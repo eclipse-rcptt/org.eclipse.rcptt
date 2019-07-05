@@ -688,7 +688,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		public void addInstallationBundle(IPluginModelBase base,
 				BundleStart hint) {
-			boolean singleton = false;
+			boolean singleton = true;
 			BundleDescription description = base.getBundleDescription();
 			if (description != null) {
 				singleton = description.isSingleton();
