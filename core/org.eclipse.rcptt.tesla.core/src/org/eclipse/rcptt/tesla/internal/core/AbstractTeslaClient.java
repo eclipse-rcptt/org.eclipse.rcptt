@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.rcptt.tesla.core.ClosedException;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
 import org.eclipse.rcptt.tesla.core.context.ContextManagement.Context;
 import org.eclipse.rcptt.tesla.core.info.AdvancedInformation;
@@ -31,6 +32,7 @@ import org.eclipse.rcptt.tesla.core.protocol.Nop;
 import org.eclipse.rcptt.tesla.core.protocol.ProtocolFactory;
 import org.eclipse.rcptt.tesla.core.protocol.ProtocolPackage;
 import org.eclipse.rcptt.tesla.core.protocol.SelectCommand;
+import org.eclipse.rcptt.tesla.core.protocol.SelectData;
 import org.eclipse.rcptt.tesla.core.protocol.SelectResponse;
 import org.eclipse.rcptt.tesla.core.protocol.TeslaStream;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Command;
@@ -105,18 +107,33 @@ public abstract class AbstractTeslaClient implements IElementProcessorMapper {
 	}
 
 	private SelectResponse handleSelect(SelectCommand cmd) {
-		// Check for extensions first
-		String kind = cmd.getData().getKind();
-		SelectResponse response = processors.select(cmd, generator, this);
-		if (response == null) {
-			response = ProtocolFactory.eINSTANCE.createSelectResponse();
-			response.setStatus(ResponseStatus.FAILED);
-			response.setMessage("No Element with kind:" + kind + " is available for selection...");
-		}
-		if (response.getStatus().equals(ResponseStatus.FAILED)) {
+		try {
+			// Check for extensions first
+			String kind = cmd.getData().getKind();
+			SelectResponse response = processors.select(cmd, generator, this);
+			if (response == null) {
+				response = ProtocolFactory.eINSTANCE.createSelectResponse();
+				response.setStatus(ResponseStatus.FAILED);
+				response.setMessage("No Element with kind:" + kind + " is available for selection...");
+			}
+			if (response.getStatus().equals(ResponseStatus.FAILED)) {
+				handleFailedResponse(cmd, response);
+			}
+			return response;
+		} catch (ClosedException e) {
+			SelectResponse response = ProtocolFactory.eINSTANCE
+					.createSelectResponse();
+			response.setMessage("Disposed");
 			handleFailedResponse(cmd, response);
+			return response;
+		} catch (Exception e) {
+			SelectData data = cmd.getData();
+			Element parent = null;
+			if (data != null) {
+				parent = data.getParent();
+			}
+			throw new IllegalArgumentException("Can't select " + data + " in " + parent, e);
 		}
-		return response;
 	}
 
 	private String makeKey(Element uiElement) {

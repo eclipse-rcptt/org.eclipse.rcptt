@@ -13,6 +13,7 @@ package org.eclipse.rcptt.tesla.internal.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.rcptt.tesla.core.ClosedException;
 import org.eclipse.rcptt.tesla.core.protocol.SelectCommand;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Element;
 import org.eclipse.rcptt.tesla.internal.core.processing.ElementGenerator;
@@ -23,7 +24,7 @@ public class BasicElementMapper<T extends IBasicMappingNode> {
 	protected Map<String, T> elements = new HashMap<String, T>();
 	private Map<T, Element> backElements = new HashMap<T, Element>();
 	private ElementGenerator generator = new ElementGenerator();
-
+	
 	public ElementGenerator getGenerator() {
 		return generator;
 	}
@@ -48,8 +49,15 @@ public class BasicElementMapper<T extends IBasicMappingNode> {
 	 * {@link #get(IBasicMappingNode)} method, then it returns generated Element
 	 * identifier within the response.
 	 */
-	public T get(Element element) {
-		return elements.get(makeKey(element));
+	public T get(Element element) throws ClosedException {
+		if (element == null) {
+			return null;
+		}
+		T result = elements.get(makeKey(element));
+		if (result == null) {
+			throw new ClosedException();
+		}
+		return result;
 	}
 
 	public Element get(T result) {

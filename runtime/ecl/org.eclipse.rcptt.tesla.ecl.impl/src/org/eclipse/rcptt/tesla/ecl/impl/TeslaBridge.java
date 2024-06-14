@@ -164,6 +164,17 @@ public class TeslaBridge {
 	 * @throws CoreException
 	 */
 	public static Element find(ControlHandler handler, IProcess process) throws CoreException {
+		try {
+			return findOneshot(handler, process);
+		} catch (CoreException e) {
+			for(ControlHandler parent = handler; parent != null; parent = parent.getParent() ) {
+				parent.setResolved(null);
+			}
+			return findOneshot(handler, process);
+		}
+		
+	}
+	private static Element findOneshot(ControlHandler handler, IProcess process) throws CoreException {
 		Assert.isNotNull(handler);
 
 		// Check if resolved already

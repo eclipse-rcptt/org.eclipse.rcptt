@@ -56,6 +56,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.rcptt.tesla.core.ClosedException;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
 import org.eclipse.rcptt.tesla.core.TeslaFeatures;
 import org.eclipse.rcptt.tesla.core.context.ContextManagement.Context;
@@ -1495,9 +1496,13 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 
 	public boolean activateViewEditor(final Element cmdElement,
 			boolean onlyOpen, Q7WaitInfoRoot info) {
-		final SWTUIElement element = getMapper().get(cmdElement);
-		if (element != null) {
-			return activateViewEditor(element, onlyOpen, info);
+		try {
+			final SWTUIElement element = getMapper().get(cmdElement);
+			if (element != null) {
+				return activateViewEditor(element, onlyOpen, info);
+			}
+		} catch (ClosedException e) {
+			return true;
 		}
 		return true;
 	}
@@ -2872,12 +2877,16 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			element = ((SelectCommand) lastCommand).getData().getParent();
 		}
 		// Required element hierarchy
-		SWTUIElement uiElement = null;
-		if (element != null) {
-			uiElement = getMapper().get(element);
-		}
-		if (uiElement != null) {
-			processChildren(uiElement, root, new HashSet<SWTUIElement>());
+		try {
+			SWTUIElement uiElement = null;
+			if (element != null) {
+				uiElement = getMapper().get(element);
+			}
+			if (uiElement != null) {
+				processChildren(uiElement, root, new HashSet<SWTUIElement>());
+			}
+		} catch (ClosedException e) {
+			// Can't collect information on disposed elements
 		}
 		Node root2 = root.child("eclipse.windows");
 
