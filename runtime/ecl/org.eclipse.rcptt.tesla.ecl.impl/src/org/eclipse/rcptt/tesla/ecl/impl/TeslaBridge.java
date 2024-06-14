@@ -172,8 +172,8 @@ public class TeslaBridge {
 			}
 			return findOneshot(handler, process);
 		}
-		
 	}
+	
 	private static Element findOneshot(ControlHandler handler, IProcess process) throws CoreException {
 		Assert.isNotNull(handler);
 

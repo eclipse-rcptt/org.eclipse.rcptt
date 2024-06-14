@@ -2231,11 +2231,21 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			response.getElements().add(element);
 		}
 		else {
+			StringBuilder qualifier = new StringBuilder();
+			if (data.getPattern() != null) {
+				qualifier.append("pattern: " + data.getPattern());
+			} else if (!data.getPath().isEmpty()) {
+				qualifier.append("path: ").append(data.getPath());
+			} else if (!data.getIndexes().isEmpty()) {
+				qualifier.append("indexes: ").append(data.getPath());
+			} else if (data.getIndex() >= 0) {
+				qualifier.append("index: ").append(data.getIndex());
+			}
+			
 			response.setMessage(NLS.bind(
 					TeslaSWTMessages.SWTUIProcessor_CannotFindControl,
 					data.getKind(),
-					(data.getPattern() != null ? data.getPattern() : data
-							.getPath())));
+					qualifier));
 			response.setStatus(ResponseStatus.FAILED);
 		}
 		return response;
