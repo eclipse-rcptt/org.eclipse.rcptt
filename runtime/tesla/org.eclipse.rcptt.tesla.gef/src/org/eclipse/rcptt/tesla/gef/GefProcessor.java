@@ -772,15 +772,15 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 					org.eclipse.gef.internal.ui.palette.editparts.DrawerEditPart drawer = findContainingDrawer(finalPart
 							.getParent());
 					if (drawer != null) {
-						horizontalBarVisibility = drawer.getDrawerFigure()
+						horizontalBarVisibility = getDrawerFigure(drawer)
 								.getScrollpane()
 								.getHorizontalScrollBarVisibility();
-						verticalBarVisibility = drawer.getDrawerFigure()
+						verticalBarVisibility = getDrawerFigure(drawer)
 								.getScrollpane()
 								.getVerticalScrollBarVisibility();
-						drawer.getDrawerFigure().getScrollpane()
+						getDrawerFigure(drawer).getScrollpane()
 								.setHorizontalScrollBarVisibility(0);
-						drawer.getDrawerFigure().getScrollpane()
+						getDrawerFigure(drawer).getScrollpane()
 								.setVerticalScrollBarVisibility(0);
 					}
 					viewer.reveal(finalPart);
@@ -959,11 +959,11 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 							.getParent());
 					if (drawer != null && horizontalBarVisibility != -1
 							&& verticalBarVisibility != -1) {
-						drawer.getDrawerFigure()
+						getDrawerFigure(drawer)
 								.getScrollpane()
 								.setHorizontalScrollBarVisibility(
 										horizontalBarVisibility);
-						drawer.getDrawerFigure()
+						getDrawerFigure(drawer)
 								.getScrollpane()
 								.setVerticalScrollBarVisibility(
 										verticalBarVisibility);
@@ -972,6 +972,11 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			}
 		});
 		return RawFactory.eINSTANCE.createResponse();
+	}
+	
+	@SuppressWarnings("restriction")
+	private org.eclipse.gef.internal.ui.palette.editparts.DrawerFigure getDrawerFigure(org.eclipse.gef.internal.ui.palette.editparts.DrawerEditPart drawer) {
+		return (org.eclipse.gef.internal.ui.palette.editparts.DrawerFigure) drawer.getFigure();
 	}
 
 	@SuppressWarnings("restriction")

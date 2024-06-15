@@ -35,19 +35,23 @@ Contact the project developers via the project's "dev" list.
 Search for bugs:
 ----------------
 
-This project uses Bugzilla to track ongoing development and issues.
+This project uses Github to track ongoing development and issues.
 
-- https://bugs.eclipse.org/bugs/buglist.cgi?product=RCPTT
+- https://github.com/eclipse/org.eclipse.rcptt/issues
 
 Create a new bug:
 -----------------
 
 Be sure to search for existing bugs before you create another one. Remember that contributions are always welcome!
 
-- https://bugs.eclipse.org/bugs/enter_bug.cgi?product=RCPTT
+- https://github.com/eclipse/org.eclipse.rcptt/issues/new
 
-Build RCPTT localy:
+Source contributions:
 -------------------
+
+See Contribution Guide:
+
+- https://wiki.eclipse.org/RCPTT/Contribution_Guide
 
 Run the script build.sh for a local RCPTT IDE build. The build result will be in repository/full/target/products.
 Additionally run the script build_runner.sh for a local RCPTT Runner build. The build result will be in runner/product/target.
