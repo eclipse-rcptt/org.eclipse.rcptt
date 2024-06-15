@@ -2233,12 +2233,21 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 		else {
 			StringBuilder qualifier = new StringBuilder();
 			if (data.getPattern() != null) {
-				qualifier.append("pattern: " + data.getPattern());
+				qualifier.append(data.getPattern());
 			} else if (!data.getPath().isEmpty()) {
+				if (qualifier.length() > 0) {
+					qualifier.append(", ");
+				}
 				qualifier.append("path: ").append(data.getPath());
 			} else if (!data.getIndexes().isEmpty()) {
+				if (qualifier.length() > 0) {
+					qualifier.append(", ");
+				}
 				qualifier.append("indexes: ").append(data.getPath());
 			} else if (data.getIndex() >= 0) {
+				if (qualifier.length() > 0) {
+					qualifier.append(", ");
+				}
 				qualifier.append("index: ").append(data.getIndex());
 			}
 			
