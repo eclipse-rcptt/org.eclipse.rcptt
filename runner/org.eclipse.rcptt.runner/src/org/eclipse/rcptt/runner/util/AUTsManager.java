@@ -190,7 +190,7 @@ public class AUTsManager {
 		}
 		if (!file.exists()) {
 			System.out
-					.println(file + "does not exist");
+					.println(file + " does not exist");
 			return null;
 		}
 
@@ -205,6 +205,13 @@ public class AUTsManager {
 		if (file == null) {
 			System.out
 					.println("Unknown file system layout of Java VM from ini file");
+			return null;
+		}
+		
+		try {
+			file = file.getCanonicalFile();
+		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 

@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1030,11 +1032,17 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public String getVmFromIniFile() {
-		for (File file : getAppIniFiles()) {
-			String result = getVmArg(file);
-			if (result != null) {
-				return result;
+		for (File iniFile : getAppIniFiles()) {
+			String result = getVmArg(iniFile);
+			if (result == null) {
+				continue;
 			}
+			Path iniPath = iniFile.toPath();
+			Path vmPath = Paths.get(result);
+			if (!vmPath.isAbsolute()) {
+				vmPath = iniPath.getParent().resolve(vmPath);
+			}
+			return vmPath.toString();
 		}
 		return null;
 	}

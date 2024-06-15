@@ -209,12 +209,12 @@ public class AutThread extends Thread {
 						"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
 								+ autVM);
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
-			}
-
-			String vmFromIni = manager.addJvmFromIniFile();
-			if (vmFromIni != null) {
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, vmFromIni);
-				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
+			} else {
+				String vmFromIni = manager.addJvmFromIniFile();
+				if (vmFromIni != null) {
+					config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, vmFromIni);
+					config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
+				}
 			}
 
 			if (conf.enableSoftwareInstallation)
