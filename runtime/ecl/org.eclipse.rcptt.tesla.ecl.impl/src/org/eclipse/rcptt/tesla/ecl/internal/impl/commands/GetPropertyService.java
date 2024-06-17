@@ -58,21 +58,21 @@ public class GetPropertyService implements ICommandService {
 				field.setAccessible(true);
 				context.getOutput().write(field.get(info).toString());
 			} catch (Exception e) {
-				return propertyGetError(gp.getName());
+				return propertyGetError(gp.getName(), e);
 			}
 			return Status.OK_STATUS;
 		}
-		return propertyGetError(gp.getName());
+		return propertyGetError(gp.getName(), new ClassCastException("Can't handle " + object));
 	}
 
-	private IStatus propertyGetError(String name) {
-		return TeslaImplPlugin.err(String.format("Failed to retrieve property '%s'", name));
+	private IStatus propertyGetError(String name, Exception error) {
+		return TeslaImplPlugin.err(String.format("Failed to retrieve property '%s'", name), error);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private IStatus serviceRawGet(GetProperty gp, IProcess cx) throws CoreException {
 		if (!(gp.getObject() instanceof ControlHandler)) {
-			return propertyGetError(gp.getName());
+			return propertyGetError(gp.getName(), new ClassCastException("Can't handle " + gp.getObject()));
 		}
 		GetPropertyValue gv = ProtocolFactory.eINSTANCE.createGetPropertyValue();
 		gv.setElement(TeslaBridge.find((ControlHandler) gp.getObject(), cx));
@@ -81,7 +81,7 @@ public class GetPropertyService implements ICommandService {
 		gv.setAllowRawValues(true);
 		Response response = TeslaBridge.getPlayer().safeExecuteCommand(gv);
 		if (!(response instanceof ObjectResponse) || ((ObjectResponse) response).getResult() == null) {
-			return propertyGetError(gp.getName());
+			return propertyGetError(gp.getName(), new Exception(response.getMessage()));
 		}
 		ObjectResponse r = (ObjectResponse) response;
 		if (r.getResult() instanceof IStatus) {

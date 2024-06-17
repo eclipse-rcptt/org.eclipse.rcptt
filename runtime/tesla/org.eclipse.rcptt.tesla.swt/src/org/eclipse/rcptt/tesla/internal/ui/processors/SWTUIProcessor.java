@@ -643,161 +643,167 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 		if (error != null) {
 			throw new RuntimeException("Previous command has failed", error);
 		}
-		if (command instanceof GetBounds) {
-			Element element = ((ElementCommand) command).getElement();
-			SWTUIElement widget = getMapper().get(element);
-			Rectangle bounds = null;
-			if (widget != null) {
-				bounds = widget.getBounds();
+		try {
+			if (command instanceof GetBounds) {
+				Element element = ((ElementCommand) command).getElement();
+				SWTUIElement widget = getMapper().get(element);
+				Rectangle bounds = null;
+				if (widget != null) {
+					bounds = widget.getBounds();
+				}
+				return boundsResponse(bounds);
 			}
-			return boundsResponse(bounds);
-		}
-
-		if (command instanceof ElementCommand) {
-			Element element = ((ElementCommand) command).getElement();
-			SWTUIElement widget = getMapper().get(element);
-			if (widget != null && widget.isDisposed()) {
-				return failResponse(NLS
-						.bind(TeslaSWTMessages.CommandProcessor_CannotExecuteCommandOverDisposedElement,
-								widget.toString()));
-			}
-
-			if (!skipModalDialogCheck(command)) {
-				Response response = checkForModalDialogs(widget);
-				if (response != null) {
-					return response;
+	
+			if (command instanceof ElementCommand) {
+				Element element = ((ElementCommand) command).getElement();
+				SWTUIElement widget = getMapper().get(element);
+					
+				if (widget != null && widget.isDisposed()) {
+					return failResponse(NLS
+							.bind(TeslaSWTMessages.CommandProcessor_CannotExecuteCommandOverDisposedElement,
+									widget.toString()));
+				}
+	
+				if (!skipModalDialogCheck(command)) {
+					Response response = checkForModalDialogs(widget);
+					if (response != null) {
+						return response;
+					}
 				}
 			}
-		}
-		if (command.eClass().getEPackage().equals(ProtocolPackage.eINSTANCE)) {
-			switch (command.eClass().getClassifierID()) {
-			case ProtocolPackage.COUNT_ITEMS:
-				return handleCountItems((CountItems) command);
-			case ProtocolPackage.GET_TEXT:
-				return handleGetText((GetText) command);
-			case ProtocolPackage.IS_DISPOSED:
-				return handleIsDisposed((IsDisposed) command);
-			case ProtocolPackage.IS_ENABLED:
-				return handleIsEnabled((IsEnabled) command);
-			case ProtocolPackage.SET_SELECTION:
-				return handleSetSelection((SetSelection) command);
-			case ProtocolPackage.CHECK_ITEM:
-				return handleCheckItem((CheckItem) command);
-			case ProtocolPackage.SET_TEXT:
-				return handleSetText((SetText) command);
-			case ProtocolPackage.CLICK:
-				return handleClick((Click) command);
-			case ProtocolPackage.CHECK:
-				return handleCheck((Check) command);
-			case ProtocolPackage.DOUBLE_CLICK:
-				return handleDoubleClick((DoubleClick) command);
-			case ProtocolPackage.CLOSE:
-				return handleSendClose((Close) command);
-			case ProtocolPackage.TYPE_TEXT:
-				return handleTypeText((TypeText) command);
-			case ProtocolPackage.TYPE:
-				return handleType((Type) command);
-			case ProtocolPackage.TYPE_ACTION:
-				return handleTypeAction((TypeAction) command);
-			case ProtocolPackage.SHOW:
-				return handleShow((Show) command);
-			case ProtocolPackage.DRAG_COMMAND:
-				return handleDrag((DragCommand) command);
-			case ProtocolPackage.CHILDREN:
-				return handleChildren((Children) command);
-			case ProtocolPackage.ACTIVATE_CELL_EDITOR:
-				return getCellEditorSupport().handleActivateCellEditor(
-						(ActivateCellEditor) command);
-			case ProtocolPackage.APPLY_CELL_EDITOR:
-				return getCellEditorSupport().handleApplyCellEditor(
-						(ApplyCellEditor) command);
-			case ProtocolPackage.CANCEL_CELL_EDITOR:
-				return getCellEditorSupport().handleCancelCellEditor(
-						(CancelCellEditor) command);
-			case ProtocolPackage.DEACTIVATE_CELL_EDITOR:
-				return getCellEditorSupport().handleDeactivateCellEditor(
-						(DeactivateCellEditor) command);
-			case ProtocolPackage.SET_SWT_DIALOG_INFO:
-				return handleSetSWTDialogInfo((SetSWTDialogInfo) command);
-			case ProtocolPackage.SET_TEXT_OFFSET:
-				return handleSetTextOffset((SetTextOffset) command);
-			case ProtocolPackage.HOVER_AT_TEXT_OFFSET:
-				return handleHoverAtTextOffset((HoverAtTextOffset) command);
-			case ProtocolPackage.GET_SELECTION:
-				return handleGetSelection((GetSelection) command);
-			case ProtocolPackage.CELL_CLICK:
-				return handleCellClick((CellClick) command);
-			case ProtocolPackage.CLICK_ABOUT_MENU:
-				return handleClickAboutMenu((ClickAboutMenu) command);
-			case ProtocolPackage.CLICK_PREFERENCES_MENU:
-				return handleClickPreferencesMenu((ClickPreferencesMenu) command);
-			case ProtocolPackage.MINIMIZE:
-				return handleMinimize((Minimize) command);
-			case ProtocolPackage.MAXIMIZE:
-				return handleMaximize((Maximize) command);
-			case ProtocolPackage.RESTORE:
-				return handleRestore((Restore) command);
-			case ProtocolPackage.SHOW_TAB_LIST:
-				return handleShowTabList((ShowTabList) command);
-			case ProtocolPackage.SET_STATUS_DIALOG_MODE:
-				return handleSetStatusDialogMode((SetStatusDialogMode) command);
-			case ProtocolPackage.CLICK_LINK:
-				return handleClickLink((ClickLink) command);
-			case ProtocolPackage.SET_FOCUS:
-				return handleSetFocus((SetFocus) command);
-			case ProtocolPackage.CLICK_TEXT:
-				return handleClickText((ClickText) command);
-			case ProtocolPackage.DOUBLE_CLICK_TEXT:
-				return handleDoubleClickText((DoubleClickText) command);
-			case ProtocolPackage.SAVE:
-				return handleSave((Save) command);
-			case ProtocolPackage.IS_DIRTY:
-				return handleIsDirty((IsDirty) command);
-			case ProtocolPackage.SHOW_SELECTION:
-				return handleShowSelection((ShowSelection) command);
-			case ProtocolPackage.SET_TEXT_SELECTION:
-				return handleSetTextSelection((SetTextSelection) command);
-			case ProtocolPackage.GET_TEXT_SELECTION:
-				return handleGetTextSelection((GetTextSelection) command);
-			case ProtocolPackage.GO_TO_TEXT_LINE:
-				return handleGoToTextLine((GoToTextLine) command);
-			case ProtocolPackage.GET_TEXT_LINE_OFFSET:
-				return handleGetTextLineOffset((GetTextLineOffset) command);
-			case ProtocolPackage.GET_TEXT_LINE_LENGTH:
-				return handleGetTextLineLength((GetTextLineLength) command);
-			case ProtocolPackage.SELECT_TEXT_LINE:
-				return handleSelectTextLine((SelectTextLine) command);
-			case ProtocolPackage.GET_TEXT_LINE:
-				return handleGetTextLine((GetTextLine) command);
-			case ProtocolPackage.GET_TEXT_RANGE:
-				return handleGetTextRange((GetTextRange) command);
-			case ProtocolPackage.PASTE_TEXT_SELECTION:
-				return handlePasteText((PasteTextSelection) command);
-			case ProtocolPackage.COPY_TEXT_SELECTION:
-				return handleCopyText((CopyTextSelection) command);
-			case ProtocolPackage.CUT_TEXT_SELECTION:
-				return handleCutText((CutTextSelection) command);
-			case ProtocolPackage.REPLACE_TEXT_SELECTION:
-				return handleReplaceText((ReplaceTextSelection) command);
-			case ProtocolPackage.ASSERT:
-				return handleAssert((Assert) command);
-			case ProtocolPackage.GET_REGION_TEXT:
-				return handleGetRegionText((GetRegionText) command);
-			case ProtocolPackage.GET_PROPERTY_VALUE:
-				return handleGetPropertyValue((GetPropertyValue) command);
-			case ProtocolPackage.EXPAND:
-				return handleExpand((Expand) command);
-			case ProtocolPackage.COLLAPSE:
-				return handleCollapse((Collapse) command);
-			case ProtocolPackage.CLICK_COLUMN:
-				return handleClickColumn((ClickColumn) command);
-			case ProtocolPackage.MOUSE_EVENT:
-				return handleMouseEvent((MouseEvent) command);
-			case ProtocolPackage.GET_ITEMS:
-				return handleGetItems((GetItems) command);
+			if (command.eClass().getEPackage().equals(ProtocolPackage.eINSTANCE)) {
+				switch (command.eClass().getClassifierID()) {
+				case ProtocolPackage.COUNT_ITEMS:
+					return handleCountItems((CountItems) command);
+				case ProtocolPackage.GET_TEXT:
+					return handleGetText((GetText) command);
+				case ProtocolPackage.IS_DISPOSED:
+					return handleIsDisposed((IsDisposed) command);
+				case ProtocolPackage.IS_ENABLED:
+					return handleIsEnabled((IsEnabled) command);
+				case ProtocolPackage.SET_SELECTION:
+					return handleSetSelection((SetSelection) command);
+				case ProtocolPackage.CHECK_ITEM:
+					return handleCheckItem((CheckItem) command);
+				case ProtocolPackage.SET_TEXT:
+					return handleSetText((SetText) command);
+				case ProtocolPackage.CLICK:
+					return handleClick((Click) command);
+				case ProtocolPackage.CHECK:
+					return handleCheck((Check) command);
+				case ProtocolPackage.DOUBLE_CLICK:
+					return handleDoubleClick((DoubleClick) command);
+				case ProtocolPackage.CLOSE:
+					return handleSendClose((Close) command);
+				case ProtocolPackage.TYPE_TEXT:
+					return handleTypeText((TypeText) command);
+				case ProtocolPackage.TYPE:
+					return handleType((Type) command);
+				case ProtocolPackage.TYPE_ACTION:
+					return handleTypeAction((TypeAction) command);
+				case ProtocolPackage.SHOW:
+					return handleShow((Show) command);
+				case ProtocolPackage.DRAG_COMMAND:
+					return handleDrag((DragCommand) command);
+				case ProtocolPackage.CHILDREN:
+					return handleChildren((Children) command);
+				case ProtocolPackage.ACTIVATE_CELL_EDITOR:
+					return getCellEditorSupport().handleActivateCellEditor(
+							(ActivateCellEditor) command);
+				case ProtocolPackage.APPLY_CELL_EDITOR:
+					return getCellEditorSupport().handleApplyCellEditor(
+							(ApplyCellEditor) command);
+				case ProtocolPackage.CANCEL_CELL_EDITOR:
+					return getCellEditorSupport().handleCancelCellEditor(
+							(CancelCellEditor) command);
+				case ProtocolPackage.DEACTIVATE_CELL_EDITOR:
+					return getCellEditorSupport().handleDeactivateCellEditor(
+							(DeactivateCellEditor) command);
+				case ProtocolPackage.SET_SWT_DIALOG_INFO:
+					return handleSetSWTDialogInfo((SetSWTDialogInfo) command);
+				case ProtocolPackage.SET_TEXT_OFFSET:
+					return handleSetTextOffset((SetTextOffset) command);
+				case ProtocolPackage.HOVER_AT_TEXT_OFFSET:
+					return handleHoverAtTextOffset((HoverAtTextOffset) command);
+				case ProtocolPackage.GET_SELECTION:
+					return handleGetSelection((GetSelection) command);
+				case ProtocolPackage.CELL_CLICK:
+					return handleCellClick((CellClick) command);
+				case ProtocolPackage.CLICK_ABOUT_MENU:
+					return handleClickAboutMenu((ClickAboutMenu) command);
+				case ProtocolPackage.CLICK_PREFERENCES_MENU:
+					return handleClickPreferencesMenu((ClickPreferencesMenu) command);
+				case ProtocolPackage.MINIMIZE:
+					return handleMinimize((Minimize) command);
+				case ProtocolPackage.MAXIMIZE:
+					return handleMaximize((Maximize) command);
+				case ProtocolPackage.RESTORE:
+					return handleRestore((Restore) command);
+				case ProtocolPackage.SHOW_TAB_LIST:
+					return handleShowTabList((ShowTabList) command);
+				case ProtocolPackage.SET_STATUS_DIALOG_MODE:
+					return handleSetStatusDialogMode((SetStatusDialogMode) command);
+				case ProtocolPackage.CLICK_LINK:
+					return handleClickLink((ClickLink) command);
+				case ProtocolPackage.SET_FOCUS:
+					return handleSetFocus((SetFocus) command);
+				case ProtocolPackage.CLICK_TEXT:
+					return handleClickText((ClickText) command);
+				case ProtocolPackage.DOUBLE_CLICK_TEXT:
+					return handleDoubleClickText((DoubleClickText) command);
+				case ProtocolPackage.SAVE:
+					return handleSave((Save) command);
+				case ProtocolPackage.IS_DIRTY:
+					return handleIsDirty((IsDirty) command);
+				case ProtocolPackage.SHOW_SELECTION:
+					return handleShowSelection((ShowSelection) command);
+				case ProtocolPackage.SET_TEXT_SELECTION:
+					return handleSetTextSelection((SetTextSelection) command);
+				case ProtocolPackage.GET_TEXT_SELECTION:
+					return handleGetTextSelection((GetTextSelection) command);
+				case ProtocolPackage.GO_TO_TEXT_LINE:
+					return handleGoToTextLine((GoToTextLine) command);
+				case ProtocolPackage.GET_TEXT_LINE_OFFSET:
+					return handleGetTextLineOffset((GetTextLineOffset) command);
+				case ProtocolPackage.GET_TEXT_LINE_LENGTH:
+					return handleGetTextLineLength((GetTextLineLength) command);
+				case ProtocolPackage.SELECT_TEXT_LINE:
+					return handleSelectTextLine((SelectTextLine) command);
+				case ProtocolPackage.GET_TEXT_LINE:
+					return handleGetTextLine((GetTextLine) command);
+				case ProtocolPackage.GET_TEXT_RANGE:
+					return handleGetTextRange((GetTextRange) command);
+				case ProtocolPackage.PASTE_TEXT_SELECTION:
+					return handlePasteText((PasteTextSelection) command);
+				case ProtocolPackage.COPY_TEXT_SELECTION:
+					return handleCopyText((CopyTextSelection) command);
+				case ProtocolPackage.CUT_TEXT_SELECTION:
+					return handleCutText((CutTextSelection) command);
+				case ProtocolPackage.REPLACE_TEXT_SELECTION:
+					return handleReplaceText((ReplaceTextSelection) command);
+				case ProtocolPackage.ASSERT:
+					return handleAssert((Assert) command);
+				case ProtocolPackage.GET_REGION_TEXT:
+					return handleGetRegionText((GetRegionText) command);
+				case ProtocolPackage.GET_PROPERTY_VALUE:
+					return handleGetPropertyValue((GetPropertyValue) command);
+				case ProtocolPackage.EXPAND:
+					return handleExpand((Expand) command);
+				case ProtocolPackage.COLLAPSE:
+					return handleCollapse((Collapse) command);
+				case ProtocolPackage.CLICK_COLUMN:
+					return handleClickColumn((ClickColumn) command);
+				case ProtocolPackage.MOUSE_EVENT:
+					return handleMouseEvent((MouseEvent) command);
+				case ProtocolPackage.GET_ITEMS:
+					return handleGetItems((GetItems) command);
+				}
 			}
+			return null;
+		} catch (ClosedException e) {
+			return failResponse("Disposed");
 		}
-		return null;
+
 	}
 
 	private Response handleMouseEvent(final MouseEvent command) {
@@ -2955,7 +2961,9 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 		Shell[] shells = win.getShell().getShells();
 		for (Shell shell : shells) {
 			Node shellNode = root2.child("shells");
-			processChildren(getPlayer().wrap(shell), shellNode, processed);
+			if (shell.isVisible()) {
+				processChildren(getPlayer().wrap(shell), shellNode, processed);
+			}
 		}
 	}
 
