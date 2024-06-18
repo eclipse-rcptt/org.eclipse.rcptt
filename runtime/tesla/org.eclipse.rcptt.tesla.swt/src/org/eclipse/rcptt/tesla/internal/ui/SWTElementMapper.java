@@ -13,6 +13,8 @@ package org.eclipse.rcptt.tesla.internal.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.rcptt.tesla.core.ClosedException;
+import org.eclipse.rcptt.tesla.core.protocol.raw.Element;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTUIElement;
 
 public class SWTElementMapper extends BasicElementMapper<SWTUIElement> {
@@ -25,6 +27,16 @@ public class SWTElementMapper extends BasicElementMapper<SWTUIElement> {
 			mappers.put(id, swtElementMapper);
 		}
 		return swtElementMapper;
+	}
+	
+	@Override
+	public SWTUIElement get(Element element) throws ClosedException {
+		SWTUIElement result = super.get(element);
+		if (result != null && result.isDisposed()) {
+			remove(element);
+			throw new ClosedException();
+		}
+		return result;
 	}
 
 	public synchronized static void remove(String id) {
