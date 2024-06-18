@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _K14SUHPREeGn3IInLDRicw
-Runtime-Version: 2.4.1.201903181829
-Save-Time: 3/19/19, 2:30 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 6/19/24, 12:09 AM
 Tags: feature/debug, selfAUT
 Testcase-Type: ecl
 
@@ -50,7 +50,7 @@ get-view Debug | get-tree
     | get-item "CreateJavaProject \\[RCPTT Test Suite\\]/CreateJavaProject/ECL Thread/get-link \\(CreateJavaProject: 2\\)" 
     | get-property caption | equals "get-link (CreateJavaProject: 2)" | verify-true
 get-button "Resume (F8)" | click
-get-button "RCPTT perspective" | click
+get-button "RCPTT" | click
 get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text | equals "" | verify-true
 get-view "Test Explorer" | get-tree | select "MyProject/CreateJavaProject" | double-click
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

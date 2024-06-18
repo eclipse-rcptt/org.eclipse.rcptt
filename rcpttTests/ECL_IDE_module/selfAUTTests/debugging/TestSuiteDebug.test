@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1825
 Id: _5OxMoY01EeGZA7v42Kh00Q
-Runtime-Version: 2.5.5.202403150112
-Save-Time: 3/15/24, 1:20 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 6/19/24, 12:10 AM
 Tags: selfAUT, Debug, TestSuite, QS-2256
 Testcase-Type: ecl
 
@@ -73,7 +73,7 @@ try -times 20 -delay 5000 -command {
 }
 get-editor CreateJavaProject
 get-button "Resume (F8)" | click
-get-button "RCPTT perspective" | click
+get-button "RCPTT" | click
 try {
 	with [get-view "Execution View"] {
 	    get-label "2/2" | get-property caption | equals "2/2" | verify-true
