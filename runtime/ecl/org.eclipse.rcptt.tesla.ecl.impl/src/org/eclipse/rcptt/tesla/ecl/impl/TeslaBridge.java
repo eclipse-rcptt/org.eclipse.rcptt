@@ -164,14 +164,15 @@ public class TeslaBridge {
 	 * @throws CoreException
 	 */
 	public static Element find(ControlHandler handler, IProcess process) throws CoreException {
-		try {
+		// Debugging  get-button: Cannot find button "RCPTT perspective"  when there is only "RCPTT" button
+//		try {
 			return findOneshot(handler, process);
-		} catch (CoreException e) {
-			for(ControlHandler parent = handler; parent != null; parent = parent.getParent() ) {
-				parent.setResolved(null);
-			}
-			return findOneshot(handler, process);
-		}
+//		} catch (CoreException e) {
+//			for(ControlHandler parent = handler; parent != null; parent = parent.getParent() ) {
+//				parent.setResolved(null);
+//			}
+//			return findOneshot(handler, process);
+//		}
 	}
 	
 	private static Element findOneshot(ControlHandler handler, IProcess process) throws CoreException {
