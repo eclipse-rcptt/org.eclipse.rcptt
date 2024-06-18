@@ -2961,9 +2961,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 		Shell[] shells = win.getShell().getShells();
 		for (Shell shell : shells) {
 			Node shellNode = root2.child("shells");
-			if (shell.isVisible()) {
-				processChildren(getPlayer().wrap(shell), shellNode, processed);
-			}
+			processChildren(getPlayer().wrap(shell), shellNode, processed);
 		}
 	}
 
@@ -3040,7 +3038,9 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			SWTUIElement[] children = getPlayer().children.collectFor(
 					uiElement, null, false, null, null);
 			for (SWTUIElement swtuiElement : children) {
-				processChildren(swtuiElement, nde, processed);
+				if (!swtuiElement.isDisposed()) {
+					processChildren(swtuiElement, nde, processed);
+				}
 			}
 		}
 		catch (Throwable e) {
