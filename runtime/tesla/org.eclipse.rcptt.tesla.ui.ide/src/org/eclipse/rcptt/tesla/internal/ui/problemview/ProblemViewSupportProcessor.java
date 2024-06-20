@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.rcptt.tesla.core.ClosedException;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
 import org.eclipse.rcptt.tesla.core.context.ContextManagement;
 import org.eclipse.rcptt.tesla.core.context.ContextManagement.Context;
@@ -54,7 +55,7 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 		return 50;
 	}
 
-	public boolean callMasterProcess(Context currentContext) {
+	public boolean callMasterProcess(@SuppressWarnings("unused") Context currentContext) {
 		return false;
 	}
 
@@ -103,8 +104,13 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 	@Override
 	public void postSelect(Element element, IElementProcessorMapper mapper) {
 		SWTUIProcessor processor = client.getProcessor(SWTUIProcessor.class);
-		SWTUIElement swtuiElement = processor.getMapper().get(element);
-		if (swtuiElement == null) {
+		SWTUIElement swtuiElement;
+		try {
+			swtuiElement = processor.getMapper().get(element);
+			if (swtuiElement == null) {
+				return;
+			}
+		} catch (ClosedException e) {
 			return;
 		}
 		List<SWTUIElement> parents = processor.getPlayer().getParentsList(
@@ -195,8 +201,7 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 			s.collector.disable();
 			Job.getJobManager().removeJobChangeListener(s.collector);
 		}
-		// Check for marker update job is present
-		Job[] find = Job.getJobManager().find(null);
+		// Check if marker update job is present
 		WaitForJobsStatus st = new WaitForJobsStatus(false);
 		st.collector.enable();
 		if (st.collector.isEmpty(ContextManagement.currentContext(), info)) {
