@@ -107,4 +107,10 @@ public class WorkbenchUIElement extends SWTUIElement {
 		}
 		return super.getBounds();
 	}
+	
+	@Override
+	public boolean isDisposed() {
+		// Part can be restored from a reference, so even if control is disposed, it is still usable.
+		return reference == null;
+	}
 }

@@ -123,7 +123,7 @@ public abstract class AbstractTeslaClient implements IElementProcessorMapper {
 		} catch (ClosedException e) {
 			SelectResponse response = ProtocolFactory.eINSTANCE
 					.createSelectResponse();
-			response.setMessage("Disposed");
+			response.setMessage("Disposed:\n" + Exceptions.toString(e));
 			handleFailedResponse(cmd, response);
 			return response;
 		} catch (Exception e) {
@@ -366,6 +366,7 @@ public abstract class AbstractTeslaClient implements IElementProcessorMapper {
 			AdvancedInformation information = getAdvancedInformation(command);
 			this.lastFailureInformation = information;
 			response.setAdvancedInformation(EcoreUtil.copy(information));
+			response.setStatus(ResponseStatus.FAILED);
 		}
 	}
 
