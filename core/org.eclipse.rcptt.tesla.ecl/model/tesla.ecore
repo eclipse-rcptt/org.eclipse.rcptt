@@ -388,7 +388,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GetWindow" eSuperTypes="#//Selector">
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
-      <details key="description" value="Get window with defined name. If this window doesn't exist, then error is returned."/>
+      <details key="description" value="Get window with defined name. If this window doesn't exist, then error is returned. Parent argument is ignored."/>
       <details key="returns" value="window"/>
       <details key="recorded" value="true"/>
       <details key="example" value="get-window &quot;Select context&quot; | get-table | select &quot;ECL Context \\(Q7Project\\)&quot; | click -default"/>

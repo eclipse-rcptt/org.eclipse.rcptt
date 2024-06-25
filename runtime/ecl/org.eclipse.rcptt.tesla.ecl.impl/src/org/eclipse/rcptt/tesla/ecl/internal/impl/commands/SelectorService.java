@@ -224,6 +224,7 @@ public class SelectorService implements ICommandService {
 		else if (selector instanceof GetWindow) {
 			handler.setKind(ElementKind.Window);
 			GetWindow getWindow = (GetWindow) selector;
+			handler.setParent(null);
 
 			String text = getWindow.getText();
 			if (text != null) {

@@ -26,7 +26,7 @@ package org.eclipse.rcptt.tesla.ecl.model;
  * </ul>
  *
  * @see org.eclipse.rcptt.tesla.ecl.model.TeslaPackage#getGetWindow()
- * @model annotation="http://www.eclipse.org/ecl/docs description='Get window with defined name. If this window doesn\'t exist, then error is returned.' returns='window' recorded='true' example='get-window \"Select context\" | get-table | select \"ECL Context \\\\(Q7Project\\\\)\" | click -default'"
+ * @model annotation="http://www.eclipse.org/ecl/docs description='Get window with defined name. If this window doesn\'t exist, then error is returned. Parent argument is ignored.' returns='window' recorded='true' example='get-window \"Select context\" | get-table | select \"ECL Context \\\\(Q7Project\\\\)\" | click -default'"
  * @generated
  */
 public interface GetWindow extends Selector {
