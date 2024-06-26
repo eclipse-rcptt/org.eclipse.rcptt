@@ -2250,7 +2250,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 					qualifier.append(", ");
 				}
 				qualifier.append("indexes: ").append(data.getPath());
-			} else if (data.getIndex() >= 0) {
+			} else if (data.getIndex() != null) {
 				if (qualifier.length() > 0) {
 					qualifier.append(", ");
 				}
