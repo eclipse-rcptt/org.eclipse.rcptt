@@ -225,7 +225,9 @@ public class FullSingleTestHtmlRenderer {
 	}
 
 	private void renderEvent(EObject eObject) {
-		if (eObject instanceof ProcessStatus) {
+		if (eObject == null) {
+			writer.println("null");
+		} else if (eObject instanceof ProcessStatus) {
 			renderResult((ProcessStatus) eObject);
 		} else if (eObject instanceof Screenshot) {
 			renderScreenShot((Screenshot) eObject, "");
