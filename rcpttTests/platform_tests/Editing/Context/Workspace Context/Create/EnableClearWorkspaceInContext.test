@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _GVh0cM79EeCw4ppgsBRMGg
-Runtime-Version: 2.5.5.202212090059
-Save-Time: 1/22/23, 4:59 PM
+Runtime-Version: 2.5.5.202406230819
+Save-Time: 6/27/24, 1:18 PM
 Tags: selfAUT, Context, WorkspaceContext, Create
 Testcase-Type: ecl
 
@@ -37,6 +37,9 @@ Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "q7project/defaultWS" | double-click -nowait
 get-editor defaultWS | get-button Apply | click
+
+wait-execution
+
 get-view "Execution View" | get-label "1/1" | get-property caption | equals "1/1" | verify-true
 get-view "Test Explorer" | get-tree | select "q7project/test" | double-click -nowait
 with [get-editor test | get-section "Workspace Options" | get-button "Clear workspace"] {

@@ -5,8 +5,8 @@ Element-Name: SetupAUTContext
 Element-Type: context
 Element-Version: 2.0
 Id: _ZQYygK2sEeCqBbDEJWufvQ
-Runtime-Version: 2.5.5.202404121026
-Save-Time: 4/13/24, 5:35 PM
+Runtime-Version: 2.5.5.202406261930
+Save-Time: 6/27/24, 2:10 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -32,6 +32,14 @@ proc "has-property" [val control -input] [val property] {
 		bool true // return true
 	} -catch {
 		bool false // return false
+	}
+}
+
+proc "wait-execution" {
+	try -times 10 -delay 3000 -command {
+	    verify-error {
+	        get-label "Executing .*" 
+	    }
 	}
 }
 
