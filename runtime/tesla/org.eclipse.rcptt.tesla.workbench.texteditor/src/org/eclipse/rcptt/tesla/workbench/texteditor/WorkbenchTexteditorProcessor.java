@@ -772,7 +772,7 @@ public class WorkbenchTexteditorProcessor implements ITeslaCommandProcessor,
 
 	public PreExecuteStatus preExecute(Command command,
 			PreExecuteStatus previousStatus, Q7WaitInfoRoot info) {
-		return getSWTUIProcessor().preExecute(command, previousStatus, info);
+		return null;
 	}
 
 	public void initialize(AbstractTeslaClient client, String id) {
