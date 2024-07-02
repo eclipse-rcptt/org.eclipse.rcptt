@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -131,8 +132,6 @@ public class TeslaProcessorManager {
 
 	public PreExecuteStatus preExecute(Command command, PreExecuteStatus previousStatus, Q7WaitInfoRoot info) {
 		for (ITeslaCommandProcessor processor : processors) {
-			if (!processor.isCommandSupported(command))
-				continue;
 			PreExecuteStatus rv = processor.preExecute(command, previousStatus, info);
 			if (rv != null)
 				return rv;
