@@ -6,8 +6,7 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _1HPHYH8PEeGpb_bcG7OADQ
-Runtime-Version: 1.5.0.qualifier
-Save-Time: 6/15/14 9:15 PM
+Runtime-Version: 2.5.5.202405141818
 Tags: Context, ECLContext, TextEditor
 Testcase-Type: ecl
 
@@ -49,7 +48,7 @@ with [get-editor EclContext | get-section Description] {
 }
 get-view "Test Explorer" | get-tree | select "Q7Project/EclContext" | get-menu "Open With/Text Editor" | click
 with [get-editor "EclContext.ctx" | get-text-viewer] {
-    set-caret-pos 15 4
+    set-caret-pos 14 4
     key-type 2 -times 2
     key-type "M1+s"
 }

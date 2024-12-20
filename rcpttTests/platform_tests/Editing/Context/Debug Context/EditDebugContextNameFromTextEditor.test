@@ -1,14 +1,12 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_IeEQkPSUEeCE1L2j6bYoFw
 Element-Name: EditDebugContextNameFromTextEditor
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _F5rMsPVOEeCsI4NSS6tu2Q
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:10 PM
+Runtime-Version: 2.5.5.202405141818
 Tags: LaunchContext, Context, Rename
 Testcase-Type: ecl
 

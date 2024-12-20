@@ -6,8 +6,7 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _opCWcPVIEeCXW9sK-e9fyA
-Runtime-Version: 1.5.0.qualifier
-Save-Time: 6/15/14 9:28 PM
+Runtime-Version: 2.5.5.202405141818
 Tags: Context, WorkbenchContext, Create
 Testcase-Type: ecl
 
@@ -44,8 +43,16 @@ with [get-editor WorkbenchContext | get-editbox -after [get-label "Tags:"]] {
 }
 get-view "Test Explorer" | get-tree | select "Q7Project/WorkbenchContext" | get-menu "Open With/Text Editor" | click
 with [get-editor "WorkbenchContext.ctx" | get-text-viewer] {
-    set-caret-pos 10 11
-    key-type "NUMPAD_2" 2
+    key-type "M1+f"
+    with [get-window "Find/Replace"] {
+        with [get-combo -after [get-label "Find:"]] {
+            set-text tagg
+            key-type "TRAVERSE_TAB_NEXT"
+        }
+        get-combo -after [get-label "Replace with:"] | set-text tagg2
+        get-button "Replace All" | click
+        get-button Close | click
+    }
     key-type "M1+s"
 }
 get-editor WorkbenchContext | click -nowait

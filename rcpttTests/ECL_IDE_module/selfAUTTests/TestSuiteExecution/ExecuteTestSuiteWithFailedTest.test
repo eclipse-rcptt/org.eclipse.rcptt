@@ -1,14 +1,12 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_ZQYygK2sEeCqBbDEJWufvQ,_Z-6cEEVwEeGf87sdqO61AA
 Element-Name: ExecuteTestSuiteWithFailedTest
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _-tMagEVzEeGf87sdqO61AA
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:10 PM
+Runtime-Version: 2.5.5.qualifier
 Tags: selfAUT, ECL_IDE_module, Runtime, TestSuite
 Testcase-Type: ecl
 
@@ -38,22 +36,22 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "MyProject/TestSuite" | double-click -nowait
 get-editor TestSuite | get-section "Test Cases" | get-table | select "CreateJavaProject \\(MyProject\\)" | double-click 
 with [get-editor CreateJavaProject | get-section Script | get-text-viewer] {
-    set-caret-pos 6 74
+    set-caret-pos 6 74 
     key-type Del
     type-text 2
     key-type "M1+s"
 }
 get-editor TestSuite | click
 
-exec-with-options -disableJobWaiting -command {
+exec-with-options -disableJobWaiting -command { 
 	get-editor TestSuite | get-button Execute | click
-	try -times 60 -delay 500 -command {
-		with [get-view "Execution View"] {
+	try -times 60 -delay 500 -command {      
+		with [get-view "Execution View"] {     
 		    get-label "3/3" | get-property caption | equals "3/3" | verify-true
 		    get-label 1 | get-property caption | equals 1 | verify-true
-		    with [get-tree] {
+		    with [get-tree] {    
 		        get-item "TestSuite.*" | get-property caption | equals "TestSuite.*" | verify-true
-		        get-item "TestSuite.*" | get-property childCount | equals 3 | verify-true
+		        get-item "TestSuite.*" | get-property childCount | equals 3 | verify-true    
 		        get-item "TestSuite.*/TestWithContexts.*" | get-property caption 
 		            | equals "TestWithContexts.*" | verify-true
 		        get-item "TestSuite.*/CreateJavaProject.*" | get-property caption 

@@ -6,8 +6,7 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _My6xcPqnEeecLeABbSXk4g
-Runtime-Version: 2.3.0.201801161316
-Save-Time: 1/16/18 8:52 PM
+Runtime-Version: 2.5.5.202405141818
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -26,14 +25,14 @@ with [get-view "Execution View"] {
     get-editbox -after [get-label "Message:"] | get-property text 
         | equals "Workspace verification 'WSIgnoreLines' failed:\n"
         + "1 difference in 'MyProject/folder1/folder11/case111.test' file:\n"
-        + " 18 >    click\n"
-        + " 19 >    get-button \"Add...\" | click\n"
-        + " 20 >}\n"
-        + "+21 >abcde\n"
-        + "+22 >fghij\n"
+        + " 17 >    click\n"
+        + " 18 >    get-button \"Add...\" | click\n"
+        + " 19 >}\n"
+        + "+20 >abcde\n"
+        + "+21 >fghij\n"
+        + " 22 >\n"
         + " 23 >\n"
-        + " 24 >\n"
-        + " 25 >with [get-window \"Select verification\"] {" | verify-true
+        + " 24 >with [get-window \"Select verification\"] {" | verify-true
 }
 with [get-editor WSIgnoreLines | get-section "Workspace Options" | get-editbox 
     -after [get-label "Ignore lines matched by following patterns (one regex per line):"]] {

@@ -6,8 +6,7 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _UOxqAPVOEeCsI4NSS6tu2Q
-Runtime-Version: 1.5.0.qualifier
-Save-Time: 6/15/14 9:12 PM
+Runtime-Version: 2.5.5.202405141818
 Tags: DebugContext, Context, Tags
 Testcase-Type: ecl
 
@@ -51,7 +50,7 @@ with [get-editor DebugContext] {
 }
 get-view "Test Explorer" | get-tree | select "Q7Project/DebugContext" | get-menu "Open With/Text Editor" | click
 with [get-editor "DebugContext.ctx" | get-text-viewer] {
-    set-caret-pos 13 10
+    set-caret-pos 12 10
     key-type 2
     key-type "M1+s"
 }

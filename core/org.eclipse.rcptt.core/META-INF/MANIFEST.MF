@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Automatic-Module-Name: org.eclipse.rcptt.core
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.core;singleton:=true
 Bundle-Version: 2.6.0.qualifier
@@ -23,7 +24,7 @@ Export-Package: org.eclipse.rcptt.core,
  org.eclipse.rcptt.core.versioning,
  org.eclipse.rcptt.core.versioning.updaters,
  org.eclipse.rcptt.core.workspace,
- org.eclipse.rcptt.internal.core,
+ org.eclipse.rcptt.internal.core;x-friends:="org.eclipse.rcptt.ui",
  org.eclipse.rcptt.internal.core.jobs,
  org.eclipse.rcptt.internal.core.model,
  org.eclipse.rcptt.internal.core.model.cache,

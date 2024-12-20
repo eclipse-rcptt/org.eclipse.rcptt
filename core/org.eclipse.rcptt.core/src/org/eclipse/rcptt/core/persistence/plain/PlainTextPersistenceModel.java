@@ -41,6 +41,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.ContextType;
 import org.eclipse.rcptt.core.ContextTypeManager;
+import org.eclipse.rcptt.core.DeprecationSwitch;
 import org.eclipse.rcptt.core.VerificationType;
 import org.eclipse.rcptt.core.VerificationTypeManager;
 import org.eclipse.rcptt.core.persistence.BasePersistenceModel;
@@ -86,6 +87,7 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 	private static final String ATTR_ELEMENT_NAME = "Element-Name";
 	private Map<String, String> masterAttributes = new HashMap<String, String>();
 	private String plainStoreFormat = PLAIN_HEADER;
+	private static final DeprecationSwitch ADD_SAVE_TIME = new DeprecationSwitch("save_time", "RCPTT is removing Save-Time header from storage format. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=483929", false, false); 
 
 	public PlainTextPersistenceModel(Resource element) {
 		super(element);
@@ -232,8 +234,10 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 			if (masterAttributes != null) {
 				saveAttrs.putAll(masterAttributes);
 			}
-			saveAttrs.put("Save-Time", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US)
+			if (ADD_SAVE_TIME.getResult()) {
+				saveAttrs.put("Save-Time", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US)
 					.format(new Date(System.currentTimeMillis())));
+			}
 			Bundle runtimeBundle = Platform.getBundle("org.eclipse.rcptt.updates.runtime.e4x");
 			if (runtimeBundle != null) {
 				saveAttrs.put("Runtime-Version", runtimeBundle.getVersion().toString());

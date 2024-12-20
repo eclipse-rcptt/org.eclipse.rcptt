@@ -6,8 +6,7 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _ov6OAPSZEeCE1L2j6bYoFw
-Runtime-Version: 1.5.0.qualifier
-Save-Time: 6/15/14 9:29 PM
+Runtime-Version: 2.5.5.202405141818
 Tags: Context, WorkspaceContext, Create, TextEditor
 Testcase-Type: ecl
 
@@ -46,8 +45,17 @@ with [get-editor WorkspaceContext | get-section Description | get-editbox] {
 }
 get-view "Test Explorer" | get-tree | select "Q7Project/WorkspaceContext" | get-menu "Open With/Text Editor" | click
 with [get-editor "WorkspaceContext.ctx" | get-text-viewer] {
-    set-caret-pos 15 4
-    key-type 2 -times 3
+    key-type "M1+f"
+    with [get-window "Find/Replace"] {
+        with [get-combo -after [get-label "Find:"]] {
+            set-text qqq
+            key-type "TRAVERSE_TAB_NEXT"
+        }
+        get-combo -after [get-label "Replace with:"] | set-text qqq222
+        get-button "Replace All" | click
+        get-button Close | click
+    }
+
     key-type "M1+s"
 }
 with [get-editor WorkspaceContext] {
