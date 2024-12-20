@@ -19,6 +19,11 @@ pipeline {
     choice(name: 'MODE', choices: ['Release', 'Milestone'], description: 'The deploy mode')
     string(name: 'MILESTONE_VERSION', defaultValue: 'MO', description: 'Only for milestone build')
   }
+  options {
+     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '10'))
+     disableConcurrentBuilds()
+     timeout(time: 10, unit: 'HOURS')
+  }
 
   stages {
     stage('Start Build and Test') {
