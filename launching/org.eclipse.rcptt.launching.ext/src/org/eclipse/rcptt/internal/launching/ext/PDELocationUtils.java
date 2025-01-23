@@ -18,6 +18,7 @@ import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUG
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.eclipse.core.filesystem.EFS;
@@ -132,7 +133,7 @@ public final class PDELocationUtils {
 		try {
 			return Path.fromOSString(Files.list(root).filter(Files::isDirectory).filter(PDELocationUtils::endsWithApp).findFirst().map(appDir -> 
 				appDir. resolve("Contents").resolve("Eclipse")
-			).filter(Files::isDirectory).orElseThrow().toString());
+			).filter(Files::isDirectory).orElseThrow(() -> new  NoSuchElementException("Can't find Eclipse directory in " + path)).toString());
 		} catch (IOException e) {
 			throw new CoreException(Status.error("Can't find Eclipse directory in " + path, e));
 		}
