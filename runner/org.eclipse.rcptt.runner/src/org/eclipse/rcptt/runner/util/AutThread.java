@@ -443,6 +443,7 @@ public class AutThread extends Thread {
 
 	public void shutdown() throws CoreException, InterruptedException {
 		if (launch != null) {
+			System.out.printf("Initiating shutdown. AUT is currently %s\n", launch.getLaunch().isTerminated() ? "terminated" : "running");
 			launch.gracefulShutdown(conf.shutdownTimeout);
 			launch = null;
 		}
