@@ -16,6 +16,10 @@ package org.eclipse.rcptt.internal.launching.ext;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.runtime.CoreException;
@@ -77,7 +81,11 @@ public final class PDELocationUtils {
 		IPath productPath = new Path(location);
 		File pluginDir = productPath.append(PLUGINS_FOLDER).toFile();
 		if (!pluginDir.exists() && Platform.getOS().equals(Platform.OS_MACOSX)) {
-			productPath = getOSXProductE4Folder(productPath);
+			try {
+				productPath = getOSXProductE4Folder(productPath);
+			} catch (CoreException e) {
+				return e.getStatus();
+			}
 		}
 
 		IStatus status = validateDirectoryPath(productPath.toFile());
@@ -116,8 +124,23 @@ public final class PDELocationUtils {
 		return Status.OK_STATUS;
 	}
 
-	private static IPath getOSXProductE4Folder(final IPath path) {
+	private static IPath getOSXProductE4Folder(final IPath path) throws CoreException {
 		IPath plugin = path.append(PRODUCT_PATH_IN_E4_OSX);
-		return plugin;
+		if (plugin.toFile().exists()) {
+			return plugin;
+		}
+		java.nio.file.Path root = path.toFile().toPath();
+		try {
+			return Path.fromOSString(Files.list(root).filter(Files::isDirectory).filter(PDELocationUtils::endsWithApp).findFirst().map(appDir -> 
+				appDir. resolve("Contents").resolve("Eclipse")
+			).filter(Files::isDirectory).orElseThrow(() -> new  NoSuchElementException("Can't find Eclipse directory in " + path)).toString());
+		} catch (IOException e) {
+			throw new CoreException(Status.error("Can't find Eclipse directory in " + path, e));
+		}
+	}
+
+	
+	private static boolean endsWithApp(java.nio.file.Path path) {
+		return path.getFileName().toString().endsWith(".app");
 	}
 }

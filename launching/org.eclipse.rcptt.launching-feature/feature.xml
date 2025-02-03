@@ -32,83 +32,53 @@
       <import feature="org.eclipse.rcptt.ecl.platform" version="2.5.6" match="compatible"/>
       <import feature="org.eclipse.rcptt.updates" version="2.5.6" match="compatible"/>
       <import feature="org.eclipse.rcptt.ecl.server" version="2.5.6" match="compatible"/>
+      <import plugin="org.eclipse.pde.build"/>
+      <import plugin="org.eclipse.osgi.compatibility.state"/>
+      <import feature="org.eclipse.equinox.p2.core.feature" version="1.7.100.v20240220-1431"/>
    </requires>
 
    <plugin
          id="org.eclipse.rcptt.launching"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.common"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.ext"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.remote"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.injection"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.util"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.p2utils"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.core.launching"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.multiaut"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         download-size="0"
-         install-size="0"
-         version="2.5.6.qualifier"
-         unpack="false"/>
+         version="2.5.6.qualifier"/>
 
 </feature>
