@@ -1074,7 +1074,11 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			return context.connect(getHost(), getEclPort());
 		} catch (Exception e) {
-			throw new CoreException(Q7LaunchingPlugin.createStatus("Couldn't open ECL session", e));
+			String message = "Couldn't open ECL session";
+			if (launch.isTerminated()) {
+				message = "AUT is terminated";
+			}
+			throw new CoreException(Q7LaunchingPlugin.createStatus(message, e));
 		}
 	}
 
