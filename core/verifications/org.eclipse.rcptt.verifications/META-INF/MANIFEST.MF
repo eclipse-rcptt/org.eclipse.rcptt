@@ -19,3 +19,4 @@ Export-Package: org.eclipse.rcptt.verifications.status,
  org.eclipse.rcptt.verifications.status.util,
  org.eclipse.rcptt.verifications,
  org.eclipse.rcptt.verifications.runtime
+Automatic-Module-Name: org.eclipse.rcptt.verifications

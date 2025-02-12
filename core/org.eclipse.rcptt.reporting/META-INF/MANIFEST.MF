@@ -21,3 +21,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.util;bundle-version="[2.5.6,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.reporting.internal.Q7ReportingPlugin
+Automatic-Module-Name: org.eclipse.rcptt.reporting

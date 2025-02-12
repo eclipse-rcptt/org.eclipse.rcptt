@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.rcptt.reporting.util,
  org.eclipse.rcptt.reporting.util.internal
+Automatic-Module-Name: org.eclipse.rcptt.reporting.util

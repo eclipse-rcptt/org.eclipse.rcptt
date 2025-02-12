@@ -10,3 +10,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.rcptt.ecl.telnet.server
 Bundle-Vendor: Eclipse RCP Testing Tool Project
+Automatic-Module-Name: org.eclipse.rcptt.ecl.telnet.server

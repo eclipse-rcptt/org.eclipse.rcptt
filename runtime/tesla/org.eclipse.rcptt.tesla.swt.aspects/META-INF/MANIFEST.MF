@@ -25,3 +25,4 @@ Export-Package: org.eclipse.rcptt.tesla.swt.aspects,
  org.eclipse.rcptt.tesla.swt.profiling
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.eclipse.rcptt.tesla.swt.aspects.SWTAspectActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.swt.aspects

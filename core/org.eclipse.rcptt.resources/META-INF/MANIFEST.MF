@@ -19,3 +19,4 @@ Export-Package: org.eclipse.rcptt.resources,
  org.eclipse.rcptt.workspace.impl,
  org.eclipse.rcptt.workspace.util
 Bundle-Activator: org.eclipse.rcptt.internal.resources.Activator
+Automatic-Module-Name: org.eclipse.rcptt.resources

@@ -21,3 +21,4 @@ Require-Bundle: org.eclipse.jface,
  org.eclipse.rcptt.resources;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.ui;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.util;bundle-version="[2.5.6,3.0.0)"
+Automatic-Module-Name: org.eclipse.rcptt.resources.ui

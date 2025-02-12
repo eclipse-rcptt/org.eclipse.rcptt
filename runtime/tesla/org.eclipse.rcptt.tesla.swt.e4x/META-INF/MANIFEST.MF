@@ -20,3 +20,4 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.103.0",
  org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.5.6,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.rcptt.tesla.swt.e4x

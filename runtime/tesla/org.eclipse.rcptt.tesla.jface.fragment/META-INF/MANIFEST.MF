@@ -7,3 +7,4 @@ Bundle-Vendor: Eclipse RCP Testing Tool Project
 Fragment-Host: org.eclipse.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.jface.viewers
+Automatic-Module-Name: org.eclipse.rcptt.tesla.jface.fragment

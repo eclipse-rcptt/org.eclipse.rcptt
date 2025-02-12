@@ -18,3 +18,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: org.eclipse.rcptt.tesla.ui.ide.aspects.UIIDEAspectActivator
 Export-Package: org.eclipse.rcptt.tesla.ui.ide.aspects,
  org.eclipse.rcptt.tesla.ui.ide.events
+Automatic-Module-Name: org.eclipse.rcptt.tesla.ui.ide.aspects

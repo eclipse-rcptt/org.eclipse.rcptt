@@ -16,3 +16,4 @@ Export-Package: org.eclipse.rcptt.tesla.recording.aspects.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.forms.RecordingFormsActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.recording.aspects.forms

@@ -17,3 +17,4 @@ Export-Package: org.eclipse.rcptt.core.launching,
  org.eclipse.rcptt.core.launching.events.impl,
  org.eclipse.rcptt.core.launching.events.util
 Bundle-ClassPath: .
+Automatic-Module-Name: org.eclipse.rcptt.core.launching
