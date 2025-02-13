@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime Eclipse Core Jobs Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.watson.aspects.jobs;singleton:=true
-Bundle-Version: 2.5.6.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;resolution:=optional;x-installation:=greedy;visibility:=reexport,
  org.eclipse.core.jobs,

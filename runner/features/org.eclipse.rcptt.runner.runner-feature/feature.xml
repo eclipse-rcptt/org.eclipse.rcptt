@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.runner.headless"
       label="%featureName"
-      version="2.5.6.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.rcptt.runner"
       license-feature="org.eclipse.license"
@@ -33,15 +33,15 @@
 
    <includes
          id="org.eclipse.rcptt.runner.integration"
-         version="2.5.6.qualifier"/>
+         version="2.6.0.qualifier"/>
 
    <requires>
-      <import feature="org.eclipse.rcptt.tesla.ecl" version="2.5.6" match="compatible"/>
+      <import feature="org.eclipse.rcptt.tesla.ecl" version="2.6.0" match="compatible"/>
       <import feature="org.eclipse.pde"/>
-      <import feature="org.eclipse.rcptt.ecl.server" version="2.5.6" match="compatible"/>
-      <import feature="org.eclipse.rcptt.watson" version="2.5.6" match="compatible"/>
-      <import feature="org.eclipse.rcptt.ecl.ide" version="2.5.6" match="compatible"/>
-      <import feature="org.eclipse.rcptt.ecl.platform" version="2.5.6" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.server" version="2.6.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.watson" version="2.6.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.ide" version="2.6.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.platform" version="2.6.0" match="compatible"/>
       
 
    </requires>
@@ -50,7 +50,7 @@
          id="org.eclipse.rcptt.reporting.html"
          download-size="0"
          install-size="0"
-         version="2.5.6.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -85,7 +85,7 @@
          id="org.eclipse.rcptt.runner"
          download-size="0"
          install-size="0"
-         version="2.5.6.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 <!-- Extra Features from platform -->

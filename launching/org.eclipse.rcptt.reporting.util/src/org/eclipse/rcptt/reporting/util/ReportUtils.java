@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -29,6 +30,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
 import org.eclipse.rcptt.ecl.gen.ast.ScriptProcessStatus;
+import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.ItemKind;
 import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.Q7Statistics;
@@ -272,6 +274,18 @@ public class ReportUtils {
 		for (Node child : node.getChildren()) {
 			collectScreenshots(child, acc);
 		}
+	}
+
+	public static ProcessStatus getStatus(Report report) {
+		return getStatus(report.getRoot());
+	}
+	
+	public static ProcessStatus getStatus(Node item) {
+		Q7Info current = (Q7Info) item.getProperties().get(IQ7ReportConstants.ROOT);
+		if (current == null) {
+			return ProcessStatusConverter.toProcessStatus(Status.error("Non Q7 report node"));
+		}
+		return current.getResult();
 	}
 
 	public static String getFailMessage(Node item) {
