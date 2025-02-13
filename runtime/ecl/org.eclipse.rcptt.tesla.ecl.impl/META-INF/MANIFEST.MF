@@ -29,3 +29,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.ecl.impl,
  org.eclipse.rcptt.tesla.ecl.internal.impl;x-friends:="org.eclipse.rcptt.tesla.ecl.tests",
  org.eclipse.rcptt.tesla.ecl.internal.impl.commands;x-friends:="org.eclipse.rcptt.tesla.ecl.tests"
+Automatic-Module-Name: org.eclipse.rcptt.tesla.ecl.impl

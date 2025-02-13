@@ -13,4 +13,5 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.google.guava,
  org.eclipse.rcptt.tesla.swt.aspects,
  org.eclipse.equinox.weaving.aspectj;bundle-version="1.0.0"
+Automatic-Module-Name: org.eclipse.rcptt.tesla.jface.aspects.test
 

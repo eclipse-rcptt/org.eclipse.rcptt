@@ -25,3 +25,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.operations
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.core.internal.ecl.core.Activator
+Automatic-Module-Name: org.eclipse.rcptt.core.ecl.core

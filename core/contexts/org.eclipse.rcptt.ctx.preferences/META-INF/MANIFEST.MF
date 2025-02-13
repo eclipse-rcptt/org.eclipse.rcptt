@@ -18,3 +18,4 @@ Export-Package: org.eclipse.rcptt.internal.preferences,
  org.eclipse.rcptt.preferences,
  org.eclipse.rcptt.preferences.impl,
  org.eclipse.rcptt.preferences.util
+Automatic-Module-Name: org.eclipse.rcptt.ctx.preferences

@@ -14,4 +14,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.tesla.recording.swt;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.tesla.recording.aspects.forms;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.ecl.core;bundle-version="[2.5.6,3.0.0)"
+Automatic-Module-Name: org.eclipse.rcptt.forms.impl
 

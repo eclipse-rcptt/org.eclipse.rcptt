@@ -14,3 +14,4 @@ Require-Bundle: org.junit,
  org.eclipse.rcptt.reporting.html;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.tesla.core;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.reporting.util;bundle-version="[2.5.6,3.0.0)"
+Automatic-Module-Name: org.eclipse.rcptt.reporting.html.tests

@@ -21,4 +21,5 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.workbench.aspects
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: org.eclipse.rcptt.tesla.workbench.aspects.WorkbenchAspectActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.workbench.aspects.e4x
 

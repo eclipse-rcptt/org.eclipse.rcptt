@@ -14,3 +14,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.eclipse.ui.workbench,
  com.google.guava,
  org.eclipse.equinox.weaving.aspectj;bundle-version="1.0.0"
+Automatic-Module-Name: org.eclipse.rcptt.tesla.swt.aspects.test

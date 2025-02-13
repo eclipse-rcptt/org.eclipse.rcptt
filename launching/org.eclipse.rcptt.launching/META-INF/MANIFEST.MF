@@ -36,3 +36,4 @@ Export-Package: org.eclipse.rcptt.internal.launching,
  org.eclipse.rcptt.launching,
  org.eclipse.rcptt.launching.events,
  org.eclipse.rcptt.launching.utils
+Automatic-Module-Name: org.eclipse.rcptt.launching

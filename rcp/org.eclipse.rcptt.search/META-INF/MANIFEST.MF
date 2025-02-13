@@ -26,3 +26,4 @@ Import-Package: org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui,
  org.eclipse.ui.part,
  org.eclipse.ui.texteditor
+Automatic-Module-Name: org.eclipse.rcptt.search

@@ -16,3 +16,4 @@ Export-Package: org.eclipse.rcptt.debug,
 Import-Package: org.eclipse.rcptt.util,
  org.eclipse.emf.ecore.xmi,
  org.eclipse.emf.ecore.xmi.impl
+Automatic-Module-Name: org.eclipse.rcptt.ctx.debug

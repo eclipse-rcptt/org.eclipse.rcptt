@@ -18,3 +18,4 @@ Export-Package: org.eclipse.rcptt.tesla.recording.aspects.gmf
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.gmf.RecordingGMFActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Automatic-Module-Name: org.eclipse.rcptt.tesla.recording.aspects.gmf

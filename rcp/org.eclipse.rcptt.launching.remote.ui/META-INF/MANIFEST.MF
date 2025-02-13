@@ -13,3 +13,4 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.internal.launching.remote.ui
+Automatic-Module-Name: org.eclipse.rcptt.launching.remote.ui

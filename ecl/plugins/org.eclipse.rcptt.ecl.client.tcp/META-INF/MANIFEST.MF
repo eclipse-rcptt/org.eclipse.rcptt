@@ -10,3 +10,4 @@ Export-Package: org.eclipse.rcptt.ecl.client.tcp
 Bundle-Activator: org.eclipse.rcptt.ecl.client.tcp.EclTcpClientPlugin
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.rcptt.ecl.client.tcp

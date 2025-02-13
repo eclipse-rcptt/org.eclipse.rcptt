@@ -10,3 +10,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.jsoup;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.util.UtilPlugin
+Automatic-Module-Name: org.eclipse.rcptt.util

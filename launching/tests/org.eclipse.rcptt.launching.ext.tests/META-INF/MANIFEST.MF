@@ -9,3 +9,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit;bundle-version="4.8.2",
  org.eclipse.rcptt.watson.core;bundle-version="[2.5.6,3.0.0)",
  org.eclipse.rcptt.core.ecl.core;bundle-version="[2.5.6,3.0.0)"
+Automatic-Module-Name: org.eclipse.rcptt.launching.ext.tests

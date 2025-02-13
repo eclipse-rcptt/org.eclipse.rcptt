@@ -11,3 +11,4 @@ Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Eclipse RCP Testing Tool Project
+Automatic-Module-Name: org.eclipse.rcptt.ecl.telnet.server.ui

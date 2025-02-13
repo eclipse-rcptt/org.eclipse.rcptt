@@ -15,3 +15,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.sherlock.ui,
  org.eclipse.rcptt.sherlock.ui.reportdetails,
  org.eclipse.rcptt.sherlock.ui.reportdetails.figures
+Automatic-Module-Name: org.eclipse.rcptt.watson.ui

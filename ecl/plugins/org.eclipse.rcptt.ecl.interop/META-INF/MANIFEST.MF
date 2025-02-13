@@ -16,3 +16,4 @@ Export-Package: org.eclipse.rcptt.ecl.interop,
  org.eclipse.rcptt.ecl.interop.impl,
  org.eclipse.rcptt.ecl.interop.util
 Bundle-Activator: org.eclipse.rcptt.ecl.interop.internal.EclInteropPlugin
+Automatic-Module-Name: org.eclipse.rcptt.ecl.interop

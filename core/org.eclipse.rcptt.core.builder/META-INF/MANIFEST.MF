@@ -20,3 +20,4 @@ Export-Package: org.eclipse.rcptt.core.builder,
  org.eclipse.rcptt.core.internal.builder,
  org.eclipse.rcptt.core.internal.validators
 Bundle-Localization: plugin
+Automatic-Module-Name: org.eclipse.rcptt.core.builder
