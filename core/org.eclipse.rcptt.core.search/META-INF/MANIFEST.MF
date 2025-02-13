@@ -9,3 +9,4 @@ Require-Bundle: org.eclipse.rcptt.core;bundle-version="2.0.0",
  org.antlr.runtime;bundle-version="[3.2.0,3.3.0)";visibility:=reexport
 Export-Package: org.eclipse.rcptt.core.search.tags
 Bundle-Vendor: Eclipse RCP Testing Tool Project
+Automatic-Module-Name: org.eclipse.rcptt.core.search

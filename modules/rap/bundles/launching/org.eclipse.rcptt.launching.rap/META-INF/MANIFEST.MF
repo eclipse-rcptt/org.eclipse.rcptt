@@ -24,3 +24,4 @@ Require-Bundle: org.eclipse.debug.core,
  org.eclipse.rcptt.tesla.core,
  org.eclipse.rcptt.core.launching
 Export-Package: org.eclipse.rcptt.launching.rap
+Automatic-Module-Name: org.eclipse.rcptt.launching.rap

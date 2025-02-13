@@ -20,3 +20,4 @@ Export-Package: org.eclipse.rcptt.core.ecl.model,
  org.eclipse.rcptt.core.ecl.parser,
  org.eclipse.rcptt.core.ecl.parser.ast,
  org.eclipse.rcptt.core.ecl.parser.model
+Automatic-Module-Name: org.eclipse.rcptt.core.ecl.parser

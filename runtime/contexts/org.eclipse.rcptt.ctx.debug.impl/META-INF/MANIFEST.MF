@@ -18,3 +18,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.variables,
  org.eclipse.debug.ui,
  org.eclipse.ui
+Automatic-Module-Name: org.eclipse.rcptt.ctx.debug.impl

@@ -3131,10 +3131,9 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void fillEditPartFigures(Map<IFigure, EditPart> allEditPartFigures,
 			EditPart contents) {
-		List<EditPart> children = contents.getChildren();
+		List<? extends EditPart> children = contents.getChildren();
 		for (EditPart editPart : children) {
 			if (editPart instanceof GraphicalEditPart) {
 				allEditPartFigures.put(
