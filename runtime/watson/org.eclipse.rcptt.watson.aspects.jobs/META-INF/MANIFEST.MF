@@ -15,3 +15,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.sherlock.aspects.jobs.internal.JobsActivator
 Export-Package: org.eclipse.rcptt.sherlock.aspects.jobs,
  org.eclipse.rcptt.sherlock.aspects.jobs.internal
+Automatic-Module-Name: org.eclipse.rcptt.watson.aspects.jobs

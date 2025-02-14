@@ -18,3 +18,4 @@ Export-Package: org.eclipse.rcptt.tesla.jface.text
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.jface.text.JFaceTextAspectsActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.jface.text.aspects

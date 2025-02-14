@@ -16,3 +16,4 @@ Export-Package: org.eclipse.rcptt.sherlock.aspects.asyncs,
  org.eclipse.rcptt.sherlock.aspects.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: org.eclipse.rcptt.sherlock.aspects.swt.SWTAspectActivator
+Automatic-Module-Name: org.eclipse.rcptt.watson.aspects.swt

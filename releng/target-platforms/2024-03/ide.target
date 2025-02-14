@@ -29,6 +29,7 @@
 <unit id="org.antlr.runtime" version="3.2.0.v20230929-1400"/>
 <unit id="org.jsoup" version="0.0.0"/>
 <unit id="slf4j.api" version="0.0.0"/>
+<unit id="jakarta.servlet-api" version="4.0.0"/>
 <unit id="org.apache.commons.commons-fileupload" version="0.0.0"/>
 <unit id="jakarta.servlet-api" version="0.0.0"/>
 </location>

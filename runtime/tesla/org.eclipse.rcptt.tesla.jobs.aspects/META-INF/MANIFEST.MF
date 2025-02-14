@@ -16,3 +16,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.jobs.JobsActivator
 Export-Package: org.eclipse.rcptt.tesla.jobs,
  org.eclipse.rcptt.tesla.jobs.aspects
+Automatic-Module-Name: org.eclipse.rcptt.tesla.jobs.aspects

@@ -34,3 +34,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ctx.workbench;bundle-version="[2.6.0,3.0.0)"
 Bundle-Activator: org.eclipse.rcptt.testing.TestingPlugin
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.rcptt.testing.ecl

@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Statistics#getTotal <em>Total</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Statistics#getFailed <em>Failed</em>}</li>
@@ -26,7 +27,6 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Statistics#getSkipped <em>Skipped</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Statistics#getPassed <em>Passed</em>}</li>
  * </ul>
- * </p>
  *
  * @see org.eclipse.rcptt.reporting.ReportingPackage#getQ7Statistics()
  * @model

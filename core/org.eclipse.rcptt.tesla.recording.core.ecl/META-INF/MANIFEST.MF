@@ -23,3 +23,4 @@ Export-Package: org.eclipse.rcptt.tesla.recording.core.ecl;
  org.eclipse.rcptt.tesla.recording.core.internal.ecl;x-friends:="org.eclipse.rcptt.tesla.recording.core.ecl.tests"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.core.ecl.TeslaRecordingPlugin
+Automatic-Module-Name: org.eclipse.rcptt.tesla.recording.core.ecl

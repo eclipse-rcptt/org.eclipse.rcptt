@@ -8,3 +8,4 @@ Require-Bundle: org.eclipse.rcptt.ecl.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.core.runtime
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Export-Package: org.eclipse.rcptt.ecl.dispatch
+Automatic-Module-Name: org.eclipse.rcptt.ecl.dispatch

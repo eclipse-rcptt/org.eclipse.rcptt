@@ -18,3 +18,4 @@ Export-Package: org.eclipse.rcptt.ecl.gen.ast,
  org.eclipse.rcptt.ecl.parser
 Bundle-Activator: org.eclipse.rcptt.ecl.internal.parser.EclParserPlugin
 Bundle-Vendor: %providerName
+Automatic-Module-Name: org.eclipse.rcptt.ecl.parser
