@@ -5,4 +5,5 @@ Bundle-SymbolicName: org.eclipse.rcptt
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Automatic-Module-Name: org.eclipse.rcptt
 

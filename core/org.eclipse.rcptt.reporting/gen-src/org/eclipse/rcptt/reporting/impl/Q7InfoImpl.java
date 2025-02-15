@@ -31,6 +31,7 @@ import org.eclipse.rcptt.reporting.ReportingPackage;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7InfoImpl#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7InfoImpl#getType <em>Type</em>}</li>
@@ -42,7 +43,6 @@ import org.eclipse.rcptt.reporting.ReportingPackage;
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7InfoImpl#getPhase <em>Phase</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7InfoImpl#getResult <em>Result</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -115,7 +115,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String TAGS_EDEFAULT = null;
+	protected static final String TAGS_EDEFAULT = "";
 
 	/**
 	 * The cached value of the '{@link #getTags() <em>Tags</em>}' attribute.
@@ -231,6 +231,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -240,6 +241,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -252,6 +254,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ItemKind getType() {
 		return type;
 	}
@@ -261,6 +264,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(ItemKind newType) {
 		ItemKind oldType = type;
 		type = newType == null ? TYPE_EDEFAULT : newType;
@@ -273,6 +277,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ProcessStatus getResult() {
 		return result;
 	}
@@ -297,6 +302,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setResult(ProcessStatus newResult) {
 		if (newResult != result) {
 			NotificationChain msgs = null;
@@ -330,6 +336,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -339,6 +346,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -351,6 +359,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getTags() {
 		return tags;
 	}
@@ -360,6 +369,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTags(String newTags) {
 		String oldTags = tags;
 		tags = newTags;
@@ -372,6 +382,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -381,6 +392,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDescription(String newDescription) {
 		String oldDescription = description;
 		description = newDescription;
@@ -393,6 +405,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getSubtype() {
 		return subtype;
 	}
@@ -402,6 +415,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSubtype(String newSubtype) {
 		String oldSubtype = subtype;
 		subtype = newSubtype;
@@ -414,6 +428,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<String> getVariant() {
 		if (variant == null) {
 			variant = new EDataTypeUniqueEList<String>(String.class, this, ReportingPackage.Q7_INFO__VARIANT);
@@ -426,6 +441,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPhase() {
 		return phase;
 	}
@@ -435,6 +451,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPhase(String newPhase) {
 		String oldPhase = phase;
 		phase = newPhase;
@@ -591,7 +608,7 @@ public class Q7InfoImpl extends EObjectImpl implements Q7Info {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (id: ");
 		result.append(id);
 		result.append(", type: ");

@@ -19,3 +19,4 @@ Export-Package: org.eclipse.rcptt.tesla.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.jface.JFaceAspectsActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.jface.aspects

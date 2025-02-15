@@ -289,11 +289,7 @@ public class ReportUtils {
 	}
 
 	public static String getFailMessage(Node item) {
-		Q7Info current = (Q7Info) item.getProperties().get(IQ7ReportConstants.ROOT);
-		if (current == null) {
-			return "Non Q7 report node";
-		}
-		return getFailMessage(current.getResult(), true, DEFAULT_DATUM_TO_MESSAGE);
+		return getFailMessage(getStatus(item), true, DEFAULT_DATUM_TO_MESSAGE);
 	}
 
 	public static String getFailMessage(Node item, Function<EObject, String> datumToMessage) {

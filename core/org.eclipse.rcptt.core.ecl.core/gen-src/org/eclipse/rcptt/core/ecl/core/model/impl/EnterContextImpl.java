@@ -182,5 +182,10 @@ public class EnterContextImpl extends CommandImpl implements EnterContext {
 		}
 		return super.eIsSet(featureID);
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + "\ndata:\n" + data;
+	}
 
 } //EnterContextImpl

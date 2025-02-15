@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 import org.eclipse.rcptt.ecl.core.CorePackage;
 import org.eclipse.rcptt.reporting.ItemKind;
@@ -79,7 +80,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 
 	/**
 	 * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.
-	 * 
+	 *
 	 * <p>This method is used to initialize {@link ReportingPackage#eINSTANCE} when that field is accessed.
 	 * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
 	 * <!-- begin-user-doc -->
@@ -93,12 +94,14 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 		if (isInited) return (ReportingPackage)EPackage.Registry.INSTANCE.getEPackage(ReportingPackage.eNS_URI);
 
 		// Obtain or create and register package
-		ReportingPackageImpl theReportingPackage = (ReportingPackageImpl)(EPackage.Registry.INSTANCE.get(eNS_URI) instanceof ReportingPackageImpl ? EPackage.Registry.INSTANCE.get(eNS_URI) : new ReportingPackageImpl());
+		Object registeredReportingPackage = EPackage.Registry.INSTANCE.get(eNS_URI);
+		ReportingPackageImpl theReportingPackage = registeredReportingPackage instanceof ReportingPackageImpl ? (ReportingPackageImpl)registeredReportingPackage : new ReportingPackageImpl();
 
 		isInited = true;
 
 		// Initialize simple dependencies
 		CorePackage.eINSTANCE.eClass();
+		EcorePackage.eINSTANCE.eClass();
 
 		// Create package meta-data objects
 		theReportingPackage.createPackageContents();
@@ -109,7 +112,6 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 		// Mark meta-data to indicate it can't be changed
 		theReportingPackage.freeze();
 
-  
 		// Update the registry and return the package
 		EPackage.Registry.INSTANCE.put(ReportingPackage.eNS_URI, theReportingPackage);
 		return theReportingPackage;
@@ -120,6 +122,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getQ7Info() {
 		return q7InfoEClass;
 	}
@@ -129,6 +132,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Id() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(0);
 	}
@@ -138,6 +142,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Type() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(1);
 	}
@@ -147,6 +152,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getQ7Info_Result() {
 		return (EReference)q7InfoEClass.getEStructuralFeatures().get(8);
 	}
@@ -156,6 +162,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Line() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(2);
 	}
@@ -165,6 +172,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Tags() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(3);
 	}
@@ -174,6 +182,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Description() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(4);
 	}
@@ -183,6 +192,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Subtype() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(5);
 	}
@@ -192,6 +202,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Variant() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(6);
 	}
@@ -201,6 +212,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Info_Phase() {
 		return (EAttribute)q7InfoEClass.getEStructuralFeatures().get(7);
 	}
@@ -210,6 +222,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getQ7Statistics() {
 		return q7StatisticsEClass;
 	}
@@ -219,6 +232,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Statistics_Total() {
 		return (EAttribute)q7StatisticsEClass.getEStructuralFeatures().get(0);
 	}
@@ -228,6 +242,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Statistics_Failed() {
 		return (EAttribute)q7StatisticsEClass.getEStructuralFeatures().get(1);
 	}
@@ -237,6 +252,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Statistics_Time() {
 		return (EAttribute)q7StatisticsEClass.getEStructuralFeatures().get(2);
 	}
@@ -246,6 +262,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Statistics_Skipped() {
 		return (EAttribute)q7StatisticsEClass.getEStructuralFeatures().get(3);
 	}
@@ -255,6 +272,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getQ7Statistics_Passed() {
 		return (EAttribute)q7StatisticsEClass.getEStructuralFeatures().get(4);
 	}
@@ -264,6 +282,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EEnum getItemKind() {
 		return itemKindEEnum;
 	}
@@ -273,6 +292,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ReportingFactory getReportingFactory() {
 		return (ReportingFactory)getEFactoryInstance();
 	}
@@ -355,7 +375,7 @@ public class ReportingPackageImpl extends EPackageImpl implements ReportingPacka
 		initEAttribute(getQ7Info_Id(), ecorePackage.getEString(), "id", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getQ7Info_Type(), this.getItemKind(), "type", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getQ7Info_Line(), ecorePackage.getEInt(), "line", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getQ7Info_Tags(), ecorePackage.getEString(), "tags", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getQ7Info_Tags(), ecorePackage.getEString(), "tags", "", 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getQ7Info_Description(), ecorePackage.getEString(), "description", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getQ7Info_Subtype(), ecorePackage.getEString(), "subtype", null, 0, 1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getQ7Info_Variant(), ecorePackage.getEString(), "variant", null, 0, -1, Q7Info.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
