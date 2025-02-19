@@ -12,7 +12,7 @@ onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.jface
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.jface
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.jface.RecordingJFaceActivator
 Automatic-Module-Name: org.eclipse.rcptt.tesla.recording.aspects.jface

@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.rcptt.launching;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.launching.remote;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.internal.launching.remote.ui
 Automatic-Module-Name: org.eclipse.rcptt.launching.remote.ui

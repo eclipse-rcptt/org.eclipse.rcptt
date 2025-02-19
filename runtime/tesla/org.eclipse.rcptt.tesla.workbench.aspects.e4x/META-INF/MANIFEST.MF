@@ -19,7 +19,7 @@ Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.workbench
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.workbench.aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.eclipse.rcptt.tesla.workbench.aspects.WorkbenchAspectActivator
 Automatic-Module-Name: org.eclipse.rcptt.tesla.workbench.aspects.e4x
 

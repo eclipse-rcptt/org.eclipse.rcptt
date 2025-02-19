@@ -11,7 +11,7 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.ui.views.log
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.views.log
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.workbench.aspect
 Automatic-Module-Name: org.eclipse.rcptt.ctx.workbench.aspect
