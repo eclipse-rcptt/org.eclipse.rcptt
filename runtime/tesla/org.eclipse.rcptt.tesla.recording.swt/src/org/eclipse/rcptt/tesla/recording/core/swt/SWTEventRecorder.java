@@ -98,7 +98,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.SWTEventListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.ColorDialog;
@@ -1974,7 +1973,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		}
 		for (Listener listener : listenersDown) {
 			if (listener instanceof TypedListener) {
-				SWTEventListener eventListener = ((TypedListener) listener).getEventListener();
+				Object eventListener = ((TypedListener) listener).getEventListener();
 				if (eventListener != null) {
 					String lName = eventListener.getClass().getName();
 					if (kind == SWT.MouseUp

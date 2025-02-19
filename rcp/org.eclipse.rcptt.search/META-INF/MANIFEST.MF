@@ -20,7 +20,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.ctx.parameters;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.ctx.script;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui,

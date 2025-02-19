@@ -85,11 +85,11 @@ public class TeslaGefAccess {
 			f = cl.getDeclaredField(fieldName);
 			f.setAccessible(true);
 			return f.get(widget);
-		} catch (Throwable e) {
-			// GefActivator.log(e);
-			// ignore
+		} catch (NoSuchFieldException e) {
+			return null;
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
 		}
-		return null;
 	}
 
 	public static Object getThis(Object widget) {

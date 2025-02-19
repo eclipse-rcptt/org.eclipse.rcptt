@@ -761,8 +761,7 @@ public class Q7ExternalLaunchDelegate extends
 	public static boolean isQ7BundleContainer(ITargetLocation container) {
 		if (!(container instanceof IUBundleContainer))
 			return false;
-		URI[] uris = ((IUBundleContainer) container).getRepositories();
-		for (URI uri : uris) {
+		for (URI uri : ((IUBundleContainer) container).getRepositories()) {
 			if (!uri.getScheme().equals("platform")
 					|| !uri.getPath().startsWith("/plugin/org.eclipse.rcptt")) {
 				return false;

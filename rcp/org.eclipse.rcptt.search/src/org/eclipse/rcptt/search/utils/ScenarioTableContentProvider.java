@@ -85,4 +85,12 @@ public class ScenarioTableContentProvider implements
 	public void clear() {
 		getViewer().refresh();
 	}
+
+	@Override
+	public int getLeafCount(Object parentElement) {
+		if (parentElement instanceof Q7SearchResult typed) {
+			return typed.getMatchCount();
+		}
+		return 0;
+	}
 }
