@@ -12,7 +12,7 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.ecl
-onEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.swt
 Bundle-ActivationPolicy: lazy

@@ -8,6 +8,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.server.tcp;bundle-version="[2.6.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Automatic-Module-Name: org.eclipse.rcptt.ecl.server.tcp.ui
