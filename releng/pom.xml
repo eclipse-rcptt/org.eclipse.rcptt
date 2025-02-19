@@ -16,7 +16,7 @@
   <version>2.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <tycho-version>4.0.9</tycho-version>
+    <tycho-version>4.0.11</tycho-version>
     <tycho-groupid>org.eclipse.tycho</tycho-groupid>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ajdt43repository>http://download.eclipse.org/tools/ajdt/43/update/</ajdt43repository>
