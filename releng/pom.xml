@@ -25,10 +25,13 @@
     <aspectj_dep>1.7.0</aspectj_dep>
     <ajJavaSource>1.7</ajJavaSource>
     <ajJavaTarget>1.7</ajJavaTarget>
-    <ajJavaCompilance>1.7</ajJavaCompilance>
-    <cbi-version>1.3.2</cbi-version>
-  </properties>
-  <distributionManagement>
+		<ajJavaCompilance>1.7</ajJavaCompilance>
+		<cbi-version>1.3.2</cbi-version>
+	</properties>
+	<prerequisites>
+		<maven>3.9.0</maven>
+	</prerequisites>
+	<distributionManagement>
     <repository>
       <id>repo.eclipse.org</id>
       <name>RCPTT Repository - Releases</name>
@@ -239,7 +242,7 @@
       </modules>
     </profile>
     <profile>
-      <!--
+			<!--
         This profile is copied from
         https://git.eclipse.org/c/emfcompare/org.eclipse.emf.compare.git/tree/org.eclipse.emf.compare-parent/pom.xml
       -->
