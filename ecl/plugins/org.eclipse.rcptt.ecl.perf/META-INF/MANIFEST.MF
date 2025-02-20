@@ -6,7 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.rcptt.ecl.perf,
  org.eclipse.rcptt.ecl.perf.impl,
  org.eclipse.rcptt.ecl.perf.util

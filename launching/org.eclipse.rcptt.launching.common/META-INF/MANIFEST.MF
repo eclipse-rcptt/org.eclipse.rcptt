@@ -7,7 +7,7 @@ Bundle-Activator: org.eclipse.rcptt.launching.common.CommonLaunchingPlugin
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.launching.common
 Automatic-Module-Name: org.eclipse.rcptt.launching.common

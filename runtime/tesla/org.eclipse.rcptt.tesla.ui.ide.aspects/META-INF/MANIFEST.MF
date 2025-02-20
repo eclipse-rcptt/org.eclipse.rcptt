@@ -14,7 +14,7 @@ onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.ide
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.eclipse.rcptt.tesla.ui.ide.aspects.UIIDEAspectActivator
 Export-Package: org.eclipse.rcptt.tesla.ui.ide.aspects,
  org.eclipse.rcptt.tesla.ui.ide.events
