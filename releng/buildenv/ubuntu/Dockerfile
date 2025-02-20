@@ -14,7 +14,7 @@ RUN apt-get -y update \
     && apt-get clean
 
 ## Install a maven
-ARG MAVEN_VERSION=3.5.4
+ARG MAVEN_VERSION=3.9.9
 ARG BASE_URL=https://archive.apache.org/dist/maven/maven-3/
 ARG MAVEN_HOME=/usr/share/maven
 
@@ -24,7 +24,7 @@ RUN wget -O /tmp/apache-maven.tar.gz ${BASE_URL}/${MAVEN_VERSION}/binaries/apach
   && rm -f /tmp/apache-maven.tar.gz \
   && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn
 
-ENV MAVEN_HOME ${MAVEN_HOME}
+ENV MAVEN_HOME=${MAVEN_HOME}
 
 ## switch back to default user
 USER 1000

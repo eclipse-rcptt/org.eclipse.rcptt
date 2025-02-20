@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.rcptt.ecl.debug.core;singleton:=true
 Bundle-ClassPath: .
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.emf.ecore,

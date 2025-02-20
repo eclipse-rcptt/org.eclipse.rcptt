@@ -17,6 +17,6 @@ Eclipse-SupplementBundle: org.eclipse.gef
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.gef,
  org.eclipse.rcptt.tesla.gef.aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.eclipse.rcptt.tesla.gef.GefAspectsActivator
 Automatic-Module-Name: org.eclipse.rcptt.tesla.gef.aspects

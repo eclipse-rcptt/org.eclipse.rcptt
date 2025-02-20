@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2009, 2020 Xored Software Inc and others. All rights reserved. 
+<!-- Copyright (c) 2009, 2020 Xored Software Inc and others. All rights
+reserved. 
 	This program and the accompanying materials are made available under the 
 	terms of the Eclipse Public License v2.0 which accompanies this distribution, 
 	and is available at https://www.eclipse.org/legal/epl-v20.html Contributors: 
-	Xored Software Inc - initial API and implementation and/or initial documentation -->
+	Xored Software Inc - initial API and implementation and/or initial
+documentation -->
 
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
@@ -22,7 +24,8 @@
 
 	<properties>
 		<coreRepository>file:/${user.dir}/repository/core/target/repository</coreRepository>
-		<orbitRepository>http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
+		<orbitRepository>
+			http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
 	</properties>
 
 	<repositories>
@@ -41,6 +44,45 @@
 		</repository>
 	</repositories>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>${tycho-groupid}</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<configuration>
+					<excludeResources>
+						<exludeResource>**/*.aj</exludeResource>
+					</excludeResources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<configuration>
+							<includes>
+								<include>**/*.aj</include>
+							</includes>
+							<source>${ajJavaSource}</source>
+							<target>${ajJavaTarget}</target>
+							<complianceLevel>${ajJavaCompilance}</complianceLevel>
+							<aspectDirectory>src</aspectDirectory>
+							<Xlint>ignore</Xlint>
+							<Xreweavable>true</Xreweavable>
+							<deprecation>true</deprecation>
+							<!--ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile-->
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 	<profiles>
 		<profile>
 			<id>runtime4x</id>
@@ -57,7 +99,8 @@
 				<repository>
 					<id>swtchart</id>
 					<layout>p2</layout>
-					<url>https://download.eclipse.org/swtchart/releases/0.12.0/repository</url>
+					<url>
+						https://download.eclipse.org/swtchart/releases/0.12.0/repository</url>
 				</repository>
 			</repositories>
 		</profile>

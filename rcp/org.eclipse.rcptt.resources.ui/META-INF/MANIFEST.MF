@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.rcptt.resources.ui;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.resources.internal.ui.RCPTTResourcesUI
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.resources.ui,
  org.eclipse.rcptt.resources.ui.actions,

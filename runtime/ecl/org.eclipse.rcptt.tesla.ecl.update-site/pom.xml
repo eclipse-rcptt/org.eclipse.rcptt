@@ -18,5 +18,5 @@
   </parent>
   <groupId>org.eclipse.rcptt.features</groupId>
   <artifactId>org.eclipse.rcptt.tesla.ecl.update-site</artifactId>
-  <packaging>eclipse-update-site</packaging>
+  <packaging>eclipse-repository</packaging>
 </project>

@@ -2881,7 +2881,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			for (Listener listener : listeners) {
 				if (listener instanceof TypedListener) {
 					TypedListener tl = (TypedListener) listener;
-					org.eclipse.swt.internal.SWTEventListener eventListener = tl.getEventListener();
+					Object eventListener = tl.getEventListener();
 					Object o = getViewer(eventListener);
 					if (cl.isInstance(o)
 							&& (notcl == null || !notcl.isInstance(o))) {
