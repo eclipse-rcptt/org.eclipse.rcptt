@@ -58,7 +58,7 @@
 	    <configuration>
 	      <source>
 		<repository>
-		  <url>https://download.eclipse.org/tools/ajdt/423/dev/update</url>
+		  <url>https://download.eclipse.org/tools/ajdt/431/dev/update</url>
 		  <layout>p2</layout>
 		</repository>
 	      </source>

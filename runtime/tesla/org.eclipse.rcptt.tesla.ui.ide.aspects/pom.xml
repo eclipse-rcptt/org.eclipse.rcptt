@@ -44,6 +44,7 @@
           <execution>
             <id>compile</id>
             <configuration>
+              <includes><include>**/*.aj</include></includes>
               <source>${ajJavaSource}</source>
               <target>${ajJavaTarget}</target>
               <complianceLevel>${ajJavaCompilance}</complianceLevel>
