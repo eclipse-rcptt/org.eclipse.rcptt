@@ -164,7 +164,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void archive() {
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: true, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary"
   }
 
   private void sh_with_return(String command) {
