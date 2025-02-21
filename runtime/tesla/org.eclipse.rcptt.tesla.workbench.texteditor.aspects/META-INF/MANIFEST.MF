@@ -14,7 +14,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.tesla.recording.aspects.swt;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.jface.text
-onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.workbench
 Bundle-ActivationPolicy: lazy
