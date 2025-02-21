@@ -40,3 +40,4 @@ tycho*equinox
 tycho_reactor_agent*
 tycho*secure_storage
 .ICE-unix
+*.bck
