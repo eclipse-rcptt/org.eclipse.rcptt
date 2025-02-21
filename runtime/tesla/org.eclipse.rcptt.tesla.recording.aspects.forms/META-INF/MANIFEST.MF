@@ -9,7 +9,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.ui.forms,
  org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.swt
-onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.forms
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.forms

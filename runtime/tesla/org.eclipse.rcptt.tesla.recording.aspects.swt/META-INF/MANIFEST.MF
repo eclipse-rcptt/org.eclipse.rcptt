@@ -10,7 +10,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.swt;bundle-version="[2.6.0,3.0.0)"
-onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.swt, org.eclipse.ui.views
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects
