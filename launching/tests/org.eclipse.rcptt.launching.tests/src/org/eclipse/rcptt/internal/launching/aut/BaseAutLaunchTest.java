@@ -121,8 +121,7 @@ public class BaseAutLaunchTest {
 		subject.run(context, 20000, null, ExecutionPhase.START);
 		Mockito.verify(session).execute(isA(RestoreState.class));
 		ArgumentCaptor<AstExec> command = ArgumentCaptor.forClass(AstExec.class); 
-		//TODO: Find out why mock is called twice. It is supposed to only be called once
-		Mockito.verify(session, Mockito.times(2)).execute(command.capture());
+		Mockito.verify(session, Mockito.times(1)).execute(command.capture());
 		Mockito.verify(session).execute(isA(SetupPlayer.class), ArgumentMatchers.isNull(IPipe.class), ArgumentMatchers.isA(IPipe.class));
 		Mockito.verify(session).execute(isA(SaveState.class), ArgumentMatchers.isNull(IPipe.class), ArgumentMatchers.isA(IPipe.class));
 		Assert.assertEquals("scriptBody", command.getValue().getName());

@@ -38,7 +38,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.felix.scr,
  org.eclipse.equinox.launcher,
  org.eclipse.core.filesystem
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.internal.launching.ext,
  org.eclipse.rcptt.launching.autdetails,
