@@ -80,6 +80,12 @@ documentation -->
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>${tycho-groupid}</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -92,9 +98,9 @@ documentation -->
 			</modules>
 			<repositories>
 				<repository>
-					<id>ajdt48</id>
+					<id>ajdt431</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/tools/ajdt/48/dev/update</url>
+					<url>https://download.eclipse.org/tools/ajdt/431/dev/update</url>
 				</repository>
 				<repository>
 					<id>swtchart</id>
