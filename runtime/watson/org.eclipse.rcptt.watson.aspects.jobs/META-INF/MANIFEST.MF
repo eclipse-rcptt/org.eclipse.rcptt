@@ -9,7 +9,7 @@ Require-Bundle: org.aspectj.runtime;resolution:=optional;x-installation:=greedy;
  org.eclipse.core.runtime
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.core.jobs
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.sherlock.aspects.jobs.internal.JobsActivator
 Export-Package: org.eclipse.rcptt.sherlock.aspects.jobs,
