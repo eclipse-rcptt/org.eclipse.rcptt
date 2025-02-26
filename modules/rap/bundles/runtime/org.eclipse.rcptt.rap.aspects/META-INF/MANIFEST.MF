@@ -11,10 +11,10 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.reporting,
  org.eclipse.rcptt.runtime.ui.rap,
  javax.servlet
-onEnvironment: JavaSE-1.6
+onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.rwt
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.rap.aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.eclipse.rcptt.rap.aspects.RapAspectActivator

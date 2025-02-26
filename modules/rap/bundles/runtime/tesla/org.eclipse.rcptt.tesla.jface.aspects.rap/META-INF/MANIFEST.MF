@@ -16,6 +16,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.jface
 Export-Package: org.eclipse.rcptt.tesla.jface.rap
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.jface.rap.JFaceAspectsActivator

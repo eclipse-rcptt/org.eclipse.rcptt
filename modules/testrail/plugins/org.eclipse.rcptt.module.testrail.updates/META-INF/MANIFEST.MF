@@ -4,4 +4,4 @@ Bundle-Name: RCPTT Testrail Support
 Bundle-SymbolicName: org.eclipse.rcptt.module.testrail.updates;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17

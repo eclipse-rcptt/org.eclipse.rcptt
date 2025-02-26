@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.rcptt.launching.rap;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.debug.core,
  org.eclipse.pde.launching,
