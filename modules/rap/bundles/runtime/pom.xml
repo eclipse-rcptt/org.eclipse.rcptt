@@ -45,9 +45,6 @@ documentation
 	<profiles>
 		<profile>
 			<id>core</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<modules>
 				<module>contexts</module>
 				<module>ecl</module>

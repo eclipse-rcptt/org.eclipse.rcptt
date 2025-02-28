@@ -18,9 +18,9 @@ documentation
 
 	<parent>
 		<groupId>org.eclipse.rcptt</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>rcptt.releng</artifactId>
 		<version>2.6.0-SNAPSHOT</version>
-		<relativePath>../core/pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>rap</artifactId>
@@ -34,16 +34,21 @@ documentation
 
 		<profile>
 			<id>core</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-			</modules>
 			<repositories>
 				<repository>
 					<id>runtimeRepository</id>
 					<layout>p2</layout>
 					<url>${runtimeRepository}</url>
+				</repository>
+				<repository>
+					<id>ajdt43</id>
+					<layout>p2</layout>
+					<url>${ajdt43repository}</url>
+				</repository>
+				<repository>
+					<id>eclipse-2019-03</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/2019-03</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -81,10 +86,8 @@ documentation
 		<buildUrl>file:${user.dir}</buildUrl>
 		<rapRcpttRepository>${buildUrl}/</rapRcpttRepository>
 		<rcpttRepositoryFull>${buildUrl}/repository/full/target/repository/</rcpttRepositoryFull>
-		<rcpttExternalDepencenciesRepository>
-			${buildUrl}/repository/dependencies/target/repository</rcpttExternalDepencenciesRepository>
-		<runtimeRepository>
-			${buildUrl}/runtime/updates/org.eclipse.rcptt.updates.runtime.e4x/q7/</runtimeRepository>
+		<rcpttExternalDepencenciesRepository>${buildUrl}/repository/dependencies/target/repository</rcpttExternalDepencenciesRepository>
+		<runtimeRepository>${buildUrl}/runtime/updates/org.eclipse.rcptt.updates.runtime.e4x/q7/</runtimeRepository>
 	</properties>
 
 </project>
