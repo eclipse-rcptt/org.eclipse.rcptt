@@ -58,7 +58,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
-import org.eclipse.equinox.internal.launcher.Constants;
 import org.eclipse.equinox.internal.simpleconfigurator.utils.SimpleConfiguratorUtils;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQuery;
@@ -1714,10 +1713,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return getOS() + '_' + getWS() + '_' + getArch();
 	}
 
+	// Reworked from org.eclipse.equinox.launcher.Main.getWS()
 	private static String getWS() {
 		String osgiWs = System.getProperty(PROP_WS);
-		if (osgiWs != null)
+		if (osgiWs != null) {
 			return osgiWs;
+		}
+
 		String osName = getOS();
 		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;

@@ -8,11 +8,11 @@ Require-Bundle: org.aspectj.runtime;resolution:=optional;visibility:=reexport;x-
  org.eclipse.core.runtime,
  org.eclipse.rap.rwt,
  org.eclipse.rcptt.tesla.core.context
-onEnvironment: JavaSE-1.6
+onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.rwt
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.sherlock.aspects.asyncs,
  org.eclipse.rcptt.sherlock.aspects.swt.rap
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.eclipse.rcptt.sherlock.aspects.swt.rap.SWTAspectActivator

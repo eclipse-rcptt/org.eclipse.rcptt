@@ -90,7 +90,7 @@ public class StatusesTest {
 
 	@Test
 	public void testTimeout() throws InterruptedException, CoreException {
-		IProcess process = session.execute(sleepCommand(100));
+		IProcess process = session.execute(sleepCommand(200));
 		IStatus result = process.waitFor(50, MONITOR);
 		Assert.assertFalse(result.isOK());
 		Assert.assertTrue(result.getMessage(), Statuses.hasCode(result, IProcess.TIMEOUT_CODE));

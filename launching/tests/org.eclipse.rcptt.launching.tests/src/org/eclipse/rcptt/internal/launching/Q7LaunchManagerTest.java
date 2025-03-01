@@ -12,11 +12,9 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.rcptt.core.ecl.core.model.GetReport;
 import org.eclipse.rcptt.core.ecl.core.model.ResetVerifications;
 import org.eclipse.rcptt.core.model.IContext;
+import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ITestCase;
-import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
-import org.eclipse.rcptt.core.scenario.NamedElement;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
 import org.eclipse.rcptt.ecl.core.Sequence;
@@ -35,7 +33,7 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 public class Q7LaunchManagerTest {
@@ -57,9 +55,9 @@ public class Q7LaunchManagerTest {
 			Node root = ReportFactory.eINSTANCE.createNode();
 			ReportHelper.getInfo(root).setId("id");
 			report.setRoot(root);
-			when(aut.execute(Matchers.isA(GetReport.class))).thenReturn(report);
+			when(aut.execute(ArgumentMatchers.isA(GetReport.class))).thenReturn(report);
 			ServerInfo info = CommandsFactory.eINSTANCE.createServerInfo();
-			when(aut.execute(Matchers.isA(StartServer.class))).thenReturn(info);
+			when(aut.execute(ArgumentMatchers.isA(StartServer.class))).thenReturn(info);
 		} catch (CoreException | InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -79,15 +77,15 @@ public class Q7LaunchManagerTest {
 			throw new AssertionError(result.getException());
 		}
 		Assert.assertTrue(result.getMessage(), result.isOK());
-		Mockito.verify(aut).execute(Matchers.isA(StartServer.class));
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(StartServer.class));
 		Mockito.verify(aut).getCapability();
-		Mockito.verify(aut).execute(Matchers.isA(Sequence.class));
-		Mockito.verify(aut).execute(Matchers.isA(ResetParams.class));
-		Mockito.verify(aut).execute(Matchers.isA(ResetVerifications.class));
-		Mockito.verify(aut).debug(Matchers.isA(IContext.class), Matchers.any(), Matchers.any(), Matchers.any());
-		Mockito.verify(aut).debug(Matchers.eq(testCase), Matchers.any(),	Matchers.any(), Matchers.any()); 
-		Mockito.verify(aut).execute(Matchers.isA(GetReport.class));
-		Mockito.verify(aut).execute(Matchers.isA(StopServer.class));
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(Sequence.class));
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(ResetParams.class));
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(ResetVerifications.class));
+		Mockito.verify(aut).debug(ArgumentMatchers.isA(IContext.class), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+		Mockito.verify(aut).debug(ArgumentMatchers.eq(testCase), ArgumentMatchers.any(),	ArgumentMatchers.any(), ArgumentMatchers.any()); 
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(GetReport.class));
+		Mockito.verify(aut).execute(ArgumentMatchers.isA(StopServer.class));
 	}
 	
 	@Test
@@ -96,7 +94,7 @@ public class Q7LaunchManagerTest {
 		when(configuration.getName()).thenReturn("configurationName");
 		Q7TestLaunch launch = new Q7TestLaunch(configuration, ILaunchManager.RUN_MODE);
 		String MESSAGE = "ERROR MESSAGE MOCK";
-		when(aut.execute(Matchers.isA(ResetParams.class))).thenThrow(new IllegalArgumentException(MESSAGE));
+		when(aut.execute(ArgumentMatchers.isA(ResetParams.class))).thenThrow(new IllegalArgumentException(MESSAGE));
 		Q7LaunchManager.getInstance().execute(new IQ7NamedElement[] {testCase}, aut, launch, null, Collections.emptyMap(), (ignored1, ignored2) -> new NullDebuggerTransport());
 		while (!launch.isTerminated()) {
 			Thread.sleep(100);

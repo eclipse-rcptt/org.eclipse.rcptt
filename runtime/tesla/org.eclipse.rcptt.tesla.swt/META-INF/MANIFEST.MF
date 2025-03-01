@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.ui;visibility:=reexport,
  org.eclipse.rcptt.tesla.recording.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.watson.aspects.jobs;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.watson.aspects.swt;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.internal.ui,
  org.eclipse.rcptt.tesla.internal.ui.player,

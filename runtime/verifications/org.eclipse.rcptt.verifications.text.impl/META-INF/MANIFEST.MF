@@ -16,6 +16,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.jface.text,
  org.eclipse.rcptt.tesla.recording.aspects.jface.text;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.rcptt.verifications.text.impl

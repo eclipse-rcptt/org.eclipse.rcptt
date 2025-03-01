@@ -200,7 +200,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			validatePluginDependencies(configuration, subMonitor.split(1));
 		}
 		validateProjectDependencies(configuration, subMonitor.split(1));
-		LauncherUtils.setLastLaunchMode(launch.getLaunchMode());
 		clear(configuration, subMonitor.split(1));
 		launch.setAttribute(IPDELauncherConstants.CONFIG_LOCATION, getConfigDir(configuration).toString());
 		synchronizeManifests(configuration, subMonitor.split(1));
@@ -955,7 +954,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	private void clearDataLocation(ILaunchConfiguration configuration, IProgressMonitor monitor)
 			throws CoreException {
 		String resolvedDataLocation = getResolvedDataLoacation();
-		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, monitor);
+		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, launch.getLaunchMode(), monitor);
 	}
 
 	private void registerBrowserOpener() {

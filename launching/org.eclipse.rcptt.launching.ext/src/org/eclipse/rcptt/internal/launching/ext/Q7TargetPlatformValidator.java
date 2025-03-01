@@ -49,9 +49,8 @@ public class Q7TargetPlatformValidator {
 				continue; // Skip profile container.
 			}
 			if (iBundleContainer instanceof IUBundleContainer) {
-				curURIs.addAll(Arrays
-						.asList(((IUBundleContainer) iBundleContainer)
-								.getRepositories()));
+				curURIs.addAll(((IUBundleContainer) iBundleContainer)
+								.getRepositories());
 			}
 		}
 

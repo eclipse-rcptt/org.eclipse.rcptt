@@ -28,9 +28,6 @@
   <profiles>
     <profile>
       <id>core</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <modules>
             <module>core</module>
             <module>runtime</module>

@@ -4,7 +4,7 @@ Bundle-Name: RCPTT Resources Implementation
 Bundle-SymbolicName: org.eclipse.rcptt.resources.impl;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Xored Software Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.core.resources,
  org.eclipse.core.commands,
  org.eclipse.core.filebuffers;resolution:=optional,

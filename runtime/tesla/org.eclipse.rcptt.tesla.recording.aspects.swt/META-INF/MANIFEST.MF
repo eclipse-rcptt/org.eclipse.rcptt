@@ -13,7 +13,7 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.swt, org.eclipse.ui.views
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.RecordingSWTActivator
 Automatic-Module-Name: org.eclipse.rcptt.tesla.recording.aspects.swt
