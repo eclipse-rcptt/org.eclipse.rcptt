@@ -71,7 +71,7 @@
 			<vmArg>-Dorg.jboss.byteman.transform.all</vmArg>
 			<vmArg>-Dorg.jboss.byteman.debug</vmArg-->
 			<vmArg>-XX:+HeapDumpOnOutOfMemoryError</vmArg>
-			<vmArg>-Xmx3G</vmArg>
+			<vmArg>-Xmx1G</vmArg>
 			<vmArg>-Xlog:gc</vmArg>
 			<!-- "Not supported in OpenJDK" <vmArg>-XX:+UnlockCommercialFeatures</vmArg>
 			<vmArg>-XX:+FlightRecorder</vmArg>
