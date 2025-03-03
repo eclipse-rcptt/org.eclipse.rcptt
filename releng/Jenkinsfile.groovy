@@ -15,7 +15,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
-      image: basilevs/ubuntu-rcptt:3.6.3
+      image: basilevs/ubuntu-rcptt:3.7.0
       tty: true
       resources:
         limits:
@@ -148,15 +148,17 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       def mvn = { pom ->
           this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
       }
-      mvn "releng/mirroring/pom.xml"
-      mvn "releng/core/pom.xml"
-      mvn "releng/runtime/pom.xml -P runtime4x"
-      mvn "releng/ide/pom.xml"
-      mvn "releng/rap/pom.xml -P core"
-      mvn "releng/rap/pom.xml -P ide"
-      mvn "releng/rcptt/pom.xml"
-      mvn "releng/runner/pom.xml"
-      mvn "maven-plugin/pom.xml install"      
+      this.script.xvnc() {
+        mvn "releng/mirroring/pom.xml"
+        mvn "releng/core/pom.xml"
+        mvn "releng/runtime/pom.xml -P runtime4x"
+        mvn "releng/ide/pom.xml"
+        mvn "releng/rap/pom.xml -P core"
+        mvn "releng/rap/pom.xml -P ide"
+        mvn "releng/rcptt/pom.xml"
+        mvn "releng/runner/pom.xml"
+        mvn "maven-plugin/pom.xml install"
+      }
       this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
     }
   }
@@ -220,11 +222,13 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void _run_tests(String runner, String dir, String args) {
-    this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-        -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-        -Dci-maven-version=2.0.0-SNAPSHOT \
-        -DexplicitRunner=`readlink -f ${runner}` \
-        ${args}"
+    this.script.xvnc() {
+      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
+          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+          -Dci-maven-version=2.0.0-SNAPSHOT \
+          -DexplicitRunner=`readlink -f ${runner}` \
+          ${args}"
+    }
     this.script.sh "test -f ${dir}/target/results/tests.html"
     this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**"
   }
