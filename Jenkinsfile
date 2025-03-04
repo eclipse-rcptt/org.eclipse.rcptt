@@ -4,6 +4,7 @@ node {
   result = load('releng/Jenkinsfile.groovy')(this)
   assert result != null
   library = result
+  println(library.YAML_BUILD_AGENT)
 }
 
 pipeline {
