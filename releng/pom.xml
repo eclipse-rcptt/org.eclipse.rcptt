@@ -50,6 +50,31 @@
         </plugin>
         <plugin>
           <groupId>${tycho-groupid}</groupId>
+          <artifactId>tycho-source-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <archive>
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
+          </configuration>
+          <executions>
+            <execution>
+              <id>plugin-source</id>
+              <goals>
+                <goal>plugin-source</goal>
+              </goals>
+            </execution>
+            <execution>
+              <phase>package</phase>
+              <id>feature-source</id>
+              <goals>
+                <goal>feature-source</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>${tycho-groupid}</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
           <version>${tycho-version}</version>
           <dependencies>
@@ -69,6 +94,15 @@
           <groupId>${tycho-groupid}</groupId>
           <artifactId>tycho-p2-plugin</artifactId>
           <version>${tycho-version}</version>
+          <executions>
+            <execution>
+              <id>attach-p2-metadata</id>
+              <phase>package</phase>
+              <goals>
+                <goal>p2-metadata</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho.extras</groupId>
@@ -198,6 +232,14 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>${tycho-groupid}</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>${tycho-groupid}</groupId>
+        <artifactId>tycho-p2-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>${tycho-groupid}</groupId>
