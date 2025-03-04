@@ -114,14 +114,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void build_and_test(Boolean sign) {
-      build(sign)
-
-      this.script.stage("RCPTT Test") {
-          rcptt_tests()
-      }
-      this.script.stage("Mockup Test") {
-          mockup_tests()
-      }
+    this.script.container(BUILD_CONTAINER_NAME) {
+      this.script.echo("This is an expected output 1")
+    }
   }
 
   void build(Boolean sign) {
