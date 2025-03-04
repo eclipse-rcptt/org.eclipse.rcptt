@@ -3,6 +3,7 @@
 	<name>rcptt-maven-plugin</name>
 	<comment></comment>
 	<projects>
+		<project>rcptt-maven-util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -22,7 +23,7 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.m2e.core.maven2Nature</nature>	
+		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.maven.ide.eclipse.maven2Nature</nature>
 	</natures>
