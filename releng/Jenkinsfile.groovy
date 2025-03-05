@@ -193,7 +193,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void rcptt_tests() {
     this.script.container(BUILD_CONTAINER_NAME) {
       _run_tests(
-        "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+        "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*-linux.gtk.x86_64.zip",
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
@@ -207,7 +207,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         this.script.git "https://github.com/xored/q7.quality.mockups.git"
       }
       _run_tests(
-          "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+          "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*-linux.gtk.x86_64.zip",
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
@@ -325,14 +325,15 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       for(item in [ [ RCPTT_REPOSITORY_DIR, "repository" ],
                     [ RUNTIME_DIR_E4, "runtime4x" ],
                     [ "$DOC_DIR/target/doc", "doc" ],
-                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ],
-                    [ "$RUNNER_DIR/rcptt.runner-*.zip", "runner/rcptt.runner-${version}${qualifiedDecoration}.zip" ] ]) {
+                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ]
+                    ]) {
         this.script.sh "scp -r ${item[0]} $CREDENTIAL:$storageFolder/${item[1]}"
       }
 
       this.script.sh "$SSH_CLIENT mkdir $storageFolder/ide"
       for(platform in ["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"]) {
         this.script.sh "scp -r $PRODUCTS_DIR/org.eclipse.rcptt.platform.product-${platform}.zip $CREDENTIAL:$storageFolder/ide/rcptt.ide-${version}${qualifiedDecoration}-${platform}.zip"
+        this.script.sh "scp -r $RUNNER_DIR/rcptt.runner-*-${platform}.zip $CREDENTIAL:$storageFolder/runner/rcptt.runner-${version}${qualifiedDecoration}-${platform}.zip"
       }
 
       if(copy_full) {
