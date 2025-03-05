@@ -9,7 +9,6 @@ node {
 pipeline {
   agent {
     kubernetes {
-      label 'rcptt-build-agent-3.5.4'
       yaml library.YAML_BUILD_AGENT
     }
   }

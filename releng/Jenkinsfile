@@ -10,7 +10,6 @@ node {
 pipeline {
   agent {
     kubernetes {
-      label 'rcptt-build-and-deploy-agent-3.5.4'
       yaml build.YAML_BUILD_AND_DEPLOY_AGENT
     }
   }

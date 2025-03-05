@@ -15,6 +15,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
+      imagePullPolicy: Always
       image: basilevs/ubuntu-rcptt:3.6.2
       tty: true
       resources:
@@ -226,7 +227,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         -DexplicitRunner=`readlink -f ${runner}` \
         ${args}"
     this.script.sh "test -f ${dir}/target/results/tests.html"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
 
   void post_build_actions() {
