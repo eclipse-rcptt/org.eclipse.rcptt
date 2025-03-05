@@ -45,6 +45,13 @@ documentation
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <formats>
+            <win32>zip</win32>
+            <linux>zip</linux>
+            <macosx>zip</macosx>
+          </formats>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>

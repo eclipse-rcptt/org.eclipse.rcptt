@@ -316,8 +316,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	Thread ShutdownHook = new Thread() {
 		@Override
 		public void run() {
-			try {
-				new Socket("127.0.0.1", shutdownListenerPort);
+			try (Socket socket = new Socket("127.0.0.1", shutdownListenerPort)) {
 			} catch (IOException e) {
 				System.out.println(e);
 			}
