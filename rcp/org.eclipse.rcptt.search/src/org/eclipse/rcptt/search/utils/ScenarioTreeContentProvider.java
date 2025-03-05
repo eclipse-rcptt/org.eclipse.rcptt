@@ -251,4 +251,23 @@ public class ScenarioTreeContentProvider implements ITreeContentProvider,
 		}
 		return null;
 	}
+	
+	@Override
+	public int getLeafCount(Object parentElement) {
+		Object[] children = getChildren(parentElement);
+		if (children.length == 0) {
+			return 0;
+		}
+		int count = 0;
+		for (Object object : children) {
+			boolean leaf = !hasChildren(object);
+			if (leaf) {
+				count++;
+			} else {
+				count += getLeafCount(object);
+			}
+		}
+		return count;
+	}
+
 }

@@ -21,5 +21,5 @@
 	</parent>
 
 	<artifactId>org.eclipse.rcptt.module.nebula-site</artifactId>
-	<packaging>eclipse-update-site</packaging>
+	<packaging>eclipse-repository</packaging>
 </project>

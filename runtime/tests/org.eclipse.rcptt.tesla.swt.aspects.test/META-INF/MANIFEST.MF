@@ -4,7 +4,7 @@ Bundle-Name: Tesla SWT Tests
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.swt.aspects.test
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit;bundle-version="4.8.2",
  org.eclipse.rcptt.tesla.jface.aspects;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.swt.aspects;bundle-version="2.6.0",

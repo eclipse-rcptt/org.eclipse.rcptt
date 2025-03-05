@@ -4,7 +4,7 @@ Bundle-Name: Error Log Verification UI
 Bundle-SymbolicName: org.eclipse.rcptt.verifications.log.ui;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.rcptt.ui;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.verifications.log;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.core.runtime,

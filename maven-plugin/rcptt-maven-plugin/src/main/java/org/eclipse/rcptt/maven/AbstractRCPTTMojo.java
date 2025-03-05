@@ -20,6 +20,7 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Stack;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
@@ -103,7 +104,7 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 		if (runner == null) {
 			runner = new RCPTTCoords();
 		}
-		runner.setClassifier("");
+		runner.setClassifier(computeClassifier());
 		ComparableVersion version = parseVersion(runner.getVersion());
 		if(runner.getPlatform() == null){
 			runner.setPlatform(getDefaultPaltform(version));
@@ -115,6 +116,12 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 			runner.setGroupId(getDefaultGroup(version));
 		}
 		return runner;
+	}
+
+	private static String computeClassifier() {
+		Properties properties = System.getProperties();
+		
+		return String.format("%s.%s.%s", PlatformPropertiesUtils.getOS(properties), PlatformPropertiesUtils.getWS(properties), PlatformPropertiesUtils.getArch(properties)); 
 	}
 
 	/**

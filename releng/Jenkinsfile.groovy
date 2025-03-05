@@ -15,8 +15,8 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
+      image: basilevs/ubuntu-rcptt:3.7.0
       imagePullPolicy: Always
-      image: basilevs/ubuntu-rcptt:3.6.2
       tty: true
       resources:
         limits:
@@ -149,15 +149,17 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       def mvn = { pom ->
           this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
       }
-      mvn "releng/mirroring/pom.xml"
-      mvn "releng/core/pom.xml"
-      mvn "releng/runtime/pom.xml -P runtime4x"
-      mvn "releng/ide/pom.xml"
-      mvn "releng/rap/pom.xml -P core"
-      mvn "releng/rap/pom.xml -P ide"
-      mvn "releng/rcptt/pom.xml"
-      mvn "releng/runner/pom.xml"
-      mvn "maven-plugin/pom.xml install"      
+      this.script.xvnc() {
+        mvn "releng/mirroring/pom.xml"
+        mvn "releng/core/pom.xml"
+        mvn "releng/runtime/pom.xml -P runtime4x"
+        mvn "releng/ide/pom.xml"
+        mvn "releng/rap/pom.xml -P core"
+        mvn "releng/rap/pom.xml -P ide"
+        mvn "releng/rcptt/pom.xml"
+        mvn "releng/runner/pom.xml"
+        mvn "maven-plugin/pom.xml install"
+      }
       this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
     }
   }
@@ -191,7 +193,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void rcptt_tests() {
     this.script.container(BUILD_CONTAINER_NAME) {
       _run_tests(
-        "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+        "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*-linux.gtk.x86_64.zip",
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
@@ -205,7 +207,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         this.script.git "https://github.com/xored/q7.quality.mockups.git"
       }
       _run_tests(
-          "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+          "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*-linux.gtk.x86_64.zip",
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
@@ -221,11 +223,13 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void _run_tests(String runner, String dir, String args) {
-    this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-        -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-        -Dci-maven-version=2.0.0-SNAPSHOT \
-        -DexplicitRunner=`readlink -f ${runner}` \
-        ${args}"
+    this.script.xvnc() {
+      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
+          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+          -Dci-maven-version=2.0.0-SNAPSHOT \
+          -DexplicitRunner=`readlink -f ${runner}` \
+          ${args}"
+    }
     this.script.sh "test -f ${dir}/target/results/tests.html"
     this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
@@ -321,14 +325,15 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       for(item in [ [ RCPTT_REPOSITORY_DIR, "repository" ],
                     [ RUNTIME_DIR_E4, "runtime4x" ],
                     [ "$DOC_DIR/target/doc", "doc" ],
-                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ],
-                    [ "$RUNNER_DIR/rcptt.runner-*.zip", "runner/rcptt.runner-${version}${qualifiedDecoration}.zip" ] ]) {
+                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ]
+                    ]) {
         this.script.sh "scp -r ${item[0]} $CREDENTIAL:$storageFolder/${item[1]}"
       }
 
       this.script.sh "$SSH_CLIENT mkdir $storageFolder/ide"
       for(platform in ["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"]) {
         this.script.sh "scp -r $PRODUCTS_DIR/org.eclipse.rcptt.platform.product-${platform}.zip $CREDENTIAL:$storageFolder/ide/rcptt.ide-${version}${qualifiedDecoration}-${platform}.zip"
+        this.script.sh "scp -r $RUNNER_DIR/rcptt.runner-*-${platform}.zip $CREDENTIAL:$storageFolder/runner/rcptt.runner-${version}${qualifiedDecoration}-${platform}.zip"
       }
 
       if(copy_full) {
