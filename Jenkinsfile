@@ -1,7 +1,7 @@
 def library
 node {
   checkout scm
-  result = load('releng/Jenkinsfile.groovy')(this)
+  def result = load('releng/Jenkinsfile.groovy')(this)
   assert result != null
   library = result
 }
