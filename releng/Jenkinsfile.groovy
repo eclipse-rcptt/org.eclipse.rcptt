@@ -194,7 +194,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void rcptt_tests() {
     withBuildContainer() {
       _run_tests(
-        "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless-*-linux.gtk.x86_64.zip",
+        "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-linux.gtk.x86_64.zip",
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
