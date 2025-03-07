@@ -356,7 +356,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 			return;
 		}
 		if ((type == SWT.Selection || type == SWT.DefaultSelection)) {
-			processSelection(widget, event, type, ctx);
+			processSelection(widget, type);
 		} else if (type == SWT.Activate) {
 			lastEvents.add(toRecording);
 			// processActivateEvent(widget, toRecording);
@@ -428,7 +428,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 					// }
 				} else {
 					addToPressed(event);
-					processTraverse(widget, event, toRecording);
+					processTraverse(widget, event);
 					lastEvents.add(toRecording);
 				}
 			}
@@ -487,8 +487,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 		return getSWTEventRecorder().getPlayer();
 	}
 
-	private void processSelection(Widget widget, Event event, int type,
-			Context ctx) {
+	private void processSelection(Widget widget, int type) {
 		if (SWTEventRecorder.isIgnoreSelection(widget, type)) {
 			return;
 		}
@@ -537,8 +536,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 		}
 	}
 
-	private void processTraverse(Widget widget, Event event,
-			RecordedEvent toRecording) {
+	private void processTraverse(Widget widget, Event event) {
 		getSWTEventRecorder().processTraverse(widget, event);
 	}
 
@@ -754,7 +752,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 					Point center = new Point(subjectArea.x + subjectArea.width
 							/ 2, subjectArea.y + subjectArea.height / 2);
 					int offset = ((StyledText) widget)
-							.getOffsetAtLocation(center);
+							.getOffsetAtPoint(center);
 
 					int[] result = getCursorOffset(text, offset);
 
@@ -806,7 +804,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 					.findElement(widget, false, false, true);
 			if (widget instanceof StyledText && findResult != null) {
 				StyledText text = (StyledText) widget;
-				int offset = text.getOffsetAtLocation(new Point(event.x,
+				int offset = text.getOffsetAtPoint(new Point(event.x,
 						event.y));
 				int[] position = getCursorOffset(text, offset);
 				TextUIElement textElement = new TextUIElement(
