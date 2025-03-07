@@ -85,6 +85,7 @@ class Build implements Serializable {
   private final String DOC_DIR="releng/doc"
 
   private final String DOWNLOADS_HOME="/home/data/httpd/download.eclipse.org/rcptt"
+  private final String[] PLATFORMS=["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"];
 
   private final def script
 
@@ -207,7 +208,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         this.script.git "https://github.com/xored/q7.quality.mockups.git"
       }
       _run_tests(
-          "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless-*-linux.gtk.x86_64.zip",
+          "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-linux.gtk.x86_64.zip",
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
@@ -226,7 +227,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     this.script.xvnc() {
       this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
           -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-          -Dci-maven-version=2.0.0-SNAPSHOT \
+          -Dci-maven-version=2.6.0-SNAPSHOT \
           -DexplicitRunner=`readlink -f ${runner}` \
           ${args}"
     }
@@ -331,9 +332,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       }
 
       this.script.sh "$SSH_CLIENT mkdir $storageFolder/ide"
-      for(platform in ["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"]) {
+      for(platform in PLATFORMS) {
         this.script.sh "scp -r $PRODUCTS_DIR/org.eclipse.rcptt.platform.product-${platform}.zip $CREDENTIAL:$storageFolder/ide/rcptt.ide-${version}${qualifiedDecoration}-${platform}.zip"
-        this.script.sh "scp -r $RUNNER_DIR/org.eclipse.rcptt.runner.headless-*-${platform}.zip $CREDENTIAL:$storageFolder/runner/rcptt.runner-${version}${qualifiedDecoration}-${platform}.zip"
+        this.script.sh "scp -r $RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${platform}.zip $CREDENTIAL:$storageFolder/runner/rcptt.runner-${version}${qualifiedDecoration}-${platform}.zip"
       }
 
       if(copy_full) {
@@ -357,13 +358,15 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   private void maven_deploy_runner(String version) {
     this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn deploy:deploy-file -B \
+      for (platform in PLATFORMS) {
+        this.script.sh "mvn deploy:deploy-file -B \
           -Dversion=$version -Durl=https://repo.eclipse.org/content/repositories/rcptt-releases/ \
           -DgroupId=org.eclipse.rcptt.runner \
           -DrepositoryId=repo.eclipse.org \
           -DgeneratePom=true \
           -DartifactId=rcptt.runner \
-          -Dfile=`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless-*.zip`"
+          -Dfile=`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${platform}.zip`"
+      }
     }
   }
 
