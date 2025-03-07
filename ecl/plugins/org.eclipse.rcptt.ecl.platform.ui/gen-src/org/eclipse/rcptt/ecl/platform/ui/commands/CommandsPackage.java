@@ -493,6 +493,52 @@ public interface CommandsPackage extends EPackage {
 	int FROM_CLIPBOARD_FEATURE_COUNT = CorePackage.COMMAND_FEATURE_COUNT + 0;
 
 	/**
+	 * The meta object id for the '{@link org.eclipse.rcptt.ecl.platform.ui.commands.impl.ExecuteCommandImpl <em>Execute Command</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.impl.ExecuteCommandImpl
+	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.impl.CommandsPackageImpl#getExecuteCommand()
+	 * @generated
+	 */
+	int EXECUTE_COMMAND = 10;
+
+	/**
+	 * The feature id for the '<em><b>Host</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int EXECUTE_COMMAND__HOST = CorePackage.COMMAND__HOST;
+
+	/**
+	 * The feature id for the '<em><b>Bindings</b></em>' containment reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int EXECUTE_COMMAND__BINDINGS = CorePackage.COMMAND__BINDINGS;
+
+	/**
+	 * The feature id for the '<em><b>Command Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int EXECUTE_COMMAND__COMMAND_ID = CorePackage.COMMAND_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Execute Command</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int EXECUTE_COMMAND_FEATURE_COUNT = CorePackage.COMMAND_FEATURE_COUNT + 1;
+
+	/**
 	 * Returns the meta object for class '{@link org.eclipse.rcptt.ecl.platform.ui.commands.Alert <em>Alert</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -681,6 +727,27 @@ public interface CommandsPackage extends EPackage {
 	EClass getFromClipboard();
 
 	/**
+	 * Returns the meta object for class '{@link org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand <em>Execute Command</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Execute Command</em>'.
+	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand
+	 * @generated
+	 */
+	EClass getExecuteCommand();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand#getCommandId <em>Command Id</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Command Id</em>'.
+	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand#getCommandId()
+	 * @see #getExecuteCommand()
+	 * @generated
+	 */
+	EAttribute getExecuteCommand_CommandId();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -865,6 +932,24 @@ public interface CommandsPackage extends EPackage {
 		 * @generated
 		 */
 		EClass FROM_CLIPBOARD = eINSTANCE.getFromClipboard();
+
+		/**
+		 * The meta object literal for the '{@link org.eclipse.rcptt.ecl.platform.ui.commands.impl.ExecuteCommandImpl <em>Execute Command</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see org.eclipse.rcptt.ecl.platform.ui.commands.impl.ExecuteCommandImpl
+		 * @see org.eclipse.rcptt.ecl.platform.ui.commands.impl.CommandsPackageImpl#getExecuteCommand()
+		 * @generated
+		 */
+		EClass EXECUTE_COMMAND = eINSTANCE.getExecuteCommand();
+
+		/**
+		 * The meta object literal for the '<em><b>Command Id</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute EXECUTE_COMMAND__COMMAND_ID = eINSTANCE.getExecuteCommand_CommandId();
 
 	}
 
