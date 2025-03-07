@@ -93,7 +93,9 @@ public class TeslaSWTAccess {
 		for (Listener listener : listeners) {
 			Object lookFor = listener;
 			if (listener instanceof TypedListener) {
-				lookFor = ((TypedListener) listener).getEventListener();
+				
+				Object temp = ((TypedListener) listener).getEventListener();
+				lookFor = temp;
 			}
 			Object viewer = getFromField(lookFor, "this$0");
 			if (clazz.isInstance(viewer)) {
