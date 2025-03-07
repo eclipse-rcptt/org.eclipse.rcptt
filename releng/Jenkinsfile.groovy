@@ -138,14 +138,14 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void set_milestone(String decorator) {
-      this.script.container(BUILD_CONTAINER_NAME) {
+      withBuildContainer() {
         def version = get_version_from_pom().split("-")[0]
         this.script.sh "./update_version.sh $version $decorator"
       }
   }
 
   void _build(Boolean sign) {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.sh "mvn --version"
       def mvn = { pom ->
           this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
@@ -192,7 +192,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void rcptt_tests() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       _run_tests(
         "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless-*-linux.gtk.x86_64.zip",
         "rcpttTests",
@@ -203,7 +203,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void mockup_tests() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.dir('mockups') {
         this.script.git "https://github.com/xored/q7.quality.mockups.git"
       }
@@ -217,7 +217,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void tests(String repo, String runner, String args) {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.git repo
       _run_tests(runner, "rcpttTests", args)
     }
@@ -236,7 +236,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void post_build_actions() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.sh "jps -v"
       this.script.sh "ps x"
     }
@@ -287,7 +287,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       copy_files(type, version, "latest", "-nightly", true)
     }
 
-    maven_deploy_nightly()
+    maven_deploy(version+"-SNAPSHOT")
   }
 
   void milestone(String milestone) {
@@ -344,38 +344,27 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     }
   }
 
-  private void maven_deploy_nightly() {
+  def withBuildContainer(operation) {
     this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn -f releng/runner/pom.xml clean deploy -Dmaven.repo.local=${getWorkspace()}/m2 -e -B"
-      this.script.sh "mvn -f maven-plugin/pom.xml clean deploy -Dmaven.repo.local=${getWorkspace()}/m2 -e -B"
+      operation()
     }
   }
 
   private void maven_deploy(String version) {
-    maven_deploy_runner(version)
-    maven_deploy_maven_plugin(version)
-  }
-
-  private void maven_deploy_runner(String version) {
-    this.script.container(BUILD_CONTAINER_NAME) {
-      for (platform in PLATFORMS) {
-        this.script.sh "mvn deploy:deploy-file -B \
-          -Dversion=$version -Durl=https://repo.eclipse.org/content/repositories/rcptt-releases/ \
-          -DgroupId=org.eclipse.rcptt.runner \
-          -DrepositoryId=repo.eclipse.org \
-          -DgeneratePom=true \
-          -DartifactId=rcptt.runner \
-          -Dfile=`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${platform}.zip`"
-      }
+    withBuildContainer() {
+      mvn('-Dtycho.mode=maven -f runner/product org.eclipse.tycho:tycho-versions-plugin::set-version -DnewVersion=' + version)
+      mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
+      mvn('-f releng/runner/pom.xml clean deploy')
+      mvn('-f maven-plugin/pom.xml clean deploy')
     }
   }
+  
+  private final def sh = this.script.sh
+  
+  private void mvn(String arguments) {
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
+  } 
 
-  private void maven_deploy_maven_plugin(String version){
-    this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn -f maven-plugin/pom.xml clean versions:set -DnewVersion=$version -B"
-      this.script.sh "mvn -f maven-plugin/pom.xml clean deploy -B"
-    }
-  }
 }
 
 return { script -> new Build(script) }
