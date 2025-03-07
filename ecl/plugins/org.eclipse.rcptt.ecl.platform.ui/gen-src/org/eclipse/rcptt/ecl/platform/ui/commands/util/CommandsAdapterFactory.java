@@ -119,6 +119,10 @@ public class CommandsAdapterFactory extends AdapterFactoryImpl {
 				return createFromClipboardAdapter();
 			}
 			@Override
+			public Adapter caseExecuteCommand(ExecuteCommand object) {
+				return createExecuteCommandAdapter();
+			}
+			@Override
 			public Adapter caseCommand(Command object) {
 				return createCommandAdapter();
 			}
@@ -279,6 +283,20 @@ public class CommandsAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createFromClipboardAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand <em>Execute Command</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand
+	 * @generated
+	 */
+	public Adapter createExecuteCommandAdapter() {
 		return null;
 	}
 

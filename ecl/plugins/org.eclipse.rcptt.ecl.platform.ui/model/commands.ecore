@@ -87,4 +87,11 @@
       <details key="example" value="show-alert [from-clipboard]"/>
     </eAnnotations>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExecuteCommand" eSuperTypes="../../org.eclipse.rcptt.ecl.core/model/ecl.ecore#//Command">
+    <eAnnotations source="http://www.eclipse.org/ecl/docs">
+      <details key="description" value="Executes an Eclipse command. "/>
+      <details key="example" value="execute-command org.eclipse.ui.help.installationDialog"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="commandId" eType="ecore:EDataType platform:/plugin/org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>

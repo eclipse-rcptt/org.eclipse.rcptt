@@ -1,14 +1,5 @@
-/*******************************************************************************
- * Copyright (c) 2014, 2019 Xored Software Inc and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Xored Software Inc - initial API and implementation and/or initial documentation
- *******************************************************************************/
-
+/**
+ */
 package org.eclipse.rcptt.ecl.platform.ui.commands.impl;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -19,49 +10,49 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.rcptt.ecl.core.impl.CommandImpl;
 
-import org.eclipse.rcptt.ecl.platform.ui.commands.Alert;
 import org.eclipse.rcptt.ecl.platform.ui.commands.CommandsPackage;
+import org.eclipse.rcptt.ecl.platform.ui.commands.ExecuteCommand;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Alert</b></em>'.
+ * An implementation of the model object '<em><b>Execute Command</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.rcptt.ecl.platform.ui.commands.impl.AlertImpl#getMessage <em>Message</em>}</li>
+ *   <li>{@link org.eclipse.rcptt.ecl.platform.ui.commands.impl.ExecuteCommandImpl#getCommandId <em>Command Id</em>}</li>
  * </ul>
  *
  * @generated
  */
-public class AlertImpl extends CommandImpl implements Alert {
+public class ExecuteCommandImpl extends CommandImpl implements ExecuteCommand {
 	/**
-	 * The default value of the '{@link #getMessage() <em>Message</em>}' attribute.
+	 * The default value of the '{@link #getCommandId() <em>Command Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getMessage()
+	 * @see #getCommandId()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String MESSAGE_EDEFAULT = null;
+	protected static final String COMMAND_ID_EDEFAULT = null;
 
 	/**
-	 * The cached value of the '{@link #getMessage() <em>Message</em>}' attribute.
+	 * The cached value of the '{@link #getCommandId() <em>Command Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getMessage()
+	 * @see #getCommandId()
 	 * @generated
 	 * @ordered
 	 */
-	protected String message = MESSAGE_EDEFAULT;
+	protected String commandId = COMMAND_ID_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected AlertImpl() {
+	protected ExecuteCommandImpl() {
 		super();
 	}
 
@@ -72,7 +63,7 @@ public class AlertImpl extends CommandImpl implements Alert {
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return CommandsPackage.Literals.ALERT;
+		return CommandsPackage.Literals.EXECUTE_COMMAND;
 	}
 
 	/**
@@ -81,8 +72,8 @@ public class AlertImpl extends CommandImpl implements Alert {
 	 * @generated
 	 */
 	@Override
-	public String getMessage() {
-		return message;
+	public String getCommandId() {
+		return commandId;
 	}
 
 	/**
@@ -91,11 +82,11 @@ public class AlertImpl extends CommandImpl implements Alert {
 	 * @generated
 	 */
 	@Override
-	public void setMessage(String newMessage) {
-		String oldMessage = message;
-		message = newMessage;
+	public void setCommandId(String newCommandId) {
+		String oldCommandId = commandId;
+		commandId = newCommandId;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, CommandsPackage.ALERT__MESSAGE, oldMessage, message));
+			eNotify(new ENotificationImpl(this, Notification.SET, CommandsPackage.EXECUTE_COMMAND__COMMAND_ID, oldCommandId, commandId));
 	}
 
 	/**
@@ -106,8 +97,8 @@ public class AlertImpl extends CommandImpl implements Alert {
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case CommandsPackage.ALERT__MESSAGE:
-				return getMessage();
+			case CommandsPackage.EXECUTE_COMMAND__COMMAND_ID:
+				return getCommandId();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -120,8 +111,8 @@ public class AlertImpl extends CommandImpl implements Alert {
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case CommandsPackage.ALERT__MESSAGE:
-				setMessage((String)newValue);
+			case CommandsPackage.EXECUTE_COMMAND__COMMAND_ID:
+				setCommandId((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -135,8 +126,8 @@ public class AlertImpl extends CommandImpl implements Alert {
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case CommandsPackage.ALERT__MESSAGE:
-				setMessage(MESSAGE_EDEFAULT);
+			case CommandsPackage.EXECUTE_COMMAND__COMMAND_ID:
+				setCommandId(COMMAND_ID_EDEFAULT);
 				return;
 		}
 		super.eUnset(featureID);
@@ -150,8 +141,8 @@ public class AlertImpl extends CommandImpl implements Alert {
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case CommandsPackage.ALERT__MESSAGE:
-				return MESSAGE_EDEFAULT == null ? message != null : !MESSAGE_EDEFAULT.equals(message);
+			case CommandsPackage.EXECUTE_COMMAND__COMMAND_ID:
+				return COMMAND_ID_EDEFAULT == null ? commandId != null : !COMMAND_ID_EDEFAULT.equals(commandId);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -166,10 +157,10 @@ public class AlertImpl extends CommandImpl implements Alert {
 		if (eIsProxy()) return super.toString();
 
 		StringBuilder result = new StringBuilder(super.toString());
-		result.append(" (message: ");
-		result.append(message);
+		result.append(" (commandId: ");
+		result.append(commandId);
 		result.append(')');
 		return result.toString();
 	}
 
-} //AlertImpl
+} //ExecuteCommandImpl
