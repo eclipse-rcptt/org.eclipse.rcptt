@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.EventListener;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -88,13 +89,13 @@ public class TeslaSWTAccess {
 		return getThis(Viewer.class, w, SWT.Dispose);
 	}
 
+	
 	public static <T> T getThis(Class<T> clazz, Widget widget, int event) {
 		Listener[] listeners = widget.getListeners(event);
 		for (Listener listener : listeners) {
 			Object lookFor = listener;
-			if (listener instanceof TypedListener) {
-				
-				Object temp = ((TypedListener) listener).getEventListener();
+			Object temp = getFromField(listener, "eventListener");
+			if (temp != null) {
 				lookFor = temp;
 			}
 			Object viewer = getFromField(lookFor, "this$0");
@@ -137,13 +138,23 @@ public class TeslaSWTAccess {
 		return null;
 	}
 
+	
+	/**
+	 * @param listener - SWT listener that is passed to org.eclipse.swt.widgets.Widget.addListener(int, Listener)
+	 * @return either EventListener passed to org.eclipse.swt.widgets.Control.add*Listener(*Listener), or input value
+	 */
+	public static Object tryUnwrapEventListener(Listener listener) {
+		Object temp = getFromField(listener, "eventListener"); // handle org.eclipse.swt.widgets.TypedListener
+		if (temp instanceof EventListener) {
+			return temp;
+		}
+		return listener;
+	}
+	
 	private static Object getThis(String clazz, Control control, int event) {
 		Listener[] listeners = control.getListeners(event);
 		for (Listener listener : listeners) {
-			Object lookFor = listener;
-			if (listener instanceof TypedListener) {
-				lookFor = ((TypedListener) listener).getEventListener();
-			}
+			Object lookFor = tryUnwrapEventListener(listener);
 			try {
 				Field this$0 = lookFor.getClass().getDeclaredField("this$0");
 				this$0.setAccessible(true);

@@ -489,7 +489,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 
 	private void processSelection(Widget widget, Event event, int type,
 			Context ctx) {
-		if (SWTEventRecorder.isIgnoreSelection(widget, event, type, ctx)) {
+		if (SWTEventRecorder.isIgnoreSelection(widget, type)) {
 			return;
 		}
 		try {
@@ -539,7 +539,7 @@ public class WorkbenchTexteditorRecordingProcessor implements
 
 	private void processTraverse(Widget widget, Event event,
 			RecordedEvent toRecording) {
-		getSWTEventRecorder().processTraverse(widget, event, toRecording);
+		getSWTEventRecorder().processTraverse(widget, event);
 	}
 
 	private void processKeyDown(Widget widget, Event event) {

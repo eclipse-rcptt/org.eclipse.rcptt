@@ -2879,22 +2879,12 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			Listener[] listeners = figureCanvas.widget
 					.getListeners(SWT.Dispose);
 			for (Listener listener : listeners) {
-				if (listener instanceof TypedListener) {
-					TypedListener tl = (TypedListener) listener;
-					Object eventListener = tl.getEventListener();
-					Object o = getViewer(eventListener);
-					if (cl.isInstance(o)
-							&& (notcl == null || !notcl.isInstance(o))) {
-						viewer = o;
-						break;
-					}
-				} else {
-					Object o = getViewer(listener);
-					if (cl.isInstance(o)
-							&& (notcl == null || !notcl.isInstance(o))) {
-						viewer = o;
-						break;
-					}
+				Object eventListener = TeslaSWTAccess.tryUnwrapEventListener(listener);
+				Object o = getViewer(eventListener);
+				if (cl.isInstance(o)
+						&& (notcl == null || !notcl.isInstance(o))) {
+					viewer = o;
+					break;
 				}
 			}
 		}
