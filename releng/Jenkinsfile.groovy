@@ -359,7 +359,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     }
   }
   
-  private final def sh = this.script.sh
+  private def sh(arguments) {
+    return this.script.sh(arguments)
+  }
   
   private void mvn(String arguments) {
     sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
