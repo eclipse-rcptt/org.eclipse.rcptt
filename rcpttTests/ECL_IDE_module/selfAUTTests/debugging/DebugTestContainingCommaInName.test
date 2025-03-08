@@ -61,8 +61,10 @@ with [get-window "Show View"] {
     get-button Open | click
 }
 with [get-view "Error Log" | get-editbox] {
-    set-text "*Invalid stack format"
-    key-type Enter
+	try -command {
+	    set-text "*Invalid stack format"
+	    key-type Enter
+    } -catch {}
 }
 get-view "Error Log" | get-tree | get-property itemCount | equals 0 | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
