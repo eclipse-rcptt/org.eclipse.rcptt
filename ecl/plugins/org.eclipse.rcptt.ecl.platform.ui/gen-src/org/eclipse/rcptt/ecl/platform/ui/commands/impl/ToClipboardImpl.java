@@ -81,6 +81,7 @@ public class ToClipboardImpl extends CommandImpl implements ToClipboard {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getInput() {
 		return input;
 	}
@@ -90,6 +91,7 @@ public class ToClipboardImpl extends CommandImpl implements ToClipboard {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setInput(String newInput) {
 		String oldInput = input;
 		input = newInput;
@@ -164,7 +166,7 @@ public class ToClipboardImpl extends CommandImpl implements ToClipboard {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (input: ");
 		result.append(input);
 		result.append(')');

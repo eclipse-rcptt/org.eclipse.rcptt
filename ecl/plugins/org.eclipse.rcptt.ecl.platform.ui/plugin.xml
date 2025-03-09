@@ -72,6 +72,11 @@
             name="FromClipboard"
             namespace="http://www.eclipse.org/ecl/platform.ui/commands.ecore">
       </scriptlet>
+      <scriptlet
+            class="org.eclipse.rcptt.ecl.platform.internal.ui.commands.ExecuteCommandService"
+            name="ExecuteCommand"
+            namespace="http://www.eclipse.org/ecl/platform.ui/commands.ecore">
+      </scriptlet>
    </extension>
 
 </plugin>

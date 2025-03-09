@@ -42,7 +42,8 @@ public interface CreateWorkingSet extends Command {
 	 * @return the value of the '<em>Name</em>' attribute.
 	 * @see #setName(String)
 	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.CommandsPackage#getCreateWorkingSet_Name()
-	 * @model annotation="http://www.eclipse.org/ecl/docs description='Working set name'"
+	 * @model annotation="http://www.eclipse.org/ecl/input"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Working set name'"
 	 * @generated
 	 */
 	String getName();
@@ -70,7 +71,7 @@ public interface CreateWorkingSet extends Command {
 	 * @see #setType(String)
 	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.CommandsPackage#getCreateWorkingSet_Type()
 	 * @model default="org.eclipse.ui.resourceWorkingSetPage"
-	 *        annotation="http://www.eclipse.org/ecl/docs description='Working set type id. Default value is <code>org.eclipse.ui.resourceWorkingSetPage</code>, which corresponds to Resource Working Set. The short name <code>java</code> can be used to identify type <code>org.eclipse.jdt.ui.JavaWorkingSetPage</code>'"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Working set type id. Default value is &lt;code&gt;org.eclipse.ui.resourceWorkingSetPage&lt;/code&gt;, which corresponds to Resource Working Set. The short name &lt;code&gt;java&lt;/code&gt; can be used to identify type &lt;code&gt;org.eclipse.jdt.ui.JavaWorkingSetPage&lt;/code&gt;'"
 	 * @generated
 	 */
 	String getType();

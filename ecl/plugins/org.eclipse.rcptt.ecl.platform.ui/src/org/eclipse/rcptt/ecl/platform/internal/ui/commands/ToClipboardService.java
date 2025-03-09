@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ecl.platform.internal.ui.commands;
 
-import static org.eclipse.rcptt.ecl.platform.ui.PlatformUIPlugin.createError;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -31,7 +29,7 @@ public class ToClipboardService implements ICommandService {
 		}
 		final String input = ((ToClipboard) command).getInput(); 
 		if (input == null) {
-			return createError("No input specified");
+			return Utils.error("No input specified");
 		}
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		Clipboard clipboard = toolkit.getSystemClipboard();
