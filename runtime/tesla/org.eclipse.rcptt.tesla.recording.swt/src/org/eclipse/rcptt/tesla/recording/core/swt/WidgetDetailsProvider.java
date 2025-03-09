@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.TypedListener;
 import org.eclipse.swt.widgets.Widget;
 
 @SuppressWarnings("rawtypes")
@@ -336,18 +335,13 @@ public class WidgetDetailsProvider {
 			Listener[] listeners = widget.getListeners(type.intValue());
 			if (listeners != null && listeners.length > 0) {
 				for (Listener listener : listeners) {
-					Object key = listener;
-					if (listener instanceof TypedListener) {
-						key = ((TypedListener) listener).getEventListener();
+					Object key = TeslaSWTAccess.tryUnwrapEventListener(listener);
+					Set<String> list = listenerToTypes.get(key);
+					if (list == null) {
+						list = new HashSet<String>();
+						listenerToTypes.put(key, list);
 					}
-					if (key != null) {
-						Set<String> list = listenerToTypes.get(key);
-						if (list == null) {
-							list = new HashSet<String>();
-							listenerToTypes.put(key, list);
-						}
-						list.add("SWT." + eventTypes.get(type));
-					}
+					list.add("SWT." + eventTypes.get(type));
 				}
 			}
 		}

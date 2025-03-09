@@ -60,7 +60,6 @@
 				<groupId>${tycho-groupid}</groupId>
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
-					<resolver>p2</resolver>
 					<!--ignoreTychoRepositories>true</ignoreTychoRepositories -->
 					<environments>
 						<environment>

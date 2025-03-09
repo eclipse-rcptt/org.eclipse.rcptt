@@ -14,11 +14,11 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rap.rwt.osgi,
  org.eclipse.rcptt.tesla.swt.aspects.rap,
  javax.servlet
-onEnvironment: JavaSE-1.7
+onEnvironment: JavaSE-17
 Import-Package: org.eclipse.rcptt.util,
  org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.rwt, org.eclipse.rap.ui.views, org.eclipse.rap.filedialog
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.swt.rap
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.swt.rap.RecordingSWTActivator

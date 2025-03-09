@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Automatic-Module-Name: org.eclipse.rcptt.launching.ext
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.launching.ext;singleton:=true
 Bundle-Version: 2.6.0.qualifier
@@ -12,7 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.launching;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.pde.core;bundle-version="3.9.0",
+ org.eclipse.pde.core;bundle-version="3.19.0",
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.metadata,
  org.eclipse.equinox.p2.repository,
@@ -37,7 +38,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.felix.scr,
  org.eclipse.equinox.launcher,
  org.eclipse.core.filesystem
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.internal.launching.ext,
  org.eclipse.rcptt.launching.autdetails,

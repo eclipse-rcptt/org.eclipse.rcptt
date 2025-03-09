@@ -6,7 +6,7 @@
     <booleanAttribute key="automaticIncludeRequirements" value="true"/>
     <booleanAttribute key="automaticValidate" value="true"/>
     <stringAttribute key="bootstrap" value=""/>
-    <stringAttribute key="checked" value="org.eclipse.rcptt.tesla.swt"/>
+    <stringAttribute key="checked" value="[NONE]"/>
     <booleanAttribute key="clearConfig" value="true"/>
     <booleanAttribute key="clearws" value="false"/>
     <booleanAttribute key="clearwslog" value="false"/>
@@ -22,7 +22,7 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.eclipse.swt.graphics.Resource.reportNonDisposed=true&#13;&#10;-Xms128m &#13;&#10;-Xmx768m &#13;&#10;-Dorg.eclipse.swt.browser.DefaultType=mozilla &#13;&#10;-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false&#13;&#10;-DteslaPort=7927 &#13;&#10;-DeclPort=5379 &#13;&#10;-Dosgi.framework.extensions=org.eclipse.equinox.weaving.hook&#10;--add-opens java.base/java.lang=ALL-UNNAMED"/>
@@ -30,17 +30,12 @@
     <stringAttribute key="product" value="org.eclipse.platform.ide"/>
     <setAttribute key="selected_target_bundles">
         <setEntry value="com.google.gson@default:default"/>
-        <setEntry value="com.google.guava*33.0.0.jre@default:default"/>
+        <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.ibm.icu@default:default"/>
         <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.sun.jna.platform@default:default"/>
         <setEntry value="com.sun.jna@default:default"/>
-        <setEntry value="com.sun.xml.bind@default:default"/>
-        <setEntry value="jakarta.activation@default:default"/>
-        <setEntry value="jakarta.xml.bind@default:default"/>
-        <setEntry value="javax.activation@default:default"/>
         <setEntry value="javax.annotation@default:default"/>
-        <setEntry value="javax.xml@default:default"/>
         <setEntry value="lpg.runtime.java@default:default"/>
         <setEntry value="net.bytebuddy.byte-buddy-agent@default:default"/>
         <setEntry value="net.bytebuddy.byte-buddy@default:default"/>
@@ -63,9 +58,7 @@
         <setEntry value="org.apache.batik.transcoder@default:default"/>
         <setEntry value="org.apache.batik.util@default:default"/>
         <setEntry value="org.apache.batik.xml@default:default"/>
-        <setEntry value="org.apache.commons.codec@default:default"/>
-        <setEntry value="org.apache.commons.jxpath@default:default"/>
-        <setEntry value="org.apache.commons.lang3.source@default:default"/>
+        <setEntry value="org.apache.commons.lang3.source"/>
         <setEntry value="org.apache.commons.lang3@default:default"/>
         <setEntry value="org.apache.commons.logging@default:default"/>
         <setEntry value="org.apache.felix.gogo.command@default:default"/>
@@ -131,9 +124,7 @@
         <setEntry value="org.eclipse.ecf.filetransfer@default:default"/>
         <setEntry value="org.eclipse.ecf.identity@default:default"/>
         <setEntry value="org.eclipse.ecf.provider.filetransfer.httpclient5@default:default"/>
-        <setEntry value="org.eclipse.ecf.provider.filetransfer.ssl@default:false"/>
         <setEntry value="org.eclipse.ecf.provider.filetransfer@default:default"/>
-        <setEntry value="org.eclipse.ecf.ssl@default:false"/>
         <setEntry value="org.eclipse.ecf@default:default"/>
         <setEntry value="org.eclipse.emf.ant@default:default"/>
         <setEntry value="org.eclipse.emf.cheatsheets@default:default"/>
@@ -375,14 +366,9 @@
         <setEntry value="org.eclipse.ui@default:default"/>
         <setEntry value="org.eclipse.update.configurator@default:default"/>
         <setEntry value="org.eclipse.urischeme@default:default"/>
-        <setEntry value="org.hamcrest*2.2.0@default:default"/>
-        <setEntry value="org.hamcrest.core@default:default"/>
-        <setEntry value="org.hamcrest.integration@default:default"/>
-        <setEntry value="org.hamcrest.library@default:default"/>
-        <setEntry value="org.hamcrest.text@default:default"/>
+        <setEntry value="org.hamcrest@default:default"/>
         <setEntry value="org.jsoup@default:default"/>
         <setEntry value="org.junit@default:default"/>
-        <setEntry value="org.mockito@default:default"/>
         <setEntry value="org.objectweb.asm.tree@default:default"/>
         <setEntry value="org.objectweb.asm@default:default"/>
         <setEntry value="org.objenesis@default:default"/>
@@ -500,8 +486,6 @@
         <setEntry value="org.eclipse.rcptt.tesla.ecl@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.gef.aspects@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.gef@default:default"/>
-        <setEntry value="org.eclipse.rcptt.tesla.gmf.aspects@default:default"/>
-        <setEntry value="org.eclipse.rcptt.tesla.gmf@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.jdt.aspects@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.jdt@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.jface.aspects.test@default:default"/>
@@ -575,7 +559,7 @@
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
     <stringAttribute key="templateConfig" value="${target_home}\configuration\config.ini"/>
-    <booleanAttribute key="tracing" value="true"/>
+    <booleanAttribute key="tracing" value="false"/>
     <mapAttribute key="tracingOptions">
         <mapEntry key="com.xored.tesla.core.am/logging" value="false"/>
         <mapEntry key="com.xored.tesla.core/logging" value="false"/>

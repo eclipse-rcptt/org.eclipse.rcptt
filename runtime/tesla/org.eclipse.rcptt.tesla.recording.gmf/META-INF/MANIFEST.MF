@@ -17,5 +17,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rcptt.tesla.recording.swt;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.gef;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

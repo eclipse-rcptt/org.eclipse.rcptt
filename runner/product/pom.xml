@@ -7,34 +7,58 @@
     https://www.eclipse.org/legal/epl-v20.html
      
     Contributors:
-    	Xored Software Inc - initial API and implementation and/or initial documentation
+    	Xored Software Inc - initial API and implementation and/or initial
+documentation
  -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>rcptt.runner</artifactId>
-	<packaging>eclipse-application</packaging>
-	<parent>
-		<groupId>org.eclipse.rcptt.runner</groupId>
-		<version>2.6.0-SNAPSHOT</version>
-		<artifactId>runner</artifactId>
-	</parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>rcptt.runner</artifactId>
+  <packaging>eclipse-repository</packaging>
+  <parent>
+    <groupId>org.eclipse.rcptt.runner</groupId>
+    <version>2.6.0-SNAPSHOT</version>
+    <artifactId>runner</artifactId>
+  </parent>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>${tycho-groupid}</groupId>
-				<artifactId>tycho-packaging-plugin</artifactId>
-				<configuration>
-					<separateEnvironments>false</separateEnvironments>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>${tycho-groupid}</groupId>
+        <artifactId>tycho-p2-director-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <executions>
+          <execution>
+            <id>materialize-products</id>
+            <phase>package</phase>
+            <goals>
+              <goal>materialize-products</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>archive-products</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>archive-products</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <formats>
+            <win32>zip</win32>
+            <linux>zip</linux>
+            <macosx>zip</macosx>
+          </formats>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

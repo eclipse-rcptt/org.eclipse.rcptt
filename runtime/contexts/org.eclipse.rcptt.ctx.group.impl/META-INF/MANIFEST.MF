@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.reporting;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.core.ecl.core;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.group.impl
 Automatic-Module-Name: org.eclipse.rcptt.ctx.group.impl

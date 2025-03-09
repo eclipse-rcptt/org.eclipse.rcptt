@@ -14,5 +14,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rap.rwt,
  org.eclipse.core.variables
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

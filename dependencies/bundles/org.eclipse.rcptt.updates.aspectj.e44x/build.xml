@@ -54,14 +54,14 @@
 
     <ac:for param="file" xmlns:ac="antlib:net.sf.antcontrib">
       <path>
-	<fileset dir="dependencies/plugins" includes="**/*.jar"/>
+	<fileset dir="source/plugins" includes="**/*.jar"/>
       </path>
       <sequential>
 	<unsignjar jar="@{file}"/>
       </sequential>
     </ac:for>
 
-    <delete file="dependencies/content.jar"/>
-    <delete file="dependencies/artifacts.jar"/>
+    <delete file="source/content.jar"/>
+    <delete file="source/artifacts.jar"/>
   </target>
 </project>

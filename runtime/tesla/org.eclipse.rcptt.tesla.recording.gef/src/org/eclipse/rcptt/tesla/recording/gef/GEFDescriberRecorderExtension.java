@@ -52,7 +52,7 @@ public class GEFDescriberRecorderExtension implements
 			FigureCanvas canvas = (FigureCanvas) widget;
 			SWTUIPlayer player = getSWTProcessor(TeslaRecorder.getInstance()).getPlayer();
 			GraphicalViewer viewer = GefProcessor.findDiagramViewer(
-					player.wrap(canvas), GraphicalViewer.class, null, player);
+					player.wrap(canvas), GraphicalViewer.class, null);
 			EditPart editPart = viewer == null ? null : viewer.findObjectAt(new Point(x, y));
 			if (editPart instanceof RootEditPart) {
 				return new RecordingEditPartDescriber(viewer.getContents(), viewer);

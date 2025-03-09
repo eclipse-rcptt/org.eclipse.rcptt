@@ -1019,7 +1019,7 @@ public class GefEventRecorder implements IRecordingProcessor,
 					SWTUIPlayer player = eventRecorder.getPlayer();
 					GraphicalViewer viewer = GefProcessor.findDiagramViewer(
 							player.wrap(parent),
-							GraphicalViewer.class, null, player);
+							GraphicalViewer.class, null);
 					if (viewer != null) {
 						if (isSkipDiagramOperations()) {
 							return;
@@ -1070,7 +1070,7 @@ public class GefEventRecorder implements IRecordingProcessor,
 					SWTUIPlayer player = eventRecorder.getPlayer();
 					GraphicalViewer viewer = GefProcessor.findDiagramViewer(
 							player.wrap(parent),
-							GraphicalViewer.class, null, player);
+							GraphicalViewer.class, null);
 					if (viewer != null) {
 						if (isSkipDiagramOperations()) {
 							return;

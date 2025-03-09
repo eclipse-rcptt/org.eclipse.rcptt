@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _6f2O0JBTEeKb2YsCtQq5YA
-Runtime-Version: 1.5.2.201408180747
-Save-Time: 9/10/14 3:11 PM
+Runtime-Version: 2.6.0.202503071721
+Save-Time: 3/7/25, 10:30 PM
 Tags: q7commands
 Testcase-Type: ecl
 
@@ -37,7 +37,7 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "MyProject/P1" | double-click
 get-editor P1 | get-section Parameters | get-table | get-table-data | select-rows -column "Value" -value "v2" | write-csv-file "workspace:///FilesForContextEditor//test.csv"
 get-view "Test Explorer" | get-tree | select FilesForContextEditor | get-menu Refresh | click
-get-view "Test Explorer" | get-tree | select "FilesForContextEditor/test.csv" | get-menu "Open With/Text Editor" | click
+get-view "Test Explorer" | get-tree | select "FilesForContextEditor/test.csv" | get-menu "Open With/Plain Text Editor" | click
 get-editor "test.csv" | get-text-viewer | get-property text | equals "Name,Value\n"
     + "p2,v2\n" | verify-true
 

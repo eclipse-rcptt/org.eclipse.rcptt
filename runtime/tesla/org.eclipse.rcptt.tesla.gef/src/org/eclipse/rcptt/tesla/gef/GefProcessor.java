@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -143,7 +144,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.TypedListener;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -1024,7 +1024,6 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		return size;
 	}
 
-	@SuppressWarnings("rawtypes")
 	protected Point correctFigurePosition(int nx, int ny,
 			GraphicalEditPart part, IFigure figure, GraphicalViewer viewer,
 			FigureCanvas canvas) {
@@ -1034,9 +1033,8 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		if (dragParts.contains(part)) {
 			return null;
 		}
-		Set exclude = new HashSet();
 		Rectangle bounds = getBounds(figure);
-		if (isInside(canvas, viewer, part, figure, nx, ny, exclude)) {
+		if (isInside(canvas, viewer, part, figure, nx, ny)) {
 			return null;
 		}
 
@@ -1054,7 +1052,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			newY = bounds.y + bounds.height - 1;
 		}
 
-		if (isInside(canvas, viewer, part, figure, newX, newY, exclude)) {
+		if (isInside(canvas, viewer, part, figure, newX, newY)) {
 			return new Point(newX, newY);
 		}
 		// Point inside bounds sometimes not inside figure, for example arrows
@@ -1073,7 +1071,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 				Point relativeEventPoint = new Point(x, y);
 				figure.translateToRelative(relativeEventPoint);
 				if (isInside(canvas, viewer, part, figure,
-						relativeEventPoint.x, relativeEventPoint.y, exclude)) {
+						relativeEventPoint.x, relativeEventPoint.y)) {
 					return relativeEventPoint;
 				}
 			}
@@ -1083,7 +1081,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 				Point relativeEventPoint = new Point(x, y);
 				figure.translateToRelative(relativeEventPoint);
 				if (isInside(canvas, viewer, part, figure,
-						relativeEventPoint.x, relativeEventPoint.y, exclude)) {
+						relativeEventPoint.x, relativeEventPoint.y)) {
 					return relativeEventPoint;
 				}
 			}
@@ -1096,7 +1094,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 				Point relativeEventPoint = new Point(x, y);
 				figure.translateToRelative(relativeEventPoint);
 				if (isInside(canvas, viewer, part, figure,
-						relativeEventPoint.x, relativeEventPoint.y, exclude)) {
+						relativeEventPoint.x, relativeEventPoint.y)) {
 					return relativeEventPoint;
 				}
 			}
@@ -1106,7 +1104,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 				Point relativeEventPoint = new Point(x, y);
 				figure.translateToRelative(relativeEventPoint);
 				if (isInside(canvas, viewer, part, figure,
-						relativeEventPoint.x, relativeEventPoint.y, exclude)) {
+						relativeEventPoint.x, relativeEventPoint.y)) {
 					return relativeEventPoint;
 				}
 			}
@@ -1139,9 +1137,8 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		return bounds;
 	}
 
-	@SuppressWarnings("rawtypes")
 	private boolean isInside(FigureCanvas canvas, GraphicalViewer viewer,
-			GraphicalEditPart part, IFigure figure, int nx, int ny, Set exclude) {
+			GraphicalEditPart part, IFigure figure, int nx, int ny) {
 		Point translatedPoint = new Point(nx, ny);
 		figure.translateToAbsolute(translatedPoint);
 		// Check for some inner figure inside.
@@ -1153,7 +1150,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 					return false; // Have some part inside
 				}
 			} else {
-				EditPart at = findAt(viewer, translatedPoint, exclude);
+				EditPart at = findAt(viewer, translatedPoint, Collections.emptySet());
 				if (at != null) {
 					if (!at.equals(part)
 							&& !at.equals(viewer.getRootEditPart())) { // Some
@@ -1180,7 +1177,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			figureRoot = part.getFigure();
 		} else {
 			if (viewer.getRootEditPart() != null) {
-				EditPart at = findAt(viewer, translatedPoint, exclude);
+				EditPart at = findAt(viewer, translatedPoint, Collections.emptySet());
 				if (at != null) {
 					EditPart parentPart = viewer.getContents();
 					boolean partFound = at.equals(parentPart);
@@ -1228,9 +1225,8 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		}
 	};
 
-	@SuppressWarnings("rawtypes")
 	private EditPart findAt(GraphicalViewer viewer, Point translatedPoint,
-			Set exclude) {
+			Set<IFigure> exclude) {
 		EditPart at = viewer.findObjectAtExcluding(new Point(translatedPoint.x,
 				translatedPoint.y), exclude, findAtCondition);
 		return at;
@@ -1390,6 +1386,10 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 						case DOUBLE_CLICK:
 							dispatcher.dispatchMouseDoubleClicked(mouseEvent);
 							break;
+						case NATIVE_DRAG_FINISHED:
+							break;
+						case NATIVE_DRAG_STARTED:
+							break;
 						}
 					}
 				});
@@ -1526,6 +1526,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		return result;
 	}
 
+	@SuppressWarnings("unused")
 	private Response handleGetTextCommand(GetText command) {
 		return null;
 	}
@@ -1842,8 +1843,8 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		return TeslaGefAccess.getSourceEditPart(manager);
 	}
 
+	@SuppressWarnings("unused")
 	private Response handleSetFigureSelection(SetFigureSelection command) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -2869,9 +2870,9 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 		return response;
 	}
 
-	@SuppressWarnings({ "rawtypes", "restriction" })
+	@SuppressWarnings({ "rawtypes" })
 	public static GraphicalViewer findDiagramViewer(SWTUIElement figureCanvas,
-			Class cl, Class notcl, SWTUIPlayer player) {
+			Class cl, Class notcl) {
 		Object viewer = null;
 		viewer = getViewer(figureCanvas.widget);
 		if (viewer == null) {
@@ -2879,22 +2880,12 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			Listener[] listeners = figureCanvas.widget
 					.getListeners(SWT.Dispose);
 			for (Listener listener : listeners) {
-				if (listener instanceof TypedListener) {
-					TypedListener tl = (TypedListener) listener;
-					org.eclipse.swt.internal.SWTEventListener eventListener = tl.getEventListener();
-					Object o = getViewer(eventListener);
-					if (cl.isInstance(o)
-							&& (notcl == null || !notcl.isInstance(o))) {
-						viewer = o;
-						break;
-					}
-				} else {
-					Object o = getViewer(listener);
-					if (cl.isInstance(o)
-							&& (notcl == null || !notcl.isInstance(o))) {
-						viewer = o;
-						break;
-					}
+				Object eventListener = TeslaSWTAccess.tryUnwrapEventListener(listener);
+				Object o = getViewer(eventListener);
+				if (cl.isInstance(o)
+						&& (notcl == null || !notcl.isInstance(o))) {
+					viewer = o;
+					break;
 				}
 			}
 		}
@@ -2910,7 +2901,7 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 			Class cl, Class notcl, SWTUIPlayer player) {
 
 		GraphicalViewer graphicalViewer = findDiagramViewer(figureCanvas, cl,
-				notcl, player);
+				notcl);
 		if (graphicalViewer != null) {
 			DiagramViewerUIElement element = new DiagramViewerUIElement(player,
 					graphicalViewer);
@@ -3077,10 +3068,6 @@ public class GefProcessor implements ITeslaCommandProcessor, IModelMapperHelper 
 					Math.max(bottomRight.y, port.getViewLocation().y));
 
 		canvas.scrollSmoothTo(finalLocation.x, finalLocation.y);
-	}
-
-	public boolean callMasterProcess(Context currentContext) {
-		return false;
 	}
 
 	public RawFigureElementMapper getRawMapper() {

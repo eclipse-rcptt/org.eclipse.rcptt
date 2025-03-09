@@ -23,11 +23,7 @@
 	<packaging>maven-plugin</packaging>
 
 	<name>RCPTT runner maven plugin</name>
-	<url>http://xored.com</url>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+	<url>https://eclipse.dev/rcptt/userguide/maven/</url>
 
 	<dependencies>
 		<dependency>

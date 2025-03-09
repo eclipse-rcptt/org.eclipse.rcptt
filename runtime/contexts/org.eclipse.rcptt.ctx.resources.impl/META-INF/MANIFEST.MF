@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.resources.impl;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.util.resources;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.resources
 Automatic-Module-Name: org.eclipse.rcptt.ctx.resources.impl
