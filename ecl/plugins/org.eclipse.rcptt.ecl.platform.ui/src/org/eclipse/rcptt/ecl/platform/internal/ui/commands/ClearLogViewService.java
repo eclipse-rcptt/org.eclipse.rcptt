@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.ecl.core.Command;
-import org.eclipse.rcptt.ecl.platform.ui.PlatformUIPlugin;
 import org.eclipse.rcptt.ecl.runtime.ICommandService;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.ui.IViewPart;
@@ -50,8 +49,7 @@ public class ClearLogViewService implements ICommandService {
 			}
 		});
 		if (exceptions[0] != null) {
-			return new Status(IStatus.ERROR, PlatformUIPlugin.PLUGIN_ID,
-					"Error clearing log view", exceptions[0]);
+			return Utils.error("Error clearing log view", exceptions[0]);
 		}
 		return Status.OK_STATUS;
 	}

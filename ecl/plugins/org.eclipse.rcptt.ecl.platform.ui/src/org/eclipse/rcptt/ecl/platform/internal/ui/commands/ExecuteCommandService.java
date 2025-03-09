@@ -30,11 +30,12 @@ public class ExecuteCommandService implements ICommandService {
 		try {
 			service.executeCommand(id, null);
 		} catch (ExecutionException e) {
-			return Status.error("Command " + id + " has failed", e);
+			return Utils.error("Command " + id + " has failed", e);
 		} catch(NotDefinedException | NotEnabledException | NotHandledException e) {
-			return Status.error("Command " + id + " is unavailable", e);
+			return Utils.error("Command " + id + " is unavailable", e);
 		}
 		return Status.OK_STATUS;
 	}
+	
 
 }
