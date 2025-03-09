@@ -232,6 +232,8 @@ public class FullSingleTestHtmlRenderer {
 			renderScreenShot((Screenshot) eObject, "");
 		} else if (eObject instanceof AdvancedInformation) {
 			renderAdvanced((AdvancedInformation) eObject);
+		} else if (eObject == null) {
+			writer.println("Event contains no data. This indicates a premature AUT termination.");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}
