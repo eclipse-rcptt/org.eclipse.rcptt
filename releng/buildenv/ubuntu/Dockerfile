@@ -13,7 +13,7 @@ locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8
 locales locales/default_environment_locale select en_US.UTF-8
 EOT
 
-COPY custom.apt.conf /etc/apt/apt.conf.d/custom
+COPY files/ /
 
 RUN apt-get update \
  && apt-get install \
@@ -34,6 +34,7 @@ RUN apt-get update \
     fonts-wqy-zenhei \
     fonts-tlwg-loma-otf \
     wget \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 ## Install a maven
