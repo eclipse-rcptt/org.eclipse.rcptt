@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _EEhNYGHLEemi1p1zI885UA
-Runtime-Version: 2.6.0.202503071103
-Save-Time: 3/7/25, 4:27 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/9/25, 12:27 PM
 Testcase-Type: ecl
 Verifications: _UnfUID8XEeSyDoCDFnaFCg
 
@@ -21,21 +21,20 @@ with [get-view "Project Explorer"] {
   get-menu -path "Select Working Set..." | click
 }
 with [get-window "Select Working Set"] {
-    with [get-table] {
-	    try -command {
-	        get-item -path ws1
-		} -catch  {
-	        get-button "New..." | click
-	    	with [get-window "New Working Set"] {
-		        get-table | select Resource | double-click
-		        get-editbox -after [get-label "Working set name:"] | set-text ws1
-		        get-button Finish | click
-		    }
-	    }
-	    get-item -path ws1 | check
+    try -command {
+        get-table | get-item -path ws1
+    } -catch  {
+        get-button "New..." | click
+        with [get-window "New Working Set"] {
+            get-table | select Resource | double-click
+            get-editbox -after [get-label "Working set name:"] | set-text ws1
+            get-button Finish | click
+        }
     }
+    get-item -path ws1 | check
     get-button OK | click
 }
+
 get-button "View Menu" | click
 get-view "Project Explorer" | get-menu -path "Edit Active Working Set..." | click
 with [get-window "Edit Working Set"] {
