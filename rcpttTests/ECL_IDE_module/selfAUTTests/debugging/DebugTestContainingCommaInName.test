@@ -7,7 +7,7 @@ Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-2363
 Id: _o45OMHTTEeKZ8acQ_IBh0w
 Runtime-Version: 2.5.5.202404041628
-Save-Time: 3/8/25, 1:08 PM
+Save-Time: 3/9/25, 1:32 PM
 Tags: selfAUT, Debug
 Testcase-Type: ecl
 
@@ -42,8 +42,7 @@ with [get-window "Rename Resource"] {
 }
 get-view "Test Explorer" | get-tree | select "MyProject/List.set\\(index, element\\) test" | double-click
 clear-log-view
-
-set-q7-option -key jobTreatAsSleepingTimeout -value 1000
+set-q7-option -key jobTreatAsSleepingTimeout -value 40000
 with [get-editor "List.set(index, element) test" | get-section Script] {
     get-left-ruler | get-ruler-column AnnotationColumn | double-click-ruler 2
     with [get-text-viewer] {
@@ -51,6 +50,7 @@ with [get-editor "List.set(index, element) test" | get-section Script] {
         get-menu "Debug As/.* Test Cases" | click
     }
 }
+set-q7-option -key jobTreatAsSleepingTimeout -value 1000
 get-view Debug | get-tree 
     | get-item "List.set\\(index, element\\) test \\[RCPTT Test Suite\\]/List.set\\(index, element\\) test/ECL Thread/get-window \\(List.set\\(index, element\\) test: 2\\)" 
     | get-property caption | equals "get-window (List.set(index, element) test: 2)" | verify-true
@@ -63,10 +63,8 @@ with [get-window "Show View"] {
     get-button Open | click
 }
 with [get-view "Error Log" | get-editbox] {
-	try -command {
-	    set-text "*Invalid stack format"
-	    key-type Enter
-    } -catch {}
+    set-text "*Invalid stack format"
+    key-type Enter
 }
 get-view "Error Log" | get-tree | get-property itemCount | equals 0 | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
