@@ -22,7 +22,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.pde.internal.core.util.VMUtil;
-import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.internal.ui.IHelpContextIds;
 import org.eclipse.pde.internal.ui.launcher.JREBlock;
 import org.eclipse.pde.internal.ui.launcher.ProgramBlock;
@@ -80,7 +79,7 @@ public class ExternalAUTMainTab extends MainTab {
 						if (fJreCombo.getSelectionIndex() != -1) {
 							String jreName = fJreCombo.getText();
 
-							IVMInstall install = VMHelper.getVMInstall(jreName);
+							IVMInstall install = VMUtil.getVMInstall(jreName);
 							return install;
 						}
 					} else {

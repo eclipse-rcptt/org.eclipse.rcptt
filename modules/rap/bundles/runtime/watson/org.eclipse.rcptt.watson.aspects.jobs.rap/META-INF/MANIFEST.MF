@@ -7,10 +7,10 @@ Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;resolution:=optional;x-installation:=greedy;visibility:=reexport,
  org.eclipse.core.jobs,
  org.eclipse.core.runtime
-onEnvironment: JavaSE-1.6
+onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.core.jobs
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.sherlock.aspects.jobs.internal.JobsActivator
 Export-Package: org.eclipse.rcptt.sherlock.aspects.jobs.internal,

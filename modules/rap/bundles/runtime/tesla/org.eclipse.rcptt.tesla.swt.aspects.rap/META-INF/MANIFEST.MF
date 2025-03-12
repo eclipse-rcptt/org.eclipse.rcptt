@@ -14,7 +14,7 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.tesla.ecl;bundle-version="[2.6.0,3.0.0)",
  javax.servlet
-onEnvironment: JavaSE-1.7
+onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.rwt, org.eclipse.rap.filedialog
 Bundle-ActivationPolicy: lazy
@@ -27,5 +27,5 @@ Export-Package: org.eclipse.rcptt.tesla.swt.aspects.rap,
  org.eclipse.rcptt.tesla.swt.images,
  org.eclipse.rcptt.tesla.swt.js,
  org.eclipse.rcptt.tesla.swt.profiling
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.eclipse.rcptt.tesla.swt.aspects.rap.SWTAspectActivator

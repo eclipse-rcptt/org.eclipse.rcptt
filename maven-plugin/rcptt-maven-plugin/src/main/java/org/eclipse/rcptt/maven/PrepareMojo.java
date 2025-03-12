@@ -126,7 +126,7 @@ public class PrepareMojo extends AbstractRCPTTMojo {
 			setAutDir(autArchive);
 		}
 		if (q7Archive.isFile()) {
-			getLog().info(String.format("Extracting RCPTT runner to %s", q7Dir));
+			getLog().info(String.format("Extracting RCPTT runner from %s to %s", q7Archive, q7Dir));
 			getArchiveUtil().extract(q7Archive, getQ7Dir(getQ7Coords().getPlatform()));
 		} else {
 			getLog().info(String.format("Using RCPTT Runner from %s", q7Archive));

@@ -98,7 +98,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.SWTEventListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.ColorDialog;
@@ -131,7 +130,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.TypedListener;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageListener;
@@ -142,7 +140,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.keys.IBindingService;
 import org.osgi.framework.Bundle;
 
@@ -150,7 +147,6 @@ import org.osgi.framework.Bundle;
  * Simple event collector Each used widget will be added as variable.
  *
  */
-@SuppressWarnings("restriction")
 public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventListener, IRecordingModeListener {
 	// private Map<Widget, String> variables = new HashMap<Widget, String>();
 	// private Map<String, Integer> varCounters = new HashMap<String,
@@ -344,6 +340,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		enabled = true;
 	}
 
+	@SuppressWarnings("unused")
 	public boolean doProcessing(Context context, boolean contextChanged) {
 		return false;
 	}
@@ -373,7 +370,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 					// recorded on KeyUp event
 					if (!(widget instanceof Browser)) {
 						addToPressed(lastTraverseEvent);
-						processTraverse(lastTraverseEvent.widget, lastTraverseEvent, toRecordingTraverse);
+						processTraverse(lastTraverseEvent.widget, lastTraverseEvent);
 						lastEvents.add(toRecordingTraverse);
 					}
 					lastTraverseEvent = null;
@@ -549,10 +546,10 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		if (widget instanceof Control) {
 			Control c = (Control) widget;
 			if (c.getParent() instanceof DateTime) {
-				processDateTime(c.getParent(), c, type, event);
+				processDateTime(c.getParent(), type, event);
 				return;
 			} else if (c instanceof DateTime) {
-				processDateTime(c, c, type, event);
+				processDateTime(c, type, event);
 				return;
 			}
 		}
@@ -561,7 +558,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		CCombo[] combo = SWTEventManager.getCombo();
 		for (CCombo cCombo : combo) {
 			if (CComboSupport.isComboWidget(cCombo, widget)) {
-				processCCombo(widget, cCombo, type, event);
+				processCCombo(widget, cCombo, type);
 				return;
 			}
 		}
@@ -649,7 +646,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 				// recorded on KeyUp event
 				if (!(widget instanceof Browser)) {
 					addToPressed(event);
-					processTraverse(widget, event, toRecording);
+					processTraverse(widget, event);
 					lastEvents.add(toRecording);
 				}
 			} else if (event.detail != SWT.TRAVERSE_NONE) {
@@ -749,7 +746,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		}
 	}
 
-	private void processDateTime(Control dateTime, Control c, int type, Event event) {
+	private void processDateTime(Control dateTime, int type, Event event) {
 		DateTime dt = (DateTime) dateTime;
 		FindResult element;
 		switch (type) {
@@ -846,7 +843,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		return false;
 	}
 
-	private void processCCombo(Widget widget, CCombo cCombo, int type, Event event) {
+	private void processCCombo(Widget widget, CCombo cCombo, int type) {
 		switch (type) {
 		case SWT.Selection:
 			if (widget instanceof org.eclipse.swt.widgets.List) {
@@ -897,7 +894,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		return bundle != null;
 	}
 
-	public static boolean isIgnoreSelection(Widget widget, Event event, int type, Context ctx) {
+	public static boolean isIgnoreSelection(Widget widget, int type) {
 		SWTUIElement swtuiElement = SWTRecordingHelper.getHelper().getLocator().getPlayer().wrap(widget);
 		if (swtuiElement != null && swtuiElement.getKind().is(ElementKind.Unknown))
 			return true;
@@ -949,7 +946,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 			}
 		}
 
-		if (isIgnoreSelection(widget, event, type, ctx)) {
+		if (isIgnoreSelection(widget, type)) {
 			return;
 		}
 
@@ -1585,7 +1582,7 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 		return false;
 	}
 
-	public void processTraverse(Widget widget, Event event, RecordedEvent toRecording) {
+	public final void processTraverse(Widget widget, Event event) {
 		// === traverse types ===
 		// - SWT.TRAVERSE_NONE
 		// * SWT.TRAVERSE_ESCAPE (event chain)
@@ -1973,22 +1970,16 @@ public class SWTEventRecorder implements IRecordingProcessor, IExtendedSWTEventL
 			return false;
 		}
 		for (Listener listener : listenersDown) {
-			if (listener instanceof TypedListener) {
-				SWTEventListener eventListener = ((TypedListener) listener).getEventListener();
-				if (eventListener != null) {
-					String lName = eventListener.getClass().getName();
-					if (kind == SWT.MouseUp
-							&& lName.contains("org.eclipse.ui.internal.quickaccess.QuickAccessDialog")) {
-						return true;
-					}
-					if (lName.contains("org.eclipse.swt") || lName.contains("org.eclipse.ui")
-							|| lName.contains("org.eclipse.jface")) {
-						continue;
-					}
-				}
+			Object eventListener = TeslaSWTAccess.tryUnwrapEventListener(listener);
+			String lName = eventListener.getClass().getName();
+			if (kind == SWT.MouseUp
+					&& lName.contains("org.eclipse.ui.internal.quickaccess.QuickAccessDialog")) {
 				return true;
 			}
-			String lName = listener.getClass().getName();
+			if (lName.contains("org.eclipse.swt") || lName.contains("org.eclipse.ui")
+					|| lName.contains("org.eclipse.jface")) {
+				continue;
+			}
 			if (lName.contains("org.eclipse.swt") || lName.contains("org.eclipse.ui")
 					|| lName.contains("org.eclipse.jface")) {
 				continue;

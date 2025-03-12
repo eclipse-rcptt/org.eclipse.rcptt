@@ -10,6 +10,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.ui.views
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.workbench.aspect.rap

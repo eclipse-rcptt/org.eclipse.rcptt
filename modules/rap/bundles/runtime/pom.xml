@@ -7,9 +7,11 @@
     https://www.eclipse.org/legal/epl-v20.html
      
     Contributors:
-    	Xored Software Inc - initial API and implementation and/or initial documentation
+    	Xored Software Inc - initial API and implementation and/or initial
+documentation
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -20,12 +22,29 @@
 	</parent>
 	<artifactId>runtime</artifactId>
 	<packaging>pom</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>${tycho-groupid}</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<requireEagerResolve>true</requireEagerResolve> <!--aspectj-maven-plugin fails without prepared Target Platform-->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>**/*.aj</include>
+					</includes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<profiles>
 		<profile>
 			<id>core</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<modules>
 				<module>contexts</module>
 				<module>ecl</module>

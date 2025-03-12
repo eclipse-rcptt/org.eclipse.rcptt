@@ -21,6 +21,6 @@
   </parent>
 
   <artifactId>org.eclipse.rcptt.module.testrail-runtime-site</artifactId>
-  <packaging>eclipse-update-site</packaging>
+  <packaging>eclipse-repository</packaging>
 
 </project>

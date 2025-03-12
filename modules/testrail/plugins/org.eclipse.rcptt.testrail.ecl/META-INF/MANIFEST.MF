@@ -6,7 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.rcptt.testrail,
  org.eclipse.rcptt.testrail.impl,
  org.eclipse.rcptt.testrail.util
