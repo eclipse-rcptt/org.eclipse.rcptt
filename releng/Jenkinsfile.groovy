@@ -146,22 +146,23 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
-      this.script.sh "mvn --version"
-      def mvn = { pom ->
-          this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
+      sh "mvn --version"
+      def mvn2 = { pom ->
+          mvn "${sign ? "-P sign" : ""} -f ${pom}" 
       }
       this.script.xvnc() {
-        mvn "releng/mirroring/pom.xml"
-        mvn "releng/core/pom.xml"
-        mvn "releng/runtime/pom.xml -P runtime4x"
-        mvn "releng/ide/pom.xml"
-        mvn "releng/rap/pom.xml -P core"
-        mvn "releng/rap/pom.xml -P ide"
-        mvn "releng/rcptt/pom.xml"
-        mvn "releng/runner/pom.xml"
-        mvn "maven-plugin/pom.xml install"
+        sh "x-window-manager &"
+        mvn2 "releng/mirroring/pom.xml"
+        mvn2 "releng/core/pom.xml"
+        mvn2 "releng/runtime/pom.xml -P runtime4x"
+        mvn2 "releng/ide/pom.xml"
+        mvn2 "releng/rap/pom.xml -P core"
+        mvn2 "releng/rap/pom.xml -P ide"
+        mvn2 "releng/rcptt/pom.xml"
+        mvn2 "releng/runner/pom.xml"
+        mvn2 "maven-plugin/pom.xml install"
       }
-      this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
+      sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
     }
   }
 
@@ -225,20 +226,20 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   private void _run_tests(String runner, String dir, String args) {
     this.script.xvnc() {
-      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+      sh "x-window-manager &"
+      mvn "clean verify -f ${dir}/pom.xml \
           -Dci-maven-version=2.6.0-SNAPSHOT \
           -DexplicitRunner=`readlink -f ${runner}` \
           ${args}"
     }
-    this.script.sh "test -f ${dir}/target/results/tests.html"
+    sh "test -f ${dir}/target/results/tests.html"
     this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
 
   void post_build_actions() {
     withBuildContainer() {
-      this.script.sh "jps -v"
-      this.script.sh "ps x"
+      sh "jps -v"
+      sh "ps x"
     }
   }
 
@@ -364,7 +365,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
+    sh("mvn -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
   } 
 
 }
