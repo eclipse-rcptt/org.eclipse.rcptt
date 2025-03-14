@@ -148,7 +148,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     withBuildContainer() {
       sh "mvn --version"
       def mvn2 = { pom ->
-          mvn "${sign ? "-P sign" : ""} -f ${pom}" 
+          mvn "clean verify ${sign ? "-P sign" : ""} -f ${pom}" 
       }
       this.script.xvnc() {
         sh "x-window-manager &"
