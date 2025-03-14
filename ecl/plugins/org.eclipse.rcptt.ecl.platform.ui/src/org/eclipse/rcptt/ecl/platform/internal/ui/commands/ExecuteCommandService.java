@@ -35,7 +35,7 @@ public class ExecuteCommandService implements ICommandService {
 		ExecuteCommand typed = (ExecuteCommand) command;
 		String id = typed.getCommandId();
 		CompletableFuture<IStatus> result = new CompletableFuture<>();
-		workbench.getDisplay().asyncExec(() -> {
+		workbench.getDisplay().syncExec(() -> {
 			try {
 				// If the command shows a dialog and does not return, continue execution
 				workbench.getDisplay().asyncExec(() -> result.complete(Status.OK_STATUS));
