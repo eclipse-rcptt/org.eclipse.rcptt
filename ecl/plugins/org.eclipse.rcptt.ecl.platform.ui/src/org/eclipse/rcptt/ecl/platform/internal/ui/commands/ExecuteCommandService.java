@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.NotEnabledException;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
@@ -38,6 +37,8 @@ public class ExecuteCommandService implements ICommandService {
 		CompletableFuture<IStatus> result = new CompletableFuture<>();
 		workbench.getDisplay().asyncExec(() -> {
 			try {
+				// If the command shows a dialog and does not return, continue execution
+				workbench.getDisplay().asyncExec(() -> result.complete(Status.OK_STATUS));
 				service.executeCommand(id, null);
 				result.complete(Status.OK_STATUS);
 			} catch( NotDefinedException | NotEnabledException | NotHandledException e) {
@@ -46,12 +47,10 @@ public class ExecuteCommandService implements ICommandService {
 				result.complete(error("Command " + id + " has failed", e));
 			}
 		});
-		// If the command shows a dialog and does not return, continue execution
-		workbench.getDisplay().asyncExec(() -> result.complete(Status.OK_STATUS));
 		try {
 			return result.get(1, TimeUnit.SECONDS);
 		} catch (TimeoutException e) {
-			return error("The command " + id + " has timed out");
+			return error("UI thread has timed out");
 		} catch (java.util.concurrent.ExecutionException e) {
 			return error("Unexpected completion result", e);
 		}
