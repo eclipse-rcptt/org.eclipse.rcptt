@@ -389,6 +389,9 @@ public class FullSingleTestHtmlRenderer {
 		writer.println("<pre>");
 		writer.println(escape(trace.toString()));
 		writer.println("</pre>");
+		if (exception.getStatus() != null) {
+			renderResult(exception.getStatus());
+		}
 	}
 
 	private void titledRow(String key, String value) {
