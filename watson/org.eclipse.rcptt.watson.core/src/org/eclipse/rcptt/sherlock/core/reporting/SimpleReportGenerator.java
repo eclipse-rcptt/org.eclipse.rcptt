@@ -270,6 +270,7 @@ public class SimpleReportGenerator {
 				className = className.substring(0, pos);
 			}
 			className += '.' + waitRoot.getInnerClassMap().get(originalClassName);
+			className += " (" + originalClassName + ")";
 		}
 		return className;
 	}

@@ -47,6 +47,20 @@ public abstract class DataExecutable extends Executable {
 		}
 		this.launch = launch;
 		executionMonitor = new NullProgressMonitor();
+		addListener(new Listener() {
+
+			@Override
+			public void onStatusChange(Executable executable) {
+				if (getStatus() == State.COMPLETED) {
+					executionMonitor.setCanceled(true);
+				}
+			}
+
+			@Override
+			public void updateSessionCounters(Executable executable, IStatus status) {
+			}
+			
+		});
 	}
 
 	public AutLaunch getAut() {

@@ -80,6 +80,7 @@ public class GetHotkeyImpl extends CommandImpl implements GetHotkey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getCommandId() {
 		return commandId;
 	}
@@ -89,6 +90,7 @@ public class GetHotkeyImpl extends CommandImpl implements GetHotkey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCommandId(String newCommandId) {
 		String oldCommandId = commandId;
 		commandId = newCommandId;
@@ -163,7 +165,7 @@ public class GetHotkeyImpl extends CommandImpl implements GetHotkey {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (commandId: ");
 		result.append(commandId);
 		result.append(')');

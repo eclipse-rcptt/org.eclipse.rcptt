@@ -15,7 +15,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -27,9 +27,9 @@ import org.eclipse.rcptt.ui.recording.RecordingSupport.RecordingMode;
 public abstract class AbstractEmbeddedComposite implements IEmbeddedComposite {
 
 	protected final DataBindingContext dbc = new DataBindingContext();
-	protected final WritableValue visible = new WritableValue(true,
+	protected final WritableValue<Boolean> visible = new WritableValue<>(true,
 			Boolean.class);
-	protected final WritableValue recordingMode = new WritableValue(
+	protected final WritableValue<RecordingMode> recordingMode = new WritableValue<>(
 			RecordingMode.Stopped, RecordingMode.class);
 	protected ToolBar toolBar;
 
@@ -41,11 +41,11 @@ public abstract class AbstractEmbeddedComposite implements IEmbeddedComposite {
 		visible.setValue(value);
 	}
 
-	public IObservableValue observeVisible() {
+	public IObservableValue<Boolean> observeVisible() {
 		return visible;
 	}
 
-	public IObservableValue observeRecordingMode() {
+	public IObservableValue<RecordingMode> observeRecordingMode() {
 		return recordingMode;
 	}
 
@@ -64,7 +64,7 @@ public abstract class AbstractEmbeddedComposite implements IEmbeddedComposite {
 		toolBar = manager.createControl(parent);
 		toolBar.moveAbove(null);
 		if (disableToolBarOnHide()) {
-			dbc.bindValue(SWTObservables.observeEnabled(toolBar), visible);
+			dbc.bindValue(WidgetProperties.enabled().observe(toolBar), visible);
 		}
 	}
 

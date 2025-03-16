@@ -204,8 +204,8 @@ public abstract class BasicAUTComposite {
 						@Override
 						protected void configureShell(Shell newShell) {
 							super.configureShell(newShell);
-							newShell.setImage(Images.getImageDescriptor(
-									Images.AUT).createImage());
+							newShell.setImage(Images.getImage(
+									Images.AUT));
 						}
 					};
 					((IAUTConfigWizard) configWizard).setWizardDialog(dialog);
@@ -288,8 +288,7 @@ public abstract class BasicAUTComposite {
 			@Override
 			protected void configureShell(Shell newShell) {
 				super.configureShell(newShell);
-				newShell.setImage(Images.getImageDescriptor(Images.AUT)
-						.createImage());
+				newShell.setImage(Images.getImage(Images.AUT));
 			}
 		};
 		dialog.setHelpAvailable(false);

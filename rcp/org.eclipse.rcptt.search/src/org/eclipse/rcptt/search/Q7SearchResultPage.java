@@ -62,7 +62,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
-import org.eclipse.ui.views.navigator.NavigatorDragAdapter;
+import org.eclipse.search.internal.ui.text.NavigatorDragAdapter;
 
 import org.eclipse.rcptt.search.utils.ScenarioTableContentProvider;
 import org.eclipse.rcptt.search.utils.ScenarioTreeContentProvider;
@@ -129,8 +129,7 @@ public class Q7SearchResultPage extends AbstractTextSearchViewPage implements
 	private SortAction fSortByNameAction;
 	private SortAction fSortByPathAction;
 
-	@SuppressWarnings("deprecation")
-	private static final String[] SHOW_IN_TARGETS = new String[] { IPageLayout.ID_RES_NAV };
+	private static final String[] SHOW_IN_TARGETS = new String[] { IPageLayout.ID_PROJECT_EXPLORER };
 	private static final IShowInTargetList SHOW_IN_TARGET_LIST = new IShowInTargetList() {
 		public String[] getShowInTargetIds() {
 			return SHOW_IN_TARGETS;

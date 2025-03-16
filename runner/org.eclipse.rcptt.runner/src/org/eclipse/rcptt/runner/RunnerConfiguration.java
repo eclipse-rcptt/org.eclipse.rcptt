@@ -97,7 +97,8 @@ public class RunnerConfiguration {
 				"When true, treat autWsPrefix as full workspace path and do not change it",
 				"reuseExistingWorkspace"), //
 		Tests("Semicolon-separated list of test name glob patterns (* - any chars, ? - exactly one char)", "tests"), //
-		TestEngine("Semicolon-separated list of test engines configuration parameters", "testEngine");
+		TestEngine("Semicolon-separated list of test engines configuration parameters", "testEngine"),
+		EnableSoftwareInstallation("Enable support software installation in the launched application", "enableSoftwareInstallation");
 
 		CommandArg(String message, String... val) {
 			this.val = val;
@@ -140,6 +141,7 @@ public class RunnerConfiguration {
 	public String browserCmd = null;
 	public Integer port = null;
 	public boolean rapPlatform = false;
+	public boolean enableSoftwareInstallation = false;
 
 	public static class UserReport {
 		public String id;
@@ -258,6 +260,9 @@ public class RunnerConfiguration {
 				continue;
 			}
 			switch (cmdArg) {
+			case EnableSoftwareInstallation:
+				enableSoftwareInstallation = true;
+				break;
 			case OnlySpecified:
 				onlySpecified = true;
 				break;

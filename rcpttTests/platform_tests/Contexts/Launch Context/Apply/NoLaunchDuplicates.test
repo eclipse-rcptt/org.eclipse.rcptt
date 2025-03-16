@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _yOKkgaHCEeK_-IO-g05tUA
-Runtime-Version: 2.2.0.qualifier
-Save-Time: 5/22/17 12:09 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 7/31/24, 8:17 PM
 Tags: Context, LaunchContext, selfAUT
 Testcase-Type: ecl
 
@@ -31,27 +31,14 @@ Tests that event without terminating all launches, repeated context execution wo
 Content-Type: text/ecl
 Entry-Name: .content
 
-proc waitForTaskToComplete {
-	loop {
-		if [get-view "Execution View" | get-label ".*/1"
-			| get-property caption -raw | not-eq "1/1"] {
-			wait 500
-			recur
-		}
-	}
-}
-
 get-view "Test Explorer" | get-tree | select "TestQ7Prj/JavaProgram" | double-click
 get-editor JavaProgram | get-button Apply | click
 waitForTaskToComplete
 
 get-editor LaunchContextTest | click
 get-editor LaunchContextTest | get-button Apply | click
-try {
-	get-window "RCPTT Debug" | get-button Yes | click
-}
--catch {
-}
+waitForTaskToComplete
+
 get-view "Test Explorer" | get-tree | select "TestQ7Prj/EnsureOnlyOneLaunch" | get-menu "Run As/\\d+ Test Cases" | click
 get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text | equals "" | verify-true
 with [get-editor LaunchContextTest] {

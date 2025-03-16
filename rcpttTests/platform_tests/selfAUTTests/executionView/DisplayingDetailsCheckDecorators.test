@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _xofzcC84EeS6jLApChUV4Q
-Runtime-Version: 2.5.2.202204240826
-Save-Time: 4/27/22, 5:42 PM
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/15/24, 2:39 PM
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -46,6 +46,11 @@ try -times 30 -delay 1000 -command{
 get-window "Execution details" | get-tab-folder | get-tab-item Description | click
 get-window "Execution details" | get-editbox | get-property text | contains "ControlDecoration(Name must be non-blank string.)" | verify-true
 get-window "Execution details" | get-button OK | click
+
+
+// Make sure old editor is not shown in snapshots for the next test. Close them all
+get-view "Test Explorer" | get-tree | select "q7project/defaultWB" | double-click
+get-editor defaultWB | get-button Apply | click
 
 // No decorators
 get-view "Test Explorer" | get-tree | select "q7project/failedWithoutDecorators" | double-click

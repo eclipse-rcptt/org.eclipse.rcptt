@@ -299,7 +299,7 @@ public class PrepareExecutionWrapper extends Executable {
 			return Status.CANCEL_STATUS;
 		} catch (Throwable e) {
 			RcpttPlugin.log(e);
-			IStatus rv = RcpttPlugin.createStatus(e);
+			IStatus rv = internalFailure(e);
 			resultReport = generateReport(rv);
 			return rv;
 		} finally {

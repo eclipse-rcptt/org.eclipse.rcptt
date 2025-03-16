@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
@@ -93,11 +93,10 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 	private DestinationsBox destinations;
 	private DataBindingContext dbc = new DataBindingContext();
 
-	private WritableValue previewValue = new WritableValue("", String.class);
+	private WritableValue<String> previewValue = new WritableValue<>("", String.class);
 	private boolean isValid = false;
-	private WritableValue locationValue = new WritableValue("", String.class);
-	private WritableValue testcaseNameValue = new WritableValue("",
-			String.class);
+	private WritableValue<String> locationValue = new WritableValue<>("", String.class);
+	private WritableValue<String> testcaseNameValue = new WritableValue<>("", String.class);
 
 	private IContainer initialContainer;
 
@@ -126,7 +125,7 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 		Text locationText = new Text(infoGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
 				.grab(true, false).applyTo(locationText);
-		dbc.bindValue(SWTObservables.observeText(locationText, SWT.Modify),
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(locationText),
 				locationValue);
 
 		Button browse = new Button(infoGroup, SWT.PUSH);
@@ -143,7 +142,7 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 		l.setText("Testcase name:");
 		Text testCaseName = new Text(infoGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(testCaseName);
-		dbc.bindValue(SWTObservables.observeText(testCaseName, SWT.Modify),
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(testCaseName),
 				testcaseNameValue);
 
 		destinations = new DestinationsBox(dbc) {
@@ -176,8 +175,7 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 		text.setCaret(null);
 		FontData dt = new FontData("monospace", 10, 0);
 		text.setFont(new Font(text.getDisplay(), dt));
-		dbc.bindValue(SWTObservables.observeText(text, SWT.Modify),
-				previewValue);
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(text), previewValue);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(text);
 
 		setControl(cp);
@@ -239,7 +237,7 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 			Clipboard clipboard = new Clipboard(Display.getCurrent());
 			Object contents = clipboard.getContents(TextTransfer.getInstance());
 			if (contents != null && contents instanceof String) {
-				previewValue.setValue(contents);
+				previewValue.setValue((String)contents);
 			}
 			clipboard.dispose();
 			break;

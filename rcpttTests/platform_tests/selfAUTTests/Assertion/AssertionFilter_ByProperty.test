@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: https://bugs.eclipse.org/bugs/show_bug.cgi?id=472899
 Id: _-YNnMF0LEeWFmN-e7Tz_8g
-Runtime-Version: 2.0.0.201509172032
-Save-Time: 9/18/15 1:00 PM
+Runtime-Version: 2.5.5.202404121026
+Save-Time: 4/13/24, 5:37 PM
 Testcase-Type: ecl
 Verifications: _Eo2pYF0NEeWFmN-e7Tz_8g
 
@@ -39,23 +39,20 @@ Entry-Name: .content
 
 get-button "Record a Snippet" | click
 with [get-window "Control Panel - selfQ7 [Recording]"] {
-    get-button "Switch to Recording Mode" | click
-    get-button "Switch to Assertion Mode" | click
+	try -times 10 -delay 15000 -command {
+		get-button "Switch to Recording Mode" | click
+	}
+	get-button "Switch to Assertion Mode" | click
 }
 
-get-aut "selfQ7" | eval{
-
-get-button "Record a Snippet" | click
-
+get-aut selfQ7 | eval {
+	get-button "Record a Snippet" | click
 }
 with [get-window "Control Panel - selfQ7 [Asserting]" | get-window "Assertion and Verification"] {
-    get-combo | select "Filter by property"
-    with [get-editbox] {
-        set-text tooltip
-        key-type Enter
-    }
-    
+	get-combo | select "Filter by property"
+	with [get-editbox] {
+		set-text tooltip
+		key-type Enter
+	}
 }
-
-
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

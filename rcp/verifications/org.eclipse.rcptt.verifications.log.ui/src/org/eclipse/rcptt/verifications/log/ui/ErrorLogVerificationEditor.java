@@ -13,6 +13,7 @@ package org.eclipse.rcptt.verifications.log.ui;
 
 import static com.google.common.base.Strings.nullToEmpty;
 
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -22,7 +23,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -64,7 +65,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.ide.IGotoMarker;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 
 public class ErrorLogVerificationEditor extends BaseVerificationEditor implements IGotoMarker {
@@ -387,8 +387,9 @@ public class ErrorLogVerificationEditor extends BaseVerificationEditor implement
 		int style = ExpandableComposite.TITLE_BAR | ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED;
 		Button includeContextsCheckbox = toolkit.createButton(parent, "Take into account Context events", SWT.CHECK);
 		GridDataFactory.swtDefaults().hint(SWT.DEFAULT, 50).applyTo(includeContextsCheckbox);
-		dbc.bindValue(WidgetProperties.selection().observe(includeContextsCheckbox), EMFObservables.observeValue(
-				getVerification(), LogPackage.Literals.ERROR_LOG_VERIFICATION__INCLUDE_CONTEXTS));
+		IObservableValue<Boolean> includeContexts = EMFObservables.observeValue(
+				getVerification(), LogPackage.Literals.ERROR_LOG_VERIFICATION__INCLUDE_CONTEXTS);
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(includeContextsCheckbox), includeContexts);
 		requiredTable = new PredicateTable(
 				LogPackage.Literals.ERROR_LOG_VERIFICATION__REQUIRED,
 				"Require"

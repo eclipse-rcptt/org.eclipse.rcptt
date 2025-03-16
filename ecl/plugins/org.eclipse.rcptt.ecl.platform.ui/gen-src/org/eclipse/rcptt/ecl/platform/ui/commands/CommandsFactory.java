@@ -121,6 +121,15 @@ public interface CommandsFactory extends EFactory {
 	FromClipboard createFromClipboard();
 
 	/**
+	 * Returns a new object of class '<em>Execute Command</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Execute Command</em>'.
+	 * @generated
+	 */
+	ExecuteCommand createExecuteCommand();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

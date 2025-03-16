@@ -197,10 +197,9 @@ public class Images {
 		ImageRegistry registry = Q7UIPlugin.getDefault().getImageRegistry();
 		Image image = registry.get(key);
 		if (image == null || image.isDisposed()) {
-			ImageDescriptor descriptor = getImageDescriptor(key);
-			image = descriptor.createImage();
 			registry.remove(key);
-			registry.put(key, image);
+			registry.put(key, getImageDescriptor(key));
+			image = registry.get(key);
 		}
 		return image;
 	}

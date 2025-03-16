@@ -122,7 +122,6 @@ public class UpdateVMArgs {
 
 	public static List<String> updateAttr(List<String> attribute) {
 		List<String> result = Lists.newArrayList(attribute);
-		addIfAbsent(result, "-Xmx", "512m");
 		// -XstartOnFirstThread
 		// -Dorg.eclipse.swt.internal.carbon.smallFonts
 		if (Platform.getOS().equals(Platform.OS_MACOSX)) {

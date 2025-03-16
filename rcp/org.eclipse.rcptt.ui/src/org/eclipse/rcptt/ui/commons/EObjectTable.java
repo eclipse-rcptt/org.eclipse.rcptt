@@ -37,7 +37,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.databinding.viewers.IViewerObservableList;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,7 +45,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
-import org.eclipse.rcptt.core.model.IContext;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
@@ -174,8 +173,8 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 				refresh(false);
 			}
 		});
-		contentObservable.addValueChangeListener(new IValueChangeListener() {
-			public void handleValueChange(ValueChangeEvent event) {
+		contentObservable.addValueChangeListener(new IValueChangeListener<Object>() {
+			public void handleValueChange(ValueChangeEvent<? extends Object> event) {
 				refresh(false);
 			}
 		});
@@ -277,7 +276,7 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 
 	@Override
 	protected void fillActions(IToolBarManager toolBarManager) {
-		viewerSelection = ViewersObservables.observeMultiSelection(viewer);
+		viewerSelection = ViewerProperties.multipleSelection().observe(viewer);
 
 		addTool = new Action() {
 			@Override
@@ -306,18 +305,18 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE_DISABLED));
 
-		removeToolComputedValue = new ComputedValue() {
+		removeToolComputedValue = new ComputedValue<Boolean>() {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return canRemove();
 			}
 		};
 
 		toolBarManager.add(removeTool);
 
-		upToolComputedValue = new ComputedValue() {
+		upToolComputedValue = new ComputedValue<Boolean>() {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return calculateUpToolEnablement();
 			}
 		};
@@ -332,9 +331,9 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 
 		toolBarManager.add(upTool);
 
-		downToolComputedValue = new ComputedValue() {
+		downToolComputedValue = new ComputedValue<Boolean>() {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return calculateDownToolEnablement();
 			}
 		};
@@ -385,13 +384,13 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 
 	// private Binding viewerBinding;
 
-	private IViewerObservableList viewerSelection;
+	private IViewerObservableList<Object> viewerSelection;
 
-	private ComputedValue removeToolComputedValue;
+	private ComputedValue<Boolean> removeToolComputedValue;
 
-	private ComputedValue upToolComputedValue;
+	private ComputedValue<Boolean> upToolComputedValue;
 
-	private ComputedValue downToolComputedValue;
+	private ComputedValue<Boolean> downToolComputedValue;
 
 	private Binding removeToolBinding;
 
@@ -399,7 +398,7 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 
 	private Binding downToolBinding;
 
-	private IObservableValue contentObservable;
+	private IObservableValue<?> contentObservable;
 
 	protected abstract Class<?> getContentsType();
 
@@ -641,7 +640,7 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 		viewer.setInput(getViewerContents());
 	}
 
-	protected Object calculateUpToolEnablement() {
+	protected boolean calculateUpToolEnablement() {
 		if (viewerSelection.isEmpty() || viewerSelection.isDisposed()) {
 			return false;
 		}
@@ -657,7 +656,7 @@ public abstract class EObjectTable extends AbstractEmbeddedComposite implements
 		return object != first;
 	}
 
-	private Object calculateDownToolEnablement() {
+	private boolean calculateDownToolEnablement() {
 		if (viewerSelection.isEmpty() || viewerSelection.isDisposed()) {
 			return false;
 		}

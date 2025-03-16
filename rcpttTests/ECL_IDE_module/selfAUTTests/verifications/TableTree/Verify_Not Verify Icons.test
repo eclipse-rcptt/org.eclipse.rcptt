@@ -6,13 +6,16 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _BKzUsBZtEeWfXuiNKOMhqw
-Runtime-Version: 2.2.0.qualifier
-Save-Time: 5/22/17 11:48 AM
+Runtime-Version: 2.5.5.202403161845
+Save-Time: 3/20/24, 5:56 PM
+Tags: skipExecution
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
 Entry-Name: .description
+
+Disabled because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=579775
 
 Copyright (c) 2009, 2019 Xored Software Inc and others.
 All rights reserved. This program and the accompanying materials

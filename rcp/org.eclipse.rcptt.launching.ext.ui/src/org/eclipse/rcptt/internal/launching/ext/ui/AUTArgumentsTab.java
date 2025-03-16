@@ -11,6 +11,8 @@
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
@@ -33,6 +35,7 @@ import org.eclipse.swt.widgets.Text;
 public class AUTArgumentsTab extends JavaArgumentsTab implements IAUTListener {
 	Text vmArguments;
 	Button secureStorage;
+	private static final ILog LOG = Platform.getLog(AUTArgumentsTab.class);
 
 	@Override
 	protected VMArgumentsBlock createVMArgsBlock() {
@@ -57,10 +60,12 @@ public class AUTArgumentsTab extends JavaArgumentsTab implements IAUTListener {
 			public void initializeFrom(ILaunchConfiguration configuration) {
 				super.initializeFrom(configuration);
 				try {
-					String value = configuration.getAttribute(
-							IQ7Launch.OVERRIDE_SECURE_STORAGE, (String) null);
-					secureStorage.setSelection(value == null);
+					boolean value = configuration.getAttribute(
+							IQ7Launch.OVERRIDE_SECURE_STORAGE, true);
+					secureStorage.setSelection(value);
 				} catch (CoreException e) {
+					LOG.error("FAiled to read " + IQ7Launch.OVERRIDE_SECURE_STORAGE + "attribute"  , e);
+					throw new IllegalArgumentException(e);
 				}
 			}
 
@@ -72,7 +77,7 @@ public class AUTArgumentsTab extends JavaArgumentsTab implements IAUTListener {
 							.removeAttribute(IQ7Launch.OVERRIDE_SECURE_STORAGE);
 				} else {
 					configuration.setAttribute(
-							IQ7Launch.OVERRIDE_SECURE_STORAGE, "false");
+							IQ7Launch.OVERRIDE_SECURE_STORAGE, false);
 				}
 				super.performApply(configuration);
 

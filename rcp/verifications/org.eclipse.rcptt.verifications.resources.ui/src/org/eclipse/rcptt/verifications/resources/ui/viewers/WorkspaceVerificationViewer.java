@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.verifications.resources.ui.viewers;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.rcptt.core.scenario.Verification;
-import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.ui.editors.IQ7Editor;
 import org.eclipse.rcptt.ui.editors.IQ7Viewer;
 
@@ -21,11 +19,6 @@ public class WorkspaceVerificationViewer implements IQ7Viewer<Verification> {
 	@Override
 	public IQ7Editor<Verification> createEditor() {
 		return new WorkspaceVerificationEditor();
-	}
-
-	@Override
-	public ImageDescriptor getImage(Verification context) {
-		return Images.getImageDescriptor(Images.WORKSPACE);
 	}
 
 	@Override

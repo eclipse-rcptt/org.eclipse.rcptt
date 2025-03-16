@@ -50,6 +50,7 @@ public class EclContextEditor extends BaseContextEditor {
 		}
 	}
 
+	@Override
 	public Control create(Composite parent, FormToolkit toolkit,
 			IWorkbenchSite site, EditorHeader header) {
 		Section section = new SectionWithComposite("Script", Section.TITLE_BAR
@@ -72,6 +73,7 @@ public class EclContextEditor extends BaseContextEditor {
 		viewer.setEditable(true);
 		viewer.setDocument(new Document(getScript()));
 		viewer.addTextListener(new ITextListener() {
+			@Override
 			public void textChanged(TextEvent event) {
 				if (!event.getText().equals(event.getReplacedText())) {
 					setScript(viewer.getDocument().get());

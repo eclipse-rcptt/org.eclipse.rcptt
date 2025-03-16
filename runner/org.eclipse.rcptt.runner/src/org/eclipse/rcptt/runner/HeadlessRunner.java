@@ -14,6 +14,8 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.core.LaunchManager;
@@ -27,6 +29,7 @@ import org.eclipse.rcptt.runner.util.TestsRunner;
 
 @SuppressWarnings("restriction")
 public class HeadlessRunner {
+	private final ILog LOG = Platform.getLog(HeadlessRunner.class);
 
 	public final Reporter reporter = new Reporter();
 
@@ -49,15 +52,18 @@ public class HeadlessRunner {
 		try {
 			tpc.initAndCheckTargetPlatform();
 		} catch(CoreException e) {
+			LOG.log(e.getStatus());
 			e.printStackTrace(System.err);
 			throw new TargetPlatformFail();
 		}
 
 		TestsRunner testsRunner = new TestsRunner(conf, this,
 				new ResultsHandler(conf, runnerOptions.isRestartAUTOnFailures()));
-		Q7ReportIterator reportIterator = testsRunner.findAndRunTests();
-
-		reporter.report(reportIterator, this, conf);
+		try(Q7ReportIterator reportIterator = testsRunner.findAndRunTests()) {
+			reporter.report(reportIterator, this, conf);
+		}
+		testsRunner.throwOnError();
+		
 		return testsRunner.getFailedCount();
 	}
 

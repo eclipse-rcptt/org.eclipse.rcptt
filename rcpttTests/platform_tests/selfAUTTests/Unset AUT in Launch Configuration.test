@@ -1,0 +1,61 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _ymiyse5IEeCU6db9MgIBkA,_ZQYygK2sEeCqBbDEJWufvQ,_zyoccGk6EeOVJ9Fi6d7JYQ
+Element-Name: Unset AUT in Launch Configuration
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _Vei3UOtbEe6bdKuDS2jw1A
+Runtime-Version: 2.5.5.202403210919
+Save-Time: 3/26/24, 2:43 PM
+Tags: selfAUT
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+Test that tests without specified AUT association prompt for AUT selection and successfully launch selected AUT.
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view "Test Explorer" | get-tree | select "Q7Project/Test" | get-menu "Run As/1 Test Cases" | click
+with [get-view Applications] {
+	click
+	get-tree | select "selfQ7.*"
+	get-button Stop | click
+	get-button Stop | get-property enablement | equals false | verify-true
+}
+
+get-button "Run.*" -after [get-button "Debug.*"] | click -arrow
+get-menu "Run Configurations..." | click
+with [get-window "Run Configurations"] {
+	get-tree | select "RCPTT Test Suite/Test"
+	get-combo -after [get-label "AUT:"] | get-property selection | equals "" | verify-true
+	get-button Run | click
+}
+with [get-window "Select an Application Under Test"] {
+	get-tree | select "selfQ7.*"
+	get-button OK | click
+}
+try -times 10 -delay 7000 -command {
+    with [get-view Applications] {
+        click
+        get-tree | select "selfQ7.*"
+        // check that AUT has indeed started
+        get-button Stop | get-property enablement | equals true | verify-true
+    }
+}
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

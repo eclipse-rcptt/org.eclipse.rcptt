@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.verifications.log.ui;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.rcptt.core.scenario.Verification;
 import org.eclipse.rcptt.ui.editors.IQ7Editor;
 import org.eclipse.rcptt.ui.editors.IQ7Viewer;
@@ -21,14 +19,6 @@ public class ErrorLogVerificationViewer implements IQ7Viewer<Verification> {
 	@Override
 	public String getLabel(Verification source) {
 		return "Error Log";
-	}
-
-	
-	private static final ImageDescriptor ERROR_LOG_ICON = ImageDescriptor.createFromFile(ErrorLogVerificationViewer.class, "icons/error_log.gif"); 
-	
-	@Override
-	public ImageDescriptor getImage(Verification source) {
-		return ERROR_LOG_ICON;
 	}
 
 	@Override

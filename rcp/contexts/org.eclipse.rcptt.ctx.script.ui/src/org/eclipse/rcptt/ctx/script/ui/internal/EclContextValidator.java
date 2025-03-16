@@ -25,6 +25,7 @@ import org.eclipse.rcptt.core.ecl.context.EclContext;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 
 public class EclContextValidator implements IQ7Validator {
+	@Override
 	public void validate(IQ7NamedElement element, IQ7ProblemReporter reporter,
 			IProgressMonitor monitor) {
 		try {
@@ -44,6 +45,7 @@ public class EclContextValidator implements IQ7Validator {
 		}
 	}
 
+	@Override
 	public void reconcile(IQ7NamedElement content, String eclCode,
 			IQ7ProblemReporter reporter, IProgressMonitor nullProgressMonitor) {
 	}

@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _u_S3IHM6EeGsLtfm1BUmHg
-Runtime-Version: 2.2.0.qualifier
-Save-Time: 5/22/17 11:41 AM
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/20/24, 8:58 PM
 Tags: feature/debug, selfAUT
 Testcase-Type: ecl
 
@@ -54,15 +54,19 @@ with [get-editor CreateJavaProject | get-section Script] {
 //get-window -from "Information Window" | get-control Browser | get-property text 
 //    | matches "^.*Line Breakpoint: CreateJavaProject\.test \[line: 8].*$" | verify-true
 get-menu "Run/Debug As/.* Test Cases" | click
+set-q7-option jobHangTimeout 1000
 get-window "Save Resource" | get-button Save | click
-get-view Debug | get-tree 
-    | get-item "CreateJavaProject \\[RCPTT Test Suite\\]/CreateJavaProject/ECL Thread/get-view \\(CreateJavaProject: 1\\)" 
-    | get-property caption | equals "get-view (CreateJavaProject: 1)" | verify-true
+try -times 10 -delay 1000 -command {
+    get-view Debug | get-tree 
+        | get-item "CreateJavaProject \\[RCPTT Test Suite\\]/CreateJavaProject/ECL Thread/get-view \\(CreateJavaProject: 1\\)" 
+        | get-property caption | equals "get-view (CreateJavaProject: 1)" | verify-true
+}
 get-view Debug | get-tree | key-type F8
-wait 2000
-get-view Debug | get-tree 
-    | get-item "<terminated>CreateJavaProject \\[RCPTT Test Suite\\]/<terminated>CreateJavaProject/<terminated>ECL Thread" 
-    | get-property caption | equals "<terminated>ECL Thread" | verify-true
+try -times 10 -delay 1000 -command {
+    get-view Debug | get-tree 
+        | get-item "<terminated>CreateJavaProject \\[RCPTT Test Suite\\]/<terminated>CreateJavaProject/<terminated>ECL Thread" 
+        | get-property caption | equals "<terminated>ECL Thread" | verify-true
+}
 get-button "RCPTT perspective" | click
 with [get-view "Execution View"] {
     get-tree | get-item "CreateJavaProject.*" | get-property caption 

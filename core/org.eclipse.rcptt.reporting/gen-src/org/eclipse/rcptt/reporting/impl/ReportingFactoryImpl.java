@@ -107,6 +107,7 @@ public class ReportingFactoryImpl extends EFactoryImpl implements ReportingFacto
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Q7Info createQ7Info() {
 		Q7InfoImpl q7Info = new Q7InfoImpl();
 		return q7Info;
@@ -117,6 +118,7 @@ public class ReportingFactoryImpl extends EFactoryImpl implements ReportingFacto
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Q7Statistics createQ7Statistics() {
 		Q7StatisticsImpl q7Statistics = new Q7StatisticsImpl();
 		return q7Statistics;
@@ -147,6 +149,7 @@ public class ReportingFactoryImpl extends EFactoryImpl implements ReportingFacto
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ReportingPackage getReportingPackage() {
 		return (ReportingPackage)getEPackage();
 	}

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.databinding.observable.Diffs;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.action.Action;
@@ -29,9 +30,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.databinding.swt.SWTObservables;
-import org.eclipse.jface.databinding.viewers.IViewerObservableList;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -800,12 +800,12 @@ public class ParametersContextEditor extends BaseContextEditor implements
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(removeButton);
 		removeButton.setImage(Images.getImageDescriptor(
 				ISharedImages.IMG_ETOOL_DELETE).createImage());
-		dbc.bindValue(SWTObservables.observeEnabled(removeButton),
-				new ComputedValue() {
+		dbc.bindValue(WidgetProperties.enabled().observe(removeButton),
+				new ComputedValue<Boolean>() {
 
-					protected Object calculate() {
-						IViewerObservableList selection = ViewersObservables
-								.observeMultiSelection(viewer);
+					protected Boolean calculate() {
+						IObservableList<Parameter> selection = ViewerProperties.<TableViewer, Parameter>multipleSelection()
+								.observe(viewer);
 						if (selection.size() == 1
 								&& selection.get(0) == newParameterItem)
 							return false;

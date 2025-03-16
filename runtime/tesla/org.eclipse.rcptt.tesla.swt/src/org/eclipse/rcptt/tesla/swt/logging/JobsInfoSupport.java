@@ -87,8 +87,8 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobStart(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job, 0);
-		if (status.equals(JobStatus.IGNORED)) {
+		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
 		IReportBuilder[] builders = provider.getListeners();
@@ -98,8 +98,8 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobFinish(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job, 0);
-		if (status.equals(JobStatus.IGNORED)) {
+		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
 		IReportBuilder[] builders = provider.getListeners();
@@ -109,8 +109,8 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobUpdate(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job, 0);
-		if (status.equals(JobStatus.IGNORED)) {
+		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
 		IReportBuilder[] builders = provider.getListeners();

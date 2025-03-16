@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.updates"
       label="RCPTT Runtime Sites"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -29,42 +29,42 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.rcptt.external.dependencies.feature" version="2.5.5" match="compatible"/>
+      <import feature="org.eclipse.rcptt.external.dependencies.feature" version="2.6.0" match="compatible"/>
    </requires>
 
    <plugin
          id="org.eclipse.rcptt.updates.runtime.e4x"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.updates.kepler"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.updates.aspectj.e44x"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.updates.extra"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.util.swt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

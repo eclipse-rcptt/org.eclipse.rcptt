@@ -48,7 +48,7 @@ public class AUTLocationBlock {
 
 	private ExternalAUTMainTab fTab;
 	private Listener fListener = new Listener();
-	private final WritableValue status = new WritableValue(Status.OK_STATUS, IStatus.class);
+	private final WritableValue<IStatus> status = new WritableValue<>(Status.OK_STATUS, IStatus.class);
 
 	private void setStatus(final IStatus newStatus) {
 		status.getRealm().asyncExec(new Runnable() {
@@ -225,7 +225,7 @@ public class AUTLocationBlock {
 		updateInfo();
 		needUpdate = true;
 	}
-
+	
 	private void runInDialog(final IRunnableWithProgress run) {
 		final TimeTriggeredProgressMonitorDialog dialog = new TimeTriggeredProgressMonitorDialog(
 				fTab.getControl().getShell(), 500);

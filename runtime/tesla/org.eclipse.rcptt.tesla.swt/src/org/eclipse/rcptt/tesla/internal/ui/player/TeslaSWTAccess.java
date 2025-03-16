@@ -13,12 +13,16 @@ package org.eclipse.rcptt.tesla.internal.ui.player;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.EventListener;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.CellEditor;
@@ -55,7 +59,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.TypedListener;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
@@ -85,12 +88,14 @@ public class TeslaSWTAccess {
 		return getThis(Viewer.class, w, SWT.Dispose);
 	}
 
+	
 	public static <T> T getThis(Class<T> clazz, Widget widget, int event) {
 		Listener[] listeners = widget.getListeners(event);
 		for (Listener listener : listeners) {
 			Object lookFor = listener;
-			if (listener instanceof TypedListener) {
-				lookFor = ((TypedListener) listener).getEventListener();
+			Object temp = getFromField(listener, "eventListener");
+			if (temp != null) {
+				lookFor = temp;
 			}
 			Object viewer = getFromField(lookFor, "this$0");
 			if (clazz.isInstance(viewer)) {
@@ -132,13 +137,23 @@ public class TeslaSWTAccess {
 		return null;
 	}
 
+	
+	/**
+	 * @param listener - SWT listener that is passed to org.eclipse.swt.widgets.Widget.addListener(int, Listener)
+	 * @return either EventListener passed to org.eclipse.swt.widgets.Control.add*Listener(*Listener), or input value
+	 */
+	public static Object tryUnwrapEventListener(Listener listener) {
+		Object temp = getFromField(listener, "eventListener"); // handle org.eclipse.swt.widgets.TypedListener
+		if (temp instanceof EventListener) {
+			return temp;
+		}
+		return listener;
+	}
+	
 	private static Object getThis(String clazz, Control control, int event) {
 		Listener[] listeners = control.getListeners(event);
 		for (Listener listener : listeners) {
-			Object lookFor = listener;
-			if (listener instanceof TypedListener) {
-				lookFor = ((TypedListener) listener).getEventListener();
-			}
+			Object lookFor = tryUnwrapEventListener(listener);
 			try {
 				Field this$0 = lookFor.getClass().getDeclaredField("this$0");
 				this$0.setAccessible(true);
@@ -645,6 +660,40 @@ public class TeslaSWTAccess {
 			TeslaCore.log(e);
 		}
 		return 0;
+	}
+	
+	
+	
+	private static final Consumer<Job> waitListeners;
+	
+	static {
+		IJobManager jobManager = Job.getJobManager();
+		Consumer<Job> result = null;
+		try {
+			Object listeners = getField(Object.class, jobManager, "jobListeners");
+			if (listeners != null) {
+				final Method method = listeners.getClass().getDeclaredMethod("waitAndSendEvents", new Class[] {Job.class.getSuperclass(), boolean.class});
+				method.setAccessible(true);
+				result = job ->  {
+					try {
+						method.invoke(listeners, new Object[] {job, true});
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new RuntimeException(e);
+					}
+				};
+			}
+		} catch (NoSuchMethodException e) {
+			// handle null below
+		}
+		if (result == null) {
+			result = job -> {};
+		}
+		waitListeners = result;
+	}
+	
+	/** Wait for all job listeners to fire */
+	public static void waitListeners(Job job) {
+		waitListeners.accept(job);
 	}
 
 	public static CTabFolderEvent createCTabFolderEvent(Widget widget) {

@@ -114,7 +114,7 @@ public interface EclException extends EObject {
 	 * @return the value of the '<em>Throwable</em>' attribute.
 	 * @see #setThrowable(Throwable)
 	 * @see org.eclipse.rcptt.ecl.core.CorePackage#getEclException_Throwable()
-	 * @model dataType="org.eclipse.rcptt.ecl.core.Throwable"
+	 * @model dataType="org.eclipse.rcptt.ecl.core.Throwable" transient="true"
 	 * @generated
 	 */
 	Throwable getThrowable();

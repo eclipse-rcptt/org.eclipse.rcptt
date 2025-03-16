@@ -19,23 +19,41 @@ public class PlatformUtil {
 	 * @return The classifier of current platform in form of os.ws.arch
 	 */
 	public static String getEclipseClassifier() {
-		return String.format("%s.%s", getOS().classifier, getArch());
+		return String.format("%s.%s", getOS().classifier, getArch()); //$NON-NLS-1$
 	}
 
 	public static String getArch() {
-		String result = System.getProperty("os.arch");
-		if (result.contains("64") || getOS() == OS.MACOSX) {
-			return "x86_64";
+		String result = System.getProperty("os.arch"); //$NON-NLS-1$
+		if (result != null) {
+			result = result.toLowerCase();
+			switch (result) {
+			case "x86": //$NON-NLS-1$
+			case "x86_64": //$NON-NLS-1$
+			case "aarch64": //$NON-NLS-1$
+				return result;
+			case "i386": //$NON-NLS-1$
+			case "i486": //$NON-NLS-1$
+			case "i586": //$NON-NLS-1$
+			case "i686": //$NON-NLS-1$
+			case "pentium": //$NON-NLS-1$
+				return "x86"; //$NON-NLS-1$
+			case "amd64": //$NON-NLS-1$
+			case "em64t": //$NON-NLS-1$
+			case "universal": //$NON-NLS-1$
+				return "x86_64"; //$NON-NLS-1$
+			default:
+				break;
+			}
 		}
-		return "x86";
+		throw new IllegalStateException(String.format("Unsupported \"os.arch\": %s", result)); //$NON-NLS-1$
 	}
 
 	public static OS getOS() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (osName.contains("win")) {
+		String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
+		if (osName.contains("win")) { //$NON-NLS-1$
 			return OS.WIN;
 		}
-		if (osName.contains("mac")) {
+		if (osName.contains("mac")) { //$NON-NLS-1$
 			return OS.MACOSX;
 		}
 		return OS.LINUX;

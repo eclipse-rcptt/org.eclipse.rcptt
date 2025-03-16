@@ -22,6 +22,7 @@ import org.eclipse.rcptt.ecl.core.ProcessStatus;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Info#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Info#getType <em>Type</em>}</li>
@@ -33,7 +34,6 @@ import org.eclipse.rcptt.ecl.core.ProcessStatus;
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Info#getPhase <em>Phase</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.Q7Info#getResult <em>Result</em>}</li>
  * </ul>
- * </p>
  *
  * @see org.eclipse.rcptt.reporting.ReportingPackage#getQ7Info()
  * @model
@@ -149,6 +149,7 @@ public interface Q7Info extends EObject {
 
 	/**
 	 * Returns the value of the '<em><b>Tags</b></em>' attribute.
+	 * The default value is <code>""</code>.
 	 * <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Tags</em>' attribute isn't clear,
@@ -158,7 +159,7 @@ public interface Q7Info extends EObject {
 	 * @return the value of the '<em>Tags</em>' attribute.
 	 * @see #setTags(String)
 	 * @see org.eclipse.rcptt.reporting.ReportingPackage#getQ7Info_Tags()
-	 * @model
+	 * @model default=""
 	 * @generated
 	 */
 	String getTags();

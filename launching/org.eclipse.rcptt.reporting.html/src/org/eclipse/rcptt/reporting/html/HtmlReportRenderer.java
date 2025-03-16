@@ -42,6 +42,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.html.HtmlEscapers;
 
 public class HtmlReportRenderer implements IReportRenderer {
 
@@ -145,7 +146,7 @@ public class HtmlReportRenderer implements IReportRenderer {
 		Node root = report.getRoot();
 		long millseconds = root.getDuration();
 		String duration = durationFormat.format((float) (millseconds) / 1000f);
-		writer.println("<tr><td>" + root.getName() + "</td><td>" + duration + " s</td></tr>");
+		writer.println("<tr><td>" + escape(root.getName()) + "</td><td>" + duration + " s</td></tr>");
 	}
 
 	private int screenshotCount = 0;
@@ -260,5 +261,12 @@ public class HtmlReportRenderer implements IReportRenderer {
 		}
 		name = name.trim().replace(" ", "");
 		return FileUtil.rlimitSize(FileUtil.getID(name), 20).toLowerCase();
+	}
+	
+	private String escape(String input) {
+		if (input == null) {
+			return null;
+		}
+		return HtmlEscapers.htmlEscaper().escape(input);
 	}
 }

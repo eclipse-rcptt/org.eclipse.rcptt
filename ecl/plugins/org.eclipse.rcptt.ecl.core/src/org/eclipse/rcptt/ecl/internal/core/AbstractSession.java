@@ -49,6 +49,9 @@ public abstract class AbstractSession implements ISession {
 	// public IProcess execute(final Command scriptlet, IPipe in, IPipe out)
 	// throws CoreException
 	public IProcess execute(Command scriptlet, IPipe in, IPipe out) throws CoreException {
+		if (isClosed()) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
 		final ICommandService svc = scriptlet instanceof ProcInstance ? new ProcInstanceService()
 				: CorePlugin.getScriptletManager().getScriptletService(scriptlet);
 		final IPipe tinput = in == null ? createPipe().close(Status.OK_STATUS) : in;

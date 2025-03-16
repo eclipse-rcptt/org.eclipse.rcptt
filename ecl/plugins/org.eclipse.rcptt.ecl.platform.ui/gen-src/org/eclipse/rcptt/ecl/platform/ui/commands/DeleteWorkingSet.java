@@ -43,7 +43,8 @@ public interface DeleteWorkingSet extends Command {
 	 * @return the value of the '<em>Input</em>' reference.
 	 * @see #setInput(WorkingSet)
 	 * @see org.eclipse.rcptt.ecl.platform.ui.commands.CommandsPackage#getDeleteWorkingSet_Input()
-	 * @model annotation="http://www.eclipse.org/ecl/docs description='Working set object'"
+	 * @model annotation="http://www.eclipse.org/ecl/input"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Working set object'"
 	 * @generated
 	 */
 	WorkingSet getInput();

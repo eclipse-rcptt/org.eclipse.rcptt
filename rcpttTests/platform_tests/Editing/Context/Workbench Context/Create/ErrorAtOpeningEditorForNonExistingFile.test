@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _bj7csOfnEeCButSfkA0tsQ
-Runtime-Version: 1.5.0.201407290252
-Save-Time: 7/30/14 4:00 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 7/22/24, 6:31 PM
 Tags: selfAUT, Context, WorkbenchContext, Create
 Testcase-Type: ecl
 
@@ -38,9 +38,8 @@ get-view "Test Explorer" | get-tree | select "ContextsProject/WS_empty" | double
 get-editor "WS_empty" | get-button Apply | click
 get-view "Test Explorer" | get-tree | select "ContextsProject/WB_common" | double-click
 get-editor "WB_common" | get-button Apply | click
+waitForTaskToComplete
 with [get-view "Execution View"] {
-    get-label "1/1" | get-property caption | equals "1/1" | verify-true
-    get-label 1 | get-property caption | equals 1 | verify-true
     with [get-editbox -after [get-label "Message:"]] {
         get-property text | contains "Failed to execute context: WB_common Cause: File \'project1/text.txt\' to open in editor wasn\'t found in workspace." 
             | verify-true

@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.rcptt.external.dependencies</groupId>
   	<artifactId>bundles</artifactId>
-    <version>2.5.5-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
   </parent>
   
   <artifactId>org.eclipse.rcptt.updates.aspectj.e44x</artifactId>
@@ -35,11 +35,16 @@
               </includes>
               <followSymlinks>false</followSymlinks>
             </fileset>
+            <fileset>
+              <directory>source</directory>
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
           </filesets>
         </configuration>
       </plugin>
-
-      
       <plugin>
 	<groupId>org.eclipse.tycho.extras</groupId>
 	<artifactId>tycho-p2-extras-plugin</artifactId>
@@ -53,12 +58,12 @@
 	    <configuration>
 	      <source>
 		<repository>
-		  <url>https://download.eclipse.org/tools/ajdt/410/dev/update/ajdt-e410-2.2.4.202103162301</url>
+		  <url>${ajdt43repository}</url>
 		  <layout>p2</layout>
 		</repository>
 	      </source>
 	      
-	      <destination>${project.basedir}/dependencies</destination>
+	      <destination>${project.basedir}/source</destination>
 	      <followStrictOnly>true</followStrictOnly>
 	      <includeOptional>false</includeOptional>
 	      <includeNonGreedy>false</includeNonGreedy>
@@ -83,7 +88,7 @@
               <goal>publish-features-and-bundles</goal>
             </goals>
             <configuration>
-              <sourceLocation>${project.basedir}/dependencies</sourceLocation>
+              <sourceLocation>${project.basedir}/source</sourceLocation>
               <metadataRepositoryLocation>${project.basedir}/dependencies</metadataRepositoryLocation>
               <artifactRepositoryLocation>${project.basedir}/dependencies</artifactRepositoryLocation>
             </configuration>

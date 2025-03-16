@@ -2061,7 +2061,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			if (!result) {
 				message = NLS.bind(
 						TeslaSWTMessages.SWTUIProcessor_AssertEmptyFailed,
-						assertCmd.getAttribute());
+						assertCmd.getAttribute(), strValue);
 			}
 			break;
 		case NOT_EMPTY:
@@ -2077,7 +2077,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			if (!result) {
 				message = NLS.bind(
 						TeslaSWTMessages.SWTUIProcessor_AssertContainsFailed,
-						assertCmd.getAttribute(), attrValue);
+						assertCmd.getAttribute(), strValue + " !~ " + attrValue);
 			}
 			break;
 		case NOT_CONTAINS:
@@ -2098,7 +2098,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 			if (!result) {
 				message = NLS.bind(
 						TeslaSWTMessages.SWTUIProcessor_AssertMatchRegexFailed,
-						assertCmd.getAttribute(), attrValue);
+						assertCmd.getAttribute(), attrValue + " != " + strValue);
 			}
 			break;
 		case NOT_REGEXP:

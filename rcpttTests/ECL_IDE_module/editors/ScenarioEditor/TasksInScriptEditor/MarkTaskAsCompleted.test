@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _cw0EYF0IEeGDGrudSYLu8w
-Runtime-Version: 2.4.1.qualifier
-Save-Time: 4/3/19 1:29 PM
+Runtime-Version: 2.5.5.202301242343
+Save-Time: 1/27/23, 10:22 AM
 Tags: ECL_IDE_module, TestCase, Task
 Testcase-Type: ecl
 
@@ -53,7 +53,7 @@ with [get-editor WorkspaceIsEmpty | get-section Script | get-left-ruler] {
 }
 get-window Properties | get-button Add | click
 get-view Tasks | get-tree | get-property itemCount | equals 2 | verify-true
-get-view Tasks | get-tree | select [get-item "" -index 1] | get-menu "Mark Completed" | click
+get-view Tasks | get-tree | select [get-item -column Description -path ".*verification.*"] | get-menu "Mark Completed" | click
 with [get-view Tasks | get-tree] {
     get-property itemCount | equals 2 | verify-true
     with [get-item -column Description -path ".*verification.*"] {

@@ -5,8 +5,8 @@ Element-Name: SetupAUTContext
 Element-Type: context
 Element-Version: 2.0
 Id: _ZQYygK2sEeCqBbDEJWufvQ
-Runtime-Version: 2.4.1.qualifier
-Save-Time: 3/29/19 7:13 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 7/22/24, 6:30 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -35,15 +35,27 @@ proc "has-property" [val control -input] [val property] {
 	}
 }
 
-invoke-AUT selfQ7 -args "-nosplash" -vmargs "-Xmx512m -XX:MaxPermSize=256m"
+proc waitForTaskToComplete {
+	loop {
+		if [get-view "Execution View" | get-label ".*/1"
+			| get-property caption -raw | not-eq "1/1"] {
+			wait 500
+			recur
+		}
+	}
+}
+invoke-AUT selfQ7 -args "-nosplash" -vmargs "-Xmx512m"
 
 loop [val count 0] {
 	if [$count | lt 10] {
-		if [get-view Applications | get-tree | get-item selfQ7 | has-property
-				"image.decorations[0].path"] {
+		if [get-view Applications | get-tree | get-item selfQ7 | has-property "image.decorations[0].path"] {
 			try {
 				get-aut selfQ7 | eval {
 					clean-self-AUT
+					try -command {
+						get-window "Control Panel - .*" | close
+					} -catch {
+					}
 				}
 			} -catch {
 				wait 5000
@@ -54,9 +66,9 @@ loop [val count 0] {
 			recur [$count | plus 1]
 		}
 	} -else {
-	    // On timeout, execute loop body again to show errors preventing aut startup in report
-	    get-view Applications | get-tree | get-item selfQ7 | get-property "image.decorations[0].path" -raw
-	    get-aut selfQ7 | eval {
+		// On timeout, execute loop body again to show errors preventing aut startup in report
+		get-view Applications | get-tree | get-item selfQ7 | get-property "image.decorations[0].path" -raw
+		get-aut selfQ7 | eval {
 			clean-self-AUT
 		}
 		assert-true [bool false] "Self Q7 is not available"

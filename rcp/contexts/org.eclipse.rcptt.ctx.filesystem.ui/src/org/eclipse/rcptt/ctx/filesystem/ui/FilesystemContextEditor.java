@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.CoreException;
@@ -32,7 +33,7 @@ import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationUpdater;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -308,12 +309,12 @@ public class FilesystemContextEditor extends BaseContextEditor {
 				"Clear root folder before context application", SWT.CHECK);
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(clearCheckbox);
 
-		UpdateValueStrategy strategy = new UpdateValueStrategy(
+		UpdateValueStrategy<Boolean, Boolean> strategy = new UpdateValueStrategy<>(
 				UpdateValueStrategy.POLICY_ON_REQUEST);
-		final Binding binding = dbc.bindValue(SWTObservables
-				.observeSelection(clearCheckbox), EMFObservables.observeValue(
+		IObservableValue<Boolean> clear = EMFObservables.observeValue(
 				getContextElement(),
-				FilesystemPackage.Literals.FILESYSTEM_CONTEXT__CLEAR),
+				FilesystemPackage.Literals.FILESYSTEM_CONTEXT__CLEAR);
+		final Binding binding = dbc.bindValue(WidgetProperties.buttonSelection().observe(clearCheckbox), clear,
 				strategy, null);
 		clearCheckbox.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -365,10 +366,9 @@ public class FilesystemContextEditor extends BaseContextEditor {
 				grab(true, false).
 				hint(1, SWT.DEFAULT).
 				applyTo(rootText);
-		Binding rootBinding = dbc.bindValue(SWTObservables.observeText(
-				rootText, SWT.Modify), EMFObservables.observeValue(
-				getContextElement(),
-				FilesystemPackage.Literals.FILESYSTEM_CONTEXT__PATH),
+		IObservableValue<String> path = EMFObservables.observeValue(getContextElement(), FilesystemPackage.Literals.FILESYSTEM_CONTEXT__PATH);
+		Binding rootBinding = dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(
+				rootText), path,
 				rootStrategy, rootStrategy);
 		ControlDecorationSupport.create(rootBinding, SWT.TOP | SWT.LEFT, panel,
 				new ControlDecorationUpdater() {
@@ -476,10 +476,10 @@ public class FilesystemContextEditor extends BaseContextEditor {
 
 	// --
 
-	private UpdateValueStrategy rootStrategy = new UpdateValueStrategy() {
+	private UpdateValueStrategy<String, String> rootStrategy = new UpdateValueStrategy<String, String>() {
 		{
-			this.setBeforeSetValidator(new IValidator() {
-				public IStatus validate(Object value) {
+			this.setBeforeSetValidator(new IValidator<String>() {
+				public IStatus validate(String value) {
 					String path = (String) value;
 
 					// TODO: more sophisticated path validity checking

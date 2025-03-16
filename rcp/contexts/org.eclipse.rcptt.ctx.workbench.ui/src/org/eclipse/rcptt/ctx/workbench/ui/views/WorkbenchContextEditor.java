@@ -12,10 +12,11 @@ package org.eclipse.rcptt.ctx.workbench.ui.views;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.databinding.EMFObservables;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -121,10 +122,11 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 		}
 		perspective = toolkit.createText(parent, id, SWT.BORDER);
 		perspective.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		dbc.bindValue(SWTObservables.observeText(perspective, SWT.Modify),
-				EMFObservables.observeValue(getContextElement(),
-						ScenarioPackage.eINSTANCE
-								.getWorkbenchContext_PerspectiveId()),
+		IObservableValue<String> perspectiveId = EMFObservables.observeValue(getContextElement(),
+				ScenarioPackage.eINSTANCE
+						.getWorkbenchContext_PerspectiveId());
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(perspective),
+				perspectiveId,
 				new PerspectiveChangeListener(),
 				new PerspectiveChangeListener());
 		Button button = toolkit.createButton(parent, "Browse...", SWT.PUSH);
@@ -187,10 +189,11 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 
 		resetPerspective.setEnabled(isPerspectiveSelected());
 
-		dbc.bindValue(SWTObservables.observeSelection(resetPerspective),
-				EMFObservables.observeValue(getContextElement(),
-						ScenarioPackage.eINSTANCE
-								.getWorkbenchContext_ResetPerspective()),
+		IObservableValue<Boolean> resetPerspectiveValue = EMFObservables.observeValue(getContextElement(),
+				ScenarioPackage.eINSTANCE
+						.getWorkbenchContext_ResetPerspective());
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(resetPerspective),
+				resetPerspectiveValue,
 				new ResetPerspectiveChangeListener(),
 				new ResetPerspectiveChangeListener());
 		GridData data = new GridData();
@@ -201,10 +204,10 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 	private void createDialogsOption(Composite parent, FormToolkit toolkit) {
 		final Button noModalDialogs = toolkit.createButton(parent,
 				"Close all modal dialogs", SWT.CHECK);
-		dbc.bindValue(SWTObservables.observeSelection(noModalDialogs),
-				EMFObservables.observeValue(getContextElement(),
-						ScenarioPackage.eINSTANCE
-								.getWorkbenchContext_NoModalDialogs()));
+		IObservableValue<Boolean> noModalDialogsValue = EMFObservables.observeValue(getContextElement(),
+				ScenarioPackage.eINSTANCE
+						.getWorkbenchContext_NoModalDialogs());
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(noModalDialogs), noModalDialogsValue);
 		GridData data = new GridData();
 		data.horizontalSpan = 3;
 		noModalDialogs.setLayoutData(data);
@@ -213,10 +216,11 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 	private void createClipboardOption(Composite parent, FormToolkit toolkit) {
 		final Button clearClipboard = toolkit.createButton(parent,
 				"Clear clipboard", SWT.CHECK);
-		dbc.bindValue(SWTObservables.observeSelection(clearClipboard),
-				EMFObservables.observeValue(getContextElement(),
-						ScenarioPackage.eINSTANCE
-								.getWorkbenchContext_ClearClipboard()));
+		IObservableValue<Boolean> clearClipboardValue = EMFObservables.observeValue(getContextElement(),
+				ScenarioPackage.eINSTANCE
+						.getWorkbenchContext_ClearClipboard());
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(clearClipboard),
+				clearClipboardValue);
 		GridData data = new GridData();
 		data.horizontalSpan = 3;
 		clearClipboard.setLayoutData(data);
@@ -232,9 +236,9 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 		nameText.setFocus();
 	}
 
-	private class PerspectiveChangeListener extends UpdateValueStrategy {
+	private class PerspectiveChangeListener extends UpdateValueStrategy<String, String> {
 		@Override
-		public IStatus validateBeforeSet(Object value) {
+		public IStatus validateBeforeSet(String value) {
 			String sValue = (String) value;
 			boolean isPerspectiveSelected = sValue != null
 					&& sValue.trim().length() != 0;
@@ -251,9 +255,9 @@ public class WorkbenchContextEditor extends BaseContextEditor implements IQ7Edit
 		}
 	}
 
-	private class ResetPerspectiveChangeListener extends UpdateValueStrategy {
+	private class ResetPerspectiveChangeListener extends UpdateValueStrategy<Boolean, Boolean> {
 		@Override
-		public IStatus validateBeforeSet(Object value) {
+		public IStatus validateBeforeSet(Boolean value) {
 			Boolean sValue = (Boolean) value;
 			if (editorsTable != null) {
 				editorsTable

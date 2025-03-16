@@ -15,6 +15,7 @@ import static com.google.common.collect.Iterables.transform;
 import static org.eclipse.rcptt.reporting.util.ReportUtils.replaceLineBreaks;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -24,11 +25,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.ecl.core.EclException;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
+import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.reporting.core.SimpleSeverity;
@@ -58,20 +63,21 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.html.HtmlEscapers;
 
 public class FullSingleTestHtmlRenderer {
 	private final PrintWriter writer;
 	private final NumberFormat durationFormat;
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 	private final Function<Screenshot, String> imageStorage;
+	private static final ILog LOG = Platform.getLog(FullSingleTestHtmlRenderer.class);
 
 	public static final Function<EObject, String> HTML_DATUM_TO_MESSAGE = new Function<EObject, String>() {
 
 		@Override
 		public String apply(EObject input) {
 			String message = ReportUtils.DEFAULT_DATUM_TO_MESSAGE.apply(input);
-			message = ReportUtils.replaceHtmlEntities(message);
-			message = ReportUtils.replaceLineBreaks(message);
+			message = escapeMultiline(message);
 
 			if (input instanceof VerificationStatusData) {
 				return String.format("<pre>%s</pre>", message);
@@ -91,16 +97,16 @@ public class FullSingleTestHtmlRenderer {
 	 */
 	public FullSingleTestHtmlRenderer(PrintWriter writer, NumberFormat durationFormat, Function<Screenshot, String> imageStorage) {
 		super();
-		this.writer = writer;
-		this.durationFormat = durationFormat;
-		this.imageStorage = imageStorage;
+		this.writer = Objects.requireNonNull(writer);
+		this.durationFormat = Objects.requireNonNull(durationFormat);
+		this.imageStorage = Objects.requireNonNull(imageStorage);
 	}
 
 	private void renderHeader(int level, String title, String classes) {
 		level += 2;
 		if (level > 6)
 			level = 6;
-		writer.println(String.format("<h%d class=\"%s\">%s</h%d>", level, classes, title, level));
+		writer.println(String.format("<h%d class=\"%s\">%s</h%d>", level, classes, escape(title), level));
 	}
 
 	public void render(Report report) {
@@ -226,6 +232,8 @@ public class FullSingleTestHtmlRenderer {
 			renderScreenShot((Screenshot) eObject, "");
 		} else if (eObject instanceof AdvancedInformation) {
 			renderAdvanced((AdvancedInformation) eObject);
+		} else if (eObject == null) {
+			writer.println("Event contains no data. This indicates a premature AUT termination.");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}
@@ -337,7 +345,7 @@ public class FullSingleTestHtmlRenderer {
 		} else {
 			writer.println(SimpleSeverity.create(result).toString());
 			if (!Strings.isNullOrEmpty(result.getMessage()))
-				writer.println(", message: " + result.getMessage() + "<br>");
+				writer.println(", message: " + escape(result.getMessage()) + "<br>");
 			if (result.getException() != null) {
 				openDetails(5, "Exception", "");
 				renderException(result.getException());
@@ -352,21 +360,44 @@ public class FullSingleTestHtmlRenderer {
 		}
 	}
 
+	private static String escape(String input) {
+		if (input == null) {
+			return null;
+		}
+		return HtmlEscapers.htmlEscaper().escape(input);
+	}
+	
+	private static String escapeMultiline(String input) {
+		if (input == null) {
+			return null;
+		}
+		input = escape(input);
+		return ReportUtils.replaceLineBreaks(input);
+	}
+	
 	private void renderException(EclException exception) {
-		Throwable throwable = exception.getThrowable();
-		if (throwable == null) {
-			writer.println(exception.getClassName()+": "+ exception.getMessage() + " <br>");
-		} else {
-			writer.println("<pre>");
-			throwable.printStackTrace(writer);
-			writer.println("</pre>");
+		Throwable throwable = ProcessStatusConverter.getThrowable(exception);
+		writer.println(escape(exception.getClassName())+": "+ escape(exception.getMessage()) + " <br>");
+		StringWriter trace = new StringWriter(); 
+		try {
+			try (PrintWriter w = new PrintWriter(trace)) {
+				throwable.printStackTrace(w);
+			}
+		} catch (Exception e) {
+			LOG.error("Failed to parse report exception", e);
+		}
+		writer.println("<pre>");
+		writer.println(escape(trace.toString()));
+		writer.println("</pre>");
+		if (exception.getStatus() != null) {
+			renderResult(exception.getStatus());
 		}
 	}
 
 	private void titledRow(String key, String value) {
 		Preconditions.checkNotNull(key);
 		if (value != null)
-			writer.println(String.format("<tr><th>%s</th><td>%s</td></tr>", key, value));
+			writer.println(String.format("<tr><th>%s</th><td>%s</td></tr>", key, escapeMultiline(value)));
 	}
 
 	private void row(String key, String value1, String value2) {
@@ -385,7 +416,6 @@ public class FullSingleTestHtmlRenderer {
 		titledRow("Tags", Strings.emptyToNull(tags));
 		titledRow("Duration", durationFormat.format(durationSeconds(root)));
 		String desc = ReportUtils.getScenarioDescription(root);
-		desc = ReportUtils.replaceLineBreaks(desc);
 		titledRow("Description", desc);
 		writer.println("</table>");
 		renderScreenShots(root);

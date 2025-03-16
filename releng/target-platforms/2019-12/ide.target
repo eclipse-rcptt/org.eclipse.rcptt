@@ -42,4 +42,7 @@
 <repository location="http://download.eclipse.org/tools/ajdt/410/dev/update"/>
 </location>
 </locations>
+	<environment>
+		<arch>x86_64</arch>
+	</environment>
 </target>

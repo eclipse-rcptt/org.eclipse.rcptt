@@ -1,12 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
+Contexts: _ZQYygK2sEeCqBbDEJWufvQ
 Element-Name: AssertionGroupping
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _GLGj8FFQEeqyG-160wAoew
-Runtime-Version: 2.5.2.qualifier
-Save-Time: 3/10/20 6:11 PM
+Runtime-Version: 2.5.5.202403210919
+Save-Time: 3/22/24, 7:30 PM
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -51,34 +52,20 @@ with [get-window "New Test Case"] {
 	get-button Finish | click
 }
 with [get-editor t2 | get-section Script | get-text-viewer] {
-	set-text "get-button \"Open Perspective\" | click\n" +
-		"get-window \"Open Perspective\" | get-table | select Debug | double-click\n" + 
-		"with [get-view Expressions] {\n" +
-		"click\n" +
-		"with [get-tree] {\n" +
-		"select \"Add new expression\" | activate-cell-edit -type MouseClickSelection\n" +
-		"with [get-editbox] {\n" +
-		"set-text 123\n" +
-		"key-type Enter\n" +
-		"}\n" +
-		"apply-cell-edit -deactivate\n" +
-		"select \"Add new expression\" | activate-cell-edit -type MouseClickSelection\n" +
-		"with [get-editbox] {\n" +
-		"set-text 456\n" +
-		"key-type Enter\n" +
-		"}\n" +
-		"apply-cell-edit -deactivate\n" +
-		"}\n" +
-		"}\n"
+	set-text "get-button \"Open Perspective\" | click\nget-window \"Open Perspective\" | get-table | select Debug | d" +
+		"ouble-click\nwith [get-view Expressions] {\nclick\nwith [get-tree] {\nselect \"Add new expression\" | activa" +
+		"te-cell-edit -type MouseClickSelection\nwith [get-editbox] {\nset-text 123\nkey-type Enter\n}\napply-cell-ed" +
+		"it -deactivate\nselect \"Add new expression\" | activate-cell-edit -type MouseClickSelection\nwith [get-edit" +
+		"box] {\nset-text 456\nkey-type Enter\n}\napply-cell-edit -deactivate\n}\n}\n"
 }
 
 get-editor t2 | get-button Record | click
-
-with [get-window "Control Panel - t2 (test) - selfQ7 [Recording]"] {
-	get-button "Switch to Recording Mode" | click
-	get-button "Switch to Assertion Mode" | click
+try -times 10 -delay 1000 -command {
+	with [get-window "Control Panel - t2 (test) - selfQ7 [Recording]"] {
+		get-button "Switch to Recording Mode" | click
+		get-button "Switch to Assertion Mode" | click
+	}
 }
-
 get-aut selfQ7 | eval {
 	with [get-view Expressions | get-tree] {
 		get-item -path "\"123\"" | click
@@ -107,19 +94,12 @@ with [get-window "Control Panel - t2 (test) - selfQ7 [Asserting]"] {
 	}
 }
 
-
 with [get-window "Control Panel - t2 (test) - selfQ7 [Asserting]"] {
-	get-text-viewer | get-property text
-    	| contains "with [get-view Expressions | get-tree] {\n"
-    	+ "    with [get-item -path \"\\\"123\\\"\"] {\n"
-    	+ "        get-property \"columns[0]\" | equals \"\\\"123\\\"\" | verify-true\n"
-    	+ "        get-property \"columns[1]\" | equals \"\" | verify-true\n"
-    	+ "    }\n"
-    	+ "    with [get-item -path \"\\\"456\\\"\"] {\n"
-    	+ "        get-property \"columns[0]\" | equals \"\\\"456\\\"\" | verify-true\n"
-    	+ "        get-property \"columns[1]\" | equals \"\" | verify-true\n"
-    	+ "    }\n"
-    	+ "}" | verify-true
+	get-text-viewer | get-property text | contains "with [get-view Expressions | get-tree] {\n    with [get-item -pat" +
+		"h \"\\\"123\\\"\"] {\n        get-property \"columns[0]\" | equals \"\\\"123\\\"\" | verify-true\n        ge" +
+		"t-property \"columns[1]\" | equals \"\" | verify-true\n    }\n    with [get-item -path \"\\\"456\\\"\"] {\n " +
+		"       get-property \"columns[0]\" | equals \"\\\"456\\\"\" | verify-true\n        get-property \"columns[1]" +
+		"\" | equals \"\" | verify-true\n    }\n}" | verify-true
 	get-button "Switch to Recording Mode" | click
 }
 
@@ -134,23 +114,21 @@ with [get-window "Control Panel - t2 (test) - selfQ7 [Recording]"] {
 }
 
 get-aut selfQ7 | eval {
-	get-menu -path "Edit" | click
+	get-menu -path Edit | click
 }
 with [get-window "Control Panel - t2 (test) - selfQ7 [Asserting]" | get-window "Assertion and Verification"] {
-    get-tree | get-item -path "MenuItem \\(Basic Properties\\)/caption" | check
-    get-button Add | click
+	get-tree | get-item -path "MenuItem \\(Basic Properties\\)/caption" | check
+	get-button Add | click
 }
 
 get-aut selfQ7 | eval {
-	get-menu -path "Edit" | click
+	get-menu -path Edit | click
 }
 with [get-window "Control Panel - t2 (test) - selfQ7 [Asserting]" | get-window "Assertion and Verification"] {
-    get-tree | get-item -path "MenuItem \\(Basic Properties\\)/index" | check
-    get-button Add | click
+	get-tree | get-item -path "MenuItem \\(Basic Properties\\)/index" | check
+	get-button Add | click
 }
-get-window "Control Panel - t2 (test) - selfQ7 [Asserting]" | get-text-viewer | get-property text
-    | contains "with [get-menu -path Edit] {\n"
-    + "    get-property caption | equals \"&Edit\" | verify-true\n"
-    + "    get-property index | equals 1 | verify-true\n"
-    + "}" | verify-true
+get-window "Control Panel - t2 (test) - selfQ7 [Asserting]" | get-text-viewer | get-property text | contains "with [g" +
+	"et-menu -path Edit] {\n    get-property caption | equals \"&Edit\" | verify-true\n    get-property index | equal" +
+	"s 1 | verify-true\n}" | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

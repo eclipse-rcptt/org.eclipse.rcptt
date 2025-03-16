@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.core.ecl.core.model.ExecutionPhase;
+import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.aut.ConsoleOutputListener;
 import org.eclipse.rcptt.launching.IExecutable;
@@ -148,7 +149,7 @@ public abstract class Executable implements IExecutable {
 			localResult = RcpttPlugin.createStatus("Execution was unexpectedly terminated", e);
 			throw e;
 		} catch (Throwable e) {
-			localResult = Q7LaunchingPlugin.createStatus(e);
+			localResult = internalFailure(e);
 		} finally {
 			time = System.currentTimeMillis() - startTime;
 			try {
@@ -156,7 +157,7 @@ public abstract class Executable implements IExecutable {
 				try {
 					localResult = postExecute(localResult);
 				} catch (Throwable e) {
-					localResult = Q7LaunchingPlugin.createStatus(e);
+					localResult = internalFailure(e);
 				}
 			} finally {
 				setResult(localResult);
@@ -164,6 +165,10 @@ public abstract class Executable implements IExecutable {
 			}
 			consoleListener.stopLogging();
 		}
+	}
+	
+	protected IStatus internalFailure(Throwable e) {
+		return new Status(IStatus.ERROR, getClass(), IProcess.INTERNAL_AUT_FAILURE, "Internal failure", e);
 	}
 
 	public void cancel(IStatus status) {

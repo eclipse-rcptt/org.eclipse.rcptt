@@ -10,7 +10,6 @@ node {
 pipeline {
   agent {
     kubernetes {
-      label 'rcptt-build-and-deploy-agent-3.5.4'
       yaml build.YAML_BUILD_AND_DEPLOY_AGENT
     }
   }
@@ -18,6 +17,11 @@ pipeline {
   parameters {
     choice(name: 'MODE', choices: ['Release', 'Milestone'], description: 'The deploy mode')
     string(name: 'MILESTONE_VERSION', defaultValue: 'MO', description: 'Only for milestone build')
+  }
+  options {
+     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '10'))
+     disableConcurrentBuilds()
+     timeout(time: 10, unit: 'HOURS')
   }
 
   stages {

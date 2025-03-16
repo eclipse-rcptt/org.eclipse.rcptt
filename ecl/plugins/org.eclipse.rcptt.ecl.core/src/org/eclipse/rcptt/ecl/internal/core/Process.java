@@ -71,7 +71,7 @@ public class Process implements IProcess {
 	}
 
 	public synchronized boolean isAlive() {
-		return status == null;
+		return status == null && !session.isClosed();
 	}
 
 	public ISession getSession() {

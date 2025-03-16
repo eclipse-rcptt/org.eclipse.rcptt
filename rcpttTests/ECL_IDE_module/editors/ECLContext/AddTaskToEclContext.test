@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _KE5VEWswEeGhKJWOtX9noQ
-Runtime-Version: 2.5.0.qualifier
-Save-Time: 10/17/19 10:13 PM
+Runtime-Version: 2.6.0.202503130811
+Save-Time: 3/13/25, 10:49 PM
 Tags: ECL_IDE_module, ECLContext, Task, Browser
 Testcase-Type: ecl
 
@@ -60,10 +60,16 @@ with [get-view Tasks | get-tree] {
     get-item "" | get-property columns -index 6 | equals Task | verify-true
 }
 get-editor "Open Modal Dialog" | get-section Script | get-left-ruler | hover-ruler -line 1
-get-window -from "Information Window" | 
-	get-control Browser | 
-	get-property text | 
-	matches "^.*// Task in ECL-context.*$" | verify-true
+
+with [get-window -from "Information Window" | 
+	get-control Browser ] {
+	try -times 10 -delay 5000 -command {
+		trace [get-property text -raw | str]
+		get-property text -raw | not-eq "" | verify-true
+	}
+	get-property text | matches "^.*// Task in ECL-context.*$" | verify-true
+
+}
 get-editor "Open Modal Dialog" | close
 with [get-view Tasks | get-tree] {
     select "" | activate-cell-edit -column 2

@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -67,6 +68,7 @@ import org.eclipse.rcptt.tesla.internal.core.TeslaExecutionFailedException;
 import org.eclipse.rcptt.tesla.internal.ui.player.specific.GetWindowPlayer;
 import org.eclipse.rcptt.tesla.internal.ui.player.viewers.TableViewerItem;
 import org.eclipse.rcptt.tesla.internal.ui.player.viewers.Viewers;
+import org.eclipse.rcptt.tesla.jface.TeslaCellEditorManager;
 import org.eclipse.rcptt.tesla.swt.TeslaSWTMessages;
 import org.eclipse.rcptt.tesla.swt.dialogs.SWTDialogManager;
 import org.eclipse.rcptt.tesla.swt.events.ITimerExecHelper;
@@ -1138,6 +1140,7 @@ public final class SWTUIPlayer {
 	}
 
 	private static void checkCell(Item item, int column, boolean state) {
+		TeslaCellEditorManager.getInstance().setNextCellEditorActivateEventType(ColumnViewerEditorActivationEvent.PROGRAMMATIC);
 		if (item instanceof TreeItem) {
 			Tree tree = ((TreeItem) item).getParent();
 			TreeViewer v = (TreeViewer) TeslaSWTAccess.getViewer(tree);

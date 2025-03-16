@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.updates.e4x"
       label="RCPTT Runtime Sites for Eclipse 4.x"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -32,14 +32,14 @@
          id="org.eclipse.rcptt.updates.runtime.e4x"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.util.swt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

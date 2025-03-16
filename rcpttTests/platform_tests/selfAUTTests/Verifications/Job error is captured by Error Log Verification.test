@@ -14,8 +14,12 @@ Testcase-Type: ecl
 Content-Type: text/ecl
 Entry-Name: .content
 
+get-view Applications | get-tree | get-property itemCount | equals 1 | verify-true
+get-view Applications | get-tree | get-item -path mockupsQ7
 get-view "Test Explorer" | get-tree | select "jobtest/Job error capturing with Error Log verification" | double-click
 get-editor "Job error capturing with Error Log verification" | get-button Replay | click
+try {
 get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text 
     | equals "Error log verification 'NoErrorsOrWarnings' failed:\nLog entry\nStatus ERROR: com.xored.q7.quality.mockups.platform code=0 Job error\nis denied by predicate\nERROR, WARNING" | verify-true
+} -times 10 -delay 15000
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

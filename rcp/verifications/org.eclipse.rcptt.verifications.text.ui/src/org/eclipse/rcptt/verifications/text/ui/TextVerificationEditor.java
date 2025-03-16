@@ -16,13 +16,25 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
+import org.eclipse.rcptt.launching.AutLaunch;
+import org.eclipse.rcptt.tesla.core.ui.StyleRangeEntry;
+import org.eclipse.rcptt.ui.controls.SectionWithComposite;
+import org.eclipse.rcptt.ui.editors.EditorHeader;
+import org.eclipse.rcptt.ui.utils.RangeUtils;
+import org.eclipse.rcptt.ui.verification.WidgetVerificationEditor;
+import org.eclipse.rcptt.verifications.text.TextFactory;
+import org.eclipse.rcptt.verifications.text.TextPackage;
+import org.eclipse.rcptt.verifications.text.TextVerification;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -34,18 +46,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
-
-import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.launching.AutLaunch;
-import org.eclipse.rcptt.ui.controls.SectionWithComposite;
-import org.eclipse.rcptt.ui.editors.EditorHeader;
-import org.eclipse.rcptt.ui.utils.RangeUtils;
-import org.eclipse.rcptt.ui.verification.WidgetVerificationEditor;
-import org.eclipse.rcptt.verifications.text.TextFactory;
-import org.eclipse.rcptt.verifications.text.TextPackage;
-import org.eclipse.rcptt.verifications.text.TextVerification;
-import org.eclipse.rcptt.tesla.core.ui.StyleRangeEntry;
 
 public class TextVerificationEditor extends WidgetVerificationEditor {
 
@@ -104,27 +104,29 @@ public class TextVerificationEditor extends WidgetVerificationEditor {
 		final Button ignoreStylingCheckbox = toolkit.createButton(client,
 				"Ignore text styling and colors", SWT.CHECK);
 
-		dbc.bindValue(SWTObservables.observeText(
-				text, SWT.Modify), EMFObservables.observeValue(
-				getVerification(),
-				TextPackage.Literals.TEXT_VERIFICATION__TEXT));
+		IObservableValue<String> verificationText = EMFObservables.observeValue(
+		getVerification(),
+		TextPackage.Literals.TEXT_VERIFICATION__TEXT);
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(
+				text), verificationText);
 
-		IObservableList observableStyles =
+		IObservableList<StyleRangeEntry> observableStyles =
 				EMFObservables.observeList(getVerification(),
 						TextPackage.Literals.TEXT_VERIFICATION__STYLES);
-		observableStyles.addListChangeListener(new IListChangeListener() {
+		observableStyles.addListChangeListener(new IListChangeListener<StyleRangeEntry>() {
 			@Override
-			public void handleListChange(ListChangeEvent event) {
+			public void handleListChange(ListChangeEvent<? extends StyleRangeEntry> event) {
 				updateStyling(text, ignoreStylingCheckbox);
 			}
 		});
 
 		// --
 
+		IObservableValue<Boolean> ignoreSyling = EMFObservables.observeValue(getVerification(),
+				TextPackage.Literals.TEXT_VERIFICATION__IGNORE_STYLING);
 		final Binding binding = dbc.bindValue(
-				SWTObservables.observeSelection(ignoreStylingCheckbox),
-				EMFObservables.observeValue(getVerification(),
-						TextPackage.Literals.TEXT_VERIFICATION__IGNORE_STYLING));
+				WidgetProperties.buttonSelection().observe(ignoreStylingCheckbox),
+				ignoreSyling);
 		binding.getModel().addChangeListener(new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {

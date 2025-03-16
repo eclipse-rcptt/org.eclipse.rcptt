@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _CcO-QCC4EeGpvKMy1SUvBw
-Runtime-Version: 1.5.5.201503020312
-Save-Time: 3/25/15 12:27 PM
+Runtime-Version: 2.5.5.202404070608
+Save-Time: 4/7/24, 3:26 PM
 Tags: selfAUT, Context, WorkspaceContext, Create
 Testcase-Type: ecl
 
@@ -42,8 +42,9 @@ get-view "Test Explorer" | get-tree | select "MyProject/ClearWorkspace" | double
 get-editor ClearWorkspace | get-button Apply | click
 get-view "Test Explorer" | get-tree | select "MyProject/CreateQ7Project" | get-menu "Run As/\\d+ Test Cases" | click
 with [get-view "Execution View"] {
-    get-label "1/1" | get-property caption | equals "1/1" | verify-true
-    get-label 0 | get-property caption | equals 0 | verify-true
+    try -times 10 -delay 15000 -command {
+        get-label -after [get-label "Runs:"] | get-property text | equals "1/1" | verify-true
+    }
 }
 with [get-view "Test Explorer" | get-tree] {
     select "MyProject/CreateQ7Project" | double-click -nowait

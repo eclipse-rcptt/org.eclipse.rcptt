@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.RuntimeWorkbench">
+    <booleanAttribute key="append.args" value="true"/>
+    <stringAttribute key="application" value="org.eclipse.rcptt.runner.headless"/>
+    <booleanAttribute key="askclear" value="false"/>
+    <booleanAttribute key="automaticAdd" value="false"/>
+    <booleanAttribute key="automaticIncludeRequirements" value="true"/>
+    <booleanAttribute key="automaticValidate" value="true"/>
+    <stringAttribute key="bootstrap" value=""/>
+    <stringAttribute key="checked" value="[NONE]"/>
+    <booleanAttribute key="clearConfig" value="true"/>
+    <booleanAttribute key="clearws" value="true"/>
+    <booleanAttribute key="clearwslog" value="false"/>
+    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/RCPTT Runner"/>
+    <booleanAttribute key="default" value="false"/>
+    <setAttribute key="deselected_workspace_bundles"/>
+    <booleanAttribute key="includeOptional" value="false"/>
+    <stringAttribute key="location" value="${workspace_loc}/../runtime-RCPTTRunner"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog&#10;-aut /private/tmp/Eclipse.app -autArgs '-eclipse.password;/private/tmp/lablicate/exec-process/master' -autWsPrefix /private/tmp/lablicate/exec-process/../results/demo//aut-workspace- -autConsolePrefix /private/tmp/lablicate/exec-process/../results/demo//aut-out- -autVM /Users/vasiligulevich/.p2/pool/plugins/org.eclipse.justj.openjdk.hotspot.jre.full.macosx.aarch64_21.0.2.v20240123-0840/jre -htmlReport /private/tmp/lablicate/exec-process/../results/demo//results.html -junitReport /private/tmp/lablicate/exec-process/../results/demo//results.xml -import /private/tmp/lablicate/exec-process -tests exec-process.test"/>
+    <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.eclipse.swt.graphics.Resource.reportNonDisposed=true"/>
+    <stringAttribute key="pde.version" value="3.3"/>
+    <stringAttribute key="product" value="org.eclipse.rcptt.platform.product"/>
+    <setAttribute key="selected_target_bundles">
+        <setEntry value="org.eclipse.equinox.app@default:default"/>
+        <setEntry value="org.eclipse.equinox.p2.transport.ecf@default:default"/>
+        <setEntry value="org.eclipse.osgi.compatibility.state@default:false"/>
+        <setEntry value="org.eclipse.swt.cocoa.macosx.aarch64@default:false"/>
+    </setAttribute>
+    <setAttribute key="selected_workspace_bundles">
+        <setEntry value="org.eclipse.rcptt.ctx.workbench@default:default"/>
+        <setEntry value="org.eclipse.rcptt.runner@default:default"/>
+        <setEntry value="org.eclipse.rcptt.updates.aspectj.e44x@default:default"/>
+        <setEntry value="org.eclipse.rcptt.updates.kepler@default:default"/>
+        <setEntry value="org.eclipse.rcptt.updates.runtime.e4x@default:default"/>
+    </setAttribute>
+    <booleanAttribute key="show_selected_only" value="false"/>
+    <stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
+    <booleanAttribute key="tracing" value="false"/>
+    <booleanAttribute key="useCustomFeatures" value="false"/>
+    <booleanAttribute key="useDefaultConfig" value="true"/>
+    <booleanAttribute key="useDefaultConfigArea" value="true"/>
+    <booleanAttribute key="useProduct" value="false"/>
+</launchConfiguration>

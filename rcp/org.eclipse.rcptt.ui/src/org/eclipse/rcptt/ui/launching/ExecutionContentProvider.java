@@ -47,6 +47,9 @@ public class ExecutionContentProvider implements ITreeContentProvider {
 	}
 
 	public Object getParent(Object element) {
+		if (executables == null) {
+			return null;
+		}
 		return executables.getParent((IExecutable) element);
 	}
 

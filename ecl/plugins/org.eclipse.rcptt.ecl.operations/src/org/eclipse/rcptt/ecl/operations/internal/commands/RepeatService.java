@@ -48,6 +48,9 @@ public class RepeatService implements ICommandService {
 		List<Object> contentOutput = new ArrayList<Object>();
 
 		for (int i = 0; i < times; i++) {
+			if (!process.isAlive()) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
 			IPipe input = process.getSession().createPipe();
 			for (Object o : content)
 				input.write(o);

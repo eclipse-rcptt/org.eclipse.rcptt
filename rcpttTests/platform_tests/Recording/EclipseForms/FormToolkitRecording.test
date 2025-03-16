@@ -42,7 +42,9 @@ get-aut "mockupsQ7" | eval {
             click -metaKeys SHIFT
             click -metaKeys 393216
 	    }
-        get-tree | select "node 4/node 4 - 3"
+        try -times 10 -delay 1000 -command{
+		get-tree | select "node 4/node 4 - 3"
+	}
         get-label "Label for mouse clicking test" | click
 	}
 	get-label "Label \"Label for mouse clicking test\" clicked. MouseButton: 1. StateMask: 0"

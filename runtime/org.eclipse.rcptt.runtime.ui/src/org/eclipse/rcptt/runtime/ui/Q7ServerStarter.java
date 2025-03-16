@@ -12,7 +12,9 @@ package org.eclipse.rcptt.runtime.ui;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.rcptt.ecl.client.tcp.EclTcpSession;
 import org.eclipse.rcptt.ecl.debug.runtime.SuspendListener;
 import org.eclipse.rcptt.ecl.debug.runtime.SuspendManager;
@@ -66,8 +68,12 @@ public enum Q7ServerStarter {
 
 	private void testLocalEclServer() {
 		try {
-			new EclTcpSession(InetAddress.getByName("localhost"), ecl);
+			new EclTcpSession(InetAddress.getByName("localhost"), ecl).close();
 			Activator.info("Verified that local ECL server is working");
+		} catch ( CoreException e) {
+			Activator.err(e, "Error testing a local ECL server. Something is blocking connection");
+		} catch (UnknownHostException e) {
+			Activator.err(e, "Error testing a local ECL server. Something is blocking connection");
 		} catch (IOException e) {
 			Activator.err(e, "Error testing a local ECL server. Something is blocking connection");
 		}

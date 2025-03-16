@@ -6,14 +6,16 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1111
 Id: _EdBBULVEEeGHo51xlkPHGw
-Runtime-Version: 2.5.2.202204240826
-Save-Time: 4/26/22, 11:09 PM
-Tags: Recording, Browser
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/15/24, 2:58 PM
+Tags: Recording, Browser, skipExecution
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
 Entry-Name: .description
+
+FAILS because of https://github.com/eclipse/org.eclipse.rcptt/issues/42
 
 Copyright (c) 2009, 2019 Xored Software Inc and others.
 All rights reserved. This program and the accompanying materials
@@ -51,8 +53,11 @@ with [get-window Preferences] {
 
 get-view "Test Explorer" | get-tree | select "Q7Project/AddSeveralPreferenceValuesInContext \\(1\\)_2012_06_13.html" 
     | double-click
-get-tab-folder | get-property tabCount | equals 1 | verify-true    
-get-tab-folder | get-tab-item | get-menu Close | click
+    
+try {
+	get-tab-folder | get-property tabCount | equals 1 | verify-true
+	get-tab-folder | get-tab-item | get-menu Close | click
+} -times 10 -delay 1000
 
 verify-error {
 	get-tab-folder| get-property tabCount | equals 1 | verify-true

@@ -29,7 +29,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.SWTKeySupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -38,6 +37,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BlockTextSelection;
 import org.eclipse.jface.text.IBlockTextSelection;
 import org.eclipse.osgi.util.NLS;
@@ -114,7 +114,7 @@ public class ControlPanelWindow extends Dialog {
 
 	private final Scenario scenario = ScenarioFactory.eINSTANCE
 			.createScenario();
-	private final WritableValue testCase = new WritableValue(null,
+	private final WritableValue<ITestCase> testCase = new WritableValue<>(null,
 			ITestCase.class);
 
 	private AssertionPanelWindow assertionWindow;
@@ -210,9 +210,9 @@ public class ControlPanelWindow extends Dialog {
 		scriptPart = new ScriptComposite(internalModel,
 				model != null ? (IFile) getModel().getResource() : null,
 				getShell(), SWT.SCROLL_LOCK);
-		ComputedValue recordingMode = new ComputedValue() {
+		ComputedValue<RecordingMode> recordingMode = new ComputedValue<RecordingMode>() {
 			@Override
-			protected Object calculate() {
+			protected RecordingMode calculate() {
 				return recordingSupport.getMode();
 			}
 		};
@@ -283,10 +283,10 @@ public class ControlPanelWindow extends Dialog {
 		};
 		statusBar.createControl(parent);
 		// statusBar.getControl().addKeyListener(keyListener);
-		dbc.bindValue(WidgetProperties.text().observe(getShell()),
-				new ComputedValue() {
+		dbc.bindValue(org.eclipse.jface.databinding.swt.typed.WidgetProperties.text().observe(getShell()),
+				new ComputedValue<String>() {
 					@Override
-					protected Object calculate() {
+					protected String calculate() {
 						StringBuilder text = new StringBuilder(
 								Messages.ControlPanelWindow_Title);
 						ITestCase model = getModel();
@@ -439,9 +439,9 @@ public class ControlPanelWindow extends Dialog {
 							Messages.ControlPanelWindow_SaveAction) {
 						{
 							dbc.bindValue(Actions.observeEnabled(this),
-									new ComputedValue() {
+									new ComputedValue<Boolean>() {
 										@Override
-										protected Object calculate() {
+										protected Boolean calculate() {
 											return getModel() != null;
 										}
 									});
@@ -462,9 +462,9 @@ public class ControlPanelWindow extends Dialog {
 				}
 			});
 			dbc.bindValue(Actions.observeToolTipText(saveAction),
-					new ComputedValue() {
+					new ComputedValue<String>() {
 						@Override
-						protected Object calculate() {
+						protected String calculate() {
 							if (getModel() != null) {
 								return Messages.ControlPanelWindow_SaveAction;
 							} else {
@@ -519,19 +519,19 @@ public class ControlPanelWindow extends Dialog {
 				}
 			};
 		};
-		dbc.bindValue(Actions.observeEnabled(action), new ComputedValue(
+		dbc.bindValue(Actions.observeEnabled(action), new ComputedValue<Boolean>(
 				Boolean.TYPE) {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				RecordingMode mode = recordingSupport.getMode();
 				return mode == RecordingMode.Stopped
 						|| mode == RecordingMode.Replaying;
 			}
 		});
 		dbc.bindValue(Actions.observeImageDescriptor(action),
-				new ComputedValue() {
+				new ComputedValue<ImageDescriptor>() {
 					@Override
-					protected Object calculate() {
+					protected ImageDescriptor calculate() {
 						if (recordingSupport.getMode() == RecordingMode.Replaying) {
 							return Images.getImageDescriptor(Images.STOP);
 						} else {
@@ -539,9 +539,9 @@ public class ControlPanelWindow extends Dialog {
 						}
 					}
 				});
-		dbc.bindValue(Actions.observeToolTipText(action), new ComputedValue() {
+		dbc.bindValue(Actions.observeToolTipText(action), new ComputedValue<String>() {
 			@Override
-			protected Object calculate() {
+			protected String calculate() {
 				if (recordingSupport.getMode() == RecordingMode.Replaying) {
 					return Messages.ControlPanelWindow_StopAction;
 				} else {
@@ -563,19 +563,19 @@ public class ControlPanelWindow extends Dialog {
 				}
 			};
 		};
-		dbc.bindValue(Actions.observeEnabled(action), new ComputedValue(
+		dbc.bindValue(Actions.observeEnabled(action), new ComputedValue<Boolean>(
 				Boolean.TYPE) {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				RecordingMode mode = recordingSupport.getMode();
 				return mode == RecordingMode.Stopped
 						|| mode != RecordingMode.Replaying;
 			}
 		});
 		dbc.bindValue(Actions.observeImageDescriptor(action),
-				new ComputedValue() {
+				new ComputedValue<ImageDescriptor>() {
 					@Override
-					protected Object calculate() {
+					protected ImageDescriptor calculate() {
 						RecordingMode mode = recordingSupport.getMode();
 						if (mode == RecordingMode.Stopped
 								|| mode == RecordingMode.Replaying) {
@@ -585,9 +585,9 @@ public class ControlPanelWindow extends Dialog {
 						}
 					}
 				});
-		dbc.bindValue(Actions.observeToolTipText(action), new ComputedValue() {
+		dbc.bindValue(Actions.observeToolTipText(action), new ComputedValue<String>() {
 			@Override
-			protected Object calculate() {
+			protected String calculate() {
 				RecordingMode mode = recordingSupport.getMode();
 				if (mode == RecordingMode.Recording
 						|| mode == RecordingMode.Connecting) {
@@ -600,10 +600,10 @@ public class ControlPanelWindow extends Dialog {
 		return action;
 	}
 
-	private final ComputedValue modeEnablementObservable = new ComputedValue(
+	private final ComputedValue<Boolean> modeEnablementObservable = new ComputedValue<Boolean>(
 			Boolean.TYPE) {
 		@Override
-		protected Object calculate() {
+		protected Boolean calculate() {
 			RecordingMode mode = recordingSupport.getMode();
 			return mode != RecordingMode.Stopped
 					&& mode != RecordingMode.Replaying
@@ -616,21 +616,23 @@ public class ControlPanelWindow extends Dialog {
 	private ScriptComposite scriptPart;
 
 	private IAction createRecordingModeAction() {
-		IAction action = new Action("", IAction.AS_RADIO_BUTTON) { //$NON-NLS-1$
-			@Override
-			public void run() {
-				recordingSupport.setMode(RecordingMode.Recording);
-			}
-		};
+		IAction action = new Action("", IAction.AS_RADIO_BUTTON) {}; //$NON-NLS-1$
 		action.setImageDescriptor(Images
 				.getImageDescriptor(Images.PANEL_MODE_RECORD));
 		action.setToolTipText(Messages.ControlPanelWindow_SwitchToRecordModeActionToolTip);
 		dbc.bindValue(Actions.observeEnabled(action), modeEnablementObservable);
-		dbc.bindValue(Actions.observeChecked(action), new ComputedValue(
+		dbc.bindValue(Actions.observeChecked(action), new ComputedValue<Boolean>(
 				Boolean.TYPE) {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return recordingSupport.getMode() == RecordingMode.Recording;
+			}
+			
+			@Override
+			protected void doSetValue(Boolean value) {
+				if (value) {
+					recordingSupport.setMode(RecordingMode.Recording);
+				}
 			}
 		});
 		return action;
@@ -638,20 +640,22 @@ public class ControlPanelWindow extends Dialog {
 
 	private IAction createAssertingModeAction() {
 		IAction action = new Action("", IAction.AS_RADIO_BUTTON) { //$NON-NLS-1$
-			@Override
-			public void run() {
-				recordingSupport.setMode(RecordingMode.Asserting);
-			}
 		};
 		action.setImageDescriptor(Images
 				.getImageDescriptor(Images.PANEL_MODE_ASSERT));
 		action.setToolTipText(Messages.ControlPanelWindow_SwitchToAssertModeActionToolTip);
 		dbc.bindValue(Actions.observeEnabled(action), modeEnablementObservable);
-		dbc.bindValue(Actions.observeChecked(action), new ComputedValue(
+		dbc.bindValue(Actions.observeChecked(action), new ComputedValue<Boolean>(
 				Boolean.TYPE) {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return recordingSupport.getMode() == RecordingMode.Asserting;
+			}
+			@Override
+			protected void doSetValue(Boolean value) {
+				if (value) {
+					recordingSupport.setMode(RecordingMode.Asserting);
+				}
 			}
 		});
 		return action;
@@ -659,20 +663,22 @@ public class ControlPanelWindow extends Dialog {
 
 	private IAction createImageRecognitionModeAction() {
 		IAction action = new Action("", IAction.AS_RADIO_BUTTON) { //$NON-NLS-1$
-			@Override
-			public void run() {
-				recordingSupport.setMode(RecordingMode.ImageRecognition);
-			}
 		};
 		action.setImageDescriptor(Images
 				.getImageDescriptor(Images.PANEL_MODE_IML));
 		action.setToolTipText(Messages.ControlPanelWindow_SwitchToRecognitionModeActionToolTip);
 		dbc.bindValue(Actions.observeEnabled(action), modeEnablementObservable);
-		dbc.bindValue(Actions.observeChecked(action), new ComputedValue(
+		dbc.bindValue(Actions.observeChecked(action), new ComputedValue<Boolean>(
 				Boolean.TYPE) {
 			@Override
-			protected Object calculate() {
+			protected Boolean calculate() {
 				return recordingSupport.getMode() == RecordingMode.ImageRecognition;
+			}
+			@Override
+			protected void doSetValue(Boolean value) {
+				if (value) {
+					recordingSupport.setMode(RecordingMode.ImageRecognition);
+				}
 			}
 		});
 		return action;

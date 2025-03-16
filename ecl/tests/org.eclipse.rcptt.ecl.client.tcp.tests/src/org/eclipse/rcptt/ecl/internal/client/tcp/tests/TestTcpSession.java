@@ -13,9 +13,15 @@ package org.eclipse.rcptt.ecl.internal.client.tcp.tests;
 import com.google.common.base.Function;
 import com.google.common.io.Closer;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -66,12 +72,7 @@ public class TestTcpSession {
 				}
 			}
 		});
-		EclInjectedCommandService.delegate = new Function<Command, IStatus>() {
-			@Override
-			public IStatus apply(Command ignored) {
-				return Status.OK_STATUS;
-			}
-		};
+		EclInjectedCommandService.inject(ignored -> Status.OK_STATUS);
 	}
 
 	@After
@@ -81,12 +82,7 @@ public class TestTcpSession {
 
 	@Test
 	public void simpleExecution() throws CoreException, InterruptedException {
-		EclInjectedCommandService.delegate = new Function<Command, IStatus>() {
-			@Override
-			public IStatus apply(Command ignored) {
-				return new Status(IStatus.INFO, "id", "message");
-			}
-		};
+		EclInjectedCommandService.inject(ignored ->  new Status(IStatus.INFO, "id", "message"));
 		IStatus status = executeCommand();
 		Assert.assertFalse(status.getMessage(), status.matches(IStatus.ERROR | IStatus.WARNING | IStatus.CANCEL));
 		Assert.assertTrue(status.matches(IStatus.INFO));
@@ -102,12 +98,7 @@ public class TestTcpSession {
 
 	@Test
 	public void errorIsReported() throws CoreException, InterruptedException {
-		EclInjectedCommandService.delegate = new Function<Command, IStatus>() {
-			@Override
-			public IStatus apply(Command ignored) {
-				return new Status(IStatus.ERROR, "id", "message");
-			}
-		};
+		EclInjectedCommandService.inject(ignored ->  new Status(IStatus.ERROR, "id", "message"));
 		IStatus status = executeCommand();
 		Assert.assertTrue(status.matches(IStatus.ERROR));
 		Assert.assertEquals("message", status.getMessage());
@@ -121,13 +112,10 @@ public class TestTcpSession {
 
 	@Test
 	public void istatusPropagatesTraces() throws CoreException, InterruptedException {
-		EclInjectedCommandService.delegate = new Function<Command, IStatus>() {
-			@Override
-			public IStatus apply(Command ignored) {
+		EclInjectedCommandService.inject( ignored -> {
 				absurdFunctionThatThrows();
 				return Status.OK_STATUS;
-			}
-		};
+			});
 		IStatus status = executeCommand();
 		Throwable e = status.getException();
 		while (! (e instanceof CoreException)) {
@@ -172,5 +160,33 @@ public class TestTcpSession {
 			count2++;
 		}
 		TestCase.assertEquals(count1, count2);
+	}
+	
+	@Test(timeout=10000)
+	public void processDiesIfSessionIsClosed() throws CoreException, InterruptedException {
+		AtomicBoolean isAlive = new AtomicBoolean();
+		CountDownLatch start = new CountDownLatch(1);
+		CountDownLatch stop = new CountDownLatch(1);
+		EclInjectedCommandService.inject((ignored, process) -> {
+			do {
+				isAlive.set(process.isAlive());
+				start.countDown();
+			} while (isAlive.get());
+			stop.countDown();
+			return Status.CANCEL_STATUS;
+		});
+		
+		CompletableFuture.runAsync(() -> {
+			try {
+				executeCommand();
+			} catch (CoreException | InterruptedException e) {
+				throw new AssertionError(e);
+			}
+		});
+		assertTrue(start.await(1, TimeUnit.SECONDS));
+		assertTrue(isAlive.get());
+		session.close();
+		assertTrue(stop.await(1, TimeUnit.SECONDS));
+		Assert.assertFalse(isAlive.get());
 	}
 }

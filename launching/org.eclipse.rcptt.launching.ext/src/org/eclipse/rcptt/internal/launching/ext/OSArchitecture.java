@@ -13,5 +13,6 @@ package org.eclipse.rcptt.internal.launching.ext;
 public enum OSArchitecture {
 	x86,
 	x86_64,
+	aarch64,
 	Unknown
 }

@@ -35,8 +35,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -560,7 +560,7 @@ public class AssertionPanelWindow extends Dialog {
 		final ToolBar filterToolBar = new ToolBar(filterComposite, SWT.FLAT);
 		filterToolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		final ToolItem filterItem = new ToolItem(filterToolBar, SWT.FLAT | SWT.PUSH);
-		filterItem.setImage(Images.getImageDescriptor(Images.PANEL_FILTER).createImage());
+		filterItem.setImage(Images.getImage(Images.PANEL_FILTER));
 		filterItem.setToolTipText(Messages.AssertionPanelWindow_FilterToolTip);
 		filterItem.addSelectionListener(new SelectionListener() {
 			@Override
@@ -693,11 +693,6 @@ public class AssertionPanelWindow extends Dialog {
 		sh.dispose();
 	}
 
-	public static int convertHorizontalDLUsToPixels(FontMetrics fontMetrics, int dlus) {
-		// round to the nearest pixel
-		return (fontMetrics.getAverageCharWidth() * dlus + 4 / 2) / 4;
-	}
-
 	@Override
 	protected int convertHorizontalDLUsToPixels(int dlus) {
 		// test for failure to initialize for backward compatibility
@@ -712,7 +707,6 @@ public class AssertionPanelWindow extends Dialog {
 		return minSize.x;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Control createButtonPanel(Composite parent) {
 		final Composite composite = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(composite);
@@ -720,7 +714,7 @@ public class AssertionPanelWindow extends Dialog {
 		final Button widgetInfo = new Button(composite, SWT.NONE);
 		GridDataFactory.swtDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(widgetInfo);
 		widgetInfo.setText("Widget details...");
-		widgetInfo.setImage(Images.getImageDescriptor(Images.PANEL_NEW_IMAGE_WIDGET_DETAILS).createImage());
+		widgetInfo.setImage(Images.getImage(Images.PANEL_NEW_IMAGE_WIDGET_DETAILS));
 
 		widgetInfo.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -748,8 +742,8 @@ public class AssertionPanelWindow extends Dialog {
 		GridDataFactory.swtDefaults().align(SWT.RIGHT, SWT.CENTER).grab(true, false).hint(120, SWT.DEFAULT)
 				.applyTo(appendButton);
 
-		appendButton.setImage(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_ADD)
-				.createImage());
+		
+		appendButton.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
 		appendButton.setText(Messages.AssertionPanelWindow_AddAssertButton);
 		appendButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -759,7 +753,7 @@ public class AssertionPanelWindow extends Dialog {
 			}
 		});
 
-		checkedObservable = ViewersObservables.observeCheckedElements(viewer, null);
+		checkedObservable = ViewerProperties.<CheckboxTreeViewer, Object>checkedElements(Object.class).observe(viewer);
 		ComputedValue<Boolean> computed = new ComputedValue<Boolean>(Boolean.TYPE) {
 			@Override
 			protected Boolean calculate() {

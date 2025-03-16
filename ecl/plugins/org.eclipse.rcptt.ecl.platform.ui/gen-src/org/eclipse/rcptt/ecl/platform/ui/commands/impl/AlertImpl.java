@@ -80,6 +80,7 @@ public class AlertImpl extends CommandImpl implements Alert {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMessage() {
 		return message;
 	}
@@ -89,6 +90,7 @@ public class AlertImpl extends CommandImpl implements Alert {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMessage(String newMessage) {
 		String oldMessage = message;
 		message = newMessage;
@@ -163,7 +165,7 @@ public class AlertImpl extends CommandImpl implements Alert {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (message: ");
 		result.append(message);
 		result.append(')');

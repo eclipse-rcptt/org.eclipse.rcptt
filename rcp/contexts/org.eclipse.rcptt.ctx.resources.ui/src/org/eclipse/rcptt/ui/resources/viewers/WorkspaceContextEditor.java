@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -27,7 +28,7 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.ecore.util.EContentAdapter;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.CellEditor;
@@ -93,7 +94,7 @@ import org.eclipse.ui.forms.widgets.Section;
 
 public class WorkspaceContextEditor extends BaseContextEditor {
 	private boolean corrected = false;
-	private Text ignoreByClearPattern;
+	private Text ignoreByClearPatternText;
 	private Label ignoreByClearPatternLabel;
 
 	public WorkspaceContext getContextElement() {
@@ -212,9 +213,9 @@ public class WorkspaceContextEditor extends BaseContextEditor {
 
 	private void createOptionsControls(Composite parent, FormToolkit toolkit) {
 
-		Button clearWorkspace = toolkit.createButton(parent, "Clear workspace",
+		Button clearWorkspaceCheckbox = toolkit.createButton(parent, "Clear workspace",
 				SWT.CHECK);
-		GridDataFactory.fillDefaults().span(2, 1).applyTo(clearWorkspace);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(clearWorkspaceCheckbox);
 
 		ignoreByClearPatternLabel = new Label(parent, SWT.NONE);
 		ignoreByClearPatternLabel
@@ -225,34 +226,36 @@ public class WorkspaceContextEditor extends BaseContextEditor {
 		GridDataFactory.fillDefaults().span(2, 1).hint(100, SWT.DEFAULT)
 				.applyTo(ignoreByClearPatternLabel);
 
-		ignoreByClearPattern = toolkit.createText(parent, "", SWT.BORDER);
-		ignoreByClearPattern.setBackground(null);
+		ignoreByClearPatternText = toolkit.createText(parent, "", SWT.BORDER);
+		ignoreByClearPatternText.setBackground(null);
 		GridDataFactory.fillDefaults().grab(true, false).span(2, 1)
-				.hint(100, SWT.DEFAULT).applyTo(ignoreByClearPattern);
+				.hint(100, SWT.DEFAULT).applyTo(ignoreByClearPatternText);
 
+		IObservableValue<Boolean> clearWorkspace = EMFObservables
+				.observeValue(
+						getContextElement(),
+						WorkspacePackage.Literals.WORKSPACE_CONTEXT__CLEAR_WORKSPACE);
 		dbc.bindValue(
-				SWTObservables.observeSelection(clearWorkspace),
-				EMFObservables
-						.observeValue(
-								getContextElement(),
-								WorkspacePackage.Literals.WORKSPACE_CONTEXT__CLEAR_WORKSPACE),
+				WidgetProperties.buttonSelection().observe(clearWorkspaceCheckbox),
+				clearWorkspace,
 				new ClearWorkspaceChangeListener(),
 				new ClearWorkspaceChangeListener());
 
+		IObservableValue<String> ignoredByClearPattern = EMFObservables
+				.observeValue(
+						getContextElement(),
+						WorkspacePackage.Literals.WORKSPACE_CONTEXT__IGNORED_BY_CLEAR_PATTERN);
 		dbc.bindValue(
-				SWTObservables.observeText(ignoreByClearPattern, SWT.Modify),
-				EMFObservables
-						.observeValue(
-								getContextElement(),
-								WorkspacePackage.Literals.WORKSPACE_CONTEXT__IGNORED_BY_CLEAR_PATTERN));
+				WidgetProperties.text(SWT.Modify).observe(ignoreByClearPatternText),
+				ignoredByClearPattern);
 	}
 
-	private class ClearWorkspaceChangeListener extends UpdateValueStrategy {
+	private class ClearWorkspaceChangeListener extends UpdateValueStrategy<Boolean, Boolean> {
 
-		public IStatus validateBeforeSet(Object value) {
-			Boolean sValue = (Boolean) value;
-			if (ignoreByClearPattern != null) {
-				ignoreByClearPattern.setEnabled(sValue);
+		public IStatus validateBeforeSet(Boolean value) {
+			Boolean sValue =  value;
+			if (ignoreByClearPatternText != null) {
+				ignoreByClearPatternText.setEnabled(sValue);
 			}
 			if (ignoreByClearPatternLabel != null) {
 				ignoreByClearPatternLabel.setEnabled(sValue);
@@ -434,6 +437,7 @@ public class WorkspaceContextEditor extends BaseContextEditor {
 				.createButton(parent, action.getText(), SWT.PUSH);
 		button.setData(action);
 		Image image = action.getImageDescriptor().createImage();
+		button.addDisposeListener(event -> image.dispose());
 		button.setImage(image);
 		button.addSelectionListener(new SelectionAdapter() {
 

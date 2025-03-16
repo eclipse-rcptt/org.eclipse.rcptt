@@ -40,4 +40,15 @@
             class="org.eclipse.rcptt.runner.util.RunnerBrowserLaunchDelegate">
       </browserDelegate>
    </extension>
+   <extension
+         point="org.eclipse.core.resources.filterMatchers">
+      <filterMatcher
+            argumentType="string"
+            class="org.eclipse.rcptt.runner.extensions.DummyResourceFilter"
+            description="A dummy filter replacing org.eclipse.ui.ide to suppress warnings https://bugs.eclipse.org/bugs/show_bug.cgi?id=503369"
+            id="org.eclipse.ui.ide.multiFilter"
+            name="Dummy Multifilter"
+            ordering="first">
+      </filterMatcher>
+   </extension>
 </plugin>

@@ -156,29 +156,33 @@ public class JDTUtils {
 	}
 
 	private static OSArchitecture detect(Map<String, String> properties) throws CoreException {
+		Object arch = properties.get(OS_ARCH);
+		if ("amd64".equals(arch)) {
+			return OSArchitecture.x86_64;
+		}
+		if ("x86_64".equals(arch)) {
+			return OSArchitecture.x86_64;
+		}
+		if ("i386".equals(arch)) {
+			return OSArchitecture.x86;
+		}
+		if ("i686".equals(arch)) {
+			return OSArchitecture.x86;
+		}
+		if ("i586".equals(arch)) {
+			return OSArchitecture.x86;
+		}
+		if ("aarch64".equals(arch)) {
+			return OSArchitecture.aarch64;
+		}
+		
+		// Fallback to deprecated fields
 		Object model = properties.get(SUN_ARCH_DATA_MODEL);
 		if (model != null && "32".equals(model)) {
 			return OSArchitecture.x86;
 		}
 		if (model != null && "64".equals(model)) {
 			return OSArchitecture.x86_64;
-		}
-
-		Object arch = properties.get(OS_ARCH);
-		if (arch != null && "amd64".equals(arch)) {
-			return OSArchitecture.x86_64;
-		}
-		if (arch != null && "x86_64".equals(arch)) {
-			return OSArchitecture.x86_64;
-		}
-		if (arch != null && "i386".equals(arch)) {
-			return OSArchitecture.x86;
-		}
-		if (arch != null && "i686".equals(arch)) {
-			return OSArchitecture.x86;
-		}
-		if (arch != null && "i586".equals(arch)) {
-			return OSArchitecture.x86;
 		}
 
 		String message = String.format("Unknown combination:  %s = %s and %s = %s", SUN_ARCH_DATA_MODEL, model,
@@ -188,20 +192,6 @@ public class JDTUtils {
 	}
 
 	public static boolean canRun32bit(IVMInstall install) {
-		if (Platform.getOS().equals(Platform.OS_MACOSX)) {
-			if (install instanceof IVMInstall3) {
-				AbstractVMInstall avi = (AbstractVMInstall) install;
-				try {
-					Map<String, String> properties2 = evaluateSystemPropertiesInThread(
-							avi, new NullProgressMonitor(), true, 60000);
-					if (!properties2.isEmpty()) {
-						return true;
-					}
-				} catch (CoreException e) {
-
-				}
-			}
-		}
 		return false;
 	}
 

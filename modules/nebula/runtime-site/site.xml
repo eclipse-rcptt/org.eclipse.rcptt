@@ -11,7 +11,7 @@
  -->
 
 <site>
-   <feature url="features/org.eclipse.rcptt.module.nebula.runtime_2.5.5.qualifier.jar" id="org.eclipse.rcptt.module.nebula.runtime" version="2.5.5.qualifier">
+   <feature url="features/org.eclipse.rcptt.module.nebula.runtime_2.6.0.qualifier.jar" id="org.eclipse.rcptt.module.nebula.runtime" version="2.6.0.qualifier">
       <category name="rcptt"/>
    </feature>
    <category-def name="rcptt" label="RCP Testing Tool"/>

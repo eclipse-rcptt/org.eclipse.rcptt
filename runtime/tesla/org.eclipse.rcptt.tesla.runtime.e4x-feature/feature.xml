@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.tesla.runtime"
       label="RCPTT Runtime Eclipse 4.x"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -31,98 +31,98 @@
    <requires>
       <import feature="org.eclipse.emf.ecore"/>
       <import plugin="org.aspectj.runtime"/>
-      <import feature="org.eclipse.rcptt.tesla" version="2.5.5" match="compatible"/>
+      <import feature="org.eclipse.rcptt.tesla" version="2.6.0" match="compatible"/>
    </requires>
 
    <plugin
          id="org.eclipse.rcptt.tesla.swt.e4x"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.workbench.aspects.e4x"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.canvas"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.core.am"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.gef"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.gef.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.gmf"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.gmf.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.databinding"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.databinding.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.databinding.observable.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.fragment"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -130,140 +130,140 @@
          id="org.eclipse.rcptt.tesla.jface.text"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.text.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jface.text.reconciler.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jobs.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.draw2d"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.forms"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.gef"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.gmf"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.jface"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.jface.text"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.swt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.workbench"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.aspects.workbench.texteditor"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.canvas"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.draw2d"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.gef"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.gmf"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.jface.text"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.swt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.workbench.texteditor"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -277,14 +277,14 @@
          id="org.eclipse.rcptt.tesla.swt.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.swt.fragment"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -292,63 +292,63 @@
          id="org.eclipse.rcptt.tesla.ui.ide"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.ui.ide.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.workbench.texteditor"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.workbench.texteditor.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.variables"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.properties.view"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jdt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.jdt.aspects"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
          
 	<plugin
          id="org.eclipse.rcptt.tesla.chart"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

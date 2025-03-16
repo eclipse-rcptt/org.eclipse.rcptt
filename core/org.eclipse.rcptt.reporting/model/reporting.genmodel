@@ -17,7 +17,6 @@
     <genClasses ecoreClass="reporting.ecore#//Q7Info">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/id"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/type"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/message"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/line"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/tags"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute reporting.ecore#//Q7Info/description"/>

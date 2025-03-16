@@ -5,8 +5,9 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _3-uE0BZaEeWduqDErBxjvw
-Runtime-Version: 2.4.0.qualifier
-Save-Time: 11/16/18 9:24 PM
+Runtime-Version: 2.5.5.202403210919
+Save-Time: 3/26/24, 3:02 PM
+Tags: skipLinux
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -22,6 +23,8 @@ https://www.eclipse.org/legal/epl-v20.html
 Contributors:
     Xored Software Inc - initial creation and/or initial documentation
 --------------------------------------------------------------------------------
+
+Eclipse Platform does not support restart with a different workspace on Linux in development mode.
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
 Content-Type: text/ecl
@@ -29,14 +32,14 @@ Entry-Name: .content
 
 get-menu "File/Switch Workspace/Other..." | click
 set-dialog-result Folder "platform:/resource/new_workspace"
-with [get-window "RCP Testing Tool IDE Launcher"] {
+with [get-window "(RCP Testing Tool IDE|Eclipse Platform) Launcher"] {
     get-button "Browse..." | click
     get-button Launch | click
 }
 wait-until-eclipse-is-ready
 get-menu "Window/Perspective/Open Perspective/Other..." | click
 with [get-window "Open Perspective"] {
-    get-table | select Resource
+    get-table | select "Resource.*"
     get-button Open | click
 }
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

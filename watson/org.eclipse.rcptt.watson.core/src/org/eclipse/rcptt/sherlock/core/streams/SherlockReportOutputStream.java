@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.sherlock.core.streams;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
@@ -18,7 +19,7 @@ import java.util.zip.ZipOutputStream;
 import org.eclipse.rcptt.sherlock.core.SherlockCore;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 
-public class SherlockReportOutputStream {
+public class SherlockReportOutputStream implements Closeable {
 	private ZipOutputStream stream;
 	int index = 0;
 

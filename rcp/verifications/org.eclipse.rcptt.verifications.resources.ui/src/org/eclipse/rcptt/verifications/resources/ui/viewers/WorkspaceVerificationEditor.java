@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -25,7 +26,7 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.ecore.util.EContentAdapter;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.CellEditor;
@@ -89,7 +90,6 @@ import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 
-@SuppressWarnings("deprecation")
 public class WorkspaceVerificationEditor extends BaseVerificationEditor {
 
 	private boolean corrected = false;
@@ -224,8 +224,8 @@ public class WorkspaceVerificationEditor extends BaseVerificationEditor {
 	}
 	
 	private void createAllowUncapturedControls(Composite parent, FormToolkit toolkit) {
-		Button allowUncapturedFiles = toolkit.createButton(parent, "Allow uncaptured files", SWT.CHECK);
-		GridDataFactory.fillDefaults().span(2, 1).applyTo(allowUncapturedFiles);
+		Button allowUncapturedFilesCheckbox = toolkit.createButton(parent, "Allow uncaptured files", SWT.CHECK);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(allowUncapturedFilesCheckbox);
 
 		Label notAllowedPatternsLabel = new Label(parent, SWT.NONE);
 		notAllowedPatternsLabel.setText(
@@ -235,43 +235,42 @@ public class WorkspaceVerificationEditor extends BaseVerificationEditor {
 		GridDataFactory.fillDefaults().span(2, 1).hint(100, SWT.DEFAULT)
 				.applyTo(notAllowedPatternsLabel);
 
-		Text notAllowedPatterns = toolkit.createText(parent, "", SWT.BORDER);
-		notAllowedPatterns.setBackground(null);
+		Text notAllowedPatternsText = toolkit.createText(parent, "", SWT.BORDER);
+		notAllowedPatternsText.setBackground(null);
 		GridDataFactory.fillDefaults().grab(true, false).span(2, 1)
-				.hint(100, SWT.DEFAULT).applyTo(notAllowedPatterns);
+				.hint(100, SWT.DEFAULT).applyTo(notAllowedPatternsText);
 
-		dbc.bindValue(SWTObservables.observeEnabled(notAllowedPatterns),
-				EMFObservables.observeValue(
-						getVerificationElement(),
-						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__ALLOW_UNCAPTURED_FILES));
+		IObservableValue<Boolean> allowUncapturedFiles = EMFObservables.observeValue(
+				getVerificationElement(),
+				WorkspacePackage.Literals.WORKSPACE_VERIFICATION__ALLOW_UNCAPTURED_FILES);
+		dbc.bindValue(WidgetProperties.enabled().observe(notAllowedPatternsText),
+				allowUncapturedFiles);
 
-		dbc.bindValue(SWTObservables.observeEnabled(notAllowedPatternsLabel),
-				EMFObservables.observeValue(
-						getVerificationElement(),
-						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__ALLOW_UNCAPTURED_FILES));
-
-		dbc.bindValue(
-				SWTObservables.observeSelection(allowUncapturedFiles),
-				EMFObservables.observeValue(
-								getVerificationElement(),
-						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__ALLOW_UNCAPTURED_FILES));
+		dbc.bindValue(WidgetProperties.enabled().observe(notAllowedPatternsLabel),
+				allowUncapturedFiles);
 
 		dbc.bindValue(
-				SWTObservables.observeText(notAllowedPatterns, SWT.Modify),
-				EMFObservables.observeValue(
-								getVerificationElement(),
-								WorkspacePackage.Literals.WORKSPACE_VERIFICATION__NOT_ALLOWED_PATTERNS));
+				WidgetProperties.buttonSelection().observe(allowUncapturedFilesCheckbox),
+				allowUncapturedFiles);
+
+		IObservableValue<String> notAllowedPatterns = EMFObservables.observeValue(
+						getVerificationElement(),
+						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__NOT_ALLOWED_PATTERNS);
+		dbc.bindValue(
+				WidgetProperties.text(SWT.Modify).observe(notAllowedPatternsText),
+				notAllowedPatterns);
 	}
 
 	private void createIgnoreWhiteSpaceControls(Composite parent, FormToolkit toolkit) {
-		Button ignoreWhiteSpace = toolkit.createButton(parent, "Ignore white space", SWT.CHECK);
-		GridDataFactory.fillDefaults().span(2, 1).applyTo(ignoreWhiteSpace);
+		Button ignoreWhiteSpaceCheckbox = toolkit.createButton(parent, "Ignore white space", SWT.CHECK);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(ignoreWhiteSpaceCheckbox);
 
+		IObservableValue<Boolean> ignoerWhiteSpaceCheckbox = EMFObservables.observeValue(
+				getVerificationElement(),
+				WorkspacePackage.Literals.WORKSPACE_VERIFICATION__IGNORE_WHITE_SPACE);
 		dbc.bindValue(
-				SWTObservables.observeSelection(ignoreWhiteSpace),
-				EMFObservables.observeValue(
-						getVerificationElement(),
-						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__IGNORE_WHITE_SPACE));
+				WidgetProperties.buttonSelection().observe(ignoreWhiteSpaceCheckbox),
+				ignoerWhiteSpaceCheckbox);
 	}
 
 	private void createIgnoredLinesControls(Composite parent, FormToolkit toolkit) {
@@ -283,16 +282,17 @@ public class WorkspaceVerificationEditor extends BaseVerificationEditor {
 		GridDataFactory.fillDefaults().span(2, 1).hint(100, SWT.DEFAULT)
 				.applyTo(ignoredLinePatternsLabel);
 
-		Text ignoredLinePatterns = toolkit.createText(parent, "", SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		ignoredLinePatterns.setBackground(null);
+		Text ignoredLinePatternsText = toolkit.createText(parent, "", SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+		ignoredLinePatternsText.setBackground(null);
 		GridDataFactory.fillDefaults().grab(true, false).span(2, 6)
-				.hint(100, SWT.DEFAULT).applyTo(ignoredLinePatterns);
+				.hint(100, SWT.DEFAULT).applyTo(ignoredLinePatternsText);
 
+		IObservableValue<String> ignoredLinePatterns = EMFObservables.observeValue(
+				getVerificationElement(),
+				WorkspacePackage.Literals.WORKSPACE_VERIFICATION__IGNORED_LINES);
 		dbc.bindValue(
-				SWTObservables.observeText(ignoredLinePatterns, SWT.Modify),
-				EMFObservables.observeValue(
-						getVerificationElement(),
-						WorkspacePackage.Literals.WORKSPACE_VERIFICATION__IGNORED_LINES));
+				WidgetProperties.text(SWT.Modify).observe(ignoredLinePatternsText),
+				ignoredLinePatterns);
 	}
 
 	private Tree createTree(Composite parent, FormToolkit toolkit) {
@@ -453,6 +453,7 @@ public class WorkspaceVerificationEditor extends BaseVerificationEditor {
 		Button button = toolkit.createButton(parent, action.getText(), SWT.PUSH);
 		button.setData(action);
 		Image image = action.getImageDescriptor().createImage();
+		button.addDisposeListener(event -> image.dispose());
 		button.setImage(image);
 		button.addSelectionListener(new SelectionAdapter() {
 

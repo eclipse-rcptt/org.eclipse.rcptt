@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.resources;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.rcptt.core.scenario;bundle-version="[2.5.5,3.0.0)";visibility:=reexport,
- org.eclipse.rcptt.core;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.util;bundle-version="[2.5.5,3.0.0)",
+ org.eclipse.rcptt.core.scenario;bundle-version="[2.6.0,3.0.0)";visibility:=reexport,
+ org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.core.resources
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.resources,
@@ -19,3 +19,4 @@ Export-Package: org.eclipse.rcptt.resources,
  org.eclipse.rcptt.workspace.impl,
  org.eclipse.rcptt.workspace.util
 Bundle-Activator: org.eclipse.rcptt.internal.resources.Activator
+Automatic-Module-Name: org.eclipse.rcptt.resources

@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.verifications.text.ui;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.rcptt.core.scenario.WidgetVerification;
-import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.ui.editors.IQ7Editor;
 import org.eclipse.rcptt.ui.editors.IQ7Viewer;
 
@@ -22,11 +19,6 @@ public class TextVerificationViewer implements IQ7Viewer<WidgetVerification> {
 	@Override
 	public String getLabel(WidgetVerification source) {
 		return "Widget Text";
-	}
-
-	@Override
-	public ImageDescriptor getImage(WidgetVerification source) {
-		return Images.getImageDescriptor(Images.VERIFICATION);
 	}
 
 	@Override

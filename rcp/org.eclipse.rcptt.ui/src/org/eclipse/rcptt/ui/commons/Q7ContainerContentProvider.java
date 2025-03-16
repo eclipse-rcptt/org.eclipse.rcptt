@@ -13,6 +13,7 @@ package org.eclipse.rcptt.ui.commons;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.internal.ide.misc.ContainerContentProvider;
@@ -34,6 +35,11 @@ public class Q7ContainerContentProvider extends ContainerContentProvider {
 						continue;
 					}
 				} catch (CoreException e) {
+					continue;
+				}
+			}
+			if (child instanceof IFolder) {
+				if (".settings".equals(((IFolder) child).getName())) { 
 					continue;
 				}
 			}

@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ecl.internal.core;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -65,57 +69,138 @@ public class ProcessStatusConverter implements
 					ps.getMessage(), th);
 		}
 	}
+	
+	private static Optional<Throwable> constructWithMessageAndCause(Class<?> clazz, EclException exception, Consumer<Throwable> suppress) {
+		try {
+			Constructor<?> constructor = clazz.getConstructor(
+					String.class, Throwable.class);
+			Throwable newInstance = (Throwable) constructor
+					.newInstance(exception.getMessage(), getThrowable(exception.getCause()));
+			return Optional.of(newInstance);
+		} catch (NoSuchMethodException  e) {
+		} catch (InstantiationException| IllegalAccessException | IllegalArgumentException |InvocationTargetException  e) {
+			suppress.accept(e);
+		}
+		return Optional.empty();
+	}
+
+	private static Optional<Throwable> constructWithStatus(Class<?> clazz, EclException exception, Consumer<Throwable> suppress) {
+		try {
+			if (exception.getStatus() != null) { 
+				Constructor<?> constructor = clazz.getConstructor(IStatus.class);
+				Throwable newInstance = (Throwable) constructor
+						.newInstance(toIStatus(exception.getStatus()));
+				return Optional.of(newInstance);
+			}
+		} catch (NoSuchMethodException  e) {
+		} catch (InstantiationException| IllegalAccessException | IllegalArgumentException |InvocationTargetException  e) {
+			suppress.accept(e);
+		}
+		return Optional.empty();
+	}
+	
+	private static Optional<Throwable> constructWithMessage(Class<?> clazz, EclException exception, Consumer<Throwable> suppress) {
+		try {
+			Constructor<?> constructor = clazz.getConstructor(String.class);
+			Throwable newInstance = (Throwable) constructor
+					.newInstance(exception.getMessage());
+			return Optional.of(newInstance);
+		} catch (NullPointerException | NoSuchMethodException  e) {
+		} catch (InstantiationException| IllegalAccessException | IllegalArgumentException |InvocationTargetException  e) {
+			suppress.accept(e);
+		}
+		return Optional.empty();
+	}
+	
+	private static Optional<Throwable> constructWithCause(Class<?> clazz, EclException exception, Consumer<Throwable> suppress) {
+		try {
+			Constructor<?> constructor = clazz.getConstructor(Throwable.class);
+			Throwable newInstance = (Throwable) constructor
+					.newInstance(getThrowable(exception.getCause()));
+			return Optional.of(newInstance);
+		} catch (NullPointerException | NoSuchMethodException  e) {
+		} catch (InstantiationException| IllegalAccessException | IllegalArgumentException |InvocationTargetException  e) {
+			suppress.accept(e);
+		}
+		return Optional.empty();
+	}
+
+
+	private static Optional<Throwable> constructWithoutArguments(Class<?> clazz, EclException exception, Consumer<Throwable> suppress) {
+		try {
+			Constructor<?> constructor = clazz.getConstructor();
+			Throwable newInstance = (Throwable) constructor.newInstance();
+			return Optional.of(newInstance);
+		} catch (NoSuchMethodException  e) {
+		} catch (InstantiationException| IllegalAccessException | IllegalArgumentException |InvocationTargetException  e) {
+			suppress.accept(e);
+		}
+		return Optional.empty();
+	}
+	
+	
+
 
 	public static Throwable getThrowable(EclException exception) {
 		if (exception == null)
 			return null;
-		Throwable th = null;
+		List<Throwable> suppressed = new ArrayList<>();
+		// Try to restore stored exception.
 		try {
-			// Try to restore stored exception.
-			th = exception.getThrowable();
-			if (!Objects.equals(th.getClass().getName(), exception.getClassName())) {
-				throw new IllegalStateException(String.format("Bad class, expected: %s, actual: %s ", exception.getClassName(), th.getClass().getName()));
+			Throwable th = exception.getThrowable();
+			if (th != null && Objects.equals(th.getClass().getName(), exception.getClassName())) {
+				return th;
 			}
-		} catch (Throwable ee) {
-			// Failed to restore exception, try to construct new one
-			try {
-				String className = exception.getClassName();
-				Class<?> forName = Class.forName(className);
-				try {
-					Constructor<?> constructor = forName.getConstructor(
-							String.class, Throwable.class);
-					Throwable newInstance = (Throwable) constructor
-							.newInstance(exception.getMessage(), getThrowable(exception.getCause()));
-					th = newInstance;
-				} catch (NoSuchMethodException  e) {
-					if (exception.getStatus() == null)
-						throw e;
-					Constructor<?> constructor = forName.getConstructor(IStatus.class);
-					Throwable newInstance = (Throwable) constructor
-							.newInstance(toIStatus(exception.getStatus()));
-					th = newInstance;
-					th.addSuppressed(e);
-				}
-				th.addSuppressed(ee);
-			} catch (Exception eee) {
-				if (exception.getStatus() != null) {
-					th = new CoreException(toIStatus(exception.getStatus()));
-				} else {
-					th = new Exception(exception.getMessage(), getThrowable(exception.getCause()));
-				}
-				th.addSuppressed(eee);
+		} catch (RuntimeException e) {
+			suppressed.add(e);
+		}
+
+		// Failed to restore exception, try to construct new one
+		
+		Class<?> clazz;
+		try {
+			String className = exception.getClassName();
+			clazz = Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			suppressed.add(e);
+			clazz = IOException.class;
+			if (exception.getStatus() != null) {
+				clazz = CoreException.class;
 			}
 		}
-		if (th != null) {
-			copyAttributesFromEObject(exception, th);
+
+		Optional<Throwable> result;
+		
+		result = constructWithMessageAndCause(clazz, exception, suppressed::add);
+		
+		if (!result.isPresent()) {
+			result = constructWithStatus(clazz, exception, suppressed::add);
 		}
-		return th;
+		
+		if (!result.isPresent()) {
+			result = constructWithMessage(clazz, exception, suppressed::add);
+		}
+		
+		if (!result.isPresent()) {
+			result = constructWithCause(clazz, exception, suppressed::add);
+		}
+
+		if (!result.isPresent()) {
+			result = constructWithoutArguments(clazz, exception, suppressed::add);
+		}
+
+		Throwable finalResult = result.orElse(new IOException(exception.getClassName() + ": " + exception.getMessage()));
+		copyAttributesFromEObject(exception, finalResult);
+		suppressed.forEach(finalResult::addSuppressed);
+		exception.setThrowable(finalResult);
+		return finalResult;
 	}
 
 	private static void copyAttributesFromEObject(EclException exception, Throwable newInstance) {
 		EList<EclStackTraceEntry> list = exception.getStackTrace();
-		if (list.size() > 0) {
-			newInstance.setStackTrace(constructStack(list));
+		newInstance.setStackTrace(constructStack(list));
+		if (newInstance.getCause() == null && exception.getCause() != null) {
+			newInstance.initCause(getThrowable(exception.getCause()));
 		}
 	}
 

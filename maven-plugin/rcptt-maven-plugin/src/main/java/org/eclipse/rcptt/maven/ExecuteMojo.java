@@ -81,9 +81,10 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	private static final String RAP_BROWSER_COMMAND = "-browserCmd";
 	private static final String RUNNER_PLATFORM = "-runnerPlatform";
 	private static final String TESTENGINE = "-testEngine";
+	private static final String ENABLE_SOFTWARE_INSTALLATION = "-enableSoftwareInstallation";
 
 	private static int shutdownListenerPort;
-	private static final String[] DEFAULT_Q7_VM_ARGS = new String[] { "-Xms128m", "-Xmx256m",
+	private static final String[] DEFAULT_Q7_VM_ARGS = new String[] { "-Xms256m", "-Xmx512m",
 			"-Dorg.eclipse.rcptt.runner.returnTestFailure=true" };
 
 	// TODO: Replace this random number with carefully thought one
@@ -182,6 +183,11 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 		if (aut.getVm() != null) {
 			cmd.createArg().setValue(AUT_VM);
 			cmd.createArg().setValue(aut.getVm());
+		}
+		// AUT enableSoftwareInstallation
+		if (aut.enableSoftwareInstallation())
+		{
+			cmd.createArg().setValue(ENABLE_SOFTWARE_INSTALLATION);
 		}
 
 		if (getQ7Coords().getPlatform().toLowerCase().equals("rap")) {
@@ -310,8 +316,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	Thread ShutdownHook = new Thread() {
 		@Override
 		public void run() {
-			try {
-				new Socket("127.0.0.1", shutdownListenerPort);
+			try (Socket socket = new Socket("127.0.0.1", shutdownListenerPort)) {
 			} catch (IOException e) {
 				System.out.println(e);
 			}

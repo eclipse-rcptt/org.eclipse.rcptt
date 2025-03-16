@@ -1,14 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_zOzvECeMEeGm5NjoKhWsPQ,_ZQYygK2sEeCqBbDEJWufvQ
 Element-Name: Apply ECL Context
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _4WpBACeLEeGm5NjoKhWsPQ
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:10 PM
+Runtime-Version: 2.5.5.202403310907
+Save-Time: 3/31/24, 2:39 PM
 Tags: selfAUT, Context, ECLContext, Runtime
 Testcase-Type: ecl
 
@@ -38,10 +37,16 @@ Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "Q7Project/Delete Test" | double-click -nowait
 get-editor "Delete Test" | get-button Replay | click
+
 with [get-view "Execution View"] {
-    get-tree | get-item "Delete Test.*" | get-property caption | equals "Delete Test.*" 
-        | verify-true
-    get-label "1/1" | get-property caption | equals "1/1" | verify-true
-    get-label 0 | get-property caption | equals 0 | verify-true
+	try -times 10 -delay 20000 -command {
+		get-label -after [get-label "Runs:"] | get-property caption | equals "1/1" | verify-true
+	}
+}
+
+with [get-view "Execution View"] {
+	get-tree | get-item "Delete Test.*" | get-property caption | equals "Delete Test.*" | verify-true
+	get-label "1/1" | get-property caption | equals "1/1" | verify-true
+	get-label 0 | get-property caption | equals 0 | verify-true
 }
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

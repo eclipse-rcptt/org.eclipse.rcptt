@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2024 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -78,18 +78,26 @@ public class TeslaGefAccess {
 		return null;
 	}
 
-	public static Object getThis(Object widget) {
-		Field this$0;
+	private static Object get(Object widget, String fieldName) {
+		Field f;
 		try {
 			Class<? extends Object> cl = widget.getClass();
-			this$0 = cl.getDeclaredField("this$0");
-			this$0.setAccessible(true);
-			return this$0.get(widget);
-		} catch (Throwable e) {
-			// GefActivator.log(e);
-			// ignore
+			f = cl.getDeclaredField(fieldName);
+			f.setAccessible(true);
+			return f.get(widget);
+		} catch (NoSuchFieldException e) {
+			return null;
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(e);
 		}
-		return null;
+	}
+
+	public static Object getThis(Object widget) {
+		return get(widget, "this$0");
+	}
+
+	public static Object getArg(Object widget) {
+		return get(widget, "arg$1");
 	}
 
 	@SuppressWarnings("rawtypes")

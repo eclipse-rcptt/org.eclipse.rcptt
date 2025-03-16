@@ -27,11 +27,10 @@ public class PreferencesAdapterFactory implements IAdapterFactory {
 
 	private static final Class<?>[] ADAPTER_LIST = new Class<?>[] { IPropertySource.class };
 
-	@SuppressWarnings({ "rawtypes" })
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == IPropertySource.class
 				&& adaptableObject instanceof PrefNode) {
-			return new PrefNodePropertySource((PrefNode) adaptableObject);
+			return adapterType.cast(new PrefNodePropertySource((PrefNode) adaptableObject));
 		}
 		return null;
 	}

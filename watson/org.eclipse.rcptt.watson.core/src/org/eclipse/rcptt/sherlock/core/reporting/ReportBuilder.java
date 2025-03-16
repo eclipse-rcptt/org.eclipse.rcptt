@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.sherlock.core.reporting;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
@@ -381,7 +382,7 @@ public class ReportBuilder implements IReportBuilder {
 	public static Snaphot createSnapshot(EObject data, Map<String, EObject> properties) {
 		Snaphot snapshot = ReportFactory.eINSTANCE.createSnaphot();
 		snapshot.setTime(getTime());
-		snapshot.setData(data);
+		snapshot.setData(Objects.requireNonNull(data));
 		if (properties != null) {
 			snapshot.getProperties().addAll(properties.entrySet());
 		}

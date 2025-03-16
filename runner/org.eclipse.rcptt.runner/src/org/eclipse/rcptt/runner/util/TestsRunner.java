@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -68,6 +69,7 @@ public class TestsRunner {
 	private final ResultsHandler resultsHandler;
 	private final AUTsManager auts;
 	private int failedCount = 0;
+	private AtomicReference<Exception> error = new AtomicReference<>(null);
 
 	public int getFailedCount() {
 		return failedCount;
@@ -86,13 +88,10 @@ public class TestsRunner {
 
 		TestSuite[] tests;
 		tests = findScenarios();
-		if (tests.length > 0) {
-			return runTests(tests);
-		} else {
-			System.out.println("No tests to run.");
+		if (tests.length <= 0) {
+			throw new IllegalArgumentException("No tests found.");
 		}
-
-		return null;
+		return runTests(tests);
 	}
 
 	private static List<String> buildTestNamePatterns(List<String> globs) {
@@ -257,21 +256,13 @@ public class TestsRunner {
 		Assert.isTrue(auts.isClean(), "AUTs manages should not have been used before");
 		List<ScenarioRunnable> runnables = Collections.synchronizedList(new ArrayList<ScenarioRunnable>());
 		failedCount = 0;
-		final SherlockReportOutputStream reportWriter;
 		File reportFile = new File(conf.getQ7ReportLocation());
 
 		createFolderForFile(reportFile);
 
-		try {
-			reportWriter = new SherlockReportOutputStream(
-					new BufferedOutputStream(new FileOutputStream(reportFile)));
-		} catch (FileNotFoundException e1) {
-			System.out.println("Failed to create report file:" + conf.getQ7ReportLocation());
-			HeadlessRunnerPlugin.getDefault().info("Failed to create report file:" + conf.getQ7ReportLocation());
-			throw new RuntimeException(e1);
-		}
 		Set<String> failed = new HashSet<String>();
-		try {
+		try (SherlockReportOutputStream reportWriter = new SherlockReportOutputStream(
+					new BufferedOutputStream(new FileOutputStream(reportFile)))) {
 			int count = 0;
 			for (final TestSuite suite : tests) {
 				suite.setLimit(conf.limit);
@@ -354,6 +345,9 @@ public class TestsRunner {
 				}
 				if (!alive) {
 					// No alive threads -> finish
+					if (!runnables.isEmpty()) {
+						error.compareAndSet(null, new AutLaunchFail("AUT is not available", null));
+					}
 					skipRemaining(runnables, "AUT is not available");
 					break;
 				}
@@ -367,11 +361,12 @@ public class TestsRunner {
 					System.out.println(scenario);
 				}
 			}
+		} catch (FileNotFoundException e1) {
+			System.out.println("Failed to create report file:" + conf.getQ7ReportLocation());
+			HeadlessRunnerPlugin.getDefault().info("Failed to create report file:" + conf.getQ7ReportLocation());
+			throw new RuntimeException(e1);
 		} catch (InterruptedException e) {
 			HeadlessRunnerPlugin.getDefault().info("Execution interrupted");
-		}
-		catch( Exception e ) {
-			HeadlessRunnerPlugin.getDefault().info("Unexpected error happened...", e);
 		}
 		finally {
 			skipRemaining(runnables, "Execution finished");
@@ -383,8 +378,6 @@ public class TestsRunner {
 			}
 			auts.removeShutdownHook();
 			failedCount = failed.size();
-			if (reportWriter != null)
-				reportWriter.close();
 			TestEngineManager.getInstance().fireTestRunCompleted();
 		}
 
@@ -433,6 +426,13 @@ public class TestsRunner {
 				System.out.println("ERROR: report file is not writable: "
 						+ reportFile);
 			}
+		}
+	}
+
+	public void throwOnError() throws Exception {
+		Exception result = error.get();
+		if (result != null) {
+			throw result;
 		}
 	}
 

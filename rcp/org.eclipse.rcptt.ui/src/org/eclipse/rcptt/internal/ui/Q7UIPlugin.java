@@ -130,7 +130,7 @@ public class Q7UIPlugin extends AbstractUIPlugin {
 	}
 
 	public static IWorkbenchWindow getActiveWindow() {
-		IWorkbench workbench = getDefault().getWorkbench();
+		IWorkbench workbench = PlatformUI.getWorkbench();
 		IWorkbenchWindow active = workbench.getActiveWorkbenchWindow();
 		if (active == null) {
 			IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
@@ -182,6 +182,9 @@ public class Q7UIPlugin extends AbstractUIPlugin {
 				IQ7NamedElement[] namedElements = delta.getNamedElements();
 				for (final IQ7NamedElement e : namedElements) {
 					IQ7ElementDelta childDelta = delta.getChildBy(e);
+					if ((childDelta.getFlags() & IQ7ElementDelta.F_MARKERS) == 0) {
+						continue;
+					}
 					switch (childDelta.getKind()) {
 					case IQ7ElementDelta.REMOVED:
 					case IQ7ElementDelta.CHANGED:

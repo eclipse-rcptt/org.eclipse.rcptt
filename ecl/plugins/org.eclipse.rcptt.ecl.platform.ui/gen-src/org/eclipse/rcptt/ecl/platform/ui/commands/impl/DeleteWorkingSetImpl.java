@@ -73,6 +73,7 @@ public class DeleteWorkingSetImpl extends CommandImpl implements DeleteWorkingSe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public WorkingSet getInput() {
 		if (input != null && input.eIsProxy()) {
 			InternalEObject oldInput = (InternalEObject)input;
@@ -99,6 +100,7 @@ public class DeleteWorkingSetImpl extends CommandImpl implements DeleteWorkingSe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setInput(WorkingSet newInput) {
 		WorkingSet oldInput = input;
 		input = newInput;

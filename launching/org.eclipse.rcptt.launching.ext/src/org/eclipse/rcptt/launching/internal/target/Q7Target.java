@@ -76,14 +76,12 @@ public class Q7Target {
 	 */
 	public static class AutInstall {
 		private static final String OSGI_BUNDLES = "osgi.bundles";
-		private final OriginalOrderProperties config;
 		public final ProfileBundleContainer container;
 		public String userArea;
 
 		public AutInstall(ProfileBundleContainer container) {
 			this.container = container;
 			this.userArea = null;
-			this.config = TargetPlatformHelper.processConfiguration(this);
 		}
 
 		public TargetBundle[] getBundles() {
@@ -138,7 +136,7 @@ public class Q7Target {
 		}
 
 		protected OriginalOrderProperties getConfig() {
-			return config;
+			return MoreObjects.firstNonNull(TargetPlatformHelper.processConfiguration(this), new OriginalOrderProperties());
 		}
 	}
 }

@@ -392,7 +392,7 @@ public class P2Utils {
 				false); // slicingOptions.followOnlyFilteredRequirements());
 
 		IQueryable<IInstallableUnit> slice = slicer
-				.slice(availableUnits.toArray(new IInstallableUnit[availableUnits.size()]), monitor);
+				.slice(availableUnits, monitor);
 		availableUnits.addAll(slice.query(QueryUtil.ALL_UNITS, monitor).toSet());
 	}
 }

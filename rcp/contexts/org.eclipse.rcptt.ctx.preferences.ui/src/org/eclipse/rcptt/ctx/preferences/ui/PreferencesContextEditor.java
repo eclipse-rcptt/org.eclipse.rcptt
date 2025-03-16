@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.databinding.observable.value.ComputedValue;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.emf.common.notify.Notification;
@@ -24,9 +25,9 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EContentAdapter;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableList;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.CellEditor;
@@ -99,15 +100,16 @@ public class PreferencesContextEditor extends BaseContextEditor {
 				Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED)
 				.numColumns(2).create(parent, toolkit);
 		Composite composite = (Composite) section.getClient();
-		Button cleanPreferences = toolkit.createButton(composite,
+		Button cleanPreferencesButton = toolkit.createButton(composite,
 				"Clear preferences", SWT.CHECK);
+		IObservableValue<Boolean> cleanPreferences = EMFObservables
+				.observeValue(
+						getContextElement(),
+						PreferencesPackage.Literals.PREFERENCES_CONTEXT__CLEAN_PREFERENCES);
 		dbc.bindValue(
-				SWTObservables.observeSelection(cleanPreferences),
-				EMFObservables
-						.observeValue(
-								getContextElement(),
-								PreferencesPackage.Literals.PREFERENCES_CONTEXT__CLEAN_PREFERENCES));
-		GridDataFactory.fillDefaults().span(2, 1).applyTo(cleanPreferences);
+				WidgetProperties.buttonSelection().observe(cleanPreferencesButton),
+				cleanPreferences);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(cleanPreferencesButton);
 		Tree tree = createTree(composite, toolkit);
 
 		Composite panel = createPanel(composite, toolkit);
@@ -185,8 +187,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button importButton = toolkit.createButton(panel,
 				"Import Preferences...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(importButton);
-		importButton.setImage(Images.getImageDescriptor(
-				Images.PREFERENCES_IMPORT).createImage());
+		importButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		importButton.addSelectionListener(new SelectionAdapter() {
 
@@ -201,8 +202,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 
 		Button addButton = toolkit.createButton(panel, "Add...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(addButton);
-		addButton.setImage(Images.getImageDescriptor(Images.PREFERENCES_IMPORT)
-				.createImage());
+		addButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		addButton.addSelectionListener(new SelectionAdapter() {
 
@@ -218,14 +218,12 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button removeButton = toolkit.createButton(panel, "Remove", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(removeButton);
 		removeButton.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE)
-				.createImage());
-		dbc.bindValue(SWTObservables.observeEnabled(removeButton),
-				new ComputedValue() {
+				.getImage(ISharedImages.IMG_ETOOL_DELETE));
+		dbc.bindValue(WidgetProperties.enabled().observe(removeButton),
+				new ComputedValue<Boolean>() {
 
-					protected Object calculate() {
-						IViewerObservableList selection = ViewersObservables
-								.observeMultiSelection(viewer);
+					protected Boolean calculate() {
+						IViewerObservableList<?> selection = ViewerProperties.multipleSelection().observe(viewer);
 						return !selection.isEmpty();
 					}
 				});

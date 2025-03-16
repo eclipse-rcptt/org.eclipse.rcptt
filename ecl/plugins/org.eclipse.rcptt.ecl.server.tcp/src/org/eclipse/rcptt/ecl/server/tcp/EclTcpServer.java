@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ecl.server.tcp;
 
+import static org.eclipse.rcptt.ecl.internal.core.CorePlugin.log;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -46,14 +48,16 @@ public class EclTcpServer extends Thread {
 					manager.acceptNewConnection(client);
 				} catch (Exception e) {
 					if (!socket.isClosed()) {
-						CorePlugin.log(CorePlugin.err(
+						log(CorePlugin.err(
 								"Failed to accept connection", e));
 					}
 				}
 			}
 			socket.close();
 		} catch (Exception e) {
-			CorePlugin.log(CorePlugin.err("Failed to start ECL TCP server", e));
+			log(CorePlugin.err("Failed to start ECL TCP server", e));
+		} finally {
+			log(String.format("ECL TCP server on port %d has stopped", port));
 		}
 	}
 

@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.launching.rap.feature"
       label="RCPTT RAP launching"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -29,42 +29,42 @@
    </license>
    
    <requires>
-      <import feature="org.eclipse.rcptt.external.dependencies.rap.feature" version="2.5.5" match="compatible"/>
+      <import feature="org.eclipse.rcptt.external.dependencies.rap.feature" version="2.6.0" match="compatible"/>
    </requires>
 
  <plugin
          id="org.eclipse.rcptt.updates.runtime.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
     
    <plugin
          id="org.eclipse.rcptt.tesla.ecl.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.tesla.recording.core.ecl.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
      <plugin
          id="org.eclipse.rcptt.updates.external.dependencies.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

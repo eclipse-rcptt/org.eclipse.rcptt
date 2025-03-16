@@ -11,10 +11,11 @@
 package org.eclipse.rcptt.ui.editors;
 
 import org.eclipse.core.databinding.Binding;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.databinding.EMFProperties;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.text.IRegion;
@@ -74,7 +75,6 @@ public class EditorContent implements INamedElementActions {
 
 	private VerificationsTable verificationsTable;
 	private Section verificationsSection;
-	private Section propertiesSectionSection;
 
 	public EditorContent(EditorHeader header, boolean refs, boolean scenario) {
 		this.header = header;
@@ -130,7 +130,7 @@ public class EditorContent implements INamedElementActions {
 				if (namedElement instanceof Scenario) {
 					propertiesSection = new ScenarioProperties((Scenario) namedElement, toolkit);
 
-					propertiesSectionSection = new SectionWithToolbar(propertiesSection,
+					new SectionWithToolbar(propertiesSection,
 							Section.TITLE_BAR | Section.TWISTIE).create(parent, toolkit);
 				}
 			} catch (ModelException e) {
@@ -429,9 +429,10 @@ public class EditorContent implements INamedElementActions {
 			externalRefBinding.dispose();
 		}
 		if (externalRef != null) {
+			IObservableValue<String> externalReference = EMFProperties.value(ScenarioPackage.Literals.SCENARIO__EXTERNAL_REFERENCE).observe(getElement());
 			externalRefBinding = header.getDataBindingContext().bindValue(
-					SWTObservables.observeText(externalRef.getControl(), SWT.Modify),
-					EMFProperties.value(ScenarioPackage.Literals.SCENARIO__EXTERNAL_REFERENCE).observe(getElement()));
+					WidgetProperties.text(SWT.Modify).observe(externalRef.getControl()),
+					externalReference);
 		}
 		descriptionComposite.update(element);
 		if (contextTable != null) {

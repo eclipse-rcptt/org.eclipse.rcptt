@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7StatisticsImpl#getTotal <em>Total</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7StatisticsImpl#getFailed <em>Failed</em>}</li>
@@ -33,7 +34,6 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7StatisticsImpl#getSkipped <em>Skipped</em>}</li>
  *   <li>{@link org.eclipse.rcptt.reporting.impl.Q7StatisticsImpl#getPassed <em>Passed</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -162,6 +162,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getTotal() {
 		return total;
 	}
@@ -171,6 +172,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTotal(int newTotal) {
 		int oldTotal = total;
 		total = newTotal;
@@ -183,6 +185,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getFailed() {
 		return failed;
 	}
@@ -192,6 +195,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setFailed(int newFailed) {
 		int oldFailed = failed;
 		failed = newFailed;
@@ -204,6 +208,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getTime() {
 		return time;
 	}
@@ -213,6 +218,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTime(int newTime) {
 		int oldTime = time;
 		time = newTime;
@@ -225,6 +231,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getSkipped() {
 		return skipped;
 	}
@@ -234,6 +241,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSkipped(int newSkipped) {
 		int oldSkipped = skipped;
 		skipped = newSkipped;
@@ -246,6 +254,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getPassed() {
 		return passed;
 	}
@@ -255,6 +264,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPassed(int newPassed) {
 		int oldPassed = passed;
 		passed = newPassed;
@@ -369,7 +379,7 @@ public class Q7StatisticsImpl extends EObjectImpl implements Q7Statistics {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (total: ");
 		result.append(total);
 		result.append(", failed: ");

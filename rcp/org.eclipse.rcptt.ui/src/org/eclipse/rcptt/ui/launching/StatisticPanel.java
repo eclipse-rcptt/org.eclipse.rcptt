@@ -38,23 +38,22 @@ public class StatisticPanel extends Composite {
 
 		runsLabel = createLabel(Messages.StatisticPanel_RunsLabel, null);
 		failuresLabel = createLabel(Messages.StatisticPanel_FailuresLabel,
-				Images.getImageDescriptor(Images.SCENARIO_FAIL_STATISTIC)
-						.createImage());
-		stopsLabel = createLabel(Messages.StatisticPanel_StopsLabel,
-				Images.getImageDescriptor(Images.SCENARIO_STOP_STATISTIC)
-						.createImage());
+				Images.SCENARIO_FAIL_STATISTIC);
+		stopsLabel = createLabel(Messages.StatisticPanel_StopsLabel,Images.SCENARIO_STOP_STATISTIC);
 		totalTimeLabel = createLabel(Messages.StatisticPanel_TotalTimeLabel, null);
 
 		reset();
 	}
 
-	private Label createLabel(String name, Image image) {
+	private Label createLabel(String name, String imageId) {
 		Composite c = new Composite(this, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(c);
 
 		// Image
 		Label label = new Label(c, SWT.NONE);
-		if (image != null) {
+		if (imageId != null) {
+			Image image = Images.getImageDescriptor(imageId).createImage();
+			addDisposeListener(event -> image.dispose());
 			image.setBackground(label.getBackground());
 			label.setImage(image);
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER)

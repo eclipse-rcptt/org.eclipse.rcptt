@@ -12,10 +12,9 @@ package org.eclipse.rcptt.ctx.preferences.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -103,26 +102,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		IPreferencesService service = Platform.getPreferencesService();
 		IEclipsePreferences rootPreferences = service.getRootNode();
 
-		// Clean preferences before all actions
 		if (context.isCleanPreferences()) {
-			try {
-				String[] rootChildsNames = rootPreferences.childrenNames();
-				for (String rootChild : rootChildsNames) {
-					if (rootChild.equals("project")
-							|| rootChild.equals("instance")) {
-						// Remove project preferences
-						Preferences rootChildNode = rootPreferences
-								.node(rootChild);
-						removeSubNodes(rootChildNode);
-						// node.removeNode();
-					}
-				}
-				rootPreferences.flush();
-				rootPreferences.sync();
-			} catch (BackingStoreException e) {
-				throw new CoreException(Activator.createStatus(
-						"Could not clear preferences: " + e.getMessage(), e));
-			}
 			// Clear all dialog settings
 			Bundle[] bundles = Activator.getDefault().getBundle()
 					.getBundleContext().getBundles();
@@ -130,6 +110,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 				DialogSettingsUtils.clearDialogSettings(bundle);
 			}
 		}
+		HashSet<String> touchedNodes = new HashSet<>();
 		try {
 			for (PrefNode prefNode : context.getContent()) {
 				try {
@@ -142,8 +123,9 @@ public class PreferencesContextProcessor implements IContextProcessor {
 							RcpttPlugin.log(e);
 						}
 					}
-					applyPreferences(prefNode, rootPreferences,
-							context.isCleanPreferences());
+					String name = PrefUtils.substituteVariables(prefNode.getName());
+					applyPreferences(name, prefNode, rootPreferences,	context.isCleanPreferences());
+					touchedNodes.add(name);
 					rootPreferences.flush();
 				} catch (Throwable e) {
 					String nodeName = prefNode.getName();
@@ -176,6 +158,17 @@ public class PreferencesContextProcessor implements IContextProcessor {
 					applyDialogSettings(prefNode);
 				}
 			}
+			
+			if (context.isCleanPreferences()) {
+				// If values or nodes are removed and then re-added event listeners that require a value to always be present and valid fail
+				// We have to set new values immediately, without removing nodes first
+				// To cleanup unneeded nodes, we first compute and visit all needed ones and remove all the rest.
+				for (String key: rootPreferences.keys()) {
+					if (!touchedNodes.contains(key)) {
+						applyPreferences(key, PreferencesFactory.eINSTANCE.createPrefNode(), rootPreferences,	context.isCleanPreferences());
+					}
+				}
+			}
 
 			rootPreferences.flush();
 		} catch (IOException e) {
@@ -184,58 +177,6 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		} catch (BackingStoreException e) {
 			throw new CoreException(Activator.createStatus(
 					"Error during dialog settings applying.", e));
-		}
-	}
-
-	private void removeSubNodes(Preferences rootChildNode)
-			throws BackingStoreException {
-		rootChildNode.clear();
-
-		String[] topChildNames = rootChildNode.childrenNames();
-		for (String topChild : topChildNames) {
-			Preferences topChildNode = rootChildNode.node(topChild);
-			Map<String, String> storedProperties = new HashMap<String, String>();
-			if (topChild.equals("org.eclipse.pde.core")) {
-				for (String key : getPDECoreRequiredPreferencesList()) {
-					storedProperties.put(key, topChildNode.get(key, null));
-				}
-			}
-			if (topChild.equals("org.eclipse.jdt.core")) {
-				for (String key : getJDTCoreRequiredPreferencesList()) {
-					storedProperties.put(key, topChildNode.get(key, null));
-				}
-			}
-			topChildNode.clear();
-			try {
-				topChildNode.flush();
-			} catch (Throwable e) {
-				Activator.log(e);
-			}
-			// if (!"org.eclipse.pde.core".equals(child2)) {
-			// nde.removeNode();
-			// }
-
-			String[] childrenNames = topChildNode.childrenNames();
-			for (String child : childrenNames) {
-				Preferences childNode = topChildNode.node(child);
-				childNode.removeNode();
-			}
-
-			// Roll back some stored values if required
-			for (Map.Entry<String, String> e : storedProperties.entrySet()) {
-				if (e.getValue() != null) {
-					try {
-						topChildNode.put(e.getKey(), e.getValue());
-					} catch (Throwable eee) {
-						// ignore
-					}
-				}
-			}
-		}
-		try {
-			rootChildNode.flush();
-		} catch (Throwable e) {
-			Activator.log(e);
 		}
 	}
 
@@ -296,37 +237,24 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		return true;
 	}
 
-	private void applyPreferences(PrefNode currentPrefNode,
+	private void applyPreferences(String nodeName, PrefNode currentPrefNode,
 			Preferences parentPreferences, boolean clean)
 			throws BackingStoreException {
-		String nodeName = PrefUtils.substituteVariables(currentPrefNode.getName());
-		
 		Preferences preferences = parentPreferences.node(nodeName);
 
-		Map<String, String> storedProperties = new HashMap<String, String>();
+		Set<String> datasSet = new HashSet<String>();
 		if (nodeName.equals("org.eclipse.pde.core")) {
-			for (String key : getPDECoreRequiredPreferencesList()) {
-				storedProperties.put(key, preferences.get(key, null));
-			}
+			datasSet.addAll(Arrays.asList(getPDECoreRequiredPreferencesList()));
 		}
 		if (nodeName.equals("org.eclipse.jdt.core")) {
-			for (String key : getJDTCoreRequiredPreferencesList()) {
-				storedProperties.put(key, preferences.get(key, null));
-			}
-		}
-
-		if (clean) {
-			removeSubNodes(preferences);
-			// preferences.removeNode();
+			datasSet.addAll(Arrays.asList(getJDTCoreRequiredPreferencesList()));
 		}
 
 		preferences = parentPreferences.node(nodeName);
 
 		EList<PrefData> datas = currentPrefNode.getData();
-		Set<String> datasSet = new HashSet<String>();
 		for (PrefData data : datas) {
 			StringPrefData prefData = (StringPrefData) data;
-			datasSet.add(data.getKey());
 			if (prefData
 					.getKey()
 					.startsWith(
@@ -346,32 +274,45 @@ public class PreferencesContextProcessor implements IContextProcessor {
 			PrefUtils.decodePrefData(prefData);
 			PrefUtils.decodeWorkspaceLocation(prefData);
 			PrefUtils.substituteVariables(prefData);
+			datasSet.add(prefData.getKey());
 			try {
 				preferences.put(prefData.getKey(), prefData.getValue());
 			} catch (Throwable e) {
+				Activator.log(e);
 			}
 		}
+		
+		if (clean) {
+			for (String key: preferences.keys()) {
+				if (!datasSet.contains(key)) {
+					preferences.remove(key);
+				}
+			}
+		}
+		
+		
 		if (nodeName.equals("org.eclipse.ui.workbench")
 				|| datasSet.contains("OPEN_ON_SINGLE_CLICK")) {
 			processOpenStrategy(preferences);
 		}
-		// Roll back some stored values if required
-		for (Map.Entry<String, String> e : storedProperties.entrySet()) {
-			if (e.getValue() != null) {
-				try {
-					preferences.put(e.getKey(), e.getValue());
-				} catch (Throwable eee) {
-					// ignore
-				}
-			}
-		}
 
+		datasSet.clear();
 		EList<PrefNode> childs = currentPrefNode.getChilds();
 		for (PrefNode child : childs) {
 			try {
-				applyPreferences(child, preferences, false);
+				String name = PrefUtils.substituteVariables(child.getName());
+				datasSet.add(name);
+				applyPreferences(name, child, preferences, false);
 			} catch (Throwable e) {
-				RcpttPlugin.log(e);
+				Activator.log(e);
+			}
+		}
+		
+		if (clean) {
+			for (String key: preferences.childrenNames()) {
+				if (!datasSet.contains(key)) {
+					applyPreferences(key, PreferencesFactory.eINSTANCE.createPrefNode(), preferences, clean);
+				}
 			}
 		}
 	}

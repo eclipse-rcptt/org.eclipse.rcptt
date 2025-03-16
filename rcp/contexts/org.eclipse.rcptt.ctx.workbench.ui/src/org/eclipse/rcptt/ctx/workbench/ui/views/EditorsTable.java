@@ -12,8 +12,9 @@ package org.eclipse.rcptt.ctx.workbench.ui.views;
 
 import java.util.List;
 
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.emf.databinding.EMFObservables;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
@@ -54,10 +55,11 @@ public class EditorsTable extends EObjectTable {
 	public void createControl(Composite parent) {
 		closeEditorsButton = new Button(parent, SWT.CHECK);
 		closeEditorsButton.setText("Close opened editors");
-		dbc.bindValue(SWTObservables.observeSelection(closeEditorsButton),
-				EMFObservables.observeValue(getContent(),
-						ScenarioPackage.eINSTANCE
-								.getWorkbenchContext_CloseEditors()));
+		IObservableValue<Boolean> closeEditors = EMFObservables.observeValue(getContent(),
+				ScenarioPackage.eINSTANCE
+						.getWorkbenchContext_CloseEditors());
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(closeEditorsButton),
+				closeEditors);
 		super.createControl(parent);
 	}
 

@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -115,11 +115,8 @@ public class Q7Explorer extends CommonNavigator {
 		// set search result control for search control can pass focus after
 		// enter or down arrow
 		searchControl.setSearchResultControl(viewer.getControl());
-		final IObservableValue searchObservable = SWTObservables
-				.observeDelayedValue(
-						400,
-						SWTObservables.observeText(
-								searchControl.getFilterControl(), SWT.Modify));
+		final IObservableValue<String> searchObservable = 
+				WidgetProperties.text(SWT.Modify).observeDelayed(400, searchControl.getFilterControl());
 		job.addResultListener(new ResultListener() {
 			public void resultAdded(IQ7NamedElement result) {
 				final SearchFilter filter = findFilter();
@@ -133,9 +130,10 @@ public class Q7Explorer extends CommonNavigator {
 			}
 		});
 
-		searchObservable.addValueChangeListener(new IValueChangeListener() {
+		searchObservable.addValueChangeListener(new IValueChangeListener<String>() {
 
-			public void handleValueChange(ValueChangeEvent event) {
+			@Override
+			public void handleValueChange(ValueChangeEvent<? extends String> event) {
 				final SearchFilter filter = findFilter();
 				if (filter == null) {
 					return;
@@ -144,7 +142,7 @@ public class Q7Explorer extends CommonNavigator {
 				job.cancel();
 				refreshViewerJob.cancel();
 
-				final String newValue = (String) event.diff.getNewValue();
+				final String newValue = event.diff.getNewValue();
 				if ("".equals(newValue.trim())) { //$NON-NLS-1$
 					filter.setEnabled(false);
 					filter.clear();

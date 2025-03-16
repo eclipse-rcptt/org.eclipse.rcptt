@@ -37,6 +37,27 @@ public aspect JobsAspect {
 		}
 	}
 
+	/**
+	 *  Used to determine finished ui job's.
+	 *  Added for compatibility with Eclipse 4.26 changes to JobManager::endJob signature.
+	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
+	before(org.eclipse.core.internal.jobs.JobManager mgr,
+			org.eclipse.core.internal.jobs.InternalJob job, IStatus status,
+			boolean notify, boolean worker):
+		execution(void org.eclipse.core.internal.jobs.JobManager.endJob(org.eclipse.core.internal.jobs.InternalJob, IStatus, boolean, boolean))
+		&& target(mgr) && args(job, status, notify, worker) {
+		try {
+			if (job instanceof Job) {
+				JobsManager.getInstance().notifyJobDone((Job) job, status,
+						notify);
+			}
+			ProfilingJobsEventManager.getDefault().endJob(job,status, notify);
+		} catch (Throwable e) {
+			JobsActivator.log(e);
+		}
+	}
+
 	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around(org.eclipse.core.internal.jobs.InternalJob job, long time):
 		execution(void org.eclipse.core.internal.jobs.InternalJob.setStartTime(long)) 
@@ -70,6 +91,23 @@ public aspect JobsAspect {
 			JobsActivator.log(e);
 		}
 	}
+
+	/*
+	 * Profiling.
+	 * Added for compatibility with Eclipse 4.26 changes to JobManager::schedule signature.
+	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
+	before(org.eclipse.core.internal.jobs.InternalJob job, long delay):
+				execution(void org.eclipse.core.internal.jobs.JobManager.schedule(InternalJob, long))
+				&& args(job, delay){
+		try {
+			ProfilingJobsEventManager.getDefault().jobSchedule(job, delay,
+					false);
+		} catch (Throwable e) {
+			JobsActivator.log(e);
+		}
+	}
+
 
 	@SuppressAjWarnings("adviceDidNotMatch")
 	before(org.eclipse.core.internal.jobs.InternalJob job, int newState):

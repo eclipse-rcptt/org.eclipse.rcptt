@@ -3,17 +3,17 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.ecl.client.tcp.tests;singleton:=true
 Automatic-Module-Name: org.eclipse.rcptt.ecl.client.tcp.tests
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.junit;bundle-version="3.8.2",
  com.google.guava,
- org.eclipse.rcptt.ecl.client.tcp;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.ecl.core;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.ecl.core.tests;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.ecl.server.tcp;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.ecl.platform;bundle-version="[2.5.5,3.0.0)"
+ org.eclipse.rcptt.ecl.client.tcp;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.core.tests;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.server.tcp;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.platform;bundle-version="[2.6.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %providerName

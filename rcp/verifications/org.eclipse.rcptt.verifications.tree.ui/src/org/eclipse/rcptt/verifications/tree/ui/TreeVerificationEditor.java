@@ -11,7 +11,6 @@
 package org.eclipse.rcptt.verifications.tree.ui;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,9 +19,10 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.databinding.EMFObservables;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.CellEditor;
@@ -166,9 +166,10 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 		GridLayoutFactory.fillDefaults().applyTo(treeComposite);
 
 		widgetObservable = new TreeTableObservable(treeComposite);
-		treeDataBinding = dbc.bindValue(widgetObservable, EMFObservables.observeValue(
+		IObservableValue<Tree> tree = EMFObservables.observeValue(
 				getVerificationElement(),
-				TreePackage.Literals.COMMON_TREE_VERIFICATION_DATA__TREE));
+				TreePackage.Literals.COMMON_TREE_VERIFICATION_DATA__TREE);
+		treeDataBinding = dbc.bindValue(widgetObservable, tree);
 	}
 
 	private void createPropertiesControls(final FormToolkit toolkit,
@@ -210,9 +211,10 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 		unverifiedChildrenCheck
 				.setToolTipText("Tree items from verification without chirdren, may contain children in UI. " +
 						"This might happen when tree was not fully expanded during capturing.");
-		dbc.bindValue(SWTObservables.observeSelection(unverifiedChildrenCheck),
-				EMFObservables.observeValue(getVerificationElement(),
-						TreePackage.Literals.VERIFY_TREE_DATA__ALLOW_UNCAPTURED_CHILDREN));
+		IObservableValue<Boolean> allowUncapturedChildren = EMFObservables.observeValue(getVerificationElement(),
+				TreePackage.Literals.VERIFY_TREE_DATA__ALLOW_UNCAPTURED_CHILDREN);
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(unverifiedChildrenCheck),
+				allowUncapturedChildren);
 		align.applyTo(unverifiedChildrenCheck);
 
 		// Button missingColumnsCheck = new Button(parent, SWT.CHECK);
@@ -225,9 +227,10 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 		Button verifyIconsCheck = new Button(parent, SWT.CHECK);
 		verifyIconsCheck.setText("Verify icons");
 
-		dbc.bindValue(SWTObservables.observeSelection(verifyIconsCheck),
-				EMFObservables.observeValue(getVerificationElement(),
-						TreePackage.Literals.VERIFY_TREE_DATA__VERIFY_ICONS));
+		IObservableValue<Boolean> verifyIcons = EMFObservables.observeValue(getVerificationElement(),
+				TreePackage.Literals.VERIFY_TREE_DATA__VERIFY_ICONS);
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(verifyIconsCheck),
+				verifyIcons);
 		verifyIconsCheck.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -254,7 +257,7 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 	public void setSelectionAtLine(int line) {
 	}
 
-	private class TreeTableObservable extends AbstractObservableValue {
+	private class TreeTableObservable extends AbstractObservableValue<Tree> {
 		private Composite treeComposite = null;
 		private TreeViewer viewer = null;
 		private VerificationTreeLabelProvider labelProvider = null;
@@ -321,14 +324,14 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 		}
 
 		@Override
-		protected Object doGetValue() {
+		protected Tree doGetValue() {
 			return null;
 		}
 
 		@Override
-		protected void doSetValue(Object value) {
+		protected void doSetValue(Tree value) {
 			if (value instanceof Tree) {
-				Tree treeData = (Tree) value;
+				Tree treeData = value;
 				Map<String, Image> images = deserializeImages(treeComposite.getDisplay(), getVerificationElement()
 						.getImages());
 
@@ -512,14 +515,6 @@ public class TreeVerificationEditor extends WidgetVerificationEditor {
 		int totalColumnsCount = tree.getColumns().size();
 		int excludedColumnsCount = getVerificationElement().getExcludedColumns().size();
 		return String.format(ENABLED_COLUMNS_LABEL, totalColumnsCount - excludedColumnsCount, totalColumnsCount);
-	}
-
-	private static byte[] serializeImage(Image img) {
-		ImageLoader imageLoader = new ImageLoader();
-		imageLoader.data = new ImageData[] { img.getImageData() };
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		imageLoader.save(stream, SWT.IMAGE_PNG);
-		return stream.toByteArray();
 	}
 
 	private static Image deserializeImage(Display display, byte[] img) {

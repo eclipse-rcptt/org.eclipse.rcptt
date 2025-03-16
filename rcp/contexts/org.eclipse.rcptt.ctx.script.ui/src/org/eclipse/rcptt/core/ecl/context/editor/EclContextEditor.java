@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.ecl.context.editor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -36,13 +39,37 @@ import org.eclipse.rcptt.ui.editors.ecl.EclEditorInput;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
 public class EclContextEditor extends EclEditor {
+	private final List<Runnable> onDispose = new ArrayList<>();
 	public EclContextEditor() {
-		setTitleImage(EclContextViewer.getEclContextImage().createImage());
+		onDispose.add(0, super::dispose);
+		Image image = EclContextViewer.getEclContextImage().createImage();
+		setTitleImage(image);
+		onDispose.add(0, image::dispose);
+	}
+	
+	@Override
+	public void dispose() {
+		RuntimeException result = null;
+		for (Runnable runnable: onDispose) {
+			try {
+				runnable.run();
+			} catch (RuntimeException e) {
+				if (result == null) {
+					result = e;
+				} else {
+					result.addSuppressed(e);
+				}
+			}
+		}
+		if (result != null) {
+			throw result;
+		}
 	}
 
 	@Override
@@ -70,27 +97,29 @@ public class EclContextEditor extends EclEditor {
 		// do nothing
 	}
 
+	@Override
 	protected EditorHeader createEditorHeader() {
 		return new EditorHeader(getModel(), getElement()) {
 
+			@Override
 			protected Button createRecordButton(Composite composite,
 					FormToolkit toolkit) {
 				Button button = toolkit.createButton(composite,
 						Messages.ContextEditorPage_CaptureButtonText, SWT.PUSH);
-				button.setImage(Images.getImageDescriptor(Images.SNAPSHOT)
-						.createImage());
+				button.setImage(Images.getImage(Images.SNAPSHOT));
 				button.setBackground(null);
 				GridDataFactory.fillDefaults().applyTo(button);
 				button.setEnabled(false);
 				return button;
 			}
 
+			@Override
 			protected Button createReplayButton(Composite composite,
 					FormToolkit toolkit) {
 				Button button = toolkit.createButton(composite,
 						Messages.ContextEditorPage_ApplyButtonText, SWT.PUSH);
-				button.setImage(DebugUITools.getImageDescriptor(
-						IDebugUIConstants.IMG_ACT_RUN).createImage());
+				button.setImage(DebugUITools.getImage(
+						IDebugUIConstants.IMG_ACT_RUN));
 				button.setBackground(null);
 				GridDataFactory.fillDefaults().applyTo(button);
 				button.addSelectionListener(new SelectionAdapter() {
@@ -113,6 +142,7 @@ public class EclContextEditor extends EclEditor {
 		};
 	}
 
+	@Override
 	protected EditorContent createEditorContent() {
 		return new EditorContent(header, false, true);
 	}
@@ -136,6 +166,7 @@ public class EclContextEditor extends EclEditor {
 	protected void bindScriptContent() {
 		super.bindScriptContent();
 		IChangeListener scenarioContentListener = new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				String script;
 				try {
@@ -154,7 +185,8 @@ public class EclContextEditor extends EclEditor {
 				}
 			}
 		};
-		IObservableValue scriptContent = EMFObservables.observeValue(getElement(),
+		@SuppressWarnings("unchecked")
+		IObservableValue<Script> scriptContent = EMFObservables.observeValue(getElement(),
 				ContextPackage.Literals.ECL_CONTEXT__SCRIPT);
 		scriptContent.addChangeListener(scenarioContentListener);
 	}

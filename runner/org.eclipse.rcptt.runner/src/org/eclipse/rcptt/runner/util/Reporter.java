@@ -69,7 +69,7 @@ public class Reporter implements IReporter {
 			Q7ReportIterator report, String outFile) {
 		IReportRenderer renderer;
 		try {
-			renderer = rendererClass.newInstance();
+			renderer = rendererClass.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			log("Error creating renderer", e);
 			return;

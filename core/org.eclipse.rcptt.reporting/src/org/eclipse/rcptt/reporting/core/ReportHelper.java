@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.reporting.core;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.EMap;
@@ -160,7 +161,7 @@ public class ReportHelper {
 
 	public static void addSnapshotWithData(INodeBuilder node, EObject data) {
 		Snaphot snapshot = ReportFactory.eINSTANCE.createSnaphot();
-		snapshot.setData(data);
+		snapshot.setData(Objects.requireNonNull(data));
 		node.addSnapshot(snapshot);
 	}
 

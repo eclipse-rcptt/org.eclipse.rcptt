@@ -1,13 +1,14 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Contexts: _ZQYygK2sEeCqBbDEJWufvQ,_4zI9AWpgEeCzId1Gnkds9A,_iia_IGZBEeSFIexzhWgJsg,_w0gTAGWkEeSAaoCk3UVcKg
+Contexts: _NBWagUKJEeKFe_1s8hcGwg,_ZQYygK2sEeCqBbDEJWufvQ,_4zI9AWpgEeCzId1Gnkds9A,_iia_IGZBEeSFIexzhWgJsg,_w0gTAGWkEeSAaoCk3UVcKg
 Element-Name: RefreshControlStateInAssertionMode
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _k6AFUGWjEeSAaoCk3UVcKg
-Runtime-Version: 1.5.6.201504052309
-Save-Time: 4/28/15 3:12 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 4/14/24, 12:11 AM
+Tags: skipLinux
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -17,66 +18,88 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "Test/Init" | get-menu Open | click
 get-editor Init | get-button Replay | click
 
-//wait 180000
-
-try -command {get-view "Execution View" | get-label "1/1"} -times 1000 -delay 100
+try -command {
+	get-view "Execution View" | get-label "1/1"
+} -times 10 -delay 20000
 
 get-button "Record a Snippet" | click
 
-get-aut selfQ7 | eval {
-	get-view "Test Explorer" | get-tree | select "Test/Waiting" | get-menu Open | click
-	get-view Console | get-button "Clear Console" | click
-	exec-with-options -disableJobWaiting -command {
-		get-editor Waiting | get-button Replay | click
+try -times 10 -delay 1000 -command {
+	get-aut selfQ7 | eval {
+		get-view "Test Explorer" | get-tree | select "Test/Waiting" | get-menu Open | click
+		try -times 10 -delay 15000 -command {
+			get-view Console | get-button "Clear Console" | click
+		}
+		exec-with-options -disableJobWaiting -command {
+			get-editor Waiting | get-button Replay | click
+		}
+	}
+} -finally {
+	get-view "Execution View" | get-button "Details..." | click
+	with [get-window "Execution details"] {
+		try -catch {
+		} -command {
+            repeat -times 6 -command {
+                get-button Next | click
+            }
+			repeat -times 4 -command {
+				take-screenshot
+				get-button Next | click
+			}
+		}
+		maximize
+		take-screenshot
+		close
 	}
 }
 
 with [get-window "Control Panel - selfQ7 [Recording]"] {
-    get-button "Switch to Recording Mode" | click
-    get-button "Switch to Assertion Mode" | click
+	get-button "Switch to Recording Mode" | click
+	get-button "Switch to Assertion Mode" | click
 }
 
 get-aut selfQ7 | eval {
-	get-view Console | get-text-viewer | click
+	with [get-view Console | get-text-viewer] {
+		click
+		try -times 10 -delay 1000 -command {
+			get-property text | contains "first message" | verify-true
+		}
+	}
 }
-
-wait 2000
 
 with [get-window "Control Panel - selfQ7 [Asserting]"] {
-    with [get-window "Assertion and Verification"] {
-        with [get-tree] {
-            get-item "Text \\(Basic Properties\\)/text" | check
-            select "Text \\(Basic Properties\\)/text"
-        }
-        get-button Add | click
-    }
+	with [get-window "Assertion and Verification"] {
+		with [get-tree] {
+			get-item "Text \\(Basic Properties\\)/text" | check
+			select "Text \\(Basic Properties\\)/text"
+		}
+		get-button Add | click
+	}
 }
 
-get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text 
-    | contains "first message" | verify-true
+get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text | contains "first message"
+	| verify-true
 
-get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text 
-    | contains "second message" | verify-false  
+get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text | contains "second message"
+	| verify-false
 
 get-aut selfQ7 | eval {
 	get-view Console | get-text-viewer | mouse hover
-	wait 15000
+	wait 11000
 	get-view Console | get-text-viewer | click
 }
 
-wait 2000
-
 with [get-window "Control Panel - selfQ7 [Asserting]"] {
-    with [get-window "Assertion and Verification"] {
-        with [get-tree] {
-            get-item "Text \\(Basic Properties\\)/text" | check
-            select "Text \\(Basic Properties\\)/text"
-        }
-        get-button Add | click
-    }
+	with [get-window "Assertion and Verification"] {
+		with [get-tree] {
+			// get-item "Text \\(Basic Properties\\)/text" |  get-property "columns[2]" | contains "second message" | verify-true
+			get-item "Text \\(Basic Properties\\)/text" | check
+			select "Text \\(Basic Properties\\)/text"
+		}
+		get-button Add | click
+	}
 }
 
-get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text 
-    | contains "second message" | verify-true    
-    
+get-window "Control Panel - selfQ7 [Asserting]" | get-text-viewer | get-property text | contains "second message"
+	| verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

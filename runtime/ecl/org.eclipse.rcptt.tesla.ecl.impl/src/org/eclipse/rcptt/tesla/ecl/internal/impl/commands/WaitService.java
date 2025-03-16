@@ -30,7 +30,13 @@ public class WaitService implements ICommandService {
 		int ms = wait.getMs();
 		if (ms < 0)
 			return TeslaImplPlugin.err("Negative delay is not permitted");
-		Thread.sleep(ms); // any exceptions will be handled by session
+		long stop = System.currentTimeMillis() + ms;
+		while (System.currentTimeMillis() < stop) {
+			if (!context.isAlive()) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
+			Thread.sleep(100); // any exceptions will be handled by session
+		}
 		return Status.OK_STATUS;
 	}
 

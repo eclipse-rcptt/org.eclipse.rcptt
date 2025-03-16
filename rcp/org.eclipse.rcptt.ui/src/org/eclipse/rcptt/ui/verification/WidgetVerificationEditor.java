@@ -12,6 +12,8 @@ package org.eclipse.rcptt.ui.verification;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.CoreException;
@@ -22,7 +24,7 @@ import org.eclipse.emf.databinding.EMFUpdateValueStrategy;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationUpdater;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -107,10 +109,11 @@ public abstract class WidgetVerificationEditor implements IQ7Editor<WidgetVerifi
 				hint(1, SWT.DEFAULT).applyTo(selectorText);
 		selectorText.setFont(JFaceResources.getTextFont());
 		new EclStyledTextHighlighter().install(selectorText);
-		Binding selectorBinding = dbc.bindValue(SWTObservables.observeText(
-				selectorText, SWT.Modify), EMFObservables.observeValue(
-				getWidgetVerification(),
-				ScenarioPackage.Literals.WIDGET_VERIFICATION__SELECTOR),
+		IObservableValue<String> selector = EMFObservables.observeValue(
+		getWidgetVerification(),
+		ScenarioPackage.Literals.WIDGET_VERIFICATION__SELECTOR);
+		Binding selectorBinding = dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(
+				selectorText), selector,
 				selectorStrategy, selectorStrategy);
 		ControlDecorationSupport.create(selectorBinding, SWT.TOP | SWT.LEFT, box,
 				new ControlDecorationUpdater() {
@@ -178,10 +181,12 @@ public abstract class WidgetVerificationEditor implements IQ7Editor<WidgetVerifi
 		return form;
 	}
 
-	private EMFUpdateValueStrategy selectorStrategy = new EMFUpdateValueStrategy() {
+	@SuppressWarnings("unchecked")
+	private final UpdateValueStrategy<String, String> selectorStrategy = new EMFUpdateValueStrategy() {
 		{
-			this.setBeforeSetValidator(new IValidator() {
-				public IStatus validate(Object value) {
+			UpdateValueStrategy<String, String> typed = this;
+			typed.setBeforeSetValidator(new IValidator<String>() {
+				public IStatus validate(String value) {
 					String selector = (String) value;
 
 					if (StringUtils.isBlank(selector)) {

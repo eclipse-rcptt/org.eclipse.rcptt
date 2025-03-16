@@ -167,6 +167,7 @@ public final class DetailsDialog extends Dialog {
 				Image img = new Image(imageControl.getDisplay(),
 						new ByteArrayInputStream(imgData.data));
 				imageControl.setImage(img);
+				imageControl.addDisposeListener(event -> img.dispose());
 				current = selection;
 			}
 			// Update button enablement

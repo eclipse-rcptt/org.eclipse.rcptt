@@ -63,7 +63,7 @@ public class VerificationEditorPage extends NamedElementEditorPage implements IG
 			protected Button createRecordButton(Composite composite, FormToolkit toolkit) {
 				Button button = toolkit.createButton(composite,
 						Messages.VerificationEditorPage_CaptureButtonText, SWT.PUSH);
-				button.setImage(Images.getImageDescriptor(Images.SNAPSHOT).createImage());
+				button.setImage(Images.getImage(Images.SNAPSHOT));
 				button.setBackground(null);
 				GridDataFactory.fillDefaults().applyTo(button);
 				button.addSelectionListener(new SelectionAdapter() {
@@ -85,8 +85,8 @@ public class VerificationEditorPage extends NamedElementEditorPage implements IG
 			protected Button createReplayButton(Composite composite, FormToolkit toolkit) {
 				Button button = toolkit.createButton(composite,
 						Messages.VerificationEditorPage_VerifyButtonText, SWT.PUSH);
-				button.setImage(DebugUITools.getImageDescriptor(
-						IDebugUIConstants.IMG_ACT_RUN).createImage());
+				button.setImage(DebugUITools.getImage(
+						IDebugUIConstants.IMG_ACT_RUN));
 				button.setBackground(null);
 				GridDataFactory.fillDefaults().applyTo(button);
 				button.addSelectionListener(new SelectionAdapter() {

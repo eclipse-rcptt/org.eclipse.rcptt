@@ -51,6 +51,9 @@ public class TryService implements ICommandService, ISessionPropertyConstants {
 		ISession session = process.getSession();
 		try {
 			for (int i = 0; i < times; i++) {
+				if (!process.isAlive()) {
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
 				if (i + 1 == times && !t.isNoScreenshot()) {
 					session.putProperty(NO_SCREENSHOT, null);
 				} else {

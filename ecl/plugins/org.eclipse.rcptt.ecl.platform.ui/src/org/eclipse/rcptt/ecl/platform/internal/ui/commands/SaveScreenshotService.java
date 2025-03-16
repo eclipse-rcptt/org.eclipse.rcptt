@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ecl.platform.internal.ui.commands;
 
-import static org.eclipse.rcptt.ecl.platform.ui.PlatformUIPlugin.createError;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -81,20 +79,11 @@ public class SaveScreenshotService implements ICommandService {
 	}
 
 	private static IStatus writeData(File file, byte[] data) {
-		FileOutputStream out = null;
-		try {
-			out = new FileOutputStream(file);
+		try (FileOutputStream out = new FileOutputStream(file)) {
 			out.write(data);
-			out.close();
 			return Status.OK_STATUS;
 		} catch (IOException e) {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e1) {
-				}
-			}
-			return createError(e, "Error saving screenshot: %s", e.getMessage());
+			return Utils.error("Error saving screenshot: " + e.getMessage(), e);
 		}
 	}
 
@@ -233,5 +222,13 @@ public class SaveScreenshotService implements ICommandService {
 			}
 		});
 		return result.get();
+	}
+	
+	private static IStatus createError(String message) {
+		return Utils.error(message);
+	}
+	
+	private static IStatus createError(String format, Object... args) {
+		return createError(null, format, args);
 	}
 }

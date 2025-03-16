@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.module.testrail"
       label="RCPTT Testrail Support"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -32,27 +32,27 @@
          id="org.eclipse.rcptt.testrail"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.testrail.ui"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.testrail.ecl"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.module.testrail.updates"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"/>
+         version="2.6.0.qualifier"/>
 
 </feature>

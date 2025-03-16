@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _7lhuwF0IEeGDGrudSYLu8w
-Runtime-Version: 2.5.0.201910180844
-Save-Time: 10/21/19 3:20 AM
+Runtime-Version: 2.5.5.202403210919
+Save-Time: 3/25/24, 6:09 PM
 Tags: ECL_IDE_module, TestCase, Task
 Testcase-Type: ecl
 
@@ -71,12 +71,12 @@ with [get-view "Test Explorer"] {
 with [get-view "Test Explorer" | get-tree] {
     get-item "MyProject/TestFolder/WorkspaceIsEmpty" | get-property selected | equals false | verify-true
 }
-get-view Tasks | get-tree | select [get-item "" -index 1] | get-menu "Show In/Test Explorer" | click
+get-view Tasks | get-tree | select [get-item -path "\\/\\/ New verification should be added" -column Description ] | get-menu "Show In/Test Explorer" | click
 with [get-view "Test Explorer" | get-tree] {
     get-item "MyProject/TestFolder/WorkspaceIsEmpty" | get-property caption | equals WorkspaceIsEmpty | verify-true
     get-item "MyProject/TestFolder/WorkspaceIsEmpty" | get-property selected | equals true | verify-true
 }
-get-view Tasks | get-tree | select "" | get-menu "Go to Resource" | click
+get-view Tasks | get-tree | select "\\/\\/ FIXME.*" -column "Description" | get-menu "Go to Resource" | click
 get-editor "CreateJavaProject" | get-property active -raw | equals true | verify-true
 //get-tab-folder | get-property pages -index 0 | equals CreateJavaProject | verify-true
 get-editor CreateJavaProject | get-section Script | get-editbox | get-property text 
@@ -88,7 +88,7 @@ get-editor CreateJavaProject | get-section Script | get-editbox | get-property t
     + "get-view \"Package Explorer\" | get-tree | get-property itemCount | equals 1 | verify-true\n"
     + "get-view \"Package Explorer\" | get-tree | get-item TestProject | get-property caption | equals TestProject | verify-true" 
     | verify-true
-get-view Tasks | get-tree | select [get-item "" -index 2] | get-menu "Show In/Properties" | click
+get-view Tasks | get-tree | select [get-item "\\/\\/ TODO: Add new asserion after fixing of bug" -column Description] | get-menu "Show In/Properties" | click
 get-tab-folder -index 3 | get-property pages -index 4 | equals Properties | verify-true
 with [get-view Properties | get-tree] {
     get-property itemCount | equals 1 | verify-true

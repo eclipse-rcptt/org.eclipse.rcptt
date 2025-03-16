@@ -19,13 +19,16 @@ import org.eclipse.rcptt.ecl.core.CoreFactory;
 import org.eclipse.rcptt.ecl.core.Script;
 import org.eclipse.rcptt.ecl.runtime.ICommandService;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
-
+import org.eclipse.rcptt.internal.launching.ExecutionStatus;
+import org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil;
 import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.ecl.core.model.Q7CoreFactory;
 import org.eclipse.rcptt.core.ecl.core.model.SetQ7Features;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.Q7Launcher;
+import org.eclipse.rcptt.reporting.core.ReportHelper;
+import org.eclipse.rcptt.reporting.core.ReportManager;
 import org.eclipse.rcptt.testing.commands.Eval;
 import org.eclipse.rcptt.tesla.core.TeslaFeatures;
 import org.eclipse.rcptt.tesla.ecl.model.GetAdvancedInfo;
@@ -58,9 +61,16 @@ public class EvalService implements ICommandService {
 		Script script = CoreFactory.eINSTANCE.createScript();
 		script.setContent(eval.getScript());
 
-		launch.execute(script, Q7Launcher.getLaunchTimeout() * 1000,
+		try {
+			launch.execute(script, Q7Launcher.getLaunchTimeout() * 1000,
 				new NullProgressMonitor());
-
+		} catch (CoreException e) {
+			IStatus status = ExecAdvancedInfoUtil.askForAdvancedInfo(launch, e.getStatus());
+			if (status instanceof ExecutionStatus) {
+				ReportHelper.addSnapshotWithData(ReportManager.getCurrentReportNode(), ((ExecutionStatus) status).getInfo());
+			}
+			return status;
+		}
 		GetAdvancedInfo info = TeslaFactory.eINSTANCE.createGetAdvancedInfo();
 		Object result = launch.execute(info);
 		if (result != null) {

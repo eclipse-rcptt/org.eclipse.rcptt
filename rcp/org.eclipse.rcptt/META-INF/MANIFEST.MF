@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT
 Bundle-SymbolicName: org.eclipse.rcptt
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Automatic-Module-Name: org.eclipse.rcptt
 

@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.equinox.p2.query.IQueryResult;
@@ -88,8 +88,8 @@ public class Q7TargetPlatformInitializer {
 
 	public static IStatus initialize(ITargetPlatformHelper target,
 			IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask("Initialize AUT configuration", 100);
-		if (monitor.isCanceled())
+		SubMonitor sm = SubMonitor.convert(monitor, "Initialize AUT configuration", 100);
+		if (sm.isCanceled())
 			return Status.CANCEL_STATUS;
 
 		{
@@ -101,14 +101,14 @@ public class Q7TargetPlatformInitializer {
 		Map<String, Version> map = target.getVersions();
 
 		Q7Info q7Info = getInfo(target, map);
-		monitor.worked(20);
+		sm.worked(20);
 
 		try {
 			// Check for dependencies
 			IMetadataRepository repository = PDEHelper.safeLoadRepository(
-					q7Info.q7, new SubProgressMonitor(monitor, 20));
+					q7Info.q7, sm.split(20, SubMonitor.SUPPRESS_NONE));
 			if (repository == null) {
-				if (monitor.isCanceled())
+				if (sm.isCanceled())
 					return Status.CANCEL_STATUS;
 				return createError("Failed to load repository from " + q7Info.q7);
 			}
@@ -118,8 +118,7 @@ public class Q7TargetPlatformInitializer {
 			MultiStatus rv = new MultiStatus(PLUGIN_ID, 0, "Runtime injection failed for target platform " + target,
 					null);
 			if (injectionConfiguration != null) {
-				rv.add(target.applyInjection(injectionConfiguration, new SubProgressMonitor(
-						monitor, 60)));
+				rv.add(target.applyInjection(injectionConfiguration, sm.split(60, SubMonitor.SUPPRESS_NONE)));
 				if (rv.matches(IStatus.CANCEL))
 					return rv;
 			}

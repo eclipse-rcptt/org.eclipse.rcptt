@@ -69,7 +69,7 @@ public class Utils {
 			}
 
 			MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.INTERNAL_AUT_FAILURE,
-					"Internal Aut failure", null);
+					"Failed to close dialogs", null);
 			Shell[] shells = display.getShells();
 			for (int i = shells.length - 1; i >= 0; i--) {
 				Shell shell = shells[i];

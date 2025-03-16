@@ -4,10 +4,10 @@ Contexts: _B01ToH0KEeO5CYdzFmGe7Q,_4zI9AWpgEeCzId1Gnkds9A,_ZQYygK2sEeCqBbDEJWufv
 Element-Name: ErrLogVerification_NEGATIVE Case Denied Entry_Error
 Element-Type: testcase
 Element-Version: 3.0
-External-Reference: 
+External-Reference: https://github.com/eclipse/org.eclipse.rcptt/issues/58
 Id: _Iqh_IH0VEeO5CYdzFmGe7Q
-Runtime-Version: 2.5.2.202204181530
-Save-Time: 4/19/22, 6:18 PM
+Runtime-Version: 2.5.5.202404032246
+Save-Time: 4/4/24, 11:46 PM
 Tags: verification/Error Log, selfAUT
 Testcase-Type: ecl
 
@@ -32,24 +32,25 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "MyProject/ErrorLogVerification" | double-click
 get-editor ErrorLogVerification | get-section Deny | get-button "Add..." | click
 with [get-editor ErrorLogVerification | get-section Deny | get-table] {
-    select ".\\*" -column "Plugin Pattern"
-    get-cell 0 2 | uncheck
+	select ".\\*" -column "Plugin Pattern"
+	get-cell 0 2 | uncheck
 }
 with [get-editor ErrorLogVerification | get-section Deny | get-table] {
-    select ".\\*" -column "Plugin Pattern"
-    get-cell 0 1 | uncheck
+	select ".\\*" -column "Plugin Pattern"
+	get-cell -row 0 -column 1 | uncheck
+	   get-cell -row 0 -column 2 | uncheck
 }
 with [get-editor ErrorLogVerification | get-section Allow | get-table] {
-    select "org.eclipse.equinox" -column "Plugin Pattern" | get-menu Remove | click
-    key-type "M1+s"
+	select "org.eclipse.equinox" -column "Plugin Pattern" | get-menu Remove | click
+	key-type "M1+s"
 }
 get-view "Test Explorer" | get-tree | select "MyProject/TestCase" | double-click
 get-editor TestCase | get-button Replay | click
-get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text
-    | equals ".*\n"
-    + "Log entry\n"
-    + "Status ERROR: org.eclipse.equinox code=0 Error Entry.*\n"
-    + "is denied by predicate\n"
-    + "ERROR" | verify-true
 
+try -times 10 -delay 1000 -command {
+	get-view "Execution View" | get-label -after [get-label "Runs:"] | get-property caption | equals "1/1" | verify-true
+}
+
+get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text | equals ".*\nLog entry\nSt" +
+	"atus ERROR: org.eclipse.equinox code=0 Error Entry.*\nis denied by predicate\nERROR" | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

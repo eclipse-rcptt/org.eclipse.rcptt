@@ -33,6 +33,27 @@ public aspect JobsAspect {
 		}
 	}
 
+	/**
+	 * Used to determine finished ui job's.
+	 * Added for compatibility with Eclipse 4.26 changes to JobManager::endJob signature.
+	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
+	before(org.eclipse.core.internal.jobs.JobManager mgr,
+			org.eclipse.core.internal.jobs.InternalJob job, IStatus status,
+			boolean notify):
+		execution(void org.eclipse.core.internal.jobs.JobManager.endJob(org.eclipse.core.internal.jobs.InternalJob, IStatus, boolean, boolean))
+		&& target(mgr) && args(job, status, notify) {
+		try {
+			IJobsEventListener[] listeners = JobsEventManager.getDefault()
+					.getListeners();
+			for (IJobsEventListener l : listeners) {
+				l.endJob(job, status, notify);
+			}
+		} catch (Throwable e) {
+			JobsActivator.log(e);
+		}
+	}
+
 	// Profiling
 	@SuppressAjWarnings("adviceDidNotMatch")
 	before(org.eclipse.core.internal.jobs.InternalJob job, long delay,
@@ -44,6 +65,25 @@ public aspect JobsAspect {
 					.getListeners();
 			for (IJobsEventListener l : listeners) {
 				l.jobSchedule(job, delay, reshedule);
+			}
+		} catch (Throwable e) {
+			JobsActivator.log(e);
+		}
+	}
+
+	/*
+	 * Profiling.
+	 * Added for compatibility with Eclipse 4.26 changes to JobManager::schedule signature.
+	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
+	before(org.eclipse.core.internal.jobs.InternalJob job, long delay):
+				execution(void org.eclipse.core.internal.jobs.JobManager.schedule(InternalJob, long))
+				&& args(job, delay){
+		try {
+			IJobsEventListener[] listeners = JobsEventManager.getDefault()
+					.getListeners();
+			for (IJobsEventListener l : listeners) {
+				l.jobSchedule(job, delay, false);
 			}
 		} catch (Throwable e) {
 			JobsActivator.log(e);

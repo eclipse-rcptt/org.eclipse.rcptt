@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -163,13 +164,12 @@ public abstract class ContextSelectionDialog extends
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, NEW_ID,
 				Messages.ContextSelectionDialog_NewButtonText, false).setImage(
-				Images.getImageDescriptor(Images.CONTEXT).createImage());
+						Images.getImage(Images.CONTEXT));
 
 		Button captureBtn = createButton(parent, CAPTURE_ID,
 				Messages.ContextSelectionDialog_CaptureButtonText, false);
 		captureBtn.setImage(
-				Images.getImageDescriptor(Images.SNAPSHOT)
-						.createImage());
+				Images.getImage(Images.SNAPSHOT));
 		if (type != null) {
 			captureBtn.setEnabled(type.canCreate());
 		}

@@ -88,10 +88,7 @@ public class NewAUTPage extends WizardPage {
 	private WritableValue<String> nameValue = new WritableValue<String>("", String.class);
 	private WritableValue<String> locationValue = new WritableValue<String>("", String.class);
 	private WritableValue<ITargetPlatformHelper> info = new WritableValue<ITargetPlatformHelper>(null, ITargetPlatformHelper.class);
-	private WritableValue<Boolean> platformArchitecture64 = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
-	private WritableValue<Boolean> platformArchitecture32 = new WritableValue<Boolean>(Boolean.TRUE, Boolean.class);
 	private WritableValue<Boolean> architectureError = new WritableValue<>(Boolean.FALSE, Boolean.class);
-	private WritableValue<Boolean> archEnabled = new WritableValue<Boolean>(Boolean.TRUE, Boolean.class);
 	private WritableValue<Boolean> showAdvanced = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
 	private WritableValue<String> warningMessageValue = new WritableValue<String>("", String.class);
 	private WritableValue<Boolean> autolaunchValue = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
@@ -144,7 +141,6 @@ public class NewAUTPage extends WizardPage {
 		if (location.trim().length() == 0) {
 			setStatus(new Status(IStatus.CANCEL, Q7ExtLaunchingPlugin.PLUGIN_ID,
 					"Please specify your Eclipse application installation directory."));
-			archEnabled.setValue(Boolean.FALSE);
 			return;
 		}
 
@@ -202,7 +198,6 @@ public class NewAUTPage extends WizardPage {
 	private void validatePlatform() {
 		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
 		if (helper == null) {
-			archEnabled.setValue(Boolean.FALSE);
 			setError("Please specify correct Application installation directory...");
 			return;
 		}
@@ -222,28 +217,10 @@ public class NewAUTPage extends WizardPage {
 		}
 
 		architecture = helper.detectArchitecture(false, new StringBuilder());
-		switch (architecture) {
-		case Unknown:
-			archEnabled.setValue(Boolean.TRUE);
-			// obtain architecture from UI
-			if (Boolean.TRUE.equals(platformArchitecture32.getValue())) {
-				architecture = OSArchitecture.x86;
-			} else {
-				architecture = OSArchitecture.x86_64;
-			}
-			break;// Do not change value
-		case x86:
-			archEnabled.setValue(Boolean.FALSE);
-			platformArchitecture32.setValue(Boolean.TRUE);
-			platformArchitecture64.setValue(Boolean.FALSE);
-			break;
-		case x86_64:
-			archEnabled.setValue(Boolean.FALSE);
-			platformArchitecture32.setValue(Boolean.FALSE);
-			platformArchitecture64.setValue(Boolean.TRUE);
-			break;
+		if (OSArchitecture.Unknown.equals(architecture)) {
+			setError("Unable to detect AUT's architecture.");
+			return;
 		}
-
 		boolean haveArch = false;
 		try {
 			haveArch = findJVM();
@@ -253,10 +230,9 @@ public class NewAUTPage extends WizardPage {
 		}
 
 		architectureError.setValue(!haveArch);
+
 		if (!haveArch) {
-			setError("The selected AUT requires "
-					+ ((OSArchitecture.x86.equals(architecture)) ? "32 bit"
-							: "64 bit") + " Java VM which cannot be found.");
+			setError("The selected AUT requires " + architecture + " Java VM which cannot be found.");
 			return;
 		}
 
@@ -278,14 +254,12 @@ public class NewAUTPage extends WizardPage {
 		String name = ((String) nameValue.getValue()).trim();
 		if (name.length() == 0) {
 			setError("The name of Application Under Test (AUT) can not be empty.");
-			archEnabled.setValue(Boolean.FALSE);
 			return false;
 		}
 		for (char c : name.toCharArray()) {
 			if (FileUtil.isInvalidFileNameChar(c)) {
 				setError("Symbol \"" + c
 						+ "\" is not acceptable in AUT name.");
-				archEnabled.setValue(Boolean.FALSE);
 				return false;
 			}
 		}
@@ -304,7 +278,6 @@ public class NewAUTPage extends WizardPage {
 					setError(MessageFormat
 							.format("Application {0} already exists. Please specify a different name.",
 									name));
-					archEnabled.setValue(Boolean.FALSE);
 					return false;
 				}
 			}
@@ -322,7 +295,7 @@ public class NewAUTPage extends WizardPage {
 				final TimeTriggeredProgressMonitorDialog dialog = new TimeTriggeredProgressMonitorDialog(
 						shell, 500);
 				try {
-					dialog.run(true, false, new IRunnableWithProgress() {
+					dialog.run(true, true, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor)
 								throws InvocationTargetException,
 								InterruptedException {
@@ -367,8 +340,6 @@ public class NewAUTPage extends WizardPage {
 			}
 		};
 		info.addChangeListener(validatePlatformListener);
-		platformArchitecture32.addChangeListener(validatePlatformListener);
-		platformArchitecture64.addChangeListener(validatePlatformListener);
 
 		setControl(parent);
 		validate(info.getValue() == null);
@@ -446,22 +417,6 @@ public class NewAUTPage extends WizardPage {
 	}
 
 	private void createControlArch(final Composite parent) {
-		Label archLabel = new Label(parent, SWT.NONE);
-		archLabel.setText("Architecture:");
-
-		Composite archGroup = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(archGroup);
-		GridDataFactory.fillDefaults().span(1, 1).grab(true, false).applyTo(archGroup);
-		Button b32 = new Button(archGroup, SWT.RADIO);
-		Button b64 = new Button(archGroup, SWT.RADIO);
-		b32.setText("32bit");
-		b64.setText("64bit");
-
-		dbc.bindValue(WidgetProperties.enabled().observe(b32), archEnabled);
-		dbc.bindValue(WidgetProperties.enabled().observe(b64), archEnabled);
-		dbc.bindValue(WidgetProperties.buttonSelection().observe(b64), platformArchitecture64);
-		dbc.bindValue(WidgetProperties.buttonSelection().observe(b32), platformArchitecture32);
-
 		final Link archLink = new Link(parent, SWT.UNDERLINE_LINK);
 		archLink.setText("There is no appropriate JVM configured. <a>Configure JVM...</a>");
 		GridDataFactory.fillDefaults().span(3, 1).grab(true, false).applyTo(archLink);
@@ -487,6 +442,7 @@ public class NewAUTPage extends WizardPage {
 			}
 		});
 		dbc.bindValue(archLinkObservable, architectureError);
+
 	}
 
 	private void createControlAdvanced(Composite parent) {
@@ -503,6 +459,7 @@ public class NewAUTPage extends WizardPage {
 		});
 
 		dbc.bindValue(WidgetProperties.visible().observe(advanced), showAdvanced);
+
 	}
 
 	private void createControlAutolaunch(Composite parent) {
@@ -565,11 +522,7 @@ public class NewAUTPage extends WizardPage {
 	}
 
 	public OSArchitecture getArchitecture() {
-		if (Boolean.TRUE.equals(platformArchitecture32.getValue())) {
-			return OSArchitecture.x86;
-		} else {
-			return OSArchitecture.x86_64;
-		}
+		return architecture;
 	}
 
 	public void initializeExisting(String configName, String autLocation,

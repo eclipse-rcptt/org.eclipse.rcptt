@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.jobs;
 
+import java.lang.Math;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,9 +48,11 @@ public class JobsManager {
 	}
 
 	public synchronized long calculateNewTime(InternalJob job, long time) {
-		if (toNullifyTime.contains(job)) {
-			toNullifyTime.remove(job);
-			return 0;
+		if (toNullifyTime.remove(job)) {
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=581339
+			// Can't return just 0, as sign matters for rescheduling logic
+			// see org.eclipse.core.internal.jobs.InternalJob.startTime
+			return Math.min(0, time);
 		}
 		return time;
 	}

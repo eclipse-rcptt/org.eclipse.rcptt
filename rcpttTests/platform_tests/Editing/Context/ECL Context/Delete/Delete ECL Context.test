@@ -1,16 +1,16 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_IeEQkPSUEeCE1L2j6bYoFw
 Element-Name: DeleteECLContextByDeleteButton
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _DaFOYCeOEeGm5NjoKhWsPQ
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:04 PM
+Runtime-Version: 2.5.5.202404081525
+Save-Time: 4/9/24, 2:18 PM
 Tags: Context, ECLContext, Delete
 Testcase-Type: ecl
+Verifications: _NpnwsPZXEe6uRsxcIzDz8g
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -36,6 +36,7 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "Q7Project/EclContext" | key-type DEL
+set-q7-option jobTreatAsSleepingTimeout 1000
 get-window "Delete Resources" | get-button OK | click
 get-view "Test Explorer" | get-tree | verify-error {get-item "Q7Project/EclContext"}
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

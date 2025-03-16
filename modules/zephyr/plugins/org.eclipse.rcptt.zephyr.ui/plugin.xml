@@ -25,7 +25,6 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            category="org.eclipse.rcptt.ui.views.IntegrationsPropertiesPage"
             class="org.eclipse.rcptt.zephyr.ui.properties.ZephyrPropertiesPage"
             id="org.eclipse.rcptt.zephyr.ZephyrPropertiesPage"
             name="Zephyr">

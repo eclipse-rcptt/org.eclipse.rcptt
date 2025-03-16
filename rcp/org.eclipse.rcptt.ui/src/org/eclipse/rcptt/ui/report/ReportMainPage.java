@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateListStrategy;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -23,7 +24,7 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -34,6 +35,9 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.rcptt.internal.ui.Messages;
+import org.eclipse.rcptt.reporting.core.ReportRendererManager;
+import org.eclipse.rcptt.reporting.core.ReportRendererManager.ReportRenderer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -47,29 +51,24 @@ import org.eclipse.ui.dialogs.ResourceSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import org.eclipse.rcptt.internal.ui.Messages;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.reporting.core.ReportRendererManager;
-import org.eclipse.rcptt.reporting.core.ReportRendererManager.ReportRenderer;
-
 public class ReportMainPage extends WizardPage {
-	private final class InverseBooleanConverter extends UpdateValueStrategy {
+	private final class InverseBooleanConverter extends UpdateValueStrategy<Boolean, Boolean> {
 		@Override
-		public Object convert(Object value) {
-			return Boolean.valueOf(!((Boolean) value).booleanValue());
+		public Boolean convert(Boolean value) {
+			return Boolean.valueOf(!value.booleanValue());
 		}
 	}
 
 	DataBindingContext dbc = new DataBindingContext();
-	WritableValue reportName = new WritableValue("", String.class); //$NON-NLS-1$
-	WritableValue reportFormat = new WritableValue(null, ReportRenderer.class);
-	WritableList reports = new WritableList(new ArrayList<ReportRenderer>(),
+	WritableValue<String> reportName = new WritableValue<>("", String.class); //$NON-NLS-1$
+	WritableValue<ReportRenderer> reportFormat = new WritableValue<>(null, ReportRenderer.class);
+	WritableList<ReportRenderer> reports = new WritableList<>(new ArrayList<ReportRenderer>(),
 			ReportRenderer.class);
-	WritableValue generateToWorkspace = new WritableValue(Boolean.TRUE,
+	WritableValue<Boolean> generateToWorkspace = new WritableValue<>(Boolean.TRUE,
 			Boolean.class);
 
-	WritableValue workspaceLocation = new WritableValue("", String.class); //$NON-NLS-1$
-	WritableValue filesystemLocation = new WritableValue("", String.class); //$NON-NLS-1$
+	WritableValue<String> workspaceLocation = new WritableValue<>("", String.class); //$NON-NLS-1$
+	WritableValue<String> filesystemLocation = new WritableValue<>("", String.class); //$NON-NLS-1$
 
 	private ReportWizard wizard;
 	private String initialWorkspaceLocation;
@@ -98,6 +97,9 @@ public class ReportMainPage extends WizardPage {
 			}
 			if (!found) {
 				reports.add(reportRenderer);
+				if (reportFormat.getValue() == null) {
+					reportFormat.setValue(reportRenderer);
+				}
 			}
 		}
 		reportName.setValue(wizard.getName());
@@ -147,11 +149,11 @@ public class ReportMainPage extends WizardPage {
 		controlDecoration.setImage(fieldDecoration.getImage());
 		controlDecoration.hide();
 
-		dbc.bindValue(SWTObservables.observeText(reportName, SWT.Modify),
-				this.reportName);
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(reportName), this.reportName);
 
-		this.reportName.addValueChangeListener(new IValueChangeListener() {
-			public void handleValueChange(ValueChangeEvent event) {
+		this.reportName.addValueChangeListener(new IValueChangeListener<String>() {
+			@Override
+			public void handleValueChange(ValueChangeEvent<? extends String> event) {
 				String name = (String) event.getObservableValue().getValue();
 				if (name.trim().length() == 0) {
 					controlDecoration.show();
@@ -169,33 +171,20 @@ public class ReportMainPage extends WizardPage {
 		l.setText(Messages.ReportMainPage_FormatLabel);
 		Combo reportFormat = new Combo(panel, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.swtDefaults().grab(false, false).applyTo(reportFormat);
-		dbc.bindList(SWTObservables.observeItems(reportFormat), this.reports,
-				new UpdateListStrategy() {
-					@Override
-					public Object convert(Object value) {
-						return convertReport(value);
-					}
-				}, new UpdateListStrategy() {
-					@Override
-					public Object convert(Object value) {
-						return ((ReportRenderer) value).getName();
-					}
-				});
-		dbc.bindValue(SWTObservables.observeSelection(reportFormat),
-				this.reportFormat, new UpdateValueStrategy() {
-					@Override
-					public Object convert(Object value) {
-						return convertReport(value);
-					}
-				}, new UpdateValueStrategy() {
-					@Override
-					public Object convert(Object value) {
-						if (value != null) {
-							return ((ReportRenderer) value).getName();
-						}
-						return null;
-					}
-				});
+		IConverter<String, ReportRenderer> nameToRenderer = IConverter.create(String.class,
+				ReportRenderer.class,
+				this::convertReport);
+		IConverter<ReportRenderer, String> rendererToName = IConverter.create(ReportRenderer.class,
+				String.class,
+				ReportRenderer::getName);
+		dbc.bindList(WidgetProperties.items().observe(reportFormat),
+				this.reports,
+				UpdateListStrategy.create(nameToRenderer),
+				UpdateListStrategy.create(rendererToName));
+		dbc.bindValue(WidgetProperties.comboSelection().observe(reportFormat),
+				this.reportFormat,
+				UpdateValueStrategy.create(nameToRenderer),
+				UpdateValueStrategy.create(rendererToName));
 		ReportRenderer defaultRenderer = null;
 		for (int i = 0; i < reports.size(); i++) {
 			ReportRenderer rr = (ReportRenderer) reports.get(i);
@@ -334,24 +323,24 @@ public class ReportMainPage extends WizardPage {
 		browseFilesystem.setText(Messages.ReportMainPage_BrowseButton);
 		setButtonLayoutData(browseFilesystem);
 
-		dbc.bindValue(SWTObservables.observeEnabled(browseFilesystem),
-				this.generateToWorkspace, new UpdateValueStrategy(),
+		dbc.bindValue(WidgetProperties.enabled().observe(browseFilesystem),
+				this.generateToWorkspace, UpdateValueStrategy.never(),
 				new InverseBooleanConverter());
-		dbc.bindValue(SWTObservables.observeEnabled(filesystemLocation),
-				this.generateToWorkspace, new UpdateValueStrategy(),
+		dbc.bindValue(WidgetProperties.enabled().observe(filesystemLocation),
+				this.generateToWorkspace, UpdateValueStrategy.never(),
 				new InverseBooleanConverter());
 
-		dbc.bindValue(SWTObservables.observeEnabled(sFileSystemLabel),
-				this.generateToWorkspace, new UpdateValueStrategy(),
+		dbc.bindValue(WidgetProperties.enabled().observe(sFileSystemLabel),
+				this.generateToWorkspace, UpdateValueStrategy.never(),
 				new InverseBooleanConverter());
 
 		dbc.bindValue(
-				SWTObservables.observeText(filesystemLocation, SWT.Modify),
+				WidgetProperties.text(SWT.Modify).observe(filesystemLocation),
 				this.filesystemLocation);
 
 		this.filesystemLocation
-				.addValueChangeListener(new IValueChangeListener() {
-					public void handleValueChange(ValueChangeEvent event) {
+				.addValueChangeListener(new IValueChangeListener<String>() {
+					public void handleValueChange(ValueChangeEvent<? extends String> event) {
 						if (!isValidFileLocation()) {
 							controlDecoration.show();
 							controlDecoration
@@ -434,23 +423,23 @@ public class ReportMainPage extends WizardPage {
 		});
 		setButtonLayoutData(browseWorkspace);
 
-		dbc.bindValue(SWTObservables.observeEnabled(browseWorkspace),
+		dbc.bindValue(WidgetProperties.enabled().observe(browseWorkspace),
 				this.generateToWorkspace);
-		dbc.bindValue(SWTObservables.observeEnabled(workspaceLocation),
-				this.generateToWorkspace);
-
-		dbc.bindValue(SWTObservables.observeEnabled(sWorkspaceLanel),
+		dbc.bindValue(WidgetProperties.enabled().observe(workspaceLocation),
 				this.generateToWorkspace);
 
-		dbc.bindValue(SWTObservables.observeSelection(generateToWorkspace),
+		dbc.bindValue(WidgetProperties.enabled().observe(sWorkspaceLanel),
+				this.generateToWorkspace);
+
+		dbc.bindValue(WidgetProperties.enabled().observe(generateToWorkspace),
 				this.generateToWorkspace);
 
 		dbc.bindValue(
-				SWTObservables.observeText(workspaceLocation, SWT.Modify),
+				WidgetProperties.text(SWT.Modify).observe(workspaceLocation),
 				this.workspaceLocation);
 		this.workspaceLocation
-				.addValueChangeListener(new IValueChangeListener() {
-					public void handleValueChange(ValueChangeEvent event) {
+				.addValueChangeListener(new IValueChangeListener<String>() {
+					public void handleValueChange(ValueChangeEvent<? extends String> event) {
 						if (!isValidWorkspaceLocation()) {
 							controlDecoration.show();
 							controlDecoration
@@ -463,14 +452,14 @@ public class ReportMainPage extends WizardPage {
 					}
 				});
 		this.generateToWorkspace
-				.addValueChangeListener(new IValueChangeListener() {
-					public void handleValueChange(ValueChangeEvent event) {
+				.addValueChangeListener(new IValueChangeListener<Boolean>() {
+					public void handleValueChange(ValueChangeEvent<? extends Boolean> event) {
 						validate();
 					}
 				});
 	}
 
-	private Object convertReport(Object value) {
+	private ReportRenderer convertReport(String value) {
 		for (int i = 0; i < reports.size(); i++) {
 			ReportRenderer ren = (ReportRenderer) reports.get(i);
 			if (ren.getName().equals(value)) {

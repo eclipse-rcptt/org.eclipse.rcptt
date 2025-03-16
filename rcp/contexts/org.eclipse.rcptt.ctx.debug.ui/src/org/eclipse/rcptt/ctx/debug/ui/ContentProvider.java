@@ -79,6 +79,7 @@ public class ContentProvider implements ITreeContentProvider {
 		return image;
 	}
 
+	@Override
 	public void dispose() {
 		imageRegistry.dispose();
 	}
@@ -98,6 +99,7 @@ public class ContentProvider implements ITreeContentProvider {
 				if (value instanceof EclInteger) {
 					TextCellEditor rv = new TextCellEditor((Composite) getViewer().getControl());
 					rv.setValidator(new ICellEditorValidator() {
+						@Override
 						public String isValid(Object value) {
 							try {
 								if (value instanceof Integer)
@@ -270,10 +272,12 @@ public class ContentProvider implements ITreeContentProvider {
 
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		content = (DebugContext) newInput;
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		DebugContext context = (DebugContext) inputElement;
 		List<EList<?>> rootNodes = new ArrayList<EList<?>>();
@@ -296,6 +300,7 @@ public class ContentProvider implements ITreeContentProvider {
 		return none;
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof EList) {
 			List<Object> rv = new ArrayList<Object>();
@@ -342,6 +347,7 @@ public class ContentProvider implements ITreeContentProvider {
 		return none;
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		if (element == content.getBreakpointResources()
 				|| element == content.getLaunches()
@@ -353,6 +359,7 @@ public class ContentProvider implements ITreeContentProvider {
 		return null;
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof EList) {
 			return ((EList<?>) element).size() > 0;
@@ -450,6 +457,7 @@ public class ContentProvider implements ITreeContentProvider {
 		}
 	};
 	private final ColumnLabelProvider valueLabelProvider = new ColumnLabelProvider() {
+		@Override
 		public String getText(Object element) {
 			if (element instanceof PrimitiveValue) {
 				return BoxedValues.unbox(((PrimitiveValue) element).getValue()).toString();

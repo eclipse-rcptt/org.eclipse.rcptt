@@ -31,7 +31,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
@@ -72,7 +72,7 @@ public class Q7PortableFormatExportPage extends WizardPage implements
 	private ITestCase element;
 	private PlainTextPersistenceModel tempModel = null;
 
-	private WritableValue previewValue = new WritableValue("", String.class);
+	private WritableValue<String> previewValue = new WritableValue<>("", String.class);
 
 	protected Q7PortableFormatExportPage(String pageName, ITestCase element) {
 		super(pageName);
@@ -95,7 +95,7 @@ public class Q7PortableFormatExportPage extends WizardPage implements
 		text.setCaret(null);
 		FontData dt = new FontData("monospace", 10, 0);
 		text.setFont(new Font(text.getDisplay(), dt));
-		dbc.bindValue(SWTObservables.observeText(text, SWT.Modify),
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(text),
 				previewValue);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(text);
 

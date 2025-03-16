@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _t5rYECW6EeOQ58zpl-lVdg
-Runtime-Version: 2.0.0.201505131625
-Save-Time: 5/14/15 4:48 PM
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/16/24, 10:25 PM
 Tags: selfAUT
 Testcase-Type: ecl
 
@@ -42,10 +42,19 @@ with [get-editor Dummy | get-section Script | get-left-ruler] {
     }
     get-menu "Toggle Breakpoint" | click
 }
+set-q7-option jobHangTimeout 4000
+proc "wait-debug" {
+	wait 300
+	try {
+		get-button "Resume.*" | get-property enablement | equals true | verify-true
+	} -times 10 -delay 1000
+}
 get-view "Test Explorer" | get-tree | select "MyProject/Dummy" | get-menu "Debug As/1 Test Cases" | click
+wait-debug
 get-button "Step Over (F6)" | click
-get-view Debug | get-tree | get-item "Dummy \\[RCPTT Test Suite\\]/Dummy/ECL Thread/create-new-context \\(Dummy: 1\\)" 
-    | get-property caption | equals "create-new-context (Dummy: 1)" | verify-true
+try -times 10 -delay 1000 -command  {
+	get-view Debug | get-tree | get-item "Dummy \\[RCPTT Test Suite\\]/Dummy/ECL Thread/create-new-context \\(Dummy: 1\\)" 
+}
 with [get-view Variables | get-tree] {
     get-property itemCount | equals 1 | verify-true
     get-item "create-new-context" | get-property caption | equals "create-new-context" | verify-true

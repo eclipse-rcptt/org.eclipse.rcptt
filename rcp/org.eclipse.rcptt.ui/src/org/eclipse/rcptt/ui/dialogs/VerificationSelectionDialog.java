@@ -153,8 +153,7 @@ public abstract class VerificationSelectionDialog extends
 		createButton(parent, CAPTURE_ID,
 				Messages.VerificationSelectionDialog_CaptureButtonText, false)
 				.setImage(
-						Images.getImageDescriptor(Images.SNAPSHOT)
-								.createImage());
+						Images.getImage(Images.SNAPSHOT));
 		super.createButtonsForButtonBar(parent);
 	}
 

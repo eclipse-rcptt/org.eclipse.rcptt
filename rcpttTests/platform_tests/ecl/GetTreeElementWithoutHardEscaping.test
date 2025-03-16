@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _XvptsFjbEeSBp_l8k0N2ww
-Runtime-Version: 1.5.3.qualifier
-Save-Time: 10/23/14 5:46 PM
+Runtime-Version: 2.5.5.202404042122
+Save-Time: 4/5/24, 5:10 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -58,6 +58,10 @@ with [get-window "Control Panel - selfQ7"] {
     get-text-viewer | key-type Del
 }
 get-window "Control Panel - selfQ7" | get-button Record | click
+
+try -times 10 -delay 15000 -command {
+    get-window "Control Panel - selfQ7 [Recording]"
+}
 
 // click to file
 get-aut selfQ7 | eval {

@@ -32,6 +32,7 @@ public class Q7PreferenceInitializer extends AbstractPreferenceInitializer {
 		preferenceStore.setDefault(
 				IPreferenceKeys.ADD_PROJECT_REFERENCES,
 				MessageDialogWithToggle.PROMPT);
+		preferenceStore.setDefault(IPreferenceKeys.ALL_REMOVE_PROJECT_REFERENCES, MessageDialogWithToggle.PROMPT);
 	}
 
 }

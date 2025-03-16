@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1741
 Id: _3SkmQEu5EeG_ScHaVV2s7w
-Runtime-Version: 2.5.2.202204240826
-Save-Time: 4/27/22, 7:42 PM
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/15/24, 2:42 PM
 Tags: ECL_IDE_module, TestCase
 Testcase-Type: ecl
 
@@ -43,7 +43,7 @@ with [get-editor WorkspaceIsEmpty | get-section Script | get-text-viewer] {
     key-type "M1+ARROW_RIGHT"
    
 }
-get-label -after [get-label "Smart Insert"] -index 1| get-property caption | equals [get-by-os -macosx "1 : 84 : 83" -win "1 : 4 : 3" -linux "1 : 86"] | verify-true 
+get-label -after [get-label "Smart Insert"] -index 1| get-property caption | equals [get-by-os -macosx "1 : 84 : 83" -win "1 : 4 : 3" -linux "1 : 4 : 3"] | verify-true 
 with [get-editor WorkspaceIsEmpty | get-section Script | get-text-viewer] {
     key-type End
     key-type [concat [get-by-os -macosx "M3" -win "M1" -linux "M1"] "+ARROW_LEFT"]

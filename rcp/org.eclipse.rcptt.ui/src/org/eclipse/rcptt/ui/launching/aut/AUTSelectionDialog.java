@@ -46,7 +46,7 @@ public class AUTSelectionDialog extends Dialog implements ILaunchListener {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(Messages.AUTSelectionDialog_Title);
-		newShell.setImage(Images.getImageDescriptor(Images.AUT).createImage());
+		newShell.setImage(Images.getImage(Images.AUT));
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -44,6 +44,30 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.rcptt.core.model.IElementChangedListener;
+import org.eclipse.rcptt.core.model.IQ7Element;
+import org.eclipse.rcptt.core.model.IQ7NamedElement;
+import org.eclipse.rcptt.core.model.IQ7Project;
+import org.eclipse.rcptt.core.model.ITestCase;
+import org.eclipse.rcptt.core.model.ITestSuite;
+import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.Q7ElementChangedEvent;
+import org.eclipse.rcptt.core.model.search.AllProjectScope;
+import org.eclipse.rcptt.core.model.search.ISearchScope;
+import org.eclipse.rcptt.core.model.search.Q7SearchCore;
+import org.eclipse.rcptt.core.scenario.ScenarioFactory;
+import org.eclipse.rcptt.core.scenario.ScenarioPackage;
+import org.eclipse.rcptt.core.scenario.TestSuite;
+import org.eclipse.rcptt.core.scenario.TestSuiteItem;
+import org.eclipse.rcptt.core.tags.Tag;
+import org.eclipse.rcptt.core.workspace.Q7Utils;
+import org.eclipse.rcptt.core.workspace.RcpttCore;
+import org.eclipse.rcptt.internal.core.model.OneProjectScope;
+import org.eclipse.rcptt.internal.core.model.ReferencedProjectScope;
+import org.eclipse.rcptt.internal.ui.Messages;
+import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
+import org.eclipse.rcptt.ui.actions.SelectionAction;
+import org.eclipse.rcptt.ui.editors.NamedElementLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
@@ -67,31 +91,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ResourceTransfer;
 
-import org.eclipse.rcptt.core.model.IElementChangedListener;
-import org.eclipse.rcptt.core.model.IQ7Element;
-import org.eclipse.rcptt.core.model.IQ7NamedElement;
-import org.eclipse.rcptt.core.model.IQ7Project;
-import org.eclipse.rcptt.core.model.ITestCase;
-import org.eclipse.rcptt.core.model.ITestSuite;
-import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.core.model.Q7ElementChangedEvent;
-import org.eclipse.rcptt.core.model.search.AllProjectScope;
-import org.eclipse.rcptt.core.model.search.ISearchScope;
-import org.eclipse.rcptt.core.model.search.Q7SearchCore;
-import org.eclipse.rcptt.core.scenario.ScenarioFactory;
-import org.eclipse.rcptt.core.scenario.ScenarioPackage;
-import org.eclipse.rcptt.core.scenario.TestSuite;
-import org.eclipse.rcptt.core.scenario.TestSuiteItem;
-import org.eclipse.rcptt.core.tags.Tag;
-import org.eclipse.rcptt.core.workspace.RcpttCore;
-import org.eclipse.rcptt.core.workspace.Q7Utils;
-import org.eclipse.rcptt.internal.core.model.OneProjectScope;
-import org.eclipse.rcptt.internal.core.model.ReferencedProjectScope;
-import org.eclipse.rcptt.internal.ui.Messages;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.ui.actions.SelectionAction;
-import org.eclipse.rcptt.ui.editors.NamedElementLabelProvider;
-
 public class TestSuiteTableViewer extends TableViewer implements IContentNamer, ISelectionActionsHandler {
 
 	private static TestSuiteItemTransfer TRANSFER = null;
@@ -101,7 +100,7 @@ public class TestSuiteTableViewer extends TableViewer implements IContentNamer, 
 	private final TestSuite testSuite;
 
 	private final DataBindingContext dbc = new DataBindingContext();
-	private final IObservableValue testSuiteObservable;
+	private final IObservableValue<List<TestSuiteItem>> testSuiteObservable;
 
 	private SelectionAction.RemoveAction removeAction;
 	private SelectionAction.CutAction cutAction;
@@ -126,7 +125,7 @@ public class TestSuiteTableViewer extends TableViewer implements IContentNamer, 
 		setContentProvider(new TableContentProvider());
 
 		testSuiteObservable = EMFObservables.observeValue(this.testSuite, ScenarioPackage.Literals.TEST_SUITE__ITEMS);
-		dbc.bindValue(ViewersObservables.observeInput(this), testSuiteObservable);
+		dbc.bindValue(ViewerProperties.<TestSuiteTableViewer, List<TestSuiteItem>>input().observe(this), testSuiteObservable);
 
 		addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -243,7 +242,7 @@ public class TestSuiteTableViewer extends TableViewer implements IContentNamer, 
 		manager.add(pasteAction);
 	}
 
-	public IObservableValue getTestSuiteObservable() {
+	public IObservableValue<List<TestSuiteItem>> getTestSuiteObservable() {
 		return testSuiteObservable;
 	}
 
@@ -723,7 +722,7 @@ public class TestSuiteTableViewer extends TableViewer implements IContentNamer, 
 		}
 		getTable().setSortColumn(null);
 		getTable().setSortDirection(ColumnViewerSorter.NONE);
-		setSorter(null);
+		setComparator(null);
 	}
 
 	private void swapElements(int a, int b) {

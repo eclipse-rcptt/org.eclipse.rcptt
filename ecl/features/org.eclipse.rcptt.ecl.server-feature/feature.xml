@@ -13,7 +13,7 @@
 <feature 
 	id="org.eclipse.rcptt.ecl.server" 
 	label="RCPTT ECL Server"
-	version="2.5.5.qualifier"
+	version="2.6.0.qualifier"
 	provider-name="%providerName">
 	
 	<description>
@@ -28,5 +28,5 @@
 		%license
 	</license>
 	
-	<plugin id="org.eclipse.rcptt.ecl.server.tcp" unpack="false" version="2.5.5.qualifier"/>
+	<plugin id="org.eclipse.rcptt.ecl.server.tcp" unpack="false" version="2.6.0.qualifier"/>
 </feature>

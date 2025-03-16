@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,7 +31,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.databinding.EMFProperties;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -287,7 +288,7 @@ public abstract class EditorHeader {
 		GridDataFactory.swtDefaults().align(SWT.LEFT, SWT.CENTER)
 				.applyTo(addTag);
 		addTag.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_OBJ_ADD).createImage());
+				.getImage(ISharedImages.IMG_OBJ_ADD));
 		addTag.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(final SelectionEvent e) {
@@ -329,7 +330,7 @@ public abstract class EditorHeader {
 	protected Button createRecordButton(Composite composite, FormToolkit toolkit) {
 		Button button = toolkit.createButton(composite,
 				Messages.NamedElementEditorPage_RecordButton, SWT.PUSH);
-		button.setImage(Images.getImageDescriptor(Images.RECORD).createImage());
+		button.setImage(Images.getImage(Images.RECORD));
 		button.setBackground(null);
 		GridDataFactory.fillDefaults().applyTo(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -344,8 +345,7 @@ public abstract class EditorHeader {
 	protected Button createReplayButton(Composite composite, FormToolkit toolkit) {
 		Button button = toolkit.createButton(composite,
 				Messages.NamedElementEditorPage_ReplayButton, SWT.PUSH);
-		button.setImage(DebugUITools.getImageDescriptor(
-				IDebugUIConstants.IMG_ACT_RUN).createImage());
+		button.setImage(DebugUITools.getImage(IDebugUIConstants.IMG_ACT_RUN));
 		button.setBackground(null);
 		GridDataFactory.fillDefaults().applyTo(button);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -576,10 +576,10 @@ public abstract class EditorHeader {
 				nameBinding.dispose();
 			}
 
-			UpdateValueStrategy strategy = new UpdateValueStrategy();
-			strategy.setBeforeSetValidator(new IValidator() {
-				public IStatus validate(Object value) {
-					String text = (String) value;
+			UpdateValueStrategy<String, String> strategy = new UpdateValueStrategy<>();
+			strategy.setBeforeSetValidator(new IValidator<String>() {
+				public IStatus validate(String value) {
+					String text = value;
 
 					if (StringUtils.isBlank(text))
 						return nameFail("Name must be non-blank string.");
@@ -595,9 +595,9 @@ public abstract class EditorHeader {
 					return nameWin();
 				}
 			});
-			nameBinding = dbc.bindValue(SWTObservables.observeText(nameText,
-					SWT.Modify), EMFObservables.observeValue(element,
-					ScenarioPackage.eINSTANCE.getNamedElement_Name()),
+			IObservableValue<String> name = EMFObservables.observeValue(element,
+					ScenarioPackage.eINSTANCE.getNamedElement_Name());
+			nameBinding = dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(nameText), name,
 					strategy, null);
 		}
 
@@ -605,11 +605,12 @@ public abstract class EditorHeader {
 			if (tagsBinging != null) {
 				tagsBinging.dispose();
 			}
+			IObservableValue<String> tags = EMFProperties.value(
+					ScenarioPackage.Literals.NAMED_ELEMENT__TAGS)
+					.observe(element);
 			tagsBinging = dbc.bindValue(
-					SWTObservables.observeText(tagsControl, SWT.Modify),
-					EMFProperties.value(
-							ScenarioPackage.Literals.NAMED_ELEMENT__TAGS)
-							.observe(element));
+					WidgetProperties.text(SWT.Modify).observe(tagsControl),
+					tags);
 		}
 	}
 

@@ -250,6 +250,10 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			}
 
 		}
+
+		public boolean isDone() {
+			return isCancelled.getAsBoolean() || stop < System.currentTimeMillis();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -282,9 +286,12 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		} finally {
 			execThread.interrupt();
 		}
-
+		
 		Exception wrapped = wrappedException[0];
 		if (wrapped != null) {
+			if (wrapped instanceof InterruptedException ie) {
+				throw ie;
+			}
 			if (wrapped instanceof CoreException) {
 				throw new CoreException(new MultiStatus(PLUGIN_ID, 0,
 						new IStatus[] { ((CoreException) wrapped).getStatus() }, wrapped.getMessage(), wrapped));
@@ -376,7 +383,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			try {
 				while (true) {
-					if (System.currentTimeMillis() - start > seconds * 1000) {
+					if (System.currentTimeMillis() - start > seconds * 1000 || monitor.isCanceled()) {
 						break;
 					}
 					try {
@@ -945,26 +952,22 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		}
 	}
 
-	private BooleanSupplier cancelledPredicate(IProgressMonitor monitor) {
-		return monitor == null ? () -> false : monitor::isCanceled;
-	}
-
 	private IStatus internalExecute(Command command, long timeout, IProgressMonitor monitor,
 			Map<String, String> properties) throws InterruptedException, CoreException {
 		try {
 			long stop = System.currentTimeMillis() + timeout;
-			return computeInNewSession(TimeoutInterruption.forTimeout(monitor, timeout, this), session -> {
+			TimeoutInterruption interruption = TimeoutInterruption.forTimeout(monitor, timeout, this);
+			return computeInNewSession(interruption, session -> {
+				ExecutionStatus result;
 				restoreState(session, properties);
-				try {
-					Command commandCopy = command;
-					IProcess process = session.execute(commandCopy);
-					IStatus processResult = process.waitFor(stop - System.currentTimeMillis(), monitor);
-					return new ExecutionStatus(processResult);
-				} finally {
-					if (monitor == null || !monitor.isCanceled()) {
-						dumpState(session);
-					}
+				Command commandCopy = command;
+				IProcess process = session.execute(commandCopy);
+				IStatus processResult = process.waitFor(stop - System.currentTimeMillis(), monitor);
+				result = new ExecutionStatus(processResult);
+				if (!interruption.isDone()) {
+					dumpState(session);
 				}
+				return result;
 			});
 		} catch (CoreException e) {
 			throw new CoreException(new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
@@ -1071,7 +1074,11 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			return context.connect(getHost(), getEclPort());
 		} catch (Exception e) {
-			throw new CoreException(Q7LaunchingPlugin.createStatus("Couldn't open ECL session", e));
+			String message = "Couldn't open ECL session";
+			if (launch.isTerminated()) {
+				message = "AUT is terminated";
+			}
+			throw new CoreException(Q7LaunchingPlugin.createStatus(message, e));
 		}
 	}
 

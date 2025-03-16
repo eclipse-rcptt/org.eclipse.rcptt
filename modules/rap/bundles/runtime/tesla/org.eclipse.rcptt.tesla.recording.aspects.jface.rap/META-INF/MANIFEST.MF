@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime JFace Recording Support
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.recording.aspects.jface.rap;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
  org.eclipse.rap.jface,
- org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.5.5,3.0.0)"
-onEnvironment: JavaSE-1.6
+ org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.6.0,3.0.0)"
+onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.jface
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.jface.rap
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.aspects.jface.rap.RecordingJFaceActivator

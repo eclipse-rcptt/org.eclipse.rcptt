@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ecl.server.tcp;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.internal.core.CorePlugin;
@@ -24,12 +28,16 @@ import org.eclipse.rcptt.ecl.runtime.EclRuntime;
 import org.eclipse.rcptt.ecl.runtime.IPipe;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.ecl.runtime.ISession;
+import org.osgi.framework.FrameworkUtil;
 
 final class SessionRequestHandler implements Runnable {
 	private final Socket socket;
 	private final ISession session;
+	private final BufferedInputStream inputStream;
+	private final int defaultTimeout;
+	private final static ILog LOG = Platform.getLog(FrameworkUtil.getBundle(SessionRequestHandler.class));
 
-	SessionRequestHandler(Socket socket, boolean useJobs) {
+	SessionRequestHandler(Socket socket, boolean useJobs) throws IOException {
 		// super("ECL tcp session:" + socket.getPort());
 		this.socket = socket;
 		try {
@@ -38,11 +46,13 @@ final class SessionRequestHandler implements Runnable {
 			CorePlugin.log(e);
 		}
 		this.session = EclRuntime.createSession(useJobs);
+		this.inputStream = new BufferedInputStream(socket.getInputStream());
+		this.defaultTimeout = socket.getSoTimeout();
 	}
 
 	public void run() {
 		try {
-			IPipe pipe = CoreUtils.createEMFPipe(socket.getInputStream(),
+			IPipe pipe = CoreUtils.createEMFPipe(inputStream,
 					socket.getOutputStream());
 			while (!Thread.currentThread().isInterrupted()
 					&& !socket.isClosed()) {
@@ -116,11 +126,15 @@ final class SessionRequestHandler implements Runnable {
 	}
 
 	private IStatus writeOutput(IPipe pipe, IProcess process)
-			throws CoreException {
+			throws CoreException, IOException {
 		Object object;
 		do {
-			object = process.getOutput().take(Long.MAX_VALUE);
-			if (object instanceof IStatus) {
+			object = process.getOutput().take(100);
+			if (object == null) {
+				if (!isConnected()) {
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
+			} else if (object instanceof IStatus) {
 				try {
 					return process.waitFor();
 				} catch (InterruptedException e) {
@@ -129,7 +143,21 @@ final class SessionRequestHandler implements Runnable {
 			} else {
 				pipe.write(object);
 			}
+			
 		} while (true);
+	}
+	
+	private boolean isConnected() throws IOException {
+		inputStream.mark(10);
+		socket.setSoTimeout(1);
+		try {
+			return inputStream.read() >= 0 && inputStream.read() >= 0;
+		} catch (SocketTimeoutException e) {
+			return true;
+		} finally {
+			socket.setSoTimeout(defaultTimeout);
+			inputStream.reset();
+		}
 	}
 
 	public void recover(Socket client) {

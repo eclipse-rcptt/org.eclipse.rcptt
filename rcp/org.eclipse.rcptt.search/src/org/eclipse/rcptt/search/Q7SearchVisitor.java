@@ -63,11 +63,12 @@ import org.eclipse.search.ui.NewSearchUI;
 @SuppressWarnings("restriction")
 public class Q7SearchVisitor {
 
+	private static final String JOB_NAME = "Searching...";
+
 	private static final String SEARCH_CONTEXT_REFERENCES_TASK = "Searching references to context \"{0}\""; // TODO
 																											// change
 																											// description
 
-	private static final String SEARCH_VERIFICATION_REFERENCES_TASK = "Searching references to verification \"{0}\"";
 	private static final String SEARCH_TESTCASE_REFERENCES_TASK = "Searching references to \"{0}\"";
 	@SuppressWarnings("unused")
 	private static final int N_THREADS = 8;
@@ -169,8 +170,7 @@ public class Q7SearchVisitor {
 		fNumberOfFilesToScan = files.length;
 		fCurrentFile = null;
 
-		Job monitorUpdateJob = new Job(
-				SearchMessages.TextSearchVisitor_progress_updating_job) {
+		Job monitorUpdateJob = new Job(JOB_NAME) {
 			private int fLastNumberOfScannedFiles = 0;
 
 			@Override
@@ -183,8 +183,8 @@ public class Q7SearchVisitor {
 					if (file != null) {
 						String fileName = file.getName();
 						Object[] args = { fileName,
-								new Integer(fNumberOfScannedFiles),
-								new Integer(fNumberOfFilesToScan) };
+								Integer.valueOf(fNumberOfScannedFiles),
+								Integer.valueOf(fNumberOfFilesToScan) };
 						fProgressMonitor
 								.subTask(Messages
 										.format(SearchMessages.TextSearchVisitor_scanning,

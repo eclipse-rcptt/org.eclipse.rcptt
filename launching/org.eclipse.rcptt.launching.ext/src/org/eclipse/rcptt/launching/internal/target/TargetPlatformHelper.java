@@ -25,8 +25,12 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,25 +41,23 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
-import org.eclipse.equinox.internal.launcher.Constants;
 import org.eclipse.equinox.internal.simpleconfigurator.utils.SimpleConfiguratorUtils;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQuery;
@@ -103,7 +105,6 @@ import org.osgi.framework.Version;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 
 @SuppressWarnings("restriction")
@@ -382,6 +383,28 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		registry = null;
 	}
 
+	private void addLocations(Collection<ITargetLocation> newLocations) throws CoreException {
+		List<ITargetLocation> newContainers = new ArrayList<ITargetLocation>();
+		newContainers.addAll(newLocations);
+		
+		ITargetLocation[] targetLocations = target.getTargetLocations();
+		List<ITargetLocation> existingLocations = targetLocations != null ? Arrays.asList(targetLocations) : Collections.emptyList();
+		
+		for (ITargetLocation location: newLocations) {
+			if (existingLocations.contains(location)) {
+				String str = location.getLocation(false);
+				throw new IllegalStateException("Location " + str + " is already present in target platform");
+			}
+		}
+		newContainers.addAll(existingLocations);
+		newContainers.addAll(newLocations);
+		
+		target.setTargetLocations(newContainers
+				.toArray(new ITargetLocation[newContainers.size()]));
+		models = null;
+		registry = null;
+	}
+
 	private IPluginModelBase[] getTargetModels() {
 		calcModels();
 		return models;
@@ -589,21 +612,18 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	public IStatus resolve(IProgressMonitor monitor) {
 		ITargetDefinition target = getTarget();
-		if (target != null) {
-			SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 2);
-			try {
-				status = target.resolve(m.newChild(1, SubMonitor.SUPPRESS_NONE));
-				if (!status.isOK())
-					return status;
-				status = validateBundles(m.newChild(1, SubMonitor.SUPPRESS_NONE));
-				if (!status.isOK())
-					return status;
-				return status = getBundleStatus();
-			} finally {
-				m.done();
-			}
+		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 2);
+		try {
+			status = target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE));
+			if (!status.isOK())
+				return status;
+			status = validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE));
+			if (!status.isOK())
+				return status;
+			return status = getBundleStatus();
+		} finally {
+			m.done();
 		}
-		return status = Status.CANCEL_STATUS;
 	}
 
 	AutInstall getAutInstall() {
@@ -615,7 +635,10 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public OriginalOrderProperties getConfigIniProperties() {
-		return getAutInstall().getConfig();
+		AutInstall autInstall = getAutInstall();
+		if (autInstall == null)
+			return new OriginalOrderProperties();
+		return autInstall.getConfig();
 	}
 
 	protected String getEclipseProductFileProperty(String name) {
@@ -628,21 +651,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (!iniFile.exists())
 			return null;
 		Properties pini = new Properties();
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(iniFile);
+		
+		try (FileInputStream fis = new FileInputStream(iniFile)) {
 			pini.load(fis);
 			fis.close();
 			return pini;
 		} catch (IOException e) {
 			Q7ExtLaunchingPlugin.getDefault().log(e);
-		} finally {
-			try {
-				if (fis != null)
-					fis.close();
-			} catch (IOException e) {
-				Q7ExtLaunchingPlugin.getDefault().log(e);
-			}
 		}
 		return null;
 	}
@@ -727,11 +742,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	public IStatus applyInjection(InjectionConfiguration configuration,
 			IProgressMonitor monitor) {
-		// remove the "host" from bundles, it is handled in a separate, special
-		// way
-		Iterables.removeAll(extra, Arrays.asList(getInstanceContainer()));
 
 		EList<Entry> entries = configuration.getEntries();
+		List<ITargetLocation> additionalLocations = new ArrayList<>(); 
 		SubMonitor sm = SubMonitor.convert(monitor, "Apply injection plugins", 20 + entries.size() * 20);
 		for (Entry entry : entries) {
 			if (monitor.isCanceled()) {
@@ -740,16 +753,20 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			IStatus result = new Status(IStatus.ERROR, PLUGIN_ID, "Unknown injection type: "
 					+ entry.getClass().getName());
 			if (entry instanceof UpdateSite) {
-				result = processUpdateSite(sm.newChild(20), (UpdateSite) entry);
+				result = processUpdateSite(sm.newChild(20), (UpdateSite) entry, additionalLocations::add);
 			} else if (entry instanceof Directory) {
-				result = processDirectory((Directory) entry);
+				result = processDirectory((Directory) entry, additionalLocations::add);
 			}
 			if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				return result;
 			}
 		}
-		update();
-		IStatus resolveStatus = resolve(sm.newChild(20));
+		try {
+			addLocations(additionalLocations);
+		} catch (CoreException e1) {
+			return e1.getStatus();
+		}
+		IStatus resolveStatus = resolve(sm.split(20, SubMonitor.SUPPRESS_NONE));
 		if (!resolveStatus.isOK()) {
 			return resolveStatus;
 		}
@@ -764,7 +781,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus processDirectory(Directory entry) {
+	private static IStatus processDirectory(Directory entry, Consumer<ITargetLocation> collector) {
 		String path = entry.getPath();
 		MultiStatus rv = new MultiStatus(PLUGIN_ID, 0, "Processing " + path, null);
 		if (path.startsWith("platform:///")) {
@@ -780,10 +797,10 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		ITargetLocation container = PDEHelper.getTargetService()
 				.newDirectoryLocation(path);
-		extra.add(container);
+		collector.accept(container);
 		return Status.OK_STATUS;
 	}
-
+	
 	private static final IStatus createError(String message) {
 		return createError(message, null);
 	}
@@ -795,7 +812,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return new Status(IStatus.ERROR, PLUGIN_ID, message, error);
 	}
 
-	private IStatus processUpdateSite(IProgressMonitor monitor, UpdateSite site) {
+	private static IStatus processUpdateSite(IProgressMonitor monitor, UpdateSite site, Consumer<ITargetLocation> collector ) {
 
 		try {
 			URI uri = URI.create(
@@ -843,7 +860,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 						.newIULocation(unitsAsArray, uriArray,
 								IUBundleContainer.INCLUDE_ALL_ENVIRONMENTS);
 
-				extra.add(container);
+				collector.accept(container);
 			}
 
 			// Lets mirror all required artifacts into bundle pool, since we don't
@@ -1014,11 +1031,17 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public String getVmFromIniFile() {
-		for (File file : getAppIniFiles()) {
-			String result = getVmArg(file);
-			if (result != null) {
-				return result;
+		for (File iniFile : getAppIniFiles()) {
+			String result = getVmArg(iniFile);
+			if (result == null) {
+				continue;
 			}
+			Path iniPath = iniFile.toPath();
+			Path vmPath = Paths.get(result);
+			if (!vmPath.isAbsolute()) {
+				vmPath = iniPath.getParent().resolve(vmPath);
+			}
+			return vmPath.toString();
 		}
 		return null;
 	}
@@ -1145,111 +1168,41 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	public OSArchitecture detectArchitecture(
 			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
 
-		// http://stackoverflow.com/a/808314
-		final boolean isCurrentVm64 = System.getProperty("os.arch", "not null")
-				.contains("64");
-
-		boolean has32 = false;
-		boolean has64 = false;
-
-		String launcher64 = null;
-		String launcher32 = null;
-
-		List<File> iniFiles = getAppIniFiles();
-		IPath targetPlatformProfilePath = new Path(
-				getTargetPlatformProfilePath());
-		Set<String> availableLaunchers = new HashSet<String>();
 		String os = Platform.getOS();
-		for (File file : iniFiles) {
-			String launcherLibrary = readLauncherLibraryFromIniFile(file);
-			if (launcherLibrary != null && launcherLibrary.contains(os)) {
-				String configPath = new Path(file.getAbsolutePath())
-						.removeFirstSegments(
-								targetPlatformProfilePath.segmentCount())
-						.setDevice(null).toOSString();
-				if (launcherLibrary.contains("x86_64")) {
-					has64 = true;
-					launcher64 = "launcher library\n\t\"" + launcherLibrary
-							+ "\" specified in config file: " + configPath;
-				} else if (launcherLibrary.contains("x86")
-						|| launcherLibrary.contains("cocoa.macosx")) {
-					has32 = true;
-					launcher32 = "launcher library\n\t\"" + launcherLibrary
-							+ "\" specified in config file: " + configPath;
+		TargetBundle[] bundles = target.getAllBundles();
+		for (TargetBundle b : bundles) {
+			BundleInfo info = b.getBundleInfo();
+			String name = info.getSymbolicName();
+			if (name != null && name.startsWith("org.eclipse.equinox.launcher")) {
+				if (!name.contains(os)) {
+					continue;
 				}
-			}
-		}
-		if (!has32 && !has64) {
-			TargetBundle[] bundles = target.getAllBundles();
-			for (TargetBundle b : bundles) {
-				BundleInfo info = b.getBundleInfo();
-				String name = info.getSymbolicName();
-				if (name != null && name.startsWith("org.eclipse.equinox.launcher")) {
-					URI location = info.getLocation();
-					if (location == null || location.getPath() == null) {
-						continue;
+				URI location = info.getLocation();
+				if (location == null || location.getPath() == null) {
+					continue;
+				}
+					
+				if (name.contains("aarch64")) {
+					if (detectMsg != null) {
+						detectMsg.append("aarch64 arch is selected because AUT uses " + name);
 					}
-					String pathString = new Path(info.getLocation().getPath())
-							.removeFirstSegments(targetPlatformProfilePath.segmentCount()).toOSString();
-					if (name.contains("x86_64")) {
-						if (name.contains(os)) {
-							has64 = true;
-							launcher64 = "Equinox launcher\n\t- " + pathString;
-						} else {
-							availableLaunchers.add("\t- " + pathString);
-						}
-					} else if (name.contains("x86")
-							|| name.contains("cocoa.macosx")) {
-						if (name.contains(os)) {
-							has32 = true;
-							launcher32 = "Equinox launcher\n\t- " + pathString;
-						} else {
-							availableLaunchers.add("\t- " + pathString);
-						}
+					return OSArchitecture.aarch64;
+				} else if (name.contains("x86_64")) {
+					if (detectMsg != null) {
+						detectMsg.append("x86_64 arch is selected because AUT uses " + name);
 					}
+					return OSArchitecture.x86_64;
+				} else if (name.contains("x86")) {
+					if (detectMsg != null) {
+						detectMsg.append("x86 arch is selected because AUT uses " + name);
+					}
+					return OSArchitecture.x86;
+					
 				}
 			}
 		}
 
-		if (has32 && !has64) {
-			if (detectMsg != null) {
-				detectMsg.append("32bit arch is selected because AUT uses "
-						+ launcher32);
-			}
-			return OSArchitecture.x86;
-		} else if (!has32 && has64) {
-			if (detectMsg != null) {
-				detectMsg.append("64bit arch is selected because AUT uses "
-						+ launcher64);
-			}
-			return OSArchitecture.x86_64;
-		} else if (preferCurrentVmArchitecture && has32 && has64) {
-			OSArchitecture result = isCurrentVm64 ? OSArchitecture.x86_64
-					: OSArchitecture.x86;
-			if (detectMsg != null && result.equals(OSArchitecture.x86)) {
-				detectMsg
-						.append("32bit arch is selected because\n- JVM is 32bit\n- AUT contains both launcher plugins\n\t-"
-								+ launcher32 + "\n\t-" + launcher64);
-			}
-			if (detectMsg != null && result.equals(OSArchitecture.x86_64)) {
-				detectMsg
-						.append("64bit arch is selected because\n- JVM is 64bit\n- AUT contains both launcher plugins\n\t-"
-								+ launcher32 + "\n\t-" + launcher64);
-			}
-			return result;
-		} else {
-			if (detectMsg != null) {
-				detectMsg
-						.append("Cannot find appropriate Equinox launcher library.\n");
-				if (availableLaunchers.size() > 0) {
-					detectMsg.append("Available launchers:\n");
-					for (String s : availableLaunchers) {
-						detectMsg.append(s).append("\n");
-					}
-				}
-			}
-			return OSArchitecture.Unknown;
-		}
+		return OSArchitecture.Unknown;
 	}
 
 	private Map<String, String> getRunlevelsFromSimpleConfigurator() {
@@ -1760,10 +1713,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return getOS() + '_' + getWS() + '_' + getArch();
 	}
 
+	// Reworked from org.eclipse.equinox.launcher.Main.getWS()
 	private static String getWS() {
 		String osgiWs = System.getProperty(PROP_WS);
-		if (osgiWs != null)
+		if (osgiWs != null) {
 			return osgiWs;
+		}
+
 		String osName = getOS();
 		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;

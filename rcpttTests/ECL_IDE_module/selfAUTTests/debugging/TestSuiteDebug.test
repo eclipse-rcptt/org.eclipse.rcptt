@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1825
 Id: _5OxMoY01EeGZA7v42Kh00Q
-Runtime-Version: 2.5.0.201907142359
-Save-Time: 7/18/19 3:43 PM
+Runtime-Version: 2.5.5.202403150112
+Save-Time: 3/15/24, 1:20 PM
 Tags: selfAUT, Debug, TestSuite, QS-2256
 Testcase-Type: ecl
 
@@ -58,8 +58,9 @@ with [get-editor TestSuite | get-section "Test Cases" | get-button "Add Test Cas
     key-type "M1+M2+s"
     key-type "M1+M2+w"
 }
+set-q7-option jobHangTimeout 100
+set-q7-option uijobHangTimeout 100
 get-view "Test Explorer" | get-tree | select "MyProject/TestSuite" | get-menu "Debug As/1 Test Cases" | click
-set-q7-option uijobHangTimeout 5000
 try -times 20 -delay 5000 -command {
 	get-view Debug | get-tree 
     | select "TestSuite \\[RCPTT Test Suite\\]/TestSuite/ECL Thread/get-view \\(Check New Project Window: 1\\)" 
@@ -73,9 +74,11 @@ try -times 20 -delay 5000 -command {
 get-editor CreateJavaProject
 get-button "Resume (F8)" | click
 get-button "RCPTT perspective" | click
-with [get-view "Execution View"] {
-    get-label "2/2" | get-property caption | equals "2/2" | verify-true
-    get-label 0 | get-property caption | equals 0 | verify-true
-    get-label 0 -after [get-label "Stops:"] | get-property caption | equals 0 | verify-true
-}
+try {
+	with [get-view "Execution View"] {
+	    get-label "2/2" | get-property caption | equals "2/2" | verify-true
+	    get-label 0 | get-property caption | equals 0 | verify-true
+	    get-label 0 -after [get-label "Stops:"] | get-property caption | equals 0 | verify-true
+	}
+} -times 10 -delay 1000
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

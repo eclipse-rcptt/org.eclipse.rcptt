@@ -19,9 +19,12 @@ import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.internal.launching.LaunchingPlugin;
@@ -45,6 +48,8 @@ import org.osgi.framework.Version;
  */
 @SuppressWarnings("restriction")
 public class TargetPlatformManager {
+	private final static ILog LOG = Platform.getLog(TargetPlatformManager.class);
+	
 	private static void throwOnError(IStatus status) throws CoreException {
 		if (status.matches(IStatus.ERROR))
 			throw new CoreException(status);
@@ -131,6 +136,15 @@ public class TargetPlatformManager {
 		SubMonitor monitor = SubMonitor.convert(monitorArg);
 		monitor.beginTask("Looking up " + requiredName, 2);
 
+		MultiStatus result = new MultiStatus(TargetPlatformManager.class, 0, "Problems while loading target definitions") {
+			@Override
+			protected void setSeverity(int severity) {
+				if (severity == IStatus.ERROR) {
+					severity = IStatus.WARNING;
+				}
+				super.setSeverity(severity);
+			}
+		};
 		try {
 			ITargetHandle[] targets = PDEHelper.getTargetService().getTargets(
 					monitor.newChild(1));
@@ -139,8 +153,13 @@ public class TargetPlatformManager {
 					return null;
 				}
 				ITargetDefinition def;
-
-				def = getTargetDefinition(handle);
+				
+				try {
+					def = handle.getTargetDefinition();
+				} catch (CoreException e) {
+					result.add(e.getStatus());
+					continue;
+				}
 				String name = def.getName();
 				if (name == null || !name.equals(requiredName))
 					continue;
@@ -158,6 +177,9 @@ public class TargetPlatformManager {
 			return null;
 		} finally {
 			monitor.done();
+			if (!result.isOK()) {
+				LOG.log(result);
+			}
 		}
 	}
 

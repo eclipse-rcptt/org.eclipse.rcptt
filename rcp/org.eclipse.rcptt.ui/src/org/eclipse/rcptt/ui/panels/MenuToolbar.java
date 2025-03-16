@@ -14,6 +14,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -29,8 +30,10 @@ public class MenuToolbar {
 		final ToolBar toolbar = new ToolBar(parent, SWT.FLAT | SWT.HORIZONTAL);
 
 		final ToolItem item = new ToolItem(toolbar, SWT.NONE);
-		item.setImage(Images.getImageDescriptor(Images.PANEL_MENU)
-				.createImage());
+		Image image = Images.getImageDescriptor(Images.PANEL_MENU)
+				.createImage();
+		item.addDisposeListener(event -> image.dispose());
+		item.setImage(image);
 
 		final MenuManager manager = new MenuManager();
 		fill(manager);

@@ -81,7 +81,7 @@ public class NewAUTWizard extends Wizard {
 			OSArchitecture jvmArch = page.getJVMArch();
 			List<String> vmArgs = Q7LaunchDelegateUtils.getVMArgs(target, null);
 			if (!autArch.equals(jvmArch)
-					&& Platform.getOS().equals(Platform.OS_MACOSX)) {
+					&& Platform.getOS().equals(Platform.OS_MACOSX) && autArch.equals(OSArchitecture.x86)) {
 				UpdateVMArgs.addIfAbsent(vmArgs, ATTR_D32, "");
 			}
 			workingCopy

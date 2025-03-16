@@ -93,6 +93,8 @@ public class AUTLocationBlock {
 		IStatus status = PDELocationUtils.validateProductLocation(location);
 		if (!status.isOK()) {
 			setStatus(status);
+		} else {
+			setStatus(Status.warning("RCPTT RAP supoprt will be removed in a following release. See https://github.com/eclipse/org.eclipse.rcptt/issues/56"));
 		}
 
 		if (needUpdate && status.isOK()) {

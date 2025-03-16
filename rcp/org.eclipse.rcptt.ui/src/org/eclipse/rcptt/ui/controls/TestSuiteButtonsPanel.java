@@ -80,30 +80,25 @@ public class TestSuiteButtonsPanel extends Composite {
 	private void createButtons(boolean needOrderReset) {
 		addTestCaseBtn = new Button(this, SWT.PUSH);
 		addTestCaseBtn.setText(Messages.ScenariosLaunchTab_AddTestCaseButton);
-		addTestCaseBtn.setImage(Images.getImageDescriptor(Images.SCENARIO)
-				.createImage());
+		addTestCaseBtn.setImage(Images.getImage(Images.SCENARIO));
 
 		addFolderBtn = new Button(this, SWT.PUSH);
 		addFolderBtn.setText(Messages.ScenariosLaunchTab_AddFolderButton);
-		addFolderBtn.setImage(Images.getImageDescriptor(Images.NEW_FOLDER)
-				.createImage());
+		addFolderBtn.setImage(Images.getImage(Images.NEW_FOLDER));
 
 		addTaggedBtn = new Button(this, SWT.PUSH);
 		addTaggedBtn.setText("Add with Tag");
-		addTaggedBtn.setImage(Images.getImageDescriptor(Images.TAG)
-				.createImage());
+		addTaggedBtn.setImage(Images.getImage(Images.TAG));
 
 		removeBtn = new Button(this, SWT.PUSH);
 		removeBtn.setText(Messages.ScenariosLaunchTab_RemoveButton);
 		removeBtn.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE)
-				.createImage());
+				.getImage(ISharedImages.IMG_ETOOL_DELETE));
 
 		removeAllBtn = new Button(this, SWT.PUSH);
 		removeAllBtn.setText(Messages.ScenariosLaunchTab_RemoveAllButton);
 		removeAllBtn.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE)
-				.createImage());
+				.getImage(ISharedImages.IMG_ETOOL_DELETE));
 
 		new Label(this, SWT.HORIZONTAL | SWT.SEPARATOR);
 		moveUpBtn = new Button(this, SWT.PUSH);

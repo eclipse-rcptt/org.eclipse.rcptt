@@ -68,6 +68,7 @@ public class DeleteQ7ElementInputPage extends UserInputWizardPage {
 		Label imageLabel = new Label(composite, SWT.NULL);
 		imageLabel.setBackground(image.getBackground());
 		imageLabel.setImage(image);
+		imageLabel.addDisposeListener(event -> image.dispose());
 		GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.BEGINNING)
 				.span(1, 2).applyTo(imageLabel);
 

@@ -12,16 +12,18 @@ package org.eclipse.rcptt.ui.commons;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -35,6 +37,11 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.rcptt.internal.ui.Images;
+import org.eclipse.rcptt.internal.ui.Messages;
+import org.eclipse.rcptt.ui.panels.Actions;
+import org.eclipse.rcptt.ui.wizards.LocationComposite;
+import org.eclipse.rcptt.ui.wizards.NewQ7ProjectWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -47,12 +54,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.wizards.newresource.BasicNewFolderResourceWizard;
-
-import org.eclipse.rcptt.internal.ui.Images;
-import org.eclipse.rcptt.internal.ui.Messages;
-import org.eclipse.rcptt.ui.panels.Actions;
-import org.eclipse.rcptt.ui.wizards.LocationComposite;
-import org.eclipse.rcptt.ui.wizards.NewQ7ProjectWizard;
 
 public class Q7ContainerSelectionGroup extends Composite {
 	private Listener listener;
@@ -174,15 +175,10 @@ public class Q7ContainerSelectionGroup extends Composite {
 				treeViewer.addSelectionChangedListener(deleteAction);
 
 				toolBarMgr.add(new Separator());
-				UpdateValueStrategy enablement = new UpdateValueStrategy() {
-					@Override
-					public Object convert(Object value) {
-						return value != null;
-					}
-				};
+				UpdateValueStrategy<Object, Boolean> enablement = UpdateValueStrategy.create(IConverter.create(Object.class, Boolean.class, Objects::nonNull)); 
 				dbc.bindValue(Actions.observeEnabled(newFolder),
-						ViewersObservables.observeSingleSelection(treeViewer),
-						null, enablement);
+						ViewerProperties.singleSelection().observe(treeViewer),
+						UpdateValueStrategy.never(), enablement);
 				// dbc.bindValue(Actions.observeEnabled(deleteAction),
 				// ViewersObservables.observeSingleSelection(treeViewer),
 				// null, enablement);

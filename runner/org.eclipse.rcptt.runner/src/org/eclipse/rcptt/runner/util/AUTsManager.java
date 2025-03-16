@@ -190,20 +190,28 @@ public class AUTsManager {
 		}
 		if (!file.exists()) {
 			System.out
-					.println("Java VM executable from ini file does not exist");
+					.println(file + " does not exist");
 			return null;
 		}
 
-		if (!"bin".equals(file.getParentFile().getName())) {
-			System.out
-					.println("Unknown file system layout of Java VM from ini file");
-			return null;
+		if ("bin".equals(file.getParentFile().getName()) || "lib".equals(file.getParentFile().getName()) ) {
+			file = file.getParentFile().getParentFile();
+		} else if ("bin".equals(file.getName())) {
+			file = file.getParentFile();
+		} else {
+			file = null;
 		}
 
-		file = file.getParentFile().getParentFile();
 		if (file == null) {
 			System.out
 					.println("Unknown file system layout of Java VM from ini file");
+			return null;
+		}
+		
+		try {
+			file = file.getCanonicalFile();
+		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 

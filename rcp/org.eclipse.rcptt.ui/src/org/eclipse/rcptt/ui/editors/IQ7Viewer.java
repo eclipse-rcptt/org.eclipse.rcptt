@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.editors;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-
 public interface IQ7Viewer<T> {
 
 	public String getLabel(T source);
-
-	public ImageDescriptor getImage(T source);
 
 	public IQ7Editor<T> createEditor();
 

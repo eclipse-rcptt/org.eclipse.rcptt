@@ -16,7 +16,7 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.rcptt.ui.commons.SWTFactory;
@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Text;
 public abstract class DestinationsBox {
 	private DataBindingContext dbc;
 
-	private final class ModelToSelection extends UpdateValueStrategy {
+	private final class ModelToSelection extends UpdateValueStrategy<Selection, Boolean> {
 		private Selection sel;
 
 		public ModelToSelection(Selection sel) {
@@ -40,7 +40,7 @@ public abstract class DestinationsBox {
 		}
 
 		@Override
-		public Object convert(Object value) {
+		public Boolean convert(Selection value) {
 			if (sel.equals(value)) {
 				return true;
 			}
@@ -48,7 +48,7 @@ public abstract class DestinationsBox {
 		}
 	}
 
-	private final class SelectionToModel extends UpdateValueStrategy {
+	private final class SelectionToModel extends UpdateValueStrategy<Boolean, Selection> {
 		private Selection sel;
 
 		public SelectionToModel(Selection sel) {
@@ -56,7 +56,7 @@ public abstract class DestinationsBox {
 		}
 
 		@Override
-		public Object convert(Object value) {
+		public Selection convert(Boolean value) {
 			return sel;
 		}
 	}
@@ -65,14 +65,10 @@ public abstract class DestinationsBox {
 		Filesystem, /* Workspace, */Clipboard
 	};
 
-	private WritableValue fsSelected = new WritableValue(Selection.Clipboard,
+	private WritableValue<Selection> fsSelected = new WritableValue<>(Selection.Clipboard,
 			Selection.class);
 
-	@SuppressWarnings("unused")
-	private WritableValue workspacePathValue = new WritableValue("",
-			String.class);
-
-	private WritableValue filesystemPathValue = new WritableValue("",
+	private WritableValue<String> filesystemPathValue = new WritableValue<>("",
 			String.class);
 
 	private Shell shell;
@@ -110,17 +106,17 @@ public abstract class DestinationsBox {
 		GridDataFactory.swtDefaults().applyTo(browseFilesystem);
 		SWTFactory.setButtonDimensionHint(browseFilesystem);
 
-		dbc.bindValue(SWTObservables.observeSelection(filesystemRadio),
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(filesystemRadio),
 				fsSelected, new SelectionToModel(Selection.Filesystem), new ModelToSelection(Selection.Filesystem));
-		dbc.bindValue(SWTObservables.observeSelection(clipboardRadio),
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(clipboardRadio),
 				fsSelected, new SelectionToModel(Selection.Clipboard), new ModelToSelection(Selection.Clipboard));
 
-		dbc.bindValue(SWTObservables.observeEnabled(browseFilesystem),
+		dbc.bindValue(WidgetProperties.enabled().observe(browseFilesystem),
 				fsSelected, new SelectionToModel(Selection.Filesystem), new ModelToSelection(Selection.Filesystem));
-		dbc.bindValue(SWTObservables.observeEnabled(filesystemPath),
+		dbc.bindValue(WidgetProperties.enabled().observe(filesystemPath),
 				fsSelected, new SelectionToModel(Selection.Filesystem), new ModelToSelection(Selection.Filesystem));
 
-		dbc.bindValue(SWTObservables.observeText(filesystemPath, SWT.Modify),
+		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(filesystemPath),
 				filesystemPathValue);
 		return cp;
 	}

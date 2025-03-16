@@ -13,25 +13,26 @@ package org.eclipse.rcptt.ui.panels;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.databinding.util.JFaceProperties;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 public class Actions {
-	public static final IObservableValue observeEnabled(IAction action) {
-		return JFaceProperties.value(IAction.class, "enabled", IAction.ENABLED) //$NON-NLS-1$
+	public static final IObservableValue<Boolean> observeEnabled(IAction action) {
+		return JFaceProperties.<IAction, Boolean>value(IAction.class, "enabled", IAction.ENABLED) //$NON-NLS-1$
 				.observe(action);
 	}
 
-	public static final IObservableValue observeChecked(IAction action) {
-		return JFaceProperties.value(IAction.class, "checked", IAction.CHECKED) //$NON-NLS-1$
+	public static final IObservableValue<Boolean> observeChecked(IAction action) {
+		return JFaceProperties.<IAction, Boolean>value(IAction.class, "checked", IAction.CHECKED) //$NON-NLS-1$
 				.observe(action);
 	}
 
-	public static final IObservableValue observeImageDescriptor(IAction action) {
-		return JFaceProperties.value(IAction.class, "imageDescriptor", //$NON-NLS-1$
+	public static final IObservableValue<ImageDescriptor> observeImageDescriptor(IAction action) {
+		return JFaceProperties.<IAction, ImageDescriptor>value(IAction.class, "imageDescriptor", //$NON-NLS-1$
 				IAction.IMAGE).observe(action);
 	}
 
-	public static final IObservableValue observeToolTipText(IAction action) {
-		return JFaceProperties.value(IAction.class, "toolTipText", //$NON-NLS-1$
+	public static final IObservableValue<String> observeToolTipText(IAction action) {
+		return JFaceProperties.<IAction, String>value(IAction.class, "toolTipText", //$NON-NLS-1$
 				IAction.TOOL_TIP_TEXT).observe(action);
 	}
 }

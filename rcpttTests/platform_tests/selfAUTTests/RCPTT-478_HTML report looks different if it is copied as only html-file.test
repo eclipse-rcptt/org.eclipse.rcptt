@@ -37,6 +37,14 @@ Verify that report styles are not broken.
 Content-Type: text/ecl
 Entry-Name: .content
 
+get-preferences-menu | click
+with [get-window Preferences] {
+    get-tree | select "General/Web Browser"
+    get-button "Use internal web browser" | click -metaKeys ""
+    get-button Apply | click -metaKeys ""
+    get-button "Apply and Close" | click -metaKeys ""
+}
+
 get-view "Test Explorer" | get-tree | select "Q7Project/test1" | select "Q7Project/test1" | double-click
 get-editor test1 | get-button Replay | click
 get-view "Execution View" | get-button Report | click
@@ -52,9 +60,9 @@ with [get-window "New Folder"] {
 }
 get-view "Test Explorer" | get-tree | select "Q7Project/test1.*.html" | double-click
     
-let [val reportContent [get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux "Web Browser"] | get-control Browser | get-property text -raw]]{
+let [val reportContent [get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux ".*.html"] | get-control Browser | get-property text -raw]]{
 	    
-	get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux "Web Browser"] | close
+	get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux ".*.html"] | close
 	
 	with [get-view "Test Explorer" | get-tree] {
 	    select "Q7Project/test1.*.html" | get-menu Copy | click
@@ -62,7 +70,7 @@ let [val reportContent [get-editor [get-by-os -macosx ".*.html" -win ".*.html" -
 	    select "Q7Project/F/test1.*.html" | double-click
 	}
 	     
-	get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux "Web Browser"] | get-control Browser | get-property text -raw | eq $reportContent | verify-true   
+	get-editor [get-by-os -macosx ".*.html" -win ".*.html" -linux ".*.html"] | get-control Browser | get-property text -raw | eq $reportContent | verify-true   
 	    
 }    
 

@@ -16,7 +16,7 @@
   <parent>
     <artifactId>ecl-features</artifactId>
     <groupId>org.eclipse.rcptt.ecl</groupId>
-    <version>2.5.5-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.rcptt.ecl.features</groupId>
   <artifactId>org.eclipse.rcptt.ecl.ide</artifactId>

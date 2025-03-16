@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _4m2t4CzhEeS3Uc85AOuQ3g
-Runtime-Version: 2.0.0.201505131625
-Save-Time: 5/14/15 3:30 PM
+Runtime-Version: 2.5.5.202403210919
+Save-Time: 3/22/24, 9:36 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -15,7 +15,7 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 with [get-view "Test Explorer" | get-tree] {
-    //select TestQ7Prj | key-type F5
+    select TestQ7Prj
     get-menu Refresh | click
     select "TestQ7Prj/folder/dummy.txt"
 }

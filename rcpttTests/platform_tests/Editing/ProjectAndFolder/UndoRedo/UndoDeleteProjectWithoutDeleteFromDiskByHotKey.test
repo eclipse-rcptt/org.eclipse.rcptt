@@ -4,11 +4,11 @@ Contexts: _4zI9AWpgEeCzId1Gnkds9A,_vp_JkIHtEeC8fpRZXBpN8g
 Element-Name: UndoRedoDeleteProjectWithoutDeleteFromDiskByHotKey
 Element-Type: testcase
 Element-Version: 3.0
-External-Reference: 
+External-Reference: https://github.com/eclipse/org.eclipse.rcptt/issues/68
 Id: _6UOKUILYEeGVWel_bIqsJQ
-Runtime-Version: 2.4.1.qualifier
-Save-Time: 4/2/19 12:33 PM
-Tags: Project, Delete, UndoRedo
+Runtime-Version: 2.5.5.202404121026
+Save-Time: 4/13/24, 5:54 PM
+Tags: Project, Delete, UndoRedo, skipLinux
 Testcase-Type: ecl
 Verifications: _UnfUID8XEeSyDoCDFnaFCg
 
@@ -34,6 +34,9 @@ TEST STEPS
 4. Make sure that project is created and contet present in project
 5. Press M1+y
 6. Make sure that project is not displayed in Q7 Explorer
+
+
+The consistently fails on old Linux due to 'Delete Resource' cannot be redone dialog
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
 Content-Type: text/ecl
@@ -64,12 +67,13 @@ with [get-view "Test Explorer" | get-tree] {
 }
 
 get-view "Test Explorer" | get-tree | key-type [get-by-os -win "M1+y" -default "M1+M2+z"]
-wait 200
-with [get-view "Test Explorer" | get-tree] {
-    get-property itemCount | equals 2 | verify-true
-    get-item p1 | get-property caption | equals p1 | verify-true
-    get-item p1 | get-property childCount | equals 4 | verify-true
-    get-item p2 | get-property caption | equals p2 | verify-true
-    get-item p2 | get-property childCount | equals 3 | verify-true
-} 
+try -times 10 -delay 1000 -command {
+	with [get-view "Test Explorer" | get-tree] {
+	    get-property itemCount | equals 2 | verify-true
+	    get-item p1 | get-property caption | equals p1 | verify-true
+	    get-item p1 | get-property childCount | equals 4 | verify-true
+	    get-item p2 | get-property caption | equals p2 | verify-true
+	    get-item p2 | get-property childCount | equals 3 | verify-true
+	}
+}
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

@@ -11,6 +11,8 @@
 package org.eclipse.rcptt.verifications.time.ui;
 
 import org.eclipse.core.databinding.Binding;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -18,7 +20,7 @@ import org.eclipse.emf.databinding.EMFObservables;
 import org.eclipse.emf.databinding.EMFUpdateValueStrategy;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationUpdater;
-import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -75,10 +77,11 @@ public class TimeVerificationEditor extends BaseVerificationEditor {
 				"Take into account the time spent executing contexts", SWT.CHECK);
 		GridDataFactory.fillDefaults().span(4, 1).applyTo(includeContextsCheckbox);
 
-		dbc.bindValue(SWTObservables
-				.observeSelection(includeContextsCheckbox), EMFObservables.observeValue(
-				getVerification(),
-				TimePackage.Literals.TIME_VERIFICATION__INCLUDE_CONTEXTS));
+		IObservableValue<Boolean> includeContexts = EMFObservables.observeValue(
+		getVerification(),
+		TimePackage.Literals.TIME_VERIFICATION__INCLUDE_CONTEXTS);
+		dbc.bindValue(WidgetProperties.buttonSelection().observe(
+				includeContextsCheckbox), includeContexts);
 	}
 
 	private void createMinutesAndSecondsControls(final FormToolkit toolkit,
@@ -96,11 +99,14 @@ public class TimeVerificationEditor extends BaseVerificationEditor {
 				hint(minutesText.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x, SWT.DEFAULT).
 				indent(32, 0).applyTo(minutesText);
 
-		Binding minutesBinding = dbc.bindValue(SWTObservables.observeText(
-				minutesText, SWT.Modify), EMFObservables.observeValue(
-				getVerification(),
-				TimePackage.Literals.TIME_VERIFICATION__MINUTES),
-				minutesStrategy, new EMFUpdateValueStrategy());
+		IObservableValue<Integer> minutes = EMFObservables.observeValue(
+		getVerification(),
+		TimePackage.Literals.TIME_VERIFICATION__MINUTES);
+		@SuppressWarnings("unchecked")
+		UpdateValueStrategy<Integer, String> numberToString = new EMFUpdateValueStrategy();
+		Binding minutesBinding = dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(
+				minutesText), minutes,
+				minutesStrategy, numberToString);
 		ControlDecorationSupport.create(minutesBinding, SWT.TOP | SWT.LEFT, client,
 				new ControlDecorationUpdater() {
 					@Override
@@ -121,11 +127,12 @@ public class TimeVerificationEditor extends BaseVerificationEditor {
 		GridDataFactory.fillDefaults().
 				hint(secondsText.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x, SWT.DEFAULT).
 				applyTo(secondsText);
-		Binding secondsBinding = dbc.bindValue(SWTObservables.observeText(
-				secondsText, SWT.Modify), EMFObservables.observeValue(
-				getVerification(),
-				TimePackage.Literals.TIME_VERIFICATION__SECONDS),
-				secondsStrategy, new EMFUpdateValueStrategy());
+		IObservableValue<Integer> seconds = EMFObservables.observeValue(
+		getVerification(),
+		TimePackage.Literals.TIME_VERIFICATION__SECONDS);
+		Binding secondsBinding = dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(
+				secondsText), seconds,
+				secondsStrategy, numberToString);
 		ControlDecorationSupport.create(secondsBinding, SWT.TOP | SWT.LEFT, client,
 				new ControlDecorationUpdater() {
 					@Override
@@ -142,11 +149,13 @@ public class TimeVerificationEditor extends BaseVerificationEditor {
 		secondsLabel.setBackground(null);
 	}
 
-	private EMFUpdateValueStrategy minutesStrategy = new EMFUpdateValueStrategy() {
+	@SuppressWarnings("unchecked")
+	private UpdateValueStrategy<String, Integer> minutesStrategy = new EMFUpdateValueStrategy() {
 		{
-			this.setBeforeSetValidator(new IValidator() {
-				public IStatus validate(Object value) {
-					Integer minutes = (Integer) value;
+			UpdateValueStrategy<String, Integer> thisTyped = this;
+			thisTyped.setBeforeSetValidator(new IValidator<Integer>() {
+				public IStatus validate(Integer value) {
+					Integer minutes = value;
 
 					if (minutes < 0 || minutes > 99)
 						return ValidationStatus
@@ -158,10 +167,13 @@ public class TimeVerificationEditor extends BaseVerificationEditor {
 		}
 	};
 
-	private EMFUpdateValueStrategy secondsStrategy = new EMFUpdateValueStrategy() {
+	@SuppressWarnings("unchecked")
+	private UpdateValueStrategy<String, Integer> secondsStrategy = new EMFUpdateValueStrategy() {
 		{
-			this.setBeforeSetValidator(new IValidator() {
-				public IStatus validate(Object value) {
+			UpdateValueStrategy<String, Integer> thisTyped = this;
+			thisTyped.setBeforeSetValidator(new IValidator<Integer>() {
+				@Override
+				public IStatus validate(Integer value) {
 					Integer seconds = (Integer) value;
 
 					if (seconds < 0 || seconds > 60)

@@ -46,7 +46,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
@@ -125,8 +125,8 @@ public class Q7ExternalLaunchDelegate extends
 		Q7ExtLaunchMonitor waiter = new Q7ExtLaunchMonitor(launch);
 
 		try {
-			super.launch(configuration, mode, launch, subm.newChild(1000));
-			waiter.wait(subm.newChild(1000), TeslaLimits.getAUTStartupTimeout() / 1000);
+			super.launch(configuration, mode, launch, subm.split(1000));
+			waiter.wait(subm.split(1000), TeslaLimits.getAUTStartupTimeout() / 1000);
 		} catch (CoreException e) {
 			Q7ExtLaunchingPlugin.getDefault().log(
 					"RCPTT: Failed to Launch AUT: " + configuration.getName()
@@ -137,6 +137,8 @@ public class Q7ExternalLaunchDelegate extends
 			if (!e.getStatus().matches(IStatus.CANCEL)) {
 				throw e;
 			}
+		} catch (OperationCanceledException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
 		} catch (RuntimeException e) {
 			Q7ExtLaunchingPlugin.getDefault().log(
 					"RCPTT: Failed to Launch AUT: " + configuration.getName()
@@ -184,12 +186,12 @@ public class Q7ExternalLaunchDelegate extends
 		
 		if (!isHeadless(configuration)
 				&& !super.preLaunchCheck(configuration, mode,
-						sm.newChild(1))) {
+						sm.split(1))) {
 			monitor.done();
 			return false;
 		}
 
-		waitForClearBundlePool(sm.newChild(1));
+		waitForClearBundlePool(sm.split(1));
 
 		final CachedInfo info = LaunchInfoCache.getInfo(configuration);
 
@@ -199,7 +201,7 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
-				sm.newChild(2));
+				sm.split(2));
 
 		if (monitor.isCanceled()) {
 			removeTargetPlatform(configuration);
@@ -521,9 +523,8 @@ public class Q7ExternalLaunchDelegate extends
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
-		String override = configuration.getAttribute(
-				IQ7Launch.OVERRIDE_SECURE_STORAGE, (String) null);
-		if (override == null || "true".equals(override)) {
+		if ( configuration.getAttribute(
+				IQ7Launch.OVERRIDE_SECURE_STORAGE, true)) {
 			// Override existing parameter
 			programArgs.add("-eclipse.keyring");
 			programArgs.add(getConfigDir(configuration).toString()
@@ -550,7 +551,21 @@ public class Q7ExternalLaunchDelegate extends
 			return info.vmArgs;
 		}
 		List<String> args = new ArrayList<String>(Arrays.asList(super.getVMArguments(config)));
+		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
+		massageVmArguments(config, args, target, launch.getAttribute(IQ7Launch.ATTR_AUT_ID));
+		
+
+		info.vmArgs = args.toArray(new String[args.size()]);
+		Q7ExtLaunchingPlugin.getDefault().info(
+				Q7_LAUNCHING_AUT + config.getName()
+						+ ": AUT JVM arguments is set to : "
+						+ Arrays.toString(info.vmArgs));
+		return info.vmArgs;
+	}
+
+	public static void massageVmArguments(ILaunchConfiguration config, List<String> args, ITargetPlatformHelper target, String autId)
+			throws CoreException {
 		// Filter some PDE parameters
 		Iterables.removeIf(args, new Predicate<String>() {
 			public boolean apply(String input) {
@@ -561,10 +576,9 @@ public class Q7ExternalLaunchDelegate extends
 			}
 		});
 
-		args.add("-Dq7id=" + launch.getAttribute(IQ7Launch.ATTR_AUT_ID));
+		args.add("-Dq7id=" + autId);
 		args.add("-Dq7EclPort=" + AutEventManager.INSTANCE.getPort());
 
-		TargetPlatformHelper target = (TargetPlatformHelper) ((ITargetPlatformHelper) info.target);
 
 		IPluginModelBase hook = target.getWeavingHook();
 		if (hook == null) {
@@ -575,22 +589,16 @@ public class Q7ExternalLaunchDelegate extends
 		// Append all other properties from original config file
 		OriginalOrderProperties properties = target.getConfigIniProperties();
 
-		args = UpdateVMArgs.addHook(args, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS));
+		ArrayList<String> argsCopy = new ArrayList<>(args);
+		args.clear();
+		args.addAll(UpdateVMArgs.addHook(argsCopy, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS)));
 
 		args.addAll(vmSecurityArguments(config));
 		
 		args.add("-Declipse.vmargs=" + Joiner.on("\n").join(args) + "\n");
-		
-
-		info.vmArgs = args.toArray(new String[args.size()]);
-		Q7ExtLaunchingPlugin.getDefault().info(
-				Q7_LAUNCHING_AUT + config.getName()
-						+ ": AUT JVM arguments is set to : "
-						+ Arrays.toString(info.vmArgs));
-		return info.vmArgs;
 	}
 	
-	private static List<String> vmSecurityArguments(ILaunchConfiguration configuration) throws CoreException {
+	public static List<String> vmSecurityArguments(ILaunchConfiguration configuration) throws CoreException {
 		// Magic constant from org.eclipse.jdt.internal.launching.environments.ExecutionEnvironmentAnalyzer
 		ArrayList<String> result = new ArrayList<>();
 		Set<String> envs = getMatchingEnvironments(configuration);
@@ -633,7 +641,7 @@ public class Q7ExternalLaunchDelegate extends
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getQ7Target(), target.getTarget(), subm.newChild(50), configuration);
+		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getQ7Target(), target.getTarget(), subm.split(50), configuration);
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
@@ -674,8 +682,8 @@ public class Q7ExternalLaunchDelegate extends
 
 	public static class BundlesToLaunchCollector {
 		private void addInstallationBundle(TargetBundle bundle,
-				BundleStart hint) {
-			for (IPluginModelBase base : getModels(bundle)) {
+				BundleStart hint, IProgressMonitor monitor) {
+			for (IPluginModelBase base : getModels(bundle, monitor)) {
 				addInstallationBundle(base, hint);
 			}
 		}
@@ -687,8 +695,8 @@ public class Q7ExternalLaunchDelegate extends
 			put(base, getStartInfo(base, hint));
 		}
 
-		private void addPluginBundle(TargetBundle bundle) {
-			for (IPluginModelBase base : getModels(bundle)) {
+		private void addPluginBundle(TargetBundle bundle, IProgressMonitor monitor) {
+			for (IPluginModelBase base : getModels(bundle, monitor)) {
 				String id = id(base);
 
 				if (idsToSkip.contains(id)) {
@@ -698,8 +706,8 @@ public class Q7ExternalLaunchDelegate extends
 			}
 		}
 
-		public void addExtraBundle(TargetBundle bundle) {
-			for (IPluginModelBase base : getModels(bundle)) {
+		public void addExtraBundle(TargetBundle bundle, IProgressMonitor monitor) {
+			for (IPluginModelBase base : getModels(bundle, monitor)) {
 				put(base, getStartInfo(base, BundleStart.DEFAULT));
 			}
 		}
@@ -752,8 +760,7 @@ public class Q7ExternalLaunchDelegate extends
 	public static boolean isQ7BundleContainer(ITargetLocation container) {
 		if (!(container instanceof IUBundleContainer))
 			return false;
-		URI[] uris = ((IUBundleContainer) container).getRepositories();
-		for (URI uri : uris) {
+		for (URI uri : ((IUBundleContainer) container).getRepositories()) {
 			if (!uri.getScheme().equals("platform")
 					|| !uri.getPath().startsWith("/plugin/org.eclipse.rcptt")) {
 				return false;
@@ -804,7 +811,7 @@ public class Q7ExternalLaunchDelegate extends
 	public static BundlesToLaunch collectBundles(Q7Target target, ITargetDefinition targetDefinition, IProgressMonitor monitor) {
 		BundlesToLaunchCollector collector = new BundlesToLaunchCollector();
 		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", 3000);
-		SubMonitor install = subm.newChild(1000);
+		SubMonitor install = subm.split(1000);
 
 		if (target.getInstall() != null) {
 			Map<String, BundleStart> bundlesFromConfig = target.getInstall().configIniBundles();
@@ -814,23 +821,26 @@ public class Q7ExternalLaunchDelegate extends
 				BundleStart hint = MoreObjects.firstNonNull(bundlesFromConfig.get(bundle
 						.getBundleInfo().getSymbolicName()),
 						BundleStart.fromBundle(bundle.getBundleInfo()));
-				collector.addInstallationBundle(bundle, hint);
-				install.worked(1);
+				collector.addInstallationBundle(bundle, hint, install.split(1));
 			}
 		}
 		install.done();
 
-		final SubMonitor plugins = subm.newChild(1000);
 		TargetBundle[] bundles = targetDefinition.getAllBundles();
+		final SubMonitor plugins = SubMonitor.convert(subm.split(2000), bundles.length);
 		for (TargetBundle bundle : bundles) {
-			collector.addPluginBundle(bundle);
-			plugins.worked(1);
+			collector.addPluginBundle(bundle, plugins.split(1));
 		}
 		plugins.done();
 
-
-		return new BundlesToLaunch(collector.rejectedBundles,
+		try {
+			return new BundlesToLaunch(collector.rejectedBundles,
 				collector.plugins, collector.latestVersions);
+		} finally {
+			if (monitor != null) {
+				monitor.done();
+			}
+		}
 	}
 
 	/**
@@ -883,10 +893,10 @@ public class Q7ExternalLaunchDelegate extends
 		return (BundlesToLaunch) info.data.get(KEY_BUNDLES_TO_LAUNCH);
 	}
 
-	private static IPluginModelBase[] getModels(TargetBundle bundle) {
+	private static IPluginModelBase[] getModels(TargetBundle bundle, IProgressMonitor monitor) {
 		return new PDEState(new URI[] {
 			bundle.getBundleInfo().getLocation() }, true, true,
-			new NullProgressMonitor()).getTargetModels();
+				monitor).getTargetModels();
 	}
 
 	private static Version version(IPluginModelBase plugin) {
