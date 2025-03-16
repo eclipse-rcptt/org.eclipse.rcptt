@@ -1,0 +1,57 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.ecl
+Element-Name: procedures
+Element-Type: context
+Element-Version: 2.0
+Id: _tqDkkAJnEfCi5Lv1yRTTlg
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/16/25, 5:30 PM
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2025 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+Procedures used in most tests
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
+Content-Type: text/ecl
+Entry-Name: .ecl.context
+
+proc replace_all [val input -input] [val pattern] [val replacement] {
+    with [$input] {
+	    key-type "M1+f"
+	    with [get-editbox -after [get-button "Toggle input for replace.*"]] {
+	         set-text $pattern
+	     }
+	    try -command {
+	       get-button "Replace all.*"
+	    } -catch {
+	       get-button "Toggle input for replace.*" | click
+	    }
+	    get-editbox -index 1 | set-text $replacement
+	    get-button "Replace all.*" | click
+	    get-editbox -index 1 |key-type ESC
+    }
+}
+
+proc waitForExecutionToComplete {
+    loop {
+        if [get-view "Execution View" | get-label ".*/1"
+            | get-property caption -raw | not-eq "1/1"] {
+            wait 500
+            recur
+        }
+    }
+}
+------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998--
