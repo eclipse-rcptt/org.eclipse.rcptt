@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -131,7 +132,11 @@ public class BrowserManager implements ITeslaBrowserListener {
 
 	public void browserSetText(Browser browser) {
 		synchronized (timeouts) {
-			timeouts.remove(browser);
+			if (SWT.getVersion() >= 4968) {
+				makeChanged(browser);
+			} else {
+				timeouts.remove(browser);
+			}
 		}
 	}
 
