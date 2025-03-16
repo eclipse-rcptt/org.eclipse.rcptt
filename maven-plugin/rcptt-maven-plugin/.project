@@ -31,17 +31,26 @@
 		<link>
 			<name>target_classes</name>
 			<type>2</type>
-			<location>//Users/vasiligulevich/git/org.eclipse.rcptt/maven-plugin/rcptt-maven-plugin/target/classes/</location>
+			<location>/Users/vasiligulevich/git/org.eclipse.rcptt/maven-plugin/rcptt-maven-plugin/target/classes</location>
 		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
-			<id>1737992165899</id>
+			<id>1742150122462</id>
 			<name></name>
 			<type>10</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-true-false-target</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1742150122463</id>
+			<name></name>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-true-false-target_classes</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

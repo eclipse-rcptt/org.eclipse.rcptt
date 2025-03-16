@@ -1,13 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Contexts: _ymiyse5IEeCU6db9MgIBkA,__2fEACC3EeGpvKMy1SUvBw
+Contexts: _ymiyse5IEeCU6db9MgIBkA,__2fEACC3EeGpvKMy1SUvBw,_tqDkkAJnEfCi5Lv1yRTTlg
 Element-Name: FindReplaceInScriptByShortKey
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _vgD5sFE_EeG1qoPbj5xXbg
-Runtime-Version: 2.6.0.202503081620
-Save-Time: 3/8/25, 11:41 PM
+Runtime-Version: 2.6.0.202503151907
+Save-Time: 3/16/25, 5:52 PM
 Tags: ECL_IDE_module, TestCase, SearchReplace
 Testcase-Type: ecl
 
@@ -37,22 +37,8 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "MyProject/CreateQ7Project" | double-click
-with [get-editor CreateQ7Project | get-section Script | get-text-viewer] {
-    set-caret-pos 1 2
-    key-type "M1+f"
-}
 with [get-editor CreateQ7Project | get-section Script] {
-    with [get-editbox] {
-        set-text Q7
-    }
-    try -command {
-    	get-button "Replace all.*"
-    } -catch {
-	    get-button "Toggle input for replace (M1+R)" | click
-    }
-    get-editbox -index 1 | set-text Java
-    get-button "Replace all.*" | click
-    get-editbox -index 1 |key-type ESC
+    replace_all Q7 Java
 }
 get-editor CreateQ7Project | get-section Script | get-editbox | get-property text
     | equals "get-view \"Java Explorer\" | get-tree | get-menu \"New/Java Project\" | click\n"
