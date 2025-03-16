@@ -12,7 +12,6 @@ package org.eclipse.rcptt.tesla.internal.ui.player;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -67,9 +66,6 @@ public class BrowserManager implements ITeslaBrowserListener {
 				Browser br = (Browser) event.getSource();
 				if (ContextManagement.currentContext().contains(
 						"org.eclipse.swt.browser.Browser", "setText")) {
-					return;
-				}
-				if (Objects.equals(event.location, "about:blank")) {
 					return;
 				}
 				makeChanged(br);
