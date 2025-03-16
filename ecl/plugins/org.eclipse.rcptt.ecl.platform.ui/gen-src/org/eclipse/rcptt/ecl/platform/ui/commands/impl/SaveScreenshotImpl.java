@@ -80,6 +80,7 @@ public class SaveScreenshotImpl extends CommandImpl implements SaveScreenshot {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getOut() {
 		return out;
 	}
@@ -89,6 +90,7 @@ public class SaveScreenshotImpl extends CommandImpl implements SaveScreenshot {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setOut(String newOut) {
 		String oldOut = out;
 		out = newOut;
@@ -163,7 +165,7 @@ public class SaveScreenshotImpl extends CommandImpl implements SaveScreenshot {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (out: ");
 		result.append(out);
 		result.append(')');

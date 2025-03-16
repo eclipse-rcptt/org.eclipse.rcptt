@@ -9,14 +9,15 @@ node {
 pipeline {
   agent {
     kubernetes {
-      label 'rcptt-build-agent-3.5.4'
       yaml library.YAML_BUILD_AGENT
     }
   }
 
   options {
-     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '10'))
+     timestamps()
+     buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '10', removeLastBuild: true, artifactNumToKeepStr: '1'))
      disableConcurrentBuilds()
+     timeout(time: 10, unit: 'HOURS')
   }
 
   stages {

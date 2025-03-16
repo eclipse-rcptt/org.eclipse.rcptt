@@ -5,8 +5,8 @@ Element-Name: SetupAUTContext
 Element-Type: context
 Element-Version: 2.0
 Id: _ZQYygK2sEeCqBbDEJWufvQ
-Runtime-Version: 2.5.5.202404121026
-Save-Time: 4/13/24, 5:35 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 7/22/24, 6:30 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -35,6 +35,15 @@ proc "has-property" [val control -input] [val property] {
 	}
 }
 
+proc waitForTaskToComplete {
+	loop {
+		if [get-view "Execution View" | get-label ".*/1"
+			| get-property caption -raw | not-eq "1/1"] {
+			wait 500
+			recur
+		}
+	}
+}
 invoke-AUT selfQ7 -args "-nosplash" -vmargs "-Xmx512m"
 
 loop [val count 0] {

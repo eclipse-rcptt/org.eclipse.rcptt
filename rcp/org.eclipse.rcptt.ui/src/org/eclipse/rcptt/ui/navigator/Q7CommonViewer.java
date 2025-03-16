@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.navigator;
 
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.navigator.CommonViewer;
@@ -18,7 +19,12 @@ public class Q7CommonViewer extends CommonViewer {
 
 	public Q7CommonViewer(String aViewerId, Composite aParent, int aStyle) {
 		super(aViewerId, aParent, aStyle);
-		super.setSorter(new Q7ViewerSorter());
+		super.setComparator(new Q7ViewerSorter());
+	}
+	
+	@Override
+	public void setComparator(ViewerComparator comparator) {
+		// do not allow to change sorter
 	}
 
 	@Override

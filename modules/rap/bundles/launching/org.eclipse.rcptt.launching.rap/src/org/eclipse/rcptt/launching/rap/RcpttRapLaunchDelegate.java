@@ -200,7 +200,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			validatePluginDependencies(configuration, subMonitor.split(1));
 		}
 		validateProjectDependencies(configuration, subMonitor.split(1));
-		LauncherUtils.setLastLaunchMode(launch.getLaunchMode());
 		clear(configuration, subMonitor.split(1));
 		launch.setAttribute(IPDELauncherConstants.CONFIG_LOCATION, getConfigDir(configuration).toString());
 		synchronizeManifests(configuration, subMonitor.split(1));
@@ -480,9 +479,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
-		String override = configuration.getAttribute(
-				IQ7Launch.OVERRIDE_SECURE_STORAGE, (String) null);
-		if (override == null || "true".equals(override)) {
+		if (configuration.getAttribute(
+				IQ7Launch.OVERRIDE_SECURE_STORAGE, true)) {
 			// Override existing parameter
 			programArguments.add("-eclipse.keyring");
 			programArguments.add(getConfigDir(configuration).toString()
@@ -955,7 +953,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	private void clearDataLocation(ILaunchConfiguration configuration, IProgressMonitor monitor)
 			throws CoreException {
 		String resolvedDataLocation = getResolvedDataLoacation();
-		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, monitor);
+		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, launch.getLaunchMode(), monitor);
 	}
 
 	private void registerBrowserOpener() {

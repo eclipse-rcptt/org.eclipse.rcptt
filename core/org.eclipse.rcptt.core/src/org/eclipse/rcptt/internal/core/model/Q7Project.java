@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -228,33 +229,25 @@ public class Q7Project extends Openable implements IQ7Project {
 		final Q7Folder rootFolder = (Q7Folder) getRootFolder();
 		IQ7ProjectMetadata metadata = rootFolder.getMetadata();
 
-		if (!resourceExists(metadata.getResource())) {
-			final String pfamily = "Q7_CREATE_METADATA:" + getName();
-			Job[] find = Job.getJobManager().find(pfamily);
-			if( find.length > 0) {
-				// Job is already in progress, so need just to wait for complete.
-				return rootFolder.getMetadata();
+		IResource resource = metadata.getResource();
+		Job createMetadataJob = new WorkspaceJob("Create Q7 project metadata") {
+			{
+				setRule(resource.getWorkspace().getRuleFactory().createRule(resource));
 			}
-			Job createMetadataJob = new Job("Create Q7 project metadata") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) {
+				try {
+					if (!resourceExists(resource)) {
 						rootFolder.createMetadata(true,
 								new NullProgressMonitor());
-					} catch (ModelException e) {
-						RcpttPlugin.log(e);
 					}
-					return Status.OK_STATUS;
+				} catch (ModelException e) {
+					RcpttPlugin.log(e);
 				}
-
-				@Override
-				public boolean belongsTo(Object family) {
-					return pfamily.equals(family);
-				}
+				return Status.OK_STATUS;
 			};
-			createMetadataJob.schedule();
-			return rootFolder.getMetadata();
-		}
+		};
+		createMetadataJob.schedule();
 		return metadata;
 	}
 }

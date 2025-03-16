@@ -15,7 +15,8 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
-      image: basilevs/ubuntu-rcptt:3.6.2
+      image: basilevs/ubuntu-rcptt:3.7.1
+      imagePullPolicy: Always
       tty: true
       resources:
         limits:
@@ -77,13 +78,14 @@ class Build implements Serializable {
   private final String PRODUCTS_DIR="$FULL_REPOSITORY_TARGET/products"
   private final String FULL_REPOSITORY_DIR="$FULL_REPOSITORY_TARGET/repository"
   private final String RCPTT_REPOSITORY_DIR="$RCPTT_REPOSITORY_TARGET/repository"
-  private final String RUNNER_DIR="runner/product/target"
+  private final String RUNNER_DIR="runner/product/target/products"
   private final String RUNTIME_DIR="runtime/updates"
   private final String RUNTIME_DIR_E3="$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime/q7"
   private final String RUNTIME_DIR_E4="$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime.e4x/q7"
   private final String DOC_DIR="releng/doc"
 
   private final String DOWNLOADS_HOME="/home/data/httpd/download.eclipse.org/rcptt"
+  private final String[] PLATFORMS=["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"];
 
   private final def script
 
@@ -136,27 +138,29 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void set_milestone(String decorator) {
-      this.script.container(BUILD_CONTAINER_NAME) {
+      withBuildContainer() {
         def version = get_version_from_pom().split("-")[0]
         this.script.sh "./update_version.sh $version $decorator"
       }
   }
 
   void _build(Boolean sign) {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.sh "mvn --version"
       def mvn = { pom ->
           this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
       }
-      mvn "releng/mirroring/pom.xml"
-      mvn "releng/core/pom.xml"
-      mvn "releng/runtime/pom.xml -P runtime4x"
-      mvn "releng/ide/pom.xml"
-      mvn "releng/rap/pom.xml -P core"
-      mvn "releng/rap/pom.xml -P ide"
-      mvn "releng/rcptt/pom.xml"
-      mvn "releng/runner/pom.xml"
-      mvn "maven-plugin/pom.xml install"      
+      this.script.xvnc() {
+        mvn "releng/mirroring/pom.xml"
+        mvn "releng/core/pom.xml"
+        mvn "releng/runtime/pom.xml -P runtime4x"
+        mvn "releng/ide/pom.xml"
+        mvn "releng/rap/pom.xml -P core"
+        mvn "releng/rap/pom.xml -P ide"
+        mvn "releng/rcptt/pom.xml"
+        mvn "releng/runner/pom.xml"
+        mvn "maven-plugin/pom.xml install"
+      }
       this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
     }
   }
@@ -164,7 +168,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void archive() {
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: true, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary"
   }
 
   private void sh_with_return(String command) {
@@ -188,9 +192,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void rcptt_tests() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       _run_tests(
-        "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+        "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-linux.gtk.x86_64.zip",
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
@@ -199,12 +203,12 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void mockup_tests() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.dir('mockups') {
         this.script.git "https://github.com/xored/q7.quality.mockups.git"
       }
       _run_tests(
-          "${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip",
+          "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-linux.gtk.x86_64.zip",
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
@@ -213,24 +217,26 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void tests(String repo, String runner, String args) {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.git repo
       _run_tests(runner, "rcpttTests", args)
     }
   }
 
   private void _run_tests(String runner, String dir, String args) {
-    this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-        -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-        -Dci-maven-version=2.0.0-SNAPSHOT \
-        -DexplicitRunner=`readlink -f ${runner}` \
-        ${args}"
+    this.script.xvnc() {
+      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
+          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+          -Dci-maven-version=2.6.0-SNAPSHOT \
+          -DexplicitRunner=`readlink -f ${runner}` \
+          ${args}"
+    }
     this.script.sh "test -f ${dir}/target/results/tests.html"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
 
   void post_build_actions() {
-    this.script.container(BUILD_CONTAINER_NAME) {
+    withBuildContainer() {
       this.script.sh "jps -v"
       this.script.sh "ps x"
     }
@@ -281,7 +287,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       copy_files(type, version, "latest", "-nightly", true)
     }
 
-    maven_deploy_nightly()
+    maven_deploy(version+"-SNAPSHOT")
   }
 
   void milestone(String milestone) {
@@ -320,14 +326,15 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       for(item in [ [ RCPTT_REPOSITORY_DIR, "repository" ],
                     [ RUNTIME_DIR_E4, "runtime4x" ],
                     [ "$DOC_DIR/target/doc", "doc" ],
-                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ],
-                    [ "$RUNNER_DIR/rcptt.runner-*.zip", "runner/rcptt.runner-${version}${qualifiedDecoration}.zip" ] ]) {
+                    [ "$RCPTT_REPOSITORY_TARGET/rcptt.repository-*.zip", "repository-${version}${qualifiedDecoration}.zip" ]
+                    ]) {
         this.script.sh "scp -r ${item[0]} $CREDENTIAL:$storageFolder/${item[1]}"
       }
 
       this.script.sh "$SSH_CLIENT mkdir $storageFolder/ide"
-      for(platform in ["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"]) {
+      for(platform in PLATFORMS) {
         this.script.sh "scp -r $PRODUCTS_DIR/org.eclipse.rcptt.platform.product-${platform}.zip $CREDENTIAL:$storageFolder/ide/rcptt.ide-${version}${qualifiedDecoration}-${platform}.zip"
+        this.script.sh "scp -r $RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${platform}.zip $CREDENTIAL:$storageFolder/runner/rcptt.runner-${version}${qualifiedDecoration}-${platform}.zip"
       }
 
       if(copy_full) {
@@ -337,36 +344,29 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     }
   }
 
-  private void maven_deploy_nightly() {
+  def withBuildContainer(operation) {
     this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn -f releng/runner/pom.xml clean deploy -Dmaven.repo.local=${getWorkspace()}/m2 -e -B"
-      this.script.sh "mvn -f maven-plugin/pom.xml clean deploy -Dmaven.repo.local=${getWorkspace()}/m2 -e -B"
+      operation()
     }
   }
 
   private void maven_deploy(String version) {
-    maven_deploy_runner(version)
-    maven_deploy_maven_plugin(version)
-  }
-
-  private void maven_deploy_runner(String version) {
-    this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn deploy:deploy-file -B \
-          -Dversion=$version -Durl=https://repo.eclipse.org/content/repositories/rcptt-releases/ \
-          -DgroupId=org.eclipse.rcptt.runner \
-          -DrepositoryId=repo.eclipse.org \
-          -DgeneratePom=true \
-          -DartifactId=rcptt.runner \
-          -Dfile=`readlink -f ${getWorkspace()}/$RUNNER_DIR/rcptt.runner-*.zip`"
+    withBuildContainer() {
+      mvn('-Dtycho.mode=maven -f runner/product org.eclipse.tycho:tycho-versions-plugin::set-version -DnewVersion=' + version)
+      mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
+      mvn('-f releng/runner/pom.xml clean deploy')
+      mvn('-f maven-plugin/pom.xml clean deploy')
     }
   }
-
-  private void maven_deploy_maven_plugin(String version){
-    this.script.container(BUILD_CONTAINER_NAME) {
-      this.script.sh "mvn -f maven-plugin/pom.xml clean versions:set -DnewVersion=$version -B"
-      this.script.sh "mvn -f maven-plugin/pom.xml clean deploy -B"
-    }
+  
+  private def sh(arguments) {
+    return this.script.sh(arguments)
   }
+  
+  private void mvn(String arguments) {
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
+  } 
+
 }
 
 return { script -> new Build(script) }

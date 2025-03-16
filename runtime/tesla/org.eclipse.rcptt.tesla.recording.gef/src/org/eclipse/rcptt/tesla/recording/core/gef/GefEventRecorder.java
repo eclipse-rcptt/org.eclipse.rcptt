@@ -488,10 +488,9 @@ public class GefEventRecorder implements IRecordingProcessor,
 		return resultFigure;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void fillEditPartFigures(Set<IFigure> allEditPartFigures,
 			EditPart contents) {
-		List<EditPart> children = contents.getChildren();
+		List<? extends EditPart> children = contents.getChildren();
 		for (EditPart editPart : children) {
 			if (editPart instanceof GraphicalEditPart) {
 				allEditPartFigures.add(((GraphicalEditPart) editPart)
@@ -1019,7 +1018,7 @@ public class GefEventRecorder implements IRecordingProcessor,
 					SWTUIPlayer player = eventRecorder.getPlayer();
 					GraphicalViewer viewer = GefProcessor.findDiagramViewer(
 							player.wrap(parent),
-							GraphicalViewer.class, null, player);
+							GraphicalViewer.class, null);
 					if (viewer != null) {
 						if (isSkipDiagramOperations()) {
 							return;
@@ -1070,7 +1069,7 @@ public class GefEventRecorder implements IRecordingProcessor,
 					SWTUIPlayer player = eventRecorder.getPlayer();
 					GraphicalViewer viewer = GefProcessor.findDiagramViewer(
 							player.wrap(parent),
-							GraphicalViewer.class, null, player);
+							GraphicalViewer.class, null);
 					if (viewer != null) {
 						if (isSkipDiagramOperations()) {
 							return;

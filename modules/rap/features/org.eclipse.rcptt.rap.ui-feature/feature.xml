@@ -15,7 +15,7 @@
 <feature
       id="org.eclipse.rcptt.rap.ui.feature"
       label="RCPTT RAP Support"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -34,40 +34,40 @@
          id="org.eclipse.rcptt.updates.runtime.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
     
    <plugin
          id="org.eclipse.rcptt.tesla.ecl.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
    
    <plugin
          id="org.eclipse.rcptt.tesla.recording.core.ecl.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
    <plugin
          id="org.eclipse.rcptt.updates.external.dependencies.rap"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
    <plugin
          id="org.eclipse.rcptt.launching.rap.ui"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.module.zephyr"
       label="RCPTT Zephyr Support"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>Zephyr
@@ -32,13 +32,13 @@
          id="org.eclipse.rcptt.zephyr"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.zephyr.ui"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 </feature>

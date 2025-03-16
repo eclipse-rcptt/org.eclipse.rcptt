@@ -2,19 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime UI IDE Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.ui.ide.aspects;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.tesla.core.am;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.watson.core;bundle-version="[2.5.5,3.0.0)",
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.ui.ide;resolution:=optional
-onEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.ide
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.eclipse.rcptt.tesla.ui.ide.aspects.UIIDEAspectActivator
 Export-Package: org.eclipse.rcptt.tesla.ui.ide.aspects,
  org.eclipse.rcptt.tesla.ui.ide.events
+Automatic-Module-Name: org.eclipse.rcptt.tesla.ui.ide.aspects

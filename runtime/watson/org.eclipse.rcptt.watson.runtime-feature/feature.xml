@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.watson.runtime"
       label="RCPTT Eclipse runtime information collector aspects"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -29,28 +29,28 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.rcptt.watson" version="2.5.5" match="compatible"/>
+      <import feature="org.eclipse.rcptt.watson" version="2.6.0" match="compatible"/>
    </requires>
 
     <plugin
          id="org.eclipse.rcptt.watson.jface"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.watson.aspects.jobs"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.watson.aspects.swt"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
 </feature>

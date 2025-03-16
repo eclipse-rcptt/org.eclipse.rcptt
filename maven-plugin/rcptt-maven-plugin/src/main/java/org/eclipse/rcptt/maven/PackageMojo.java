@@ -65,9 +65,9 @@ public class PackageMojo extends AbstractRCPTTMojo {
 			throw readError(junitReport);
 		}
 
-		try {
+		try (FileInputStream inputStream = new FileInputStream(junitReport)) {
 			XmlPullParser parser = new MXParser();
-			parser.setInput(new FileInputStream(junitReport), "UTF-8");
+			parser.setInput(inputStream, "UTF-8");
 			int tag = parser.nextTag();
 			if (tag != XmlPullParser.START_TAG || !parser.getName().equals("testsuite")) {
 				throw invalidFormat(junitReport);

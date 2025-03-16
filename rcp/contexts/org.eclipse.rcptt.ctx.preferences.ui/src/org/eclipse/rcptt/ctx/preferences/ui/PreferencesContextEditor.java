@@ -187,8 +187,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button importButton = toolkit.createButton(panel,
 				"Import Preferences...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(importButton);
-		importButton.setImage(Images.getImageDescriptor(
-				Images.PREFERENCES_IMPORT).createImage());
+		importButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		importButton.addSelectionListener(new SelectionAdapter() {
 
@@ -203,8 +202,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 
 		Button addButton = toolkit.createButton(panel, "Add...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(addButton);
-		addButton.setImage(Images.getImageDescriptor(Images.PREFERENCES_IMPORT)
-				.createImage());
+		addButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		addButton.addSelectionListener(new SelectionAdapter() {
 
@@ -220,8 +218,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button removeButton = toolkit.createButton(panel, "Remove", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(removeButton);
 		removeButton.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE)
-				.createImage());
+				.getImage(ISharedImages.IMG_ETOOL_DELETE));
 		dbc.bindValue(WidgetProperties.enabled().observe(removeButton),
 				new ComputedValue<Boolean>() {
 

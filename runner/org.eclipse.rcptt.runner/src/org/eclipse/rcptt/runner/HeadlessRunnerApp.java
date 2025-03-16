@@ -59,6 +59,9 @@ public class HeadlessRunnerApp implements IApplication {
 			} else {
 				return returnTestFailure ? TEST_FAIL_EXIT_CODE : IApplication.EXIT_OK;
 			}
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+			return ILLEGAL_ARGUMENT;
 		} catch (AutLaunchFail e) {
 			return AUT_FAIL_EXIT_CODE;
 		} catch (TargetPlatformFail e) {

@@ -192,9 +192,7 @@ public class AutThread extends Thread {
 			config.setAttribute(IQ7Launch.ATTR_HEADLESS_LAUNCH, true);
 			config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, true);
 
-			if (!conf.overrideSecurityStorage) {
-				config.setAttribute(IQ7Launch.OVERRIDE_SECURE_STORAGE, "false");
-			}
+			config.setAttribute(IQ7Launch.OVERRIDE_SECURE_STORAGE, !conf.overrideSecurityStorage);
 
 			config.setAttribute(IQ7Launch.ATTR_OUT_FILE, outFilePath);
 			final String vmArgs = Q7LaunchDelegateUtils.getJoinedVMArgs(tpc.getTargetPlatform(),
@@ -209,12 +207,12 @@ public class AutThread extends Thread {
 						"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
 								+ autVM);
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
-			}
-
-			String vmFromIni = manager.addJvmFromIniFile();
-			if (vmFromIni != null) {
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, vmFromIni);
-				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
+			} else {
+				String vmFromIni = manager.addJvmFromIniFile();
+				if (vmFromIni != null) {
+					config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, vmFromIni);
+					config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
+				}
 			}
 
 			if (conf.enableSoftwareInstallation)
@@ -443,6 +441,7 @@ public class AutThread extends Thread {
 
 	public void shutdown() throws CoreException, InterruptedException {
 		if (launch != null) {
+			System.out.printf("Initiating shutdown. AUT is currently %s\n", launch.getLaunch().isTerminated() ? "terminated" : "running");
 			launch.gracefulShutdown(conf.shutdownTimeout);
 			launch = null;
 		}

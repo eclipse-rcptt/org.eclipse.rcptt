@@ -75,6 +75,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 			case CommandsPackage.SAVE_SCREENSHOT: return createSaveScreenshot();
 			case CommandsPackage.TO_CLIPBOARD: return createToClipboard();
 			case CommandsPackage.FROM_CLIPBOARD: return createFromClipboard();
+			case CommandsPackage.EXECUTE_COMMAND: return createExecuteCommand();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -85,6 +86,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Alert createAlert() {
 		AlertImpl alert = new AlertImpl();
 		return alert;
@@ -95,6 +97,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListWorkingSets createListWorkingSets() {
 		ListWorkingSetsImpl listWorkingSets = new ListWorkingSetsImpl();
 		return listWorkingSets;
@@ -105,6 +108,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public CreateWorkingSet createCreateWorkingSet() {
 		CreateWorkingSetImpl createWorkingSet = new CreateWorkingSetImpl();
 		return createWorkingSet;
@@ -115,6 +119,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public DeleteWorkingSet createDeleteWorkingSet() {
 		DeleteWorkingSetImpl deleteWorkingSet = new DeleteWorkingSetImpl();
 		return deleteWorkingSet;
@@ -125,6 +130,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetWorkingSet createGetWorkingSet() {
 		GetWorkingSetImpl getWorkingSet = new GetWorkingSetImpl();
 		return getWorkingSet;
@@ -135,6 +141,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ClearLogView createClearLogView() {
 		ClearLogViewImpl clearLogView = new ClearLogViewImpl();
 		return clearLogView;
@@ -145,6 +152,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetHotkey createGetHotkey() {
 		GetHotkeyImpl getHotkey = new GetHotkeyImpl();
 		return getHotkey;
@@ -155,6 +163,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public SaveScreenshot createSaveScreenshot() {
 		SaveScreenshotImpl saveScreenshot = new SaveScreenshotImpl();
 		return saveScreenshot;
@@ -165,6 +174,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ToClipboard createToClipboard() {
 		ToClipboardImpl toClipboard = new ToClipboardImpl();
 		return toClipboard;
@@ -175,6 +185,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public FromClipboard createFromClipboard() {
 		FromClipboardImpl fromClipboard = new FromClipboardImpl();
 		return fromClipboard;
@@ -185,6 +196,18 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
+	public ExecuteCommand createExecuteCommand() {
+		ExecuteCommandImpl executeCommand = new ExecuteCommandImpl();
+		return executeCommand;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public CommandsPackage getCommandsPackage() {
 		return (CommandsPackage)getEPackage();
 	}

@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _rQsLUF0pEeGDGrudSYLu8w
-Runtime-Version: 2.3.0.qualifier
-Save-Time: 6/9/18 12:53 PM
+Runtime-Version: 2.6.0.202503081620
+Save-Time: 3/8/25, 10:51 PM
 Tags: ECL_IDE_module, TestCase, Task
 Testcase-Type: ecl
 
@@ -63,9 +63,17 @@ with [get-window Properties] {
     get-combo -after [get-label "Priority:"] | set-text High
     get-button Add | click
 }
+
+with [get-view Tasks | get-tree ] {
+	try -times 3 -command {
+		get-column-header Description | click
+		get-item "" | get-property columns -index 2 | equals "// FIXME : rewrite part of test case" | verify-true	
+	}
+}
+
 with [get-view Tasks | get-tree] {
-    select [get-item "" -index 2] | get-menu "Mark Completed" | click
-    select [get-item "" -index 2] | get-menu "Mark Completed" | click
+    select [get-item "" -index 1] | get-menu "Mark Completed" | click
+    select [get-item "" -index 0] | get-menu "Mark Completed" | click
 }
 with [get-view Tasks | get-tree] {
     get-property itemCount | equals 3 | verify-true

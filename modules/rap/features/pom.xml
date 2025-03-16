@@ -7,43 +7,42 @@
     https://www.eclipse.org/legal/epl-v20.html
      
     Contributors:
-    	Xored Software Inc - initial API and implementation and/or initial documentation
+    	Xored Software Inc - initial API and implementation and/or initial
+documentation
  -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.eclipse.rcptt.module.rap</groupId>
-    <artifactId>rcptt.module.rap</artifactId>
-    <version>2.5.5-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
+	<parent>
+		<groupId>org.eclipse.rcptt.module.rap</groupId>
+		<artifactId>rcptt.module.rap</artifactId>
+		<version>2.6.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-  <artifactId>features</artifactId>
-  <packaging>pom</packaging>
+	<artifactId>features</artifactId>
+	<packaging>pom</packaging>
 
 
- <modules>
-   <module>org.eclipse.rcptt.runtime-feature.rap</module>
-  </modules>
+	<profiles>
+		<profile>
+			<id>core</id>
+			<modules>
+				<module>org.eclipse.rcptt.runtime-feature.rap</module>
+			</modules>
+		</profile>
 
-  <profiles>
-    <profile>
-      <id>core</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-    </profile>
+		<profile>
+			<id>ide</id>
+			<modules>
+				<module>org.eclipse.rcptt.launching.rap-feature</module>
+				<module>org.eclipse.rcptt.rap.ui-feature</module>
+			</modules>
+		</profile>
 
-    <profile>
-      <id>ide</id>
-      <modules>
-          <module>org.eclipse.rcptt.launching.rap-feature</module>
-          <module>org.eclipse.rcptt.rap.ui-feature</module>
-      </modules>
-    </profile>
-
-  </profiles>
+	</profiles>
 
 </project>

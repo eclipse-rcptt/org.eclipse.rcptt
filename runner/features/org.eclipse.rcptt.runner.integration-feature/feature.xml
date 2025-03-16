@@ -13,7 +13,7 @@
 <feature
       id="org.eclipse.rcptt.runner.integration"
       label="%featureName"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -32,17 +32,17 @@
 
    <includes
          id="org.eclipse.rcptt.core"
-         version="2.5.5.qualifier"/>
+         version="2.6.0.qualifier"/>
 
    <includes
          id="org.eclipse.rcptt.launching"
-         version="2.5.5.qualifier"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -56,14 +56,14 @@
          id="org.eclipse.rcptt.watson.core"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -98,7 +98,7 @@
          id="org.eclipse.rcptt.watson.jobs"
          download-size="0"
          install-size="0"
-         version="2.5.5.qualifier"
+         version="2.6.0.qualifier"
          unpack="false"/>
 
    <plugin

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -29,6 +30,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
 import org.eclipse.rcptt.ecl.gen.ast.ScriptProcessStatus;
+import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.ItemKind;
 import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.Q7Statistics;
@@ -274,12 +276,20 @@ public class ReportUtils {
 		}
 	}
 
-	public static String getFailMessage(Node item) {
+	public static ProcessStatus getStatus(Report report) {
+		return getStatus(report.getRoot());
+	}
+	
+	public static ProcessStatus getStatus(Node item) {
 		Q7Info current = (Q7Info) item.getProperties().get(IQ7ReportConstants.ROOT);
 		if (current == null) {
-			return "Non Q7 report node";
+			return ProcessStatusConverter.toProcessStatus(Status.error("Non Q7 report node"));
 		}
-		return getFailMessage(current.getResult(), true, DEFAULT_DATUM_TO_MESSAGE);
+		return current.getResult();
+	}
+
+	public static String getFailMessage(Node item) {
+		return getFailMessage(getStatus(item), true, DEFAULT_DATUM_TO_MESSAGE);
 	}
 
 	public static String getFailMessage(Node item, Function<EObject, String> datumToMessage) {

@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _WGEpQfSSEeCE1L2j6bYoFw
-Runtime-Version: 1.5.3.201409120955
-Save-Time: 9/25/14 3:23 PM
+Runtime-Version: 2.6.0.202503071721
+Save-Time: 3/7/25, 10:30 PM
 Tags: TestCase, Rename, TextEditor
 Testcase-Type: ecl
 
@@ -39,7 +39,7 @@ Entry-Name: .content
 
 with [get-view "Test Explorer" | get-tree] {
     select "Q7Project/TestCase1" | double-click -nowait
-    select "Q7Project/TestCase1" | get-menu "Open With/Text Editor" | click
+    select "Q7Project/TestCase1" | get-menu "Open With/Plain Text Editor" | click
 }
 with [get-editor "TestCase1.test" | get-text-viewer] {
     set-caret-pos 4 22
