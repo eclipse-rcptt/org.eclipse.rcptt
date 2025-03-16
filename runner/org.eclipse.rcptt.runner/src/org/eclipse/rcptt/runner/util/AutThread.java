@@ -192,9 +192,7 @@ public class AutThread extends Thread {
 			config.setAttribute(IQ7Launch.ATTR_HEADLESS_LAUNCH, true);
 			config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, true);
 
-			if (!conf.overrideSecurityStorage) {
-				config.setAttribute(IQ7Launch.OVERRIDE_SECURE_STORAGE, "false");
-			}
+			config.setAttribute(IQ7Launch.OVERRIDE_SECURE_STORAGE, !conf.overrideSecurityStorage);
 
 			config.setAttribute(IQ7Launch.ATTR_OUT_FILE, outFilePath);
 			final String vmArgs = Q7LaunchDelegateUtils.getJoinedVMArgs(tpc.getTargetPlatform(),

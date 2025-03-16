@@ -479,9 +479,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
-		String override = configuration.getAttribute(
-				IQ7Launch.OVERRIDE_SECURE_STORAGE, (String) null);
-		if (override == null || "true".equals(override)) {
+		if (configuration.getAttribute(
+				IQ7Launch.OVERRIDE_SECURE_STORAGE, true)) {
 			// Override existing parameter
 			programArguments.add("-eclipse.keyring");
 			programArguments.add(getConfigDir(configuration).toString()

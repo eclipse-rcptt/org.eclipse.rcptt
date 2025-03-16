@@ -164,6 +164,9 @@ public class ProcessStatusConverter implements
 		} catch (ClassNotFoundException e) {
 			suppressed.add(e);
 			clazz = IOException.class;
+			if (exception.getStatus() != null) {
+				clazz = CoreException.class;
+			}
 		}
 
 		Optional<Throwable> result;
