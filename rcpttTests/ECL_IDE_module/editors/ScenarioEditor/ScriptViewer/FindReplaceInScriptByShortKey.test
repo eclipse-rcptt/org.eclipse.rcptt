@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _vgD5sFE_EeG1qoPbj5xXbg
-Runtime-Version: 2.6.0.202503151907
-Save-Time: 3/16/25, 5:52 PM
+Runtime-Version: 2.6.0.202503141513
+Save-Time: 3/16/25, 11:19 PM
 Tags: ECL_IDE_module, TestCase, SearchReplace
 Testcase-Type: ecl
 
@@ -48,14 +48,7 @@ get-editor CreateQ7Project | get-section Script | get-editbox | get-property tex
     + "get-view \"Java Explorer\" | get-tree | get-property itemCount | equals 1 | verify-true" | verify-true
 get-menu "Edit/Find\\/Replace..." | click
 with [get-editor CreateQ7Project | get-section Script] {
-    try -command {
-    	get-button "Replace all.*"
-    } -catch {
-	    get-button "Toggle input for replace (M1+R)" | click
-    }
-    get-editbox -index 1 | set-text Q7
-    get-button "Replace all.*" | click
-    get-editbox -index 1 |key-type ESC
+	replace_all Java Q7
 }
 get-editor CreateQ7Project | get-section Script | get-editbox | get-property text
     | equals "get-view \"Q7 Explorer\" | get-tree | get-menu \"New/Q7 Project\" | click\n"
