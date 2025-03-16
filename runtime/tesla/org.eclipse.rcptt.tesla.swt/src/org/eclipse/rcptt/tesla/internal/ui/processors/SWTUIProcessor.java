@@ -1543,11 +1543,13 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 					// shell.forceActive();
 					TeslaEventManager.setActiveShell(shell);
 
-					// seems like for linux systems event triggered by shell.setActive().
+					// seems like for some linux systems event is triggered by shell.setActive().
 					// the following code prevent triggering of the same event twice.
-					if (!org.eclipse.jface.util.Util.isLinux()) {
+					// however, this does not happen on dwm, so the check is removed
+//					if (!org.eclipse.jface.util.Util.isLinux()) {
+					
 						getPlayer().getEvents().sendEvent(shell, SWT.Activate);
-					}
+//					}
 
 				}
 			});
