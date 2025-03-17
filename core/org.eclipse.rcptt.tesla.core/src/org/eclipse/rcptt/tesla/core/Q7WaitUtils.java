@@ -166,8 +166,8 @@ public class Q7WaitUtils {
 						}
 						if (found && !current) {
 							methodValue = stackTrace[i1].getClassName() + "." + methodAndLocation(stackTrace[i1]);
+							break;
 						}
-						
 					}
 				} else {
 					for (int i1 = 0; i1 < stackTrace.length; i1++) {
