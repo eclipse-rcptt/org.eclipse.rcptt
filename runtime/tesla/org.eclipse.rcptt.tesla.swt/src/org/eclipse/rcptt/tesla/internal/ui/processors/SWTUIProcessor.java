@@ -1545,7 +1545,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 
 					// seems like for some linux systems event is triggered by shell.setActive().
 					// the following code prevent triggering of the same event twice.
-					// however, this does not happen on dwm, so the check is removed
+					// however, DWM only activates a window under mouse cursor, so this is still needed there
 //					if (!org.eclipse.jface.util.Util.isLinux()) {
 					
 						getPlayer().getEvents().sendEvent(shell, SWT.Activate);
