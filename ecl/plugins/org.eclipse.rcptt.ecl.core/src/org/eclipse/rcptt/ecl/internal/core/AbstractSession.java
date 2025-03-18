@@ -83,7 +83,21 @@ public abstract class AbstractSession implements ISession {
 
 			CommandStack.fireEnter(stack);
 			SessionListenerManager.beginCommand(scriptlet);
-			s = svc.service(scriptlet, process);
+			try {
+				try {
+					s = svc.service(scriptlet, process);
+				} catch (CoreException e) {
+					s = e.getStatus();
+				} catch(Throwable e ) {
+					s = err(e);
+				}
+			} finally {
+				try {
+					SessionListenerManager.endCommand(scriptlet, s);
+				} catch (Throwable e) {
+					log(s = err(e));
+				}
+			}
 		} catch (CoreException e) {
 			s = e.getStatus();
 		} catch (InterruptedException ie) {
@@ -91,11 +105,6 @@ public abstract class AbstractSession implements ISession {
 		} catch (Throwable t) {
 			log(s = err(t));
 		} finally {
-			try {
-				SessionListenerManager.endCommand(scriptlet, s);
-			} catch (Throwable e) {
-				log(s = err(e));
-			}
 			CommandStack.fireExit(stack);
 			try {
 				process.setStatus(s);
