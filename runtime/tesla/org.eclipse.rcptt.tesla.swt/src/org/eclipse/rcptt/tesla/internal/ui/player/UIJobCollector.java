@@ -367,6 +367,7 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.ui.dialogs.FilteredItemsSelectionDialog$RefreshProgressMessageJob",
 			"org.eclipse.ui.internal.progress.AnimationManager$1",
 			"org.eclipse.ui.internal.progress.ProgressManager$6",
+			"org.eclipse.ui.internal.progress.ProgressManager$2",
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$1", // Since Oxygen
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$2", // Before Oxygen
 			"org.eclipse.rcptt.ecl.internal.core.Session$1",
