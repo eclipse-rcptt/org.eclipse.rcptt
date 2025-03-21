@@ -540,6 +540,7 @@ public class RcpttCore {
 				UnresolvedContext ctx = ScenarioFactory.eINSTANCE
 						.createUnresolvedContext();
 				ctx.setName(contextId);
+				ctx.setId(contextId); // if null, causes NPE in ContextExecutable.ContextExecutable()
 				result = new Q7InternalContext((Q7Folder) element.getParent(), contextId,
 						ctx);
 			}
