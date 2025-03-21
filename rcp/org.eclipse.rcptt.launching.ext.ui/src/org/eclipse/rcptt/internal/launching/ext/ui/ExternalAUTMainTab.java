@@ -88,7 +88,14 @@ public class ExternalAUTMainTab extends MainTab {
 									.getExecutionEnvironment(parseEESelection(fEeCombo
 											.getText()));
 							if (environment != null) {
-								return environment.getDefaultVM();
+								IVMInstall result = environment.getDefaultVM();
+								if (result != null) {
+									return result;
+								}
+								if (environment.getCompatibleVMs().length <= 0) {
+									return null;
+								}
+								return environment.getCompatibleVMs()[0];
 							}
 						}
 					}
