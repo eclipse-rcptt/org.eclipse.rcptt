@@ -157,17 +157,30 @@ public class Q7WaitUtils {
 			if (methodValue == null) {
 				StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 				String clName = className.substring(0, pos);
-				for (int i1 = 0; i1 < stackTrace.length; i1++) {
-					if (stackTrace[i1].getClassName().startsWith(clName)) {
-						methodValue = stackTrace[i1].getMethodName() + ":"
-								+ stackTrace[i1].getLineNumber();
-						break;
+				if (clName.equals("org.eclipse.jface.util.Throttler")) {
+					boolean found = false;
+					for (int i1 = 0; i1 < stackTrace.length; i1++) {
+						boolean current = stackTrace[i1].getClassName().startsWith(clName);
+						if (current) {
+							found = true;
+						}
+						if (found && !current) {
+							methodValue = stackTrace[i1].getClassName() + "." + methodAndLocation(stackTrace[i1]);
+							break;
+						}
 					}
-					if (stackTrace[i1].getClassName().equals("org.eclipse.rcptt.tesla.internal.ui.player.SWTUIPlayer")
-							&& stackTrace[i1].getMethodName().equals("exec")) {
-						methodValue = stackTrace[i1 + 1].getMethodName() + ":"
-								+ stackTrace[i1 + 1].getLineNumber();
-						break;
+				} else {
+					for (int i1 = 0; i1 < stackTrace.length; i1++) {
+						if (stackTrace[i1].getClassName().startsWith(clName)) {
+							methodValue = stackTrace[i1].getMethodName() + ":"
+									+ stackTrace[i1].getLineNumber();
+							break;
+						}
+						if (stackTrace[i1].getClassName().equals("org.eclipse.rcptt.tesla.internal.ui.player.SWTUIPlayer")
+								&& stackTrace[i1].getMethodName().equals("exec")) {
+							methodValue = methodAndLocation(stackTrace[i1 + 1]);
+							break;
+						}
 					}
 				}
 				if (methodValue != null) {
@@ -175,6 +188,10 @@ public class Q7WaitUtils {
 				}
 			}
 		}
+	}
+	
+	private static String methodAndLocation(StackTraceElement element) {
+		return element.getMethodName() + ":" + element.getLineNumber();
 	}
 
 }

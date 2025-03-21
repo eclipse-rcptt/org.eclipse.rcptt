@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.aut;
 
+import static java.lang.String.format;
 import static org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin.PLUGIN_ID;
 
 import java.io.IOException;
@@ -1074,7 +1075,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			return context.connect(getHost(), getEclPort());
 		} catch (Exception e) {
-			String message = "Couldn't open ECL session";
+			String message = format("Couldn't open ECL session for %s:%d", getHost(), getEclPort());
 			if (launch.isTerminated()) {
 				message = "AUT is terminated";
 			}

@@ -93,6 +93,7 @@
           </suites-->
           <testOptions>
             <execTimeout>28800</execTimeout>
+            <reportingIncludeEclipseWaitDetails>true</reportingIncludeEclipseWaitDetails>
           </testOptions>
           <testFailureIgnore>true</testFailureIgnore>
         </configuration>

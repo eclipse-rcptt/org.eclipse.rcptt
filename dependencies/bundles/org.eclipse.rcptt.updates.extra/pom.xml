@@ -68,8 +68,6 @@
 	  <mirrorMetadataOnly>false</mirrorMetadataOnly>
 	  <compress>true</compress>
 	  <append>false</append>
-	  <includePacked>false</includePacked>
-
 	  <ius>
 	    <iu><id>org.apache.poi</id></iu>
 	    <iu><id>org.apache.poi.ooxml</id></iu>

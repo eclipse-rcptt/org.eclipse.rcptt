@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1691
 Id: _0tmhsDHnEeGmnqpjyhCbeA
-Runtime-Version: 2.0.0.201505131625
-Save-Time: 5/14/15 4:50 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/19/25, 1:24 AM
 Tags: selfAUT, Debug
 Testcase-Type: ecl
 
@@ -48,7 +48,7 @@ with [get-editor CreateJavaProject | get-section Script] {
 }
 exec-with-options -disableJobWaiting -command {
 	get-menu "Run/Debug As/\\d+ Test Cases" | click
-	try -times 100 -delay 100 -command {
+	try -times 10 -delay 2000 -command {
 		with [get-view Debug | get-tree] {
     get-item "CreateJavaProject \\[RCPTT Test Suite\\]/CreateJavaProject/ECL Thread" | get-property childCount | equals 2 
         | verify-true
