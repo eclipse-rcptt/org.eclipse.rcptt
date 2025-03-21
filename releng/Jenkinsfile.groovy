@@ -146,9 +146,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
-      this.script.sh "mvn --version"
+      mvn "--version"
       def mvn = { pom ->
-          this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -ntp -e ${sign ? "-P sign" : ""} -f ${pom}"
+          this.mvn "clean verify ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
       }
       this.script.xvnc() {
         mvn "releng/mirroring/pom.xml"
@@ -364,7 +364,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
   } 
 
 }
