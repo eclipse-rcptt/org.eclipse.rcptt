@@ -7,7 +7,7 @@
 - [Get source code](https://github.com/eclipse-rcptt/org.eclipse.rcptt)
 
 ### Building the source
-+ An OpenJDK version 17 is required.
++ An OpenJDK version 21 is required.
 + Clone the repository: `git clone -b master git@github.com:eclipse-rcptt/org.eclipse.rcptt.git`
 + Maven Tycho Build: run `build.sh` on Unix or or `build.cmd` in Windows
 + For IDE builds set the active target platform to the latest one in `releng/target-platforms`.
