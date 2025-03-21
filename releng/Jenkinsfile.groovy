@@ -148,7 +148,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     withBuildContainer() {
       this.script.sh "mvn --version"
       def mvn = { pom ->
-          this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
+          this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -ntp -e ${sign ? "-P sign" : ""} -f ${pom}"
       }
       this.script.xvnc() {
         mvn "releng/mirroring/pom.xml"
