@@ -48,7 +48,6 @@ import org.osgi.service.prefs.Preferences;
 
 public class PreferencesContextProcessor implements IContextProcessor {
 
-	private static final String DIALOG_SETTINGS_NODE_NAME = "settings";
 	private static final String SECURE_PREFERENCES_NODE_NAME = "secureStorage";
 
 	private static final String[] EXCLUDE_SCOPE_LIST = new String[] {
@@ -206,7 +205,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 
 			SettingsNode settings = collectDialogSettings();
 			if (settings.getChilds().size() > 0) {
-				settings.setName(DIALOG_SETTINGS_NODE_NAME);
+				settings.setName(PrefUtils.DIALOG_SETTINGS_NODE_NAME);
 				context.setSettings(settings);
 			}
 			try {
@@ -371,7 +370,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		SettingsNode settings = PreferencesFactory.eINSTANCE
 				.createSettingsNode();
 
-		settings.setName(DIALOG_SETTINGS_NODE_NAME);
+		settings.setName(PrefUtils.DIALOG_SETTINGS_NODE_NAME);
 
 		Bundle[] bundles = Activator.getDefault().getBundle()
 				.getBundleContext().getBundles();
