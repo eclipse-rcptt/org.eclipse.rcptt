@@ -115,12 +115,7 @@ public class WizardPreferencesPage extends WizardPage implements Listener {
 		try {
 			IExportedPreferences prefs;
 			prefs = service.readPreferences(fis);
-			PrefNode prefNode = PrefUtils.convertPreferences(prefs);
-			PreferencesContext context = PreferencesFactory.eINSTANCE
-					.createPreferencesContext();
-			if (prefNode != null) {
-				context.getContent().addAll(prefNode.getChilds());
-			}
+			PreferencesContext context = PrefUtils.toContext(prefs);
 
 			contextEditor.copyContentFrom(context, new NullProgressMonitor());
 
