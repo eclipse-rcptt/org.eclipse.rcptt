@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 public class DialogSettingsManager {
@@ -32,7 +33,13 @@ public class DialogSettingsManager {
 	}
 
 	public IDialogSettings getSettings(Bundle bundle) {
-		return settings.get(getKey(bundle));
+		try {
+			return PlatformUI.getDialogSettingsProvider(bundle).getDialogSettings();
+		} catch (NoSuchMethodError e) {
+			// Bug 549929: before 2020 no such method was available, use AspectJ to intercept AbstractUIPlugin.getDialogSettings()
+			// https://github.com/eclipse-platform/eclipse.platform.ui/commit/8266c76c0792ed71ee13bff1514e3c5cab3f4883
+			return settings.get(getKey(bundle));
+		}
 	}
 
 	public void addSettings(Bundle bundle, IDialogSettings dialogSettings) {
