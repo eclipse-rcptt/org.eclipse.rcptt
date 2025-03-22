@@ -71,8 +71,6 @@
 	      <mirrorMetadataOnly>false</mirrorMetadataOnly>
 	      <compress>true</compress>
 	      <append>false</append>
-	      <includePacked>false</includePacked>
-
 	      <ius>
 		<iu><id>org.aspectj.runtime</id></iu>
 		<iu><id>org.aspectj.weaver</id></iu>

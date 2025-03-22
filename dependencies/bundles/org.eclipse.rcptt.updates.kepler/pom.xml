@@ -68,8 +68,6 @@
 	  <mirrorMetadataOnly>false</mirrorMetadataOnly>
 	  <compress>true</compress>
 	  <append>false</append>
-	  <includePacked>false</includePacked>
-
 	  <ius>
 	    <iu><id>org.eclipse.emf.codegen.ecore.ui.feature.group</id></iu>
             <iu><id>org.eclipse.emf.codegen.ecore.feature.group</id></iu>

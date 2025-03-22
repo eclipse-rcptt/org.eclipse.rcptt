@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _3xvEACnREeSkIPEBgXDIwQ
-Runtime-Version: 1.5.0.201406020630
-Save-Time: 8/22/14 3:35 PM
+Runtime-Version: 2.6.0.202503171100
+Save-Time: 3/19/25, 6:13 PM
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -39,26 +39,35 @@ Entry-Name: .content
 
 get-preferences-menu | click
 with [get-window Preferences] {
-    get-tree | select "RCP Testing Tool"
-    with [get-section "Advanced options"] {
-        click
-        get-link "<a>Runner arg</a>" | click-link
-    }
+	get-tree | select "RCP Testing Tool"
+	with [get-section "Advanced options"] {
+		click
+		with [get-group "Runtime Features"] {
+			with [get-section Reporting] {
+				click
+				with [get-button "Include eclipse methods into 'wait details' info"] {
+					check
+					uncheck
+				}
+			}
+		}
+	}
+	get-button Apply | click
+	get-section "Advanced options" | get-link "<a>Runner arg</a>" | click-link
 }
-get-window Preferences | get-window "-testOptions arg for RCPTT Runner" 
-    | get-label "All options are set to defaults, no need to specify -testOptions arg" | get-property caption 
-    | equals "All options are set to defaults, no need to specify -testOptions arg" | verify-true
+get-window Preferences | get-window "-testOptions arg for RCPTT Runner" | get-label "All options are set to defaults," +
+	" no need to specify -testOptions arg" | get-property caption | equals "All options are set to defaults, no need " +
+	"to specify -testOptions arg" | verify-true
 with [get-window Preferences] {
-    get-window "-testOptions arg for RCPTT Runner" | get-button Close | click
-    with [get-section "Advanced options"] {
-        get-group "Core Features" | get-button "Kill AUT on connect error" | check
-        get-group "Runtime Features" | get-button "Allow status dialogs" | check
-    }
-    get-button Apply | click
-    get-section "Advanced options" | get-link "<a>Runner arg</a>" | click-link
+	get-window "-testOptions arg for RCPTT Runner" | get-button Close | click
+	with [get-section "Advanced options"] {
+		get-group "Core Features" | get-button "Kill AUT on connect error" | check
+		get-group "Runtime Features" | get-button "Allow status dialogs" | check
+	}
+	get-button Apply | click
+	get-section "Advanced options" | get-link "<a>Runner arg</a>" | click-link
 }
-get-window Preferences | get-window "-testOptions arg for RCPTT Runner" 
-    | get-label "-testOptions runtimeStatusDialogAllowed=true;launchingKillAutOnConnectError=true" 
-    | get-property caption | equals "-testOptions runtimeStatusDialogAllowed=true;launchingKillAutOnConnectError=true" 
-    | verify-true
+get-window Preferences | get-window "-testOptions arg for RCPTT Runner" | get-label "-testOptions runtimeStatusDialog" +
+	"Allowed=true;launchingKillAutOnConnectError=true" | get-property caption | equals "-testOptions runtimeStatusDia" +
+	"logAllowed=true;launchingKillAutOnConnectError=true" | verify-true
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

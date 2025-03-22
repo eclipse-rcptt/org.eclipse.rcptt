@@ -191,6 +191,7 @@ public class FilesystemContextEditor extends BaseContextEditor {
 				.createButton(parent, action.getText(), SWT.PUSH);
 		button.setData(action);
 		Image image = action.getImageDescriptor().createImage();
+		button.addDisposeListener(ignored -> image.dispose());
 		button.setImage(image);
 		button.setToolTipText(action.getToolTipText());
 		button.addSelectionListener(new SelectionAdapter() {
