@@ -19,9 +19,11 @@ import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.VerificationProcessor;
 import org.eclipse.rcptt.core.scenario.Verification;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
+import org.eclipse.rcptt.tesla.core.TeslaFeatures;
 import org.eclipse.rcptt.tesla.core.ui.StyleRangeEntry;
 import org.eclipse.rcptt.tesla.core.ui.TextPosition;
 import org.eclipse.rcptt.tesla.ecl.impl.TeslaBridge;
@@ -45,6 +47,8 @@ public class TextVerificationProcessor extends VerificationProcessor {
 		final Widget widget = swtuiElement.widget;
 
 		final ErrorList errors = new ErrorList();
+		
+		boolean strictLineEndings = Q7Features.getInstance().isTrue(Q7Features.VERIFY_LINE_ENDINGS);
 
 		widget.getDisplay().syncExec(new Runnable() {
 			@Override
@@ -58,7 +62,10 @@ public class TextVerificationProcessor extends VerificationProcessor {
 				String actualText = PlayerTextUtils.getTextForVerification(swtuiElement);
 				if (actualText == null)
 					actualText = "";
-
+				if (!strictLineEndings) {
+					actualText = normalizeLineEndings(actualText);
+					expectedText = normalizeLineEndings(expectedText);
+				}
 				if (!actualText.equals(expectedText)) {
 					errors.add("Expected text is \"%s\", but it was \"%s\".",
 							expectedText, actualText);
@@ -109,6 +116,10 @@ public class TextVerificationProcessor extends VerificationProcessor {
 
 		errors.throwIfAny(String.format("Widget text verification '%s' failed:", verification.getName()),
 				this.getClass().getPackage().getName(), verification.getId());
+	}
+	
+	private static final String normalizeLineEndings(String input) {
+		return input.replace("\r\n", "\n").replace("\r", "\n");
 	}
 
 	@Override

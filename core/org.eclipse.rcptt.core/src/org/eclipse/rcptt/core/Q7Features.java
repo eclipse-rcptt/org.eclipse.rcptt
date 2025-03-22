@@ -22,6 +22,7 @@ public class Q7Features extends AbstractFeatureManager {
 	// "q7.contexts.workspace.clear.timeout";
 	public static final String Q7_WORKSPACE_FORCE_GC = "q7.contexts.workspace.clear.force.gc";
 	public static final String LAUNCHING_KILL_AUT_ON_CONNECT_ERROR = "launching.kill.aut.on.connect.error";
+	public static final String VERIFY_LINE_ENDINGS= "rcptt.verification.strict.line.endings";
 	// Code:
 	private static Q7Features features;
 
@@ -77,5 +78,14 @@ public class Q7Features extends AbstractFeatureManager {
 				.value("false").defaultValue("false")
 				.values(AbstractFeatureManager.BOOLEAN_VALUES).editable(true)
 				.showIn(TeslaFeatures.ADV_OPTIONS, TeslaFeatures.CP_OPTIONS);
+		
+		option(VERIFY_LINE_ENDINGS)
+			.category(TeslaFeatures.CAT_RESOURCES_VERIFICATION)
+			.name("Verify text line endings (false in a next release)")
+			.description(
+					"Fail a text verification captured on Linux when replaying on Windows")
+			.value("true").defaultValue("true")
+			.values(AbstractFeatureManager.BOOLEAN_VALUES).editable(true)
+			.showIn(TeslaFeatures.ADV_OPTIONS);
 	}
 }
