@@ -333,7 +333,7 @@ public class Q7ExternalLaunchDelegate extends
 		try {
 			Job.getJobManager().join(
 					IBundlePoolConstansts.CLEAN_BUNDLE_POOL_JOB,
-					monitor);
+					SubMonitor.convert(monitor, 1));
 		} catch (Exception e1) {
 			Q7ExtLaunchingPlugin.getDefault().log(
 					"Failed to wait for bundle pool clear job", e1);
@@ -645,22 +645,29 @@ public class Q7ExternalLaunchDelegate extends
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
-
-		setDelegateFields(this, bundlesToLaunch.fModels, bundlesToLaunch.fAllBundles);
+		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target(), bundlesToLaunch.fAllBundles);
+		checkBundles(bundlesToLaunch);
+		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
 		// Copy all additional configuration area folders into PDE new
 		// configuration location.
 		copyConfiguratonFiles(configuration, info);
 		monitor.done();
 	}
+	
+	private void checkBundles(BundlesToLaunch launch) {
+		DependencyResolver resolver = new DependencyResolver(launch.fAllBundles);
+		Collection<IPluginModelBase> toDelete = resolver.checkPlugins(launch.fModels.keySet());
+		toDelete.forEach(plugin->{
+			launch.fAllBundles.remove(plugin.getBundleDescription().getName(), plugin);
+		});
 
-	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
+	}
 
+	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target,  ListMultimap<String, IPluginModelBase> deps) {
 		String path = target.getInstallLocation().getAbsolutePath();
 		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
 		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();
-
 		for (Entry<IPluginModelBase, String> entry : fModels.entrySet()) {
 			IPluginModelBase model = entry.getKey();
 			UniquePluginModel uniqueModel = new UniquePluginModel(model);
@@ -668,9 +675,12 @@ public class Q7ExternalLaunchDelegate extends
 			if (secondModel != null) {
 				if (secondModel.getInstallLocation().contains(path)) {
 					keysForRemove.add(secondModel);
+					continue;
 				} else {
 					keysForRemove.add(model);
+					continue;
 				}
+
 			} else {
 				cache.put(uniqueModel, model);
 			}
@@ -679,7 +689,7 @@ public class Q7ExternalLaunchDelegate extends
 			fModels.remove(key);
 		}
 	}
-
+	
 	public static class BundlesToLaunchCollector {
 		private void addInstallationBundle(TargetBundle bundle,
 				BundleStart hint, IProgressMonitor monitor) {
@@ -867,7 +877,7 @@ public class Q7ExternalLaunchDelegate extends
 			for (IPluginModelBase plugin: plugins.keySet()) {
 				multiMap.put(id(plugin), plugin);
 			}
-			fAllBundles = Maps.transformValues(multiMap.asMap(), ArrayList::new);
+			fAllBundles = multiMap;
 			fModels = new HashMap<IPluginModelBase, String>(Maps.transformValues(
 					resolvedBundles, new Function<BundleStart, String>() {
 						public String apply(BundleStart input) {
@@ -879,7 +889,7 @@ public class Q7ExternalLaunchDelegate extends
 		public final Map<IPluginModelBase, BundleStart> resolvedBundles;
 		public final Map<IPluginModelBase, BundleStart> latestVersionsOnly;
 		public final Map<IPluginModelBase, String> fModels;
-		public final Map<String, List<IPluginModelBase>> fAllBundles;
+		public final ListMultimap<String, IPluginModelBase> fAllBundles;
 	}
 
 	private static final String KEY_BUNDLES_TO_LAUNCH = "bundlesToLaunch";
