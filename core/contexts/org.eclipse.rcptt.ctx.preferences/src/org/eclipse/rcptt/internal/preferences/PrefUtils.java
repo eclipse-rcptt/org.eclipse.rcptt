@@ -53,7 +53,7 @@ public final class PrefUtils {
 		PreferencesContext context = PreferencesFactory.eINSTANCE
 				.createPreferencesContext();
 		if (prefNode != null) {
-			for (PrefNode i: prefNode.getChilds()) {
+			for (PrefNode i: new ArrayList<>(prefNode.getChilds())) {
 				if ("settings".equals(i.getName())) {
 					SettingsNode settings = PreferencesFactory.eINSTANCE
 							.createSettingsNode();
