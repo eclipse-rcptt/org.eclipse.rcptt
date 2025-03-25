@@ -36,6 +36,7 @@ documentation
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>8</maven.compiler.release>
   </properties>
 
   <prerequisites>
@@ -74,7 +75,10 @@ documentation
           </execution>
         </executions>
       </plugin>
+      <plugin>
+      <artifactId>maven-source-plugin</artifactId>
+       <version>3.3.1</version>
+    </plugin>
     </plugins>
   </build>
-  <dependencies />
 </project>
