@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -494,10 +493,9 @@ public class Q7ExternalLaunchDelegate extends
 			File config = new File(getConfigDir(configuration), "config.ini");
 			Properties props = new Properties();
 
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(config));
-			props.load(in);
-			in.close();
+			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(config))) {
+				props.load(in);
+			}
 
 			File location = target.getQ7Target().getInstallLocation();
 			if (location != null) {
@@ -516,10 +514,9 @@ public class Q7ExternalLaunchDelegate extends
 			properties.setBeginAdd(true);
 			properties.putAll(props);
 
-			BufferedOutputStream out = new BufferedOutputStream(
-					new FileOutputStream(config));
-			properties.store(out, "Configuration File");
-			out.close();
+			try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
+				properties.store(out, "Configuration File");
+			}
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -660,6 +657,7 @@ public class Q7ExternalLaunchDelegate extends
 		Collection<IPluginModelBase> toDelete = resolver.checkPlugins(launch.fModels.keySet());
 		toDelete.forEach(plugin->{
 			launch.fAllBundles.remove(plugin.getBundleDescription().getName(), plugin);
+			launch.fModels.remove(plugin);
 		});
 
 	}
@@ -723,7 +721,7 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		public BundlesToLaunch getResult() {
-			return new BundlesToLaunch(rejectedBundles, plugins, latestVersions);
+			return new BundlesToLaunch(plugins, latestVersions);
 		}
 
 		private void put(IPluginModelBase plugin, BundleStart start) {
@@ -762,7 +760,6 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		private final Set<String> idsToSkip = new HashSet<String>();
-		private final Set<String> rejectedBundles = new LinkedHashSet<String>();
 		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<IPluginModelBase, BundleStart>();
 		private final Map<String, IPluginModelBase> latestVersions = new HashMap<String, IPluginModelBase>();
 	}
@@ -844,8 +841,7 @@ public class Q7ExternalLaunchDelegate extends
 		plugins.done();
 
 		try {
-			return new BundlesToLaunch(collector.rejectedBundles,
-				collector.plugins, collector.latestVersions);
+			return new BundlesToLaunch(collector.plugins, collector.latestVersions);
 		} finally {
 			if (monitor != null) {
 				monitor.done();
@@ -860,8 +856,7 @@ public class Q7ExternalLaunchDelegate extends
 	 *
 	 */
 	public static class BundlesToLaunch {
-		public BundlesToLaunch(Set<String> rejectedBundles,
-				Map<IPluginModelBase, BundleStart> plugins,
+		public BundlesToLaunch(Map<IPluginModelBase, BundleStart> plugins,
 				final Map<String, IPluginModelBase> latestVersions) {
 			this.resolvedBundles = plugins;
 
