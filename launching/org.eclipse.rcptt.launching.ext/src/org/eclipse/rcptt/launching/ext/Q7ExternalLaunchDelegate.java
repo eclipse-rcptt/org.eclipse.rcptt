@@ -659,7 +659,9 @@ public class Q7ExternalLaunchDelegate extends
 			launch.fAllBundles.remove(plugin.getBundleDescription().getName(), plugin);
 			launch.fModels.remove(plugin);
 		});
-
+		String message  = "Following bundles were unresolved:\n" + 
+		toDelete.stream().map(p -> p.getBundleDescription().getName()+"_"+p.getPluginBase().getVersion()).collect(Collectors.joining("\n"));
+		log(Status.info(message));
 	}
 
 	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target,  ListMultimap<String, IPluginModelBase> deps) {
