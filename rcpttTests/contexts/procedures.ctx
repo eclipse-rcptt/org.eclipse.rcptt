@@ -5,8 +5,8 @@ Element-Name: procedures
 Element-Type: context
 Element-Version: 2.0
 Id: _tqDkkAJnEfCi5Lv1yRTTlg
-Runtime-Version: 2.6.0.202503241756
-Save-Time: 3/25/25, 11:19 AM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/26/25, 12:57 AM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -31,7 +31,9 @@ Entry-Name: .ecl.context
 proc replace_all [val input -input] [val pattern] [val replacement] {
     with [$input] {
 	    get-text-viewer | key-type "M1+f"
-	    get-button "Search all.*"
+	    try -command {
+	       get-button "Search all.*"
+       } -times 10 -delay 2000
 	    with [get-editbox -after [get-button "Toggle input for replace.*"]] {
 	         set-text $pattern
 	     }
