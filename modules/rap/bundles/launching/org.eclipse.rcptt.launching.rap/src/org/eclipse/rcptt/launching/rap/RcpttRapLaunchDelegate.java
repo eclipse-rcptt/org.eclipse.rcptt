@@ -105,6 +105,7 @@ import org.eclipse.rcptt.util.FileUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
@@ -223,9 +224,9 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
-		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
+		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target(), bundlesToLaunch.fAllBundles);
 
-		setDelegateFields(this, bundlesToLaunch.fModels, bundlesToLaunch.fAllBundles);
+		setDelegateFields(this, bundlesToLaunch.fModels,  Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
 		// Copy all additional configuration area folders into PDE new
 		// configuration location.
