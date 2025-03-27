@@ -149,7 +149,7 @@ public abstract class VerificationSelectionDialog extends
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, NEW_ID,
 				Messages.VerificationSelectionDialog_NewButtonText, false).setImage(
-				Images.getImageDescriptor(Images.VERIFICATION).createImage());
+				Images.getImage(Images.VERIFICATION));
 		createButton(parent, CAPTURE_ID,
 				Messages.VerificationSelectionDialog_CaptureButtonText, false)
 				.setImage(
