@@ -11,7 +11,7 @@
  *     Andrew Niefer - IBM Corporation - initial API and implementation
  *     Sonatype Inc. - ongoing development
  *******************************************************************************/
-package org.eclipse.rcptt.maven;
+package org.eclipse.rcptt.maven.util;
 
 import java.util.Objects;
 import java.util.Properties;

@@ -16,7 +16,7 @@ import static org.eclipse.rcptt.internal.launching.ext.Q7UpdateSiteExtensions.Q7
 import static org.eclipse.rcptt.internal.launching.ext.Q7UpdateSiteExtensions.Q7RuntimeInfo.SWT_PLATFORM;
 
 import java.net.URI;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +31,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
-import org.eclipse.equinox.p2.query.IQueryResult;
-import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.rcptt.internal.launching.ext.Q7UpdateSiteExtensions.Q7RuntimeInfo;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
@@ -47,10 +45,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
 public class Q7TargetPlatformInitializer {
-
-	private static final String GMF = "gmf";
-	private static final String DRAW2D = "draw2d";
-	private static final String GEF = "gef";
 	private static final String EMF_FEATURE_GROUP = "org.eclipse.emf.feature.group";
 	private static final String EQUINOX_EXECUTABLE_FEATURE_GROUP = "org.eclipse.equinox.executable.feature.group";
 	private static final String EMF_VALIDATION_FEATURE_GROUP = "org.eclipse.emf.validation.feature.group";
@@ -106,7 +100,7 @@ public class Q7TargetPlatformInitializer {
 		try {
 			// Check for dependencies
 			IMetadataRepository repository = PDEHelper.safeLoadRepository(
-					q7Info.q7, sm.split(20, SubMonitor.SUPPRESS_NONE));
+					q7Info.q7,  SubMonitor.convert(monitor, 20));
 			if (repository == null) {
 				if (sm.isCanceled())
 					return Status.CANCEL_STATUS;
@@ -118,7 +112,8 @@ public class Q7TargetPlatformInitializer {
 			MultiStatus rv = new MultiStatus(PLUGIN_ID, 0, "Runtime injection failed for target platform " + target,
 					null);
 			if (injectionConfiguration != null) {
-				rv.add(target.applyInjection(injectionConfiguration, sm.split(60, SubMonitor.SUPPRESS_NONE)));
+				rv.add(target.applyInjection(injectionConfiguration,  SubMonitor.convert(
+						monitor, 60)));
 				if (rv.matches(IStatus.CANCEL))
 					return rv;
 			}
@@ -133,7 +128,6 @@ public class Q7TargetPlatformInitializer {
 	public static InjectionConfiguration createInjectionConfiguration(
 			IProgressMonitor monitor, Q7Info q7Info, Map<String, Version> map) {
 		boolean hasEMF = map.containsKey(AUTInformation.EMF);
-		boolean hasEMFWorkspace = map.containsKey(AUTInformation.EMF_WORKSPACE);
 		boolean hasEMFTransaction = map
 				.containsKey(AUTInformation.EMF_TRANSACTION);
 		boolean hasEMFValidation = map
@@ -211,42 +205,6 @@ public class Q7TargetPlatformInitializer {
 		return injectionConfiguration;
 	}
 
-	@SuppressWarnings("unused")
-	private static List<String> collectQ7InstallIDs(IProgressMonitor monitor,
-			boolean hasGEF, boolean hasGMF, IMetadataRepository repository) {
-		IQueryResult<IInstallableUnit> result = repository.query(
-				QueryUtil.ALL_UNITS, monitor);
-		List<String> q7Units = new ArrayList<String>();
-		for (IInstallableUnit unit : result.toSet()) {
-			if (hasProperty(unit, P2_GROUP_FEATURE, "true")) {
-				continue;
-			}
-			if (hasProperty(unit, P2_CATEGORY_FEATURE, "true")) {
-				continue;
-			}
-
-			// Skip gef/ gmf if not pressent
-			String unitId = unit.getId();
-			if (!hasGEF) {
-				if (unitId.contains(GEF)) {
-					continue;
-				}
-				if (unitId.contains(DRAW2D)) {
-					continue;
-				}
-				if (unitId.contains(GMF)) {
-					continue;
-				}
-			}
-			if (!hasGMF) {
-				if (unitId.contains(GMF)) {
-					continue;
-				}
-			}
-			q7Units.add(unitId);
-		}
-		return q7Units;
-	}
 
 	public static void logError(TargetPlatformHelper info) {
 		Q7ExtLaunchingPlugin.log(new MultiStatus(PLUGIN_ID, 0, new IStatus[] { info.getStatus() },

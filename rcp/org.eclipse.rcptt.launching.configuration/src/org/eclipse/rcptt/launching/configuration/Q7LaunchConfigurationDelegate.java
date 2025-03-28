@@ -22,12 +22,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -39,14 +37,12 @@ import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
-import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchMonitor;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformInitializer;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
@@ -56,10 +52,11 @@ import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 
+import com.google.common.collect.Maps;
+
 public class Q7LaunchConfigurationDelegate extends
 		EclipseApplicationLaunchConfiguration {
 	private static final String SECURE_STORAGE_FILE_NAME = "secure_storage";
-	private static final ILog LOG = Platform.getLog(Q7LaunchConfigurationDelegate.class);
 
 	// private Map<String, Object> fAllBundles;
 	// private Map<Object, String> fModels;
@@ -225,10 +222,10 @@ public class Q7LaunchConfigurationDelegate extends
 			File config = new File(getConfigDir(configuration), "config.ini");
 			OriginalOrderProperties props = new OriginalOrderProperties();
 
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(config));
-			props.load(in);
-			in.close();
+			try (BufferedInputStream in = new BufferedInputStream(
+					new FileInputStream(config))) {
+				props.load(in);
+			}
 
 			String targetPlatformProfilePath = ((ITargetPlatformHelper) info.target)
 					.getTargetPlatformProfilePath();
@@ -240,10 +237,10 @@ public class Q7LaunchConfigurationDelegate extends
 					.computeOSGiBundles(Q7ExternalLaunchDelegate
 							.getBundlesToLaunch(info).latestVersionsOnly));
 
-			BufferedOutputStream out = new BufferedOutputStream(
-					new FileOutputStream(config));
-			props.store(out, "Configuration File");
-			out.close();
+			try (BufferedOutputStream out = new BufferedOutputStream(
+					new FileOutputStream(config))) {
+				props.store(out, "Configuration File");
+			}
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -296,7 +293,7 @@ public class Q7LaunchConfigurationDelegate extends
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundles);
 
-		Q7LaunchDelegateUtils.setDelegateFields(this, bundles.fModels, bundles.fAllBundles);
+		Q7LaunchDelegateUtils.setDelegateFields(this, bundles.fModels, Maps.transformValues(bundles.fAllBundles.asMap(), ArrayList::new));
 		monitor.done();
 	}
 }

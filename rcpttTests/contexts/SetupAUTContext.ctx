@@ -6,7 +6,7 @@ Element-Type: context
 Element-Version: 2.0
 Id: _ZQYygK2sEeCqBbDEJWufvQ
 Runtime-Version: 2.5.5.202404041628
-Save-Time: 3/17/25, 9:22 AM
+Save-Time: 3/28/25, 8:00 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -48,6 +48,7 @@ proc waitForTaskToComplete {
 get-view Applications | get-tree | get-items | foreach -do {
 	if -condition [ get-property caption -raw  | eq "selfQ7"] -else {
 	   try -command {
+	       trace [get-property caption -raw]
 	       get-menu -path Stop | click
        } -catch {}
  	}

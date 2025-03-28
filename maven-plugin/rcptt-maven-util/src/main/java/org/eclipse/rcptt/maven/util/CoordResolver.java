@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -253,4 +254,11 @@ public class CoordResolver {
 	private void logDefaultValue(String codename, String property, String value) {
 		log.info(String.format("%s is not specified for %s, setting to %s by default", property, codename, value));
 	}
+	
+	public static String computeLocalClassifier() {
+		Properties properties = System.getProperties();
+		
+		return String.format("%s.%s.%s", PlatformPropertiesUtils.getOS(properties), PlatformPropertiesUtils.getWS(properties), PlatformPropertiesUtils.getArch(properties)); 
+	}
+
 }
