@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +48,7 @@ import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
+import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.rap.RAPLaunchConfig;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.utils.AUTLaunchArgumentsHelper;
@@ -200,19 +202,10 @@ public class AutThread extends Thread {
 			System.out.println(String.format("%s: AUT VM arguments: %s", autWorkspace, vmArgs));
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
 
-			if (conf.javaVM != null) {
-				String autVM = manager.getAutVm();
-
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-						"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"
-								+ autVM);
+			Optional<VmInstallMetaData> autVM = manager.getAutVm();
+			if (autVM.isPresent()) {
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, autVM.get().formatVmContainerPath());
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
-			} else {
-				String vmFromIni = manager.addJvmFromIniFile();
-				if (vmFromIni != null) {
-					config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, vmFromIni);
-					config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
-				}
 			}
 
 			if (conf.enableSoftwareInstallation)
@@ -291,6 +284,8 @@ public class AutThread extends Thread {
 		}
 	}
 
+
+	
 	private boolean updateJVM(ILaunchConfiguration configuration, OSArchitecture architecture,
 			ITargetPlatformHelper target) {
 		try {

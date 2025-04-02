@@ -12,25 +12,27 @@ package org.eclipse.rcptt.runner.util;
 
 import static org.eclipse.rcptt.runner.HeadlessRunnerPlugin.PLUGIN_ID;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
 
 public class AUTsManager {
+	private static final ILog LOG = Platform.getLog(AUTsManager.class);
 
 	final List<AutThread> autThreads = new ArrayList<AutThread>();
 	final AtomicInteger autCounter = new AtomicInteger(0);
@@ -141,106 +143,27 @@ public class AUTsManager {
 
 	//
 
-	private static final String VM_INSTALL_TYPE = "org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType";
-	private String autVM = null;
+	private Optional<VmInstallMetaData> autVM = null;
 
-	public String getAutVm() {
+	public Optional<VmInstallMetaData> getAutVm() throws CoreException {
 		if (autVM != null) {
 			return autVM;
 		}
-		for (int i = 0; i < 5; i++) {
-			try {
-				autVM = "aut_vm_" + System.currentTimeMillis()
-						+ new Random().nextInt();
-				IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
-				for (IVMInstallType ivmInstallType : types) {
-					// Dispose old vm installs
-					IVMInstall[] vmInstalls = ivmInstallType.getVMInstalls();
-					for (IVMInstall ivmInstall : vmInstalls) {
-						ivmInstallType.disposeVMInstall(ivmInstall.getId());
-					}
-					if (ivmInstallType.getId().equals(VM_INSTALL_TYPE)) {
-						IVMInstall install = ivmInstallType.createVMInstall(autVM);
-						install.setInstallLocation(new File(conf.javaVM));
-						install.setName(autVM);
-						JavaRuntime.saveVMConfiguration();
-						break;
-					}
-				}
-			} catch (Throwable e) {
-				HeadlessRunnerPlugin.getDefault().info(e.getMessage());
-				continue;
-			}
-			break;
+		if (conf.javaVM == null) {
+			return autVM = addJvmFromIniFile();
 		}
-		return autVM;
+		
+		return autVM = Optional.of(VmInstallMetaData.register(Path.of(conf.javaVM)));
 	}
 
-	public String addJvmFromIniFile() {
-		String vmFromIni = tpc.getTargetPlatform().getVmFromIniFile();
+	private Optional<VmInstallMetaData> addJvmFromIniFile() throws CoreException {
+		Path vmFromIni = tpc.getTargetPlatform().getJavaHome().orElse(null);
 		if (vmFromIni == null) {
-			return null;
+			return Optional.empty();
 		}
 		System.out.println("Trying to use VM from application's ini file: "
 				+ vmFromIni);
-
-		File file = new File(vmFromIni);
-		if (!file.isAbsolute()) {
-			file = new File(new File(conf.location), vmFromIni);
-		}
-		if (!file.exists()) {
-			System.out
-					.println(file + " does not exist");
-			return null;
-		}
-
-		if ("bin".equals(file.getParentFile().getName()) || "lib".equals(file.getParentFile().getName()) ) {
-			file = file.getParentFile().getParentFile();
-		} else if ("bin".equals(file.getName())) {
-			file = file.getParentFile();
-		} else {
-			file = null;
-		}
-
-		if (file == null) {
-			System.out
-					.println("Unknown file system layout of Java VM from ini file");
-			return null;
-		}
-		
-		try {
-			file = file.getCanonicalFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		IVMInstallType type = JavaRuntime.getVMInstallType(VM_INSTALL_TYPE);
-		if (type == null) {
-			System.out
-					.println("Error configuring Java VM from ini file - StandardVMType does not exist");
-			System.out.println("Available types are:");
-			for (IVMInstallType vmtype : JavaRuntime.getVMInstallTypes()) {
-				System.out.println(vmtype.getId());
-			}
-		}
-
-		String vmName = String.format("%s-jre",
-				new File(conf.location).getName());
-		type.disposeVMInstall(vmName);
-
-		IVMInstall install = type.createVMInstall(vmName);
-		install.setInstallLocation(file);
-		install.setName(vmName);
-
-		try {
-			JavaRuntime.saveVMConfiguration();
-		} catch (CoreException e) {
-			System.out.println("Error configuring Java VM from ini file");
-			e.printStackTrace();
-			return null;
-		}
-		return String.format("org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-				VM_INSTALL_TYPE, vmName);
+		return Optional.of(VmInstallMetaData.register(vmFromIni));
 	}
+
 }

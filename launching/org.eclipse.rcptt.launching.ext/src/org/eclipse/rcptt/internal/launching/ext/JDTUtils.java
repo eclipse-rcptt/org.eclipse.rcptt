@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.internal.launching.ext;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class JDTUtils {
 
 	public static IVMInstall registerCurrentJVM() {
 		try {
-			return reInstall(new File(System.getProperty("java.home")));
+			return registerVM(new File(System.getProperty("java.home")));
 		} catch (CoreException e) {
 			LOG.log(e.getStatus());
 			throw new IllegalStateException(e);
@@ -195,13 +196,26 @@ public class JDTUtils {
 	}
 	
 	private static final AtomicInteger FREE_ID = new AtomicInteger(1);
-	public static IVMInstall reInstall(File jvmInstallationLocation) throws CoreException {
-		File jvmInstallationLocationCopy = jvmInstallationLocation.getAbsoluteFile();
+	public static IVMInstall registerVM(File jvmInstallationLocation) throws CoreException {
+		File jvmInstallationLocationCopy;
+		try {
+			jvmInstallationLocationCopy = jvmInstallationLocation.getCanonicalFile();
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Invalid VM path " + jvmInstallationLocation, e);
+		}
 		if (!jvmInstallationLocationCopy.exists()) {
 			throw new CoreException(Status.error("JVM location " + jvmInstallationLocationCopy + " does not exist"));
 		}
-		for (VmInstallMetaData i: installedVms().filter(i -> i.install.getInstallLocation().getAbsoluteFile().equals(jvmInstallationLocationCopy)).toList()) {
-			i.install.getVMInstallType().disposeVMInstall(i.install.getId());
+		Optional<IVMInstall> first = installedVms().filter(i -> {
+			try {
+				return i.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocationCopy);
+			} catch (IOException e) {
+				LOG.error("Invalid JVM path " + i.getInstallLocation());
+				return false;
+			}
+		}).findFirst();
+		if (first.isPresent()) {
+			return first.get();
 		}
 		
 		MultiStatus multiStatus = new MultiStatus(JDTUtils.class, 0, "Can't register JVM " + jvmInstallationLocationCopy);
@@ -214,14 +228,15 @@ public class JDTUtils {
 			if (status.matches(IStatus.ERROR)) {
 				continue;
 			}
-			String id;
+			String id, name;
 			Object found;
 			do {
-				id = "RCPTT JVM " + FREE_ID.getAndIncrement();
+				name = "RCPTT JVM " + FREE_ID.getAndIncrement();
+				id = name.replace(' ', '_');
 				found = type.findVMInstall(id);
 			} while (found != null);
 			IVMInstall install = type.createVMInstall(id);
-			install.setName(id);
+			install.setName(name);
 			install.setInstallLocation(jvmInstallationLocationCopy);
 			return install;
 		}
@@ -230,9 +245,9 @@ public class JDTUtils {
 	}
 
 
-	public static final Stream<VmInstallMetaData> installedVms() {
-		Stream<VmInstallMetaData> preinstalled = registeredInstalls().map(JDTUtils::toMetadata).flatMap(Optional::stream);
-		Stream<VmInstallMetaData> currentJVM = Stream.generate(JDTUtils::registerCurrentJVM).limit(1).map(JDTUtils::toMetadata).flatMap(Optional::stream);
+	public static final Stream<IVMInstall> installedVms() {
+		Stream<IVMInstall> preinstalled = registeredInstalls();
+		Stream<IVMInstall> currentJVM = Stream.generate(JDTUtils::registerCurrentJVM).limit(1);
 		return Stream.concat(preinstalled, currentJVM);
 		
 	}
@@ -250,9 +265,12 @@ public class JDTUtils {
 		.flatMap(Arrays::stream);
 	}
 	
-	private static Optional<VmInstallMetaData> toMetadata(IVMInstall install) {
+	public static Optional<VmInstallMetaData> toMetadata(IVMInstall install) {
 		try {
 			OSArchitecture jvmArch = detect(install);
+			if (OSArchitecture.Unknown.equals(jvmArch)) {
+				return Optional.empty();
+			}
 			return Optional.of(new VmInstallMetaData(install, jvmArch));
 		} catch (CoreException e) {
 			RcpttPlugin.log(e);

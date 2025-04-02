@@ -10,23 +10,40 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.ext;
 
+import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
+
+import com.google.common.base.Preconditions;
 
 public final class VmInstallMetaData {
 	public final IVMInstall install;
 	public final OSArchitecture arch;
 	public VmInstallMetaData(IVMInstall install, OSArchitecture arch) {
 		super();
+		Preconditions.checkArgument(!OSArchitecture.Unknown.equals(arch));
 		this.install = Objects.requireNonNull(install);
 		this.arch = Objects.requireNonNull(arch);
 	}
 	
+	public String formatVmContainerPath() {
+		return String.format("org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
+				install.getVMInstallType().getId(), install.getId());
+	}
+	
 	public static Stream<VmInstallMetaData> all() {
-		return JDTUtils.installedVms();
+		return JDTUtils.installedVms().map(JDTUtils::toMetadata).flatMap(Optional::stream);
+	}
+	
+	public static VmInstallMetaData register(Path location) throws CoreException {
+		IVMInstall install = JDTUtils.registerVM(location.toFile());
+		OSArchitecture arch = JDTUtils.detect(install);
+		return new VmInstallMetaData(install, arch);
 	}
 }
