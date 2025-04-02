@@ -37,7 +37,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 
 import com.google.common.base.Preconditions;
 
@@ -265,17 +264,6 @@ public class JDTUtils {
 		.flatMap(Arrays::stream);
 	}
 	
-	public static Optional<VmInstallMetaData> toMetadata(IVMInstall install) {
-		try {
-			OSArchitecture jvmArch = detect(install);
-			if (OSArchitecture.Unknown.equals(jvmArch)) {
-				return Optional.empty();
-			}
-			return Optional.of(new VmInstallMetaData(install, jvmArch));
-		} catch (CoreException e) {
-			RcpttPlugin.log(e);
-			return Optional.empty();
-		}
-	}
+
 		
 }

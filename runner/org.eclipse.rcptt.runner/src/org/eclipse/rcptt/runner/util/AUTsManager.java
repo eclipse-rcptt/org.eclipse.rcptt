@@ -21,19 +21,15 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
 
 public class AUTsManager {
-	private static final ILog LOG = Platform.getLog(AUTsManager.class);
-
 	final List<AutThread> autThreads = new ArrayList<AutThread>();
 	final AtomicInteger autCounter = new AtomicInteger(0);
 
@@ -107,10 +103,8 @@ public class AUTsManager {
 		new Thread() {
 			@Override
 			public void run() {
-				ServerSocket serverSocket = null;
-				try {
-					serverSocket = new ServerSocket(port);
-					serverSocket.accept();
+				try (ServerSocket serverSocket = new ServerSocket(port)) {
+					try (var ignored = serverSocket.accept()) {}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -149,11 +143,17 @@ public class AUTsManager {
 		if (autVM != null) {
 			return autVM;
 		}
-		if (conf.javaVM == null) {
-			return autVM = addJvmFromIniFile();
+		if (conf.javaVM != null) {
+			return autVM = Optional.of(VmInstallMetaData.register(Path.of(conf.javaVM)));
 		}
-		
-		return autVM = Optional.of(VmInstallMetaData.register(Path.of(conf.javaVM)));
+
+		if (conf.executionEnvironment != null) {
+			return autVM = Optional
+					.ofNullable(JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(conf.executionEnvironment))
+					.flatMap(e -> Optional.ofNullable(e.getDefaultVM())).flatMap(VmInstallMetaData::adapt);
+		}
+
+		return autVM = addJvmFromIniFile();
 	}
 
 	private Optional<VmInstallMetaData> addJvmFromIniFile() throws CoreException {
