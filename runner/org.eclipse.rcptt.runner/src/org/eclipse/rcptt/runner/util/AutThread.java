@@ -20,7 +20,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -29,8 +28,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.pde.internal.launching.IPDEConstants;
 import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.VMHelper;
@@ -219,7 +216,6 @@ public class AutThread extends Thread {
 			// Validate JVM compatibility
 			boolean haveAUT = false;
 			OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(true, null);
-			String crossArchLaunch = null;
 			if (!architecture.equals(OSArchitecture.Unknown)) {
 				IVMInstall install = VMHelper.getVMInstall(savedConfig);
 				try {
@@ -227,18 +223,13 @@ public class AutThread extends Thread {
 					if (jvmArch.equals(architecture)) {
 						haveAUT = true;
 					}
-
-					if (!haveAUT && jvmArch.equals(OSArchitecture.x86_64) && JDTUtils.canRun32bit(install)) {
-						haveAUT = true;
-						crossArchLaunch = "-d32";
-					}
 				} catch (Throwable e) {
 					RcpttPlugin.log(e);
 				}
 				if (!haveAUT) {
 					// Let's search for configuration and update JVM if
 					// possible.
-					haveAUT = updateJVM(savedConfig, architecture, tpc.getTargetPlatform());
+					haveAUT = updateJVM(savedConfig, tpc.getTargetPlatform());
 
 				}
 				if (!haveAUT) {
@@ -261,18 +252,6 @@ public class AutThread extends Thread {
 					ILaunchConfigurationWorkingCopy copy = savedConfig.getWorkingCopy();
 					copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, finalArgs.toString());
 
-					if (crossArchLaunch != null) {
-						String crossVmArgs = savedConfig
-								.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "");
-						crossVmArgs = crossVmArgs.replace("-d64", crossArchLaunch);
-						if (!crossVmArgs.contains(crossArchLaunch)) {
-							crossVmArgs = crossVmArgs + " " + crossArchLaunch;
-						}
-
-						copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs.toString());
-
-					}
-
 					savedConfig = copy.doSave();
 				} catch (Throwable e) {
 					throw new CoreException(
@@ -286,62 +265,41 @@ public class AutThread extends Thread {
 
 
 	
-	private boolean updateJVM(ILaunchConfiguration configuration, OSArchitecture architecture,
-			ITargetPlatformHelper target) {
+	private boolean updateJVM(ILaunchConfiguration configuration, ITargetPlatformHelper target) {
 		try {
-			IVMInstall jvmInstall = null;
-			OSArchitecture jvmArch = OSArchitecture.Unknown;
-			IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
-			boolean haveArch = false;
-			for (IVMInstallType ivmInstallType : types) {
-				IVMInstall[] installs = ivmInstallType.getVMInstalls();
-				for (IVMInstall ivmInstall : installs) {
-					jvmArch = JDTUtils.detect(ivmInstall);
-					if (jvmArch.equals(architecture)
-							|| (jvmArch.equals(OSArchitecture.x86_64) && JDTUtils.canRun32bit(ivmInstall))) {
-						jvmInstall = ivmInstall;
-						haveArch = true;
-						break;
-					}
-				}
+			OSArchitecture autArch = target.detectArchitecture(true, null);
+			final VmInstallMetaData jvmInstall = VmInstallMetaData.all().filter(i -> i.arch.equals(autArch)).findFirst().orElse(null);
+			if (jvmInstall == null) {
+				return false;
 			}
-			if (haveArch) {
-				ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+			
+			assert autArch.equals(jvmInstall.arch);
+			
+			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
 
-				String vmArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-						target.getIniVMArgs());
-				if (vmArgs == null) {
-					// Lets use current runner vm arguments
-					vmArgs = LaunchArgumentsHelper.getInitialVMArguments().trim();
-				} else {
-					vmArgs = vmArgs.trim();
-				}
-				OSArchitecture autArch = target.detectArchitecture(true, null);
-				if (!autArch.equals(jvmArch) && Platform.getOS().equals(Platform.OS_MACOSX)) {
-					if (vmArgs != null) {
-						vmArgs += " -d32";
-					} else {
-						vmArgs = "-d32";
-					}
-				}
-				if (vmArgs != null && vmArgs.length() > 0) {
-					vmArgs = UpdateVMArgs.updateAttr(vmArgs);
-					workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
-				}
-
-				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-						String.format("org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-								jvmInstall.getVMInstallType().getId(), jvmInstall.getName()));
-
-				String programArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-						AUTLaunchArgumentsHelper.getInitialProgramArguments(autArch.name()));
-
-				if (programArgs.length() > 0) {
-					workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, programArgs);
-				}
-				workingCopy.doSave();
-				return true;
+			String vmArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+					target.getIniVMArgs());
+			if (vmArgs == null) {
+				// Lets use current runner vm arguments
+				vmArgs = LaunchArgumentsHelper.getInitialVMArguments().trim();
+			} else {
+				vmArgs = vmArgs.trim();
 			}
+			if (vmArgs != null && vmArgs.length() > 0) {
+				vmArgs = UpdateVMArgs.updateAttr(vmArgs);
+				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
+			}
+
+			workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, jvmInstall.formatVmContainerPath());
+
+			String programArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+					AUTLaunchArgumentsHelper.getInitialProgramArguments(autArch.name()));
+
+			if (programArgs.length() > 0) {
+				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, programArgs);
+			}
+			workingCopy.doSave();
+			return true;
 		} catch (Throwable e) {
 			RcpttPlugin.log(e);
 		}

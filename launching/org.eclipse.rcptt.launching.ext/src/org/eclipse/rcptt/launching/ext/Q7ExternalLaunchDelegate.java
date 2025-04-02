@@ -247,10 +247,7 @@ public class Q7ExternalLaunchDelegate extends
 						+ install.getInstallLocation().toString()
 						+ " detected architecture is " + jvmArch.name());
 
-		boolean canRun32bit = false;
-		if (jvmArch.equals(architecture)
-				|| (jvmArch.equals(OSArchitecture.x86_64) && (canRun32bit = JDTUtils
-						.canRun32bit(install)))) {
+		if (jvmArch.equals(architecture)) {
 			haveAUT = true;
 		}
 
@@ -270,10 +267,7 @@ public class Q7ExternalLaunchDelegate extends
 						+ configuration.getName()
 						+ ": JVM and AUT architectures are compatible: "
 						+ haveAUT
-						+ "."
-						+ (jvmArch.equals(OSArchitecture.x86_64) ? " JVM is 64bit and support running 32bit: "
-								+ canRun32bit
-								: ""));
+						+ ".");
 		if (!haveAUT) {
 			// Let's search for configuration and update JVM if possible.
 			haveAUT = updateJVM(configuration, architecture,
@@ -642,7 +636,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target(), bundlesToLaunch.fAllBundles);
+		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 		checkBundles(bundlesToLaunch);
 		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -664,7 +658,7 @@ public class Q7ExternalLaunchDelegate extends
 		log(Status.info(message));
 	}
 
-	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target,  ListMultimap<String, IPluginModelBase> deps) {
+	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
 		String path = target.getInstallLocation().getAbsolutePath();
 		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
 		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();

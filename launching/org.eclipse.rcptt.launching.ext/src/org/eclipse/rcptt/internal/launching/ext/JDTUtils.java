@@ -63,7 +63,6 @@ public class JDTUtils {
 
 		private final AbstractVMInstall install;
 		private final IProgressMonitor monitor;
-		private final boolean d32;
 
 		public Map<String, String> getMap() {
 			return map;
@@ -74,7 +73,7 @@ public class JDTUtils {
 		}
 
 		public GetPropertiesThread(AbstractVMInstall install,
-				IProgressMonitor monitor, boolean d32) {
+				IProgressMonitor monitor) {
 			this.install = install;
 			this.monitor = new ProgressMonitorWrapper(monitor) {
 				@Override
@@ -82,13 +81,12 @@ public class JDTUtils {
 					return super.isCanceled() || Thread.interrupted();
 				}
 			};
-			this.d32 = d32;
 		}
 
 		@Override
 		public void run() {
 			try {
-				map = evaluateSystemProperties(install, monitor, d32);
+				map = evaluateSystemProperties(install, monitor);
 			} catch (CoreException e) {
 				coreException = e;
 			}
@@ -96,10 +94,8 @@ public class JDTUtils {
 	}
 
 	public static Map<String, String> evaluateSystemPropertiesInThread(
-			AbstractVMInstall install, IProgressMonitor monitor, boolean d32,
-			int timeout) throws CoreException {
-		GetPropertiesThread thread = new GetPropertiesThread(install, monitor,
-				d32);
+			AbstractVMInstall install, IProgressMonitor monitor, int timeout) throws CoreException {
+		GetPropertiesThread thread = new GetPropertiesThread(install, monitor);
 		thread.start();
 		try {
 			thread.join(timeout);
@@ -122,7 +118,7 @@ public class JDTUtils {
 	}
 
 	public static Map<String, String> evaluateSystemProperties(
-			AbstractVMInstall install, IProgressMonitor monitor, boolean d32)
+			AbstractVMInstall install, IProgressMonitor monitor)
 			throws CoreException {
 		String[] properties = new String[] { OS_ARCH, "java.version",
 				"java.specification.name", "java.specification.version",
@@ -136,7 +132,7 @@ public class JDTUtils {
 		if (install instanceof AbstractVMInstall) {
 			AbstractVMInstall avi = (AbstractVMInstall) install;
 			Map<String, String> properties = evaluateSystemPropertiesInThread(
-					avi, new NullProgressMonitor(), false, 60000);
+					avi, new NullProgressMonitor(), 60000);
 			return properties;
 		}
 		throw new CoreException(
@@ -190,10 +186,6 @@ public class JDTUtils {
 		throw new CoreException(RcpttPlugin.createStatus(message));
 	}
 
-	public static boolean canRun32bit(IVMInstall install) {
-		return false;
-	}
-	
 	private static final AtomicInteger FREE_ID = new AtomicInteger(1);
 	public static IVMInstall registerVM(File jvmInstallationLocation) throws CoreException {
 		File jvmInstallationLocationCopy;

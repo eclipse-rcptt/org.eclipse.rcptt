@@ -224,7 +224,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
-		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target(), bundlesToLaunch.fAllBundles);
+		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 
 		setDelegateFields(this, bundlesToLaunch.fModels,  Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -350,8 +350,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		OSArchitecture jvmArch = JDTUtils.detect(install);
 
-		if (jvmArch.equals(architecture)
-				|| (jvmArch.equals(OSArchitecture.x86_64) && (JDTUtils.canRun32bit(install)))) {
+		if (jvmArch.equals(architecture)) {
 			haveAUT = true;
 		}
 
@@ -629,17 +628,17 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private void writeProperty(File config, OriginalOrderProperties properties)
 			throws FileNotFoundException, IOException {
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config));
-		properties.store(out, "Configuration File");
-		out.close();
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
+			properties.store(out, "Configuration File");
+		}
 	}
 
 	private Properties readProperty(File config) throws FileNotFoundException, IOException {
 		Properties props = new Properties();
 
-		BufferedInputStream in = new BufferedInputStream(new FileInputStream(config));
-		props.load(in);
-		in.close();
+		try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(config))) {
+			props.load(in);
+		}
 		return props;
 	}
 
@@ -727,13 +726,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	}
 
 	private static int findFreePort() throws CoreException {
-		try {
-			ServerSocket server = new ServerSocket(0);
-			try {
-				return server.getLocalPort();
-			} finally {
-				server.close();
-			}
+		try (ServerSocket server = new ServerSocket(0)) {
+			return server.getLocalPort();
 		} catch (IOException e) {
 			String msg = "Could not obtain a free port number."; //$NON-NLS-1$
 			String pluginId = PLUGIN_ID;
@@ -743,20 +737,12 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	}
 
 	private static boolean isPortBusy(int port) {
-		ServerSocket server = null;
-		try {
-			server = new ServerSocket(port);
+		try (ServerSocket server = new ServerSocket(port)) {
+			return false;
 		} catch (IOException e1) {
 			// assume that port is occupied when getting here
 		}
-		if (server != null) {
-			try {
-				server.close();
-			} catch (IOException e) {
-				// ignore
-			}
-		}
-		return server == null;
+		return true;
 	}
 
 	private URL getUrl() throws CoreException {
@@ -856,9 +842,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 					&& !interrupted
 					&& !monitor.isCanceled()
 					&& !launch.isTerminated()) {
-				try {
-					Socket socket = new Socket(URLBuilder.getHost(), port);
-					socket.close();
+				try (Socket socket = new Socket(URLBuilder.getHost(), port)) {
 					canConnect = true;
 				} catch (Exception e) {
 					// http service not yet started - wait a bit
@@ -1006,9 +990,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			IVMInstall[] installs = ivmInstallType.getVMInstalls();
 			for (IVMInstall ivmInstall : installs) {
 				jvmArch = JDTUtils.detect(ivmInstall);
-				if (jvmArch.equals(architecture)
-						|| (jvmArch.equals(OSArchitecture.x86_64) && JDTUtils
-								.canRun32bit(ivmInstall))) {
+				if (jvmArch.equals(architecture)) {
 					jvmInstall = ivmInstall;
 					haveArch = true;
 					break;
