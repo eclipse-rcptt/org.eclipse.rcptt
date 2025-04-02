@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,6 @@ import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
 import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
@@ -496,12 +495,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (architecture == null || architecture == OSArchitecture.Unknown) {
 			return error(message.toString());
 		}
-		VmInstallMetaData jvm;
-		try {
-			jvm = JDTUtils.findVM(architecture);
-		} catch (CoreException e2) {
-			return e2.getStatus();
-		}
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
 		if (jvm == null) {
 			return error ("No JVM for architecture " + architecture + " is registered");
 		}
