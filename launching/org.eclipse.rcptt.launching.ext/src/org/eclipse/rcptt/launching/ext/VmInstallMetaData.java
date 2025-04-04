@@ -48,7 +48,7 @@ public final class VmInstallMetaData {
 	
 	public String formatVmContainerPath() {
 		return String.format("org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-				install.getVMInstallType().getId(), install.getId());
+				install.getVMInstallType().getId(), install.getName());
 	}
 	
 	public static Stream<VmInstallMetaData> all() {

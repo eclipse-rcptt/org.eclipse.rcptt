@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
@@ -36,6 +35,7 @@ import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.VMStandin;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 
 import com.google.common.base.Preconditions;
@@ -209,30 +209,30 @@ public class JDTUtils {
 			return first.get();
 		}
 		
-		MultiStatus multiStatus = new MultiStatus(JDTUtils.class, 0, "Can't register JVM " + jvmInstallationLocationCopy);
-		for (IVMInstallType type: JavaRuntime.getVMInstallTypes()) {
-			IStatus status = type.validateInstallLocation(jvmInstallationLocationCopy);
-			if (status.matches(IStatus.CANCEL)) {
-				throw new CoreException(status);
-			}
-			multiStatus.add(status);
-			if (status.matches(IStatus.ERROR)) {
-				continue;
-			}
-			String id, name;
-			Object found;
-			do {
-				name = "RCPTT JVM " + FREE_ID.getAndIncrement();
-				id = name.replace(' ', '_');
-				found = type.findVMInstall(id);
-			} while (found != null);
-			IVMInstall install = type.createVMInstall(id);
-			install.setName(name);
-			install.setInstallLocation(jvmInstallationLocationCopy);
-			return install;
+		IVMInstallType type = JavaRuntime.getVMInstallType("org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType");
+		IStatus status = type.validateInstallLocation(jvmInstallationLocationCopy);
+		if (status.matches(IStatus.CANCEL | IStatus.ERROR)) {
+			throw new CoreException(status);
 		}
-		multiStatus.add(Status.error("No compatible VM types found"));
-		throw new CoreException(multiStatus);
+		String id, name;
+		Object found;
+		do {
+			name = "RCPTT JVM " + FREE_ID.getAndIncrement();
+			id = name.replace(' ', '_');
+			found = type.findVMInstall(id);
+		} while (found != null);
+		// IVMInstall implements Active Record and fires notifications on each setter.
+		// so VMStandin is necessary for atomic creation of a valid entry
+		VMStandin standin = new VMStandin(type, id);
+		standin.setInstallLocation(jvmInstallationLocationCopy);
+		standin.setName(name);
+		IVMInstall result = standin.convertToRealVM();
+		try {
+			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocation);
+		} catch (IOException e) {
+			throw new CoreException(Status.error("Can't register JVM from " + jvmInstallationLocation, e));
+		}
+		return result;
 	}
 
 

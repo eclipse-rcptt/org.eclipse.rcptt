@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
@@ -148,12 +152,25 @@ public class AUTsManager {
 		}
 
 		if (conf.executionEnvironment != null) {
-			return autVM = Optional
+			Optional<VmInstallMetaData> result = Optional
 					.ofNullable(JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(conf.executionEnvironment))
-					.flatMap(e -> Optional.ofNullable(e.getDefaultVM())).flatMap(VmInstallMetaData::adapt);
+					.flatMap(e -> suitableVm(e))
+					.flatMap(VmInstallMetaData::adapt);
+			if (result.isEmpty()) {
+				throw new CoreException(Status.error("Can't find an installed JVM strictly compatible with execution environment " + conf.executionEnvironment)); 
+			}
+			return autVM = result;
 		}
 
 		return autVM = addJvmFromIniFile();
+	}
+
+	private Optional<IVMInstall> suitableVm(IExecutionEnvironment e) {
+		IVMInstall result = e.getDefaultVM();
+		if (result != null) {
+			return Optional.of(result);
+		}
+		return Arrays.stream(e.getCompatibleVMs()).filter(e::isStrictlyCompatible).findFirst();
 	}
 
 	private Optional<VmInstallMetaData> addJvmFromIniFile() throws CoreException {
