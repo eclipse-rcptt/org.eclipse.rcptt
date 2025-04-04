@@ -47,7 +47,7 @@ public class JDTUtils {
 	private static final String OS_ARCH = "os.arch";
 	private static final ILog LOG = Platform.getLog(JDTUtils.class);
 
-	public static IVMInstall registerCurrentJVM() {
+	private static IVMInstall registerCurrentJVM() {
 		try {
 			return registerVM(new File(System.getProperty("java.home")));
 		} catch (CoreException e) {
@@ -197,7 +197,7 @@ public class JDTUtils {
 		if (!jvmInstallationLocationCopy.exists()) {
 			throw new CoreException(Status.error("JVM location " + jvmInstallationLocationCopy + " does not exist"));
 		}
-		Optional<IVMInstall> first = installedVms().filter(i -> {
+		Optional<IVMInstall> first = registeredInstalls().filter(i -> {
 			try {
 				return i.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocationCopy);
 			} catch (IOException e) {

@@ -273,13 +273,6 @@ public class Q7ExternalLaunchDelegate extends
 			haveAUT = updateJVM(configuration, architecture,
 					((ITargetPlatformHelper) info.target));
 
-			if (!haveAUT) {
-				// try to register current JVM, it may help
-				JDTUtils.registerCurrentJVM();
-				haveAUT = updateJVM(configuration, architecture,
-						((ITargetPlatformHelper) info.target));
-			}
-
 			if (haveAUT) {
 				Q7ExtLaunchingPlugin
 						.getDefault()
