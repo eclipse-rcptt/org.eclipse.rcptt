@@ -72,7 +72,7 @@ public class RunnerConfiguration {
 				"autVMArgs"), //
 		JavaVM("Java virtual machine to test on. Default: AUT.ini or current VM", "autVM",
 				"autJVM", "javaVM"), //
-		ExecutionEnvironment("Preferred execution environment. Example: JavaSE-21. Default: AUT.ini or current VM", "executionEnvironemnt"),
+		AutExecutionEnvironment("Preferred execution environment. Example: JavaSE-21. Default: AUT.ini or current VM", "autExecutionEnvironemnt"),
 		UpdateSite(
 				"Comma separated update site location and features required to be injected into AUT",
 				"injection:site", "site"), //
@@ -424,13 +424,14 @@ public class RunnerConfiguration {
 					return false;
 				}
 				break;
-			case ExecutionEnvironment:
+			case AutExecutionEnvironment:
 				executionEnvironment = i.next();
 				if (JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(executionEnvironment) == null) {
 					List<String> available = Arrays.stream(JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments()).filter(e -> e.getDefaultVM() != null).map(e -> e.getId()).toList();
 					info(String.format( "ERROR: invalid executionEnvironemnt: %s, available environments: %s", executionEnvironment.split(arg), available));
 					return false;
 				}
+				break;
 			case UpdateSite:
 				initInjection();
 				String[] split = getSplitArguments(i);
