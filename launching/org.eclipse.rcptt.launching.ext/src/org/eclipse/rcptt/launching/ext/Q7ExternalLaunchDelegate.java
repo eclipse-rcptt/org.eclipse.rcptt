@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -247,10 +247,7 @@ public class Q7ExternalLaunchDelegate extends
 						+ install.getInstallLocation().toString()
 						+ " detected architecture is " + jvmArch.name());
 
-		boolean canRun32bit = false;
-		if (jvmArch.equals(architecture)
-				|| (jvmArch.equals(OSArchitecture.x86_64) && (canRun32bit = JDTUtils
-						.canRun32bit(install)))) {
+		if (jvmArch.equals(architecture)) {
 			haveAUT = true;
 		}
 
@@ -270,21 +267,11 @@ public class Q7ExternalLaunchDelegate extends
 						+ configuration.getName()
 						+ ": JVM and AUT architectures are compatible: "
 						+ haveAUT
-						+ "."
-						+ (jvmArch.equals(OSArchitecture.x86_64) ? " JVM is 64bit and support running 32bit: "
-								+ canRun32bit
-								: ""));
+						+ ".");
 		if (!haveAUT) {
 			// Let's search for configuration and update JVM if possible.
 			haveAUT = updateJVM(configuration, architecture,
 					((ITargetPlatformHelper) info.target));
-
-			if (!haveAUT) {
-				// try to register current JVM, it may help
-				JDTUtils.registerCurrentJVM();
-				haveAUT = updateJVM(configuration, architecture,
-						((ITargetPlatformHelper) info.target));
-			}
 
 			if (haveAUT) {
 				Q7ExtLaunchingPlugin
@@ -342,7 +329,7 @@ public class Q7ExternalLaunchDelegate extends
 	private static boolean updateJVM(ILaunchConfiguration configuration,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
 		
-		VmInstallMetaData jvm = JDTUtils.findVM(architecture);
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
 		if (jvm == null) {
 			return false;
 		}
@@ -642,7 +629,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target(), bundlesToLaunch.fAllBundles);
+		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 		checkBundles(bundlesToLaunch);
 		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -664,7 +651,7 @@ public class Q7ExternalLaunchDelegate extends
 		log(Status.info(message));
 	}
 
-	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target,  ListMultimap<String, IPluginModelBase> deps) {
+	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
 		String path = target.getInstallLocation().getAbsolutePath();
 		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
 		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();
