@@ -32,7 +32,11 @@
 
    <includes
          id="org.eclipse.rcptt.runner.integration"
-         version="2.6.0.qualifier"/>
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.rcptt.modules.launching"
+         version="0.0.0"/>
 
    <requires>
       <import feature="org.eclipse.rcptt.tesla.ecl" version="2.6.0" match="compatible"/>
