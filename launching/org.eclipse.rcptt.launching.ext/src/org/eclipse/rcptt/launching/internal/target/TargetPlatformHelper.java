@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.internal.target;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
@@ -25,6 +24,8 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,11 +38,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -84,7 +87,6 @@ import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
 import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
@@ -105,7 +107,6 @@ import org.osgi.framework.Version;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Files;
 
 @SuppressWarnings("restriction")
 public class TargetPlatformHelper implements ITargetPlatformHelper {
@@ -496,12 +497,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (architecture == null || architecture == OSArchitecture.Unknown) {
 			return error(message.toString());
 		}
-		VmInstallMetaData jvm;
-		try {
-			jvm = JDTUtils.findVM(architecture);
-		} catch (CoreException e2) {
-			return e2.getStatus();
-		}
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
 		if (jvm == null) {
 			return error ("No JVM for architecture " + architecture + " is registered");
 		}
@@ -1010,8 +1006,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 
 		List<String> result = new ArrayList<String>();
-		try {
-			for (String line : Files.readLines(eclipseIni, UTF_8)) {
+		try (Stream<String> lines = Files.lines(eclipseIni.toPath(), StandardCharsets.UTF_8)) {
+			for (String line : (Iterable<String>)lines::iterator) {
 				line = line.trim();
 				if (line.length() > 0 && line.charAt(0) != '#') {
 					result.add(line);
@@ -1030,20 +1026,31 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				: lines.get(vmIndex);
 	}
 
-	public String getVmFromIniFile() {
+	public Optional<Path> getJavaHome() {
 		for (File iniFile : getAppIniFiles()) {
 			String result = getVmArg(iniFile);
 			if (result == null) {
 				continue;
 			}
-			Path iniPath = iniFile.toPath();
+			Path iniPath = iniFile.toPath().toAbsolutePath();
 			Path vmPath = Paths.get(result);
 			if (!vmPath.isAbsolute()) {
 				vmPath = iniPath.getParent().resolve(vmPath);
 			}
-			return vmPath.toString();
+			if (!Files.exists(vmPath)) {
+				continue;
+			}
+			
+			String dirName = vmPath.getParent().getFileName().toString();
+			if ("bin".equals(dirName) || "lib".equals(dirName) ) {
+				vmPath = vmPath.getParent().getParent();
+			} else if ("bin".equals(vmPath.getFileName().toString())) {
+				vmPath = vmPath.getParent();
+			}
+			
+			return Optional.of(vmPath);
 		}
-		return null;
+		return Optional.empty();
 	}
 
 	private Map<String, String> readEnvironmentFromIniFile(File eclipseIniFile) {

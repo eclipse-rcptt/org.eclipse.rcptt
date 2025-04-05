@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.target;
 
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -124,7 +126,8 @@ public interface ITargetPlatformHelper {
 	 */
 	String getIniVMArgs();
 
-	String getVmFromIniFile();
+	/** java.home configured in AUT's INI file **/
+	Optional<Path> getJavaHome();
 
 	String getTemplateConfigLocation();
 
