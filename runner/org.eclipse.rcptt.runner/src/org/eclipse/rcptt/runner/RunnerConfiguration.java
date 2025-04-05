@@ -72,7 +72,7 @@ public class RunnerConfiguration {
 				"autVMArgs"), //
 		JavaVM("Java virtual machine to test on. Default: AUT.ini or current VM", "autVM",
 				"autJVM", "javaVM"), //
-		AutExecutionEnvironment("Preferred execution environment. Example: JavaSE-21. Default: AUT.ini or current VM", "autExecutionEnvironemnt"),
+		AutExecutionEnvironment("Preferred execution environment. Example: JavaSE-21. Default: AUT.ini or current VM", "autExecutionEnvironment"),
 		UpdateSite(
 				"Comma separated update site location and features required to be injected into AUT",
 				"injection:site", "site"), //
