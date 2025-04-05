@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -11,50 +11,49 @@
 package org.eclipse.rcptt.internal.launching.ext;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.internal.launching.DetectVMInstallationsJob;
 import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstall3;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.VMStandin;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 
 import com.google.common.base.Preconditions;
 
 @SuppressWarnings("restriction")
 public class JDTUtils {
-	private static final String TARGET_VM_INSTALL_TYPE = "org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType";
-	private static final String HOST_VM_INSTALL_ID = "Q7 Host JVM";
-
 	private static final String SUN_ARCH_DATA_MODEL = "sun.arch.data.model";
 	private static final String JAVA_VM_INFO = "java.vm.info";
 	private static final String OS_ARCH = "os.arch";
+	private static final ILog LOG = Platform.getLog(JDTUtils.class);
 
-	public static void registerCurrentJVM() throws CoreException {
-		IVMInstallType type = JavaRuntime
-				.getVMInstallType(TARGET_VM_INSTALL_TYPE);
-		if (type == null)
-			return;
-
-		IVMInstall install = type.findVMInstall(HOST_VM_INSTALL_ID);
-		if (install != null)
-			type.disposeVMInstall(HOST_VM_INSTALL_ID);
-
-		install = type.createVMInstall(HOST_VM_INSTALL_ID);
-		install.setInstallLocation(new File(System.getProperty("java.home")));
-		install.setName(HOST_VM_INSTALL_ID);
-		JavaRuntime.saveVMConfiguration();
+	private static IVMInstall registerCurrentJVM() {
+		try {
+			return registerVM(new File(System.getProperty("java.home")));
+		} catch (CoreException e) {
+			LOG.log(e.getStatus());
+			throw new IllegalStateException(e);
+		}
 	}
 
 	static class GetPropertiesThread extends Thread {
@@ -64,7 +63,6 @@ public class JDTUtils {
 
 		private final AbstractVMInstall install;
 		private final IProgressMonitor monitor;
-		private final boolean d32;
 
 		public Map<String, String> getMap() {
 			return map;
@@ -75,7 +73,7 @@ public class JDTUtils {
 		}
 
 		public GetPropertiesThread(AbstractVMInstall install,
-				IProgressMonitor monitor, boolean d32) {
+				IProgressMonitor monitor) {
 			this.install = install;
 			this.monitor = new ProgressMonitorWrapper(monitor) {
 				@Override
@@ -83,13 +81,12 @@ public class JDTUtils {
 					return super.isCanceled() || Thread.interrupted();
 				}
 			};
-			this.d32 = d32;
 		}
 
 		@Override
 		public void run() {
 			try {
-				map = evaluateSystemProperties(install, monitor, d32);
+				map = evaluateSystemProperties(install, monitor);
 			} catch (CoreException e) {
 				coreException = e;
 			}
@@ -97,10 +94,8 @@ public class JDTUtils {
 	}
 
 	public static Map<String, String> evaluateSystemPropertiesInThread(
-			AbstractVMInstall install, IProgressMonitor monitor, boolean d32,
-			int timeout) throws CoreException {
-		GetPropertiesThread thread = new GetPropertiesThread(install, monitor,
-				d32);
+			AbstractVMInstall install, IProgressMonitor monitor, int timeout) throws CoreException {
+		GetPropertiesThread thread = new GetPropertiesThread(install, monitor);
 		thread.start();
 		try {
 			thread.join(timeout);
@@ -123,7 +118,7 @@ public class JDTUtils {
 	}
 
 	public static Map<String, String> evaluateSystemProperties(
-			AbstractVMInstall install, IProgressMonitor monitor, boolean d32)
+			AbstractVMInstall install, IProgressMonitor monitor)
 			throws CoreException {
 		String[] properties = new String[] { OS_ARCH, "java.version",
 				"java.specification.name", "java.specification.version",
@@ -137,7 +132,7 @@ public class JDTUtils {
 		if (install instanceof AbstractVMInstall) {
 			AbstractVMInstall avi = (AbstractVMInstall) install;
 			Map<String, String> properties = evaluateSystemPropertiesInThread(
-					avi, new NullProgressMonitor(), false, 60000);
+					avi, new NullProgressMonitor(), 60000);
 			return properties;
 		}
 		throw new CoreException(
@@ -191,41 +186,76 @@ public class JDTUtils {
 		throw new CoreException(RcpttPlugin.createStatus(message));
 	}
 
-	public static boolean canRun32bit(IVMInstall install) {
-		return false;
+	private static final AtomicInteger FREE_ID = new AtomicInteger(1);
+	public static IVMInstall registerVM(File jvmInstallationLocation) throws CoreException {
+		File jvmInstallationLocationCopy;
+		try {
+			jvmInstallationLocationCopy = jvmInstallationLocation.getCanonicalFile();
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Invalid VM path " + jvmInstallationLocation, e);
+		}
+		if (!jvmInstallationLocationCopy.exists()) {
+			throw new CoreException(Status.error("JVM location " + jvmInstallationLocationCopy + " does not exist"));
+		}
+		Optional<IVMInstall> first = registeredInstalls().filter(i -> {
+			try {
+				return i.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocationCopy);
+			} catch (IOException e) {
+				LOG.error("Invalid JVM path " + i.getInstallLocation());
+				return false;
+			}
+		}).findFirst();
+		if (first.isPresent()) {
+			return first.get();
+		}
+		
+		IVMInstallType type = JavaRuntime.getVMInstallType("org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType");
+		IStatus status = type.validateInstallLocation(jvmInstallationLocationCopy);
+		if (status.matches(IStatus.CANCEL | IStatus.ERROR)) {
+			throw new CoreException(status);
+		}
+		String id, name;
+		Object found;
+		do {
+			name = "RCPTT JVM " + FREE_ID.getAndIncrement();
+			id = name.replace(' ', '_');
+			found = type.findVMInstall(id);
+		} while (found != null);
+		// IVMInstall implements Active Record and fires notifications on each setter.
+		// so VMStandin is necessary for atomic creation of a valid entry
+		VMStandin standin = new VMStandin(type, id);
+		standin.setInstallLocation(jvmInstallationLocationCopy);
+		standin.setName(name);
+		IVMInstall result = standin.convertToRealVM();
+		try {
+			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocation);
+		} catch (IOException e) {
+			throw new CoreException(Status.error("Can't register JVM from " + jvmInstallationLocation, e));
+		}
+		return result;
 	}
 
-	public static final VmInstallMetaData findVM(OSArchitecture architecture) throws CoreException {
-		if (architecture.equals(OSArchitecture.Unknown)) {
-			return null;
-		}
-		VmInstallMetaData result = matchVM(architecture);
-		if (result != null) {
-			return result;
-		}
-		registerCurrentJVM();
-		return matchVM(architecture);
+
+	public static final Stream<IVMInstall> installedVms() {
+		Stream<IVMInstall> preinstalled = registeredInstalls();
+		Stream<IVMInstall> currentJVM = Stream.generate(JDTUtils::registerCurrentJVM).limit(1);
+		return Stream.concat(preinstalled, currentJVM);
 		
 	}
-
-	private static VmInstallMetaData matchVM(OSArchitecture architecture) {
-		IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
-		for (IVMInstallType ivmInstallType : types) {
-			IVMInstall[] installs = ivmInstallType.getVMInstalls();
-			for (IVMInstall ivmInstall : installs) {
-				try {
-					OSArchitecture jvmArch = detect(ivmInstall);
-					if (jvmArch != null
-							&& (jvmArch.equals(architecture) || (jvmArch
-									.equals(OSArchitecture.x86_64) && canRun32bit(ivmInstall)))) {
-						return new VmInstallMetaData(ivmInstall, jvmArch);
-					}
-				} catch (CoreException e) {
-					RcpttPlugin.log(e);
-					continue;
-				}
-			}
+	
+	private static Stream<IVMInstall> registeredInstalls() {
+		JavaRuntime.getVMInstallTypes();
+		try {
+			Job.getJobManager().join(DetectVMInstallationsJob.class, null);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new OperationCanceledException();
 		}
-		return null;
+		return Arrays.stream(JavaRuntime.getVMInstallTypes())
+		.map(IVMInstallType::getVMInstalls)
+		.flatMap(Arrays::stream);
 	}
+	
+
+		
 }
