@@ -13,13 +13,6 @@ Contributors:
     Xored Software Inc - initial API and implementation
 -->
 
-<!--
- <copyright>
- </copyright>
-
- $Id: plugin.xml,v 1.2 2011, 2014/03/08 14:41:53 alena Exp $
--->
-
 <plugin>
 
  <extension

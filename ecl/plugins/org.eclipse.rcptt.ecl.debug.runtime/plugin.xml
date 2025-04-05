@@ -13,13 +13,6 @@ Contributors:
     Xored Software Inc - initial API and implementation
 -->
 
-<!--
- <copyright>
- </copyright>
-
- $Id$
--->
-
 <plugin>
    <extension-point id="eclDebugExtension" name="eclDebugExtension" schema="schema/eclDebugExtension.exsd"/>
 

@@ -13,13 +13,6 @@ Contributors:
     Xored Software Inc - initial API and implementation
 -->
 
-<!--
- <copyright>
- </copyright>
-
- $Id: plugin.xml,v 1.1 2010, 2014/12/20 09:42:41 haiodo Exp $
--->
-
 <plugin>
 
    <extension point="org.eclipse.emf.ecore.generated_package">

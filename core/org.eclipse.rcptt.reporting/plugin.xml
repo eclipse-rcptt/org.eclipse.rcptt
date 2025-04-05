@@ -13,13 +13,6 @@ Contributors:
     Xored Software Inc - initial API and implementation
 -->
 
-<!--
- <copyright>
- </copyright>
-
- $Id$
--->
-
 <plugin>
    <extension-point id="reportRenderer" name="reportRenderer" schema="schema/reportRenderer.exsd"/>
 

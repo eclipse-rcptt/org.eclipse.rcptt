@@ -13,13 +13,6 @@ Contributors:
     Xored Software Inc - initial API and implementation
 -->
 
-<!--
- <copyright>
- </copyright>
-
- $Id$
--->
-
 <plugin>
    <extension-point id="eventProvider" name="eventProvider" schema="schema/eventProvider.exsd"/>
 
