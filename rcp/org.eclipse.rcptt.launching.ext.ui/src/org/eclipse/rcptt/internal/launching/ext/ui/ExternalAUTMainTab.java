@@ -13,6 +13,7 @@ package org.eclipse.rcptt.internal.launching.ext.ui;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -92,10 +93,8 @@ public class ExternalAUTMainTab extends MainTab {
 								if (result != null) {
 									return result;
 								}
-								if (environment.getCompatibleVMs().length <= 0) {
-									return null;
-								}
-								return environment.getCompatibleVMs()[0];
+								return Arrays.stream(environment.getCompatibleVMs())
+										.filter(i -> environment.isStrictlyCompatible(i)).findFirst().orElse(null);
 							}
 						}
 					}
@@ -145,7 +144,7 @@ public class ExternalAUTMainTab extends MainTab {
 						.detectArchitecture(true, null) : configArch;
 				IVMInstall install = getSelectedJVM();
 				if (install == null) {
-					return "No JVM selected";
+					return "The selected JVM can not be found. Ensure it is installed.";
 				}
 				
 				try {
