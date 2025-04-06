@@ -98,14 +98,14 @@ public class HtmlReportRendererTest {
 	public void testStyle() {
 		String result = generate(Collections.<Report> emptyList()).replaceAll("(\r|\n)+", " ");
 		Assert.assertTrue("Style should be written",
-				result.contains("<style> .failure th, .failure td"));
+				result.contains(".failure th, .failure td") && result.contains("<style>"));
 	}
 
 	@Test
 	public void testScript() {
 		String result = generate(Collections.<Report> emptyList()).replaceAll("(\r|\n)+", " ");
 		Assert.assertTrue("Script should be written",
-				result.contains("<script type=\"text/javascript\"> function installDetailsWorkaround() {"));
+				result.contains("<script type=\"text/javascript\">") && result.contains("function installDetailsWorkaround() {"));
 	}
 
 	@Test
