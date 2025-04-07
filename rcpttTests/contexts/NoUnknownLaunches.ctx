@@ -1,23 +1,23 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
 Context-Type: org.eclipse.rcptt.ctx.debug
-Debug-LaunchExceptions: selfQ7
-Debug-LaunchShortcutExceptions: selfQ7
+Debug-LaunchExceptions: selfQ7, mockupsQ7
+Debug-LaunchShortcutExceptions: selfQ7, mockupsQ7
 Debug-NoBreakpoints: true
 Debug-NoLaunchShortcuts: true
 Debug-NoLaunches: true
-Element-Name: NoLaunchesKeepSelfQ7
+Element-Name: NoUnknownLaunches
 Element-Type: context
 Element-Version: 2.0
-Id: _e3IEwBMbEfC5YKns0agRyg
-Runtime-Version: 2.5.5.202404041628
-Save-Time: 4/6/25, 11:18 PM
+Id: _3QstcUKPEeKd6cDYW-3Z1w
+Runtime-Version: 2.5.5.202301240240
+Save-Time: 1/25/23, 1:13 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
 Entry-Name: .description
 
-Copyright (c) 2025 Xored Software Inc and others.
+Copyright (c) 2009, 2019 Xored Software Inc and others.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License v2.0
 which accompanies this distribution, and is available at

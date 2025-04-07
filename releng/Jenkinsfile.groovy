@@ -148,17 +148,17 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
     withBuildContainer() {
       mvn "--version"
       def mvn = { pom ->
-          this.mvn "clean verify ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
+          this.mvn "clean ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
       }
       this.script.xvnc() {
-        mvn "releng/mirroring/pom.xml"
-        mvn "releng/core/pom.xml"
-        mvn "releng/runtime/pom.xml -P runtime4x"
-        mvn "releng/ide/pom.xml"
-        mvn "releng/rap/pom.xml -P core"
-        mvn "releng/rap/pom.xml -P ide"
-        mvn "releng/rcptt/pom.xml"
-        mvn "releng/runner/pom.xml"
+        mvn "releng/mirroring/pom.xml verify"
+        mvn "releng/core/pom.xml verify"
+        mvn "releng/runtime/pom.xml -P runtime4x verify"
+        mvn "releng/ide/pom.xml verify"
+        mvn "releng/rap/pom.xml -P core verify"
+        mvn "releng/rap/pom.xml -P ide verify"
+        mvn "releng/rcptt/pom.xml verify"
+        mvn "releng/runner/pom.xml verify"
         mvn "maven-plugin/pom.xml install"
       }
       this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
