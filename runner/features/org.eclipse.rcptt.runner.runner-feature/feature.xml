@@ -306,4 +306,8 @@
          id="org.eclipse.equinox.concurrent"
          version="0.0.0"/>
 
+   <plugin
+         id="org.eclipse.rcptt.cli.common"
+         version="0.0.0"/>
+
 </feature>

@@ -38,6 +38,7 @@ maven-plugin/rcptt-maven-modules.iml
 .tycho-consumer-pom.xml
 .polyglot.feature.xml
 .polyglot.pom.tycho
+.polyglot.META-INF
 pom.tycho
 tycho*equinox
 tycho_reactor_agent*

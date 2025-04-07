@@ -23,6 +23,7 @@
     <module>../../launching</module>
     <module>../../modules</module>
     <module>../../rcp</module>
+    <module>../../cli</module>
     <module>../../testing</module>
 
     <module>../../repository/full</module>

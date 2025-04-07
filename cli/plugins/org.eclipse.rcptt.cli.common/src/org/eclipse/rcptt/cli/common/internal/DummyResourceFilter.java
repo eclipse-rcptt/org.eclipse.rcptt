@@ -10,7 +10,7 @@
  * Contributors:
  *   Xored Software Inc - initial API and implementation
  ********************************************************************************/
-package org.eclipse.rcptt.runner.extensions;
+package org.eclipse.rcptt.cli.common.internal;
 
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.resources.IContainer;

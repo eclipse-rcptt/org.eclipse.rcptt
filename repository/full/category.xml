@@ -59,5 +59,6 @@
       <category name="rcptt"/>
    </feature>
    <feature id="org.eclipse.rcptt.modules.launching"/>
+   <bundle id="org.eclipse.rcptt.cli.common"/>
    <category-def name="rcptt" label="RCP Testing Tool"/>
 </site>
