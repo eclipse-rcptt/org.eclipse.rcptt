@@ -10,10 +10,21 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.swt.test;
 
+import static java.util.stream.Stream.generate;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
+import org.eclipse.core.internal.jobs.JobListeners;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,6 +45,7 @@ import org.eclipse.rcptt.tesla.core.info.InfoFactory;
 import org.eclipse.rcptt.tesla.core.info.Q7WaitInfo;
 import org.eclipse.rcptt.tesla.core.info.Q7WaitInfoRoot;
 import org.eclipse.rcptt.tesla.internal.ui.player.UIJobCollector;
+import org.eclipse.rcptt.tesla.ui.IJobCollector;
 import org.eclipse.swt.widgets.Display;
 import org.junit.After;
 import org.junit.Assert;
@@ -101,11 +113,14 @@ public class UIJobCollectorTest {
 		oscillatingJob.setPriority(Job.INTERACTIVE);
 	}
 
+	@SuppressWarnings({ "restriction", "resource" })
 	@Before
 	public void before() {
 		TeslaFeatures.getInstance().getOption(TeslaFeatures.REPORT_INCLUDE_ECLIPSE_METHODS_WAIT_DETAILS).setValue("true");
+		JobListeners.setJobListenerTimeout(250);
+		closer.register(JobListeners::resetJobListenerTimeout);
 	}
-	
+		
 	@Before
 	public void waitForAllJobs() throws InterruptedException, CoreException {
 		rescheduling.cancel();
@@ -303,28 +318,23 @@ public class UIJobCollectorTest {
 		parameters.stepModeTimeout = 120000;
 		UIJobCollector subject = new UIJobCollector(parameters);
 		prepare(subject);
-		CountDownLatch start = new CountDownLatch(1);
-		CountDownLatch stop = new CountDownLatch(1);
-		addListener(busyLoop, new JobChangeAdapter() {public void done(IJobChangeEvent event) {
-			try {
-				System.out.println("Job is cancelled");
-				start.countDown();
-				stop.await();
-				System.out.println("Job is done");
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new AssertionError(e);
-			}
-		};});
-		busyLoop.schedule();
-		while (busyLoop.getState() != Job.RUNNING) {
-			Thread.yield();
+		try (CountingLatch latch = new CountingLatch()) {
+			ShortJob job = new ShortJob();
+			addListener(job, new JobChangeAdapter() {public void done(IJobChangeEvent event) {
+				try {
+					System.out.println("Job is cancelled");
+					latch.await();
+					System.out.println("Job is done");
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new AssertionError(e);
+				}
+			};});
+			job.schedule();
+			latch.awaitParties(1);
+			Assert.assertEquals(Job.NONE, busyLoop.getState());
+			Assert.assertFalse(isEmpty(subject));
 		}
-		busyLoop.cancel();
-		start.await();
-		Assert.assertEquals(Job.NONE, busyLoop.getState());
-		Assert.assertFalse(isEmpty(subject));
-		stop.countDown();
 		join(subject, 0);
 	}	
 	
@@ -337,7 +347,6 @@ public class UIJobCollectorTest {
 		}
 		return job.getState() == Job.NONE;
 	}
-	
 	
 	@Test
 	public void waitForCancelledJobs() throws InterruptedException {
@@ -446,7 +455,7 @@ public class UIJobCollectorTest {
 		UIJobCollector subject = new UIJobCollector(parameters);
 		addListener(subject);
 		subject.enable();
-		assertEmpty("Ignore old jobs, schduled before collector starts", subject);
+		assertEmpty("Ignore jobs scheduled before collector starts", subject);
 	}
 
 	@Test
@@ -539,21 +548,47 @@ public class UIJobCollectorTest {
 		}
 	}
 	
-	
-	private static final class ShortJob extends Job {
-		public ShortJob() {
-			super("short");
-			setPriority(Job.INTERACTIVE);
-			setSystem(true);
-			setUser(false);
+	@Test
+	public void jobListenersShouldNotHang() throws InterruptedException {
+		Parameters parameters = new Parameters();
+		UIJobCollector subject = new UIJobCollector(parameters);
+		prepare(subject);
+		try (CountingLatch latch = new CountingLatch()) {
+			List<LatchJob> jobs = Stream.generate(() -> new LatchJob(latch::await)).limit(1000).toList();
+			jobs.forEach(Job::schedule);
+			latch.awaitParties(jobs.size());
+			latch.close();
+			while(!isEmpty(subject)) {} // contention
 		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			return Status.OK_STATUS;
-		}
-		
 	}
+	
+	@Test
+	public void jobListenersShouldFireBeforeJoin() throws InterruptedException {
+		int jobCount = 500;
+		Parameters parameters = new Parameters();
+		AtomicInteger completeListenerFired = new AtomicInteger(0);
+		UIJobCollector subject = new UIJobCollector(parameters);
+		prepare(subject);
+		try (CountingLatch latch = new CountingLatch()) {
+			class TestJob extends LatchJob {
+				public TestJob() {
+					super(latch::await);
+					addJobChangeListener(IJobChangeListener.onDone( e -> completeListenerFired.incrementAndGet()));
+					closeJobAfterTest(this);
+				}
+			}
+			List<TestJob> jobs = generate(() -> new TestJob()).limit(jobCount).toList();
+			jobs.forEach(Job::schedule);
+			latch.awaitParties(jobCount);
+			latch.close();
+			subject.join(100000);
+			for (TestJob job: jobs) {
+				assertEquals(jobCount, completeListenerFired.get());
+				assertTrue(job.getResult().isOK());
+			}
+		}
+	}
+		
 	@Test
 	public void doNotScheduleInALock() {
 		Parameters parameters = new Parameters();
@@ -587,7 +622,6 @@ public class UIJobCollectorTest {
 		long stop = System.currentTimeMillis() + timeout + schedulingTolerance;
 		while (System.currentTimeMillis() < stop) {
 			idle();
-			long moment = System.currentTimeMillis();
 			if (isEmpty(subject))
 				return;
 		}
@@ -649,7 +683,7 @@ public class UIJobCollectorTest {
 		public int timeout = stepModeStartDelay * 5;
 		public int stepModeTimeout = timeout * 2;
 		public int delayToWaitFor = schedulingTolerance*3;
-
+		public Collection<IJobCollector> extensions = new ArrayList<>();
 		@Override
 		public int stepModeStartDelay() {
 			return stepModeStartDelay;
@@ -675,6 +709,11 @@ public class UIJobCollectorTest {
 			return delayToWaitFor;
 		}
 
+		@Override
+		public Collection<IJobCollector> extensions() {
+			return extensions;
+		}
+
 	}
 	
 	private void assertEmpty(String message, UIJobCollector subject) {
@@ -682,6 +721,13 @@ public class UIJobCollectorTest {
 		boolean result = subject.isEmpty(new org.eclipse.rcptt.tesla.core.context.ContextManagement.Context(), waitInfo);
 		Assert.assertTrue(message + ", but found jobs:\n" + toString(waitInfo), result);
 	}
+	
+	private void assertNonEmpty(String message, UIJobCollector subject) {
+		Q7WaitInfoRoot waitInfo = InfoFactory.eINSTANCE.createQ7WaitInfoRoot();
+		boolean result = subject.isEmpty(new org.eclipse.rcptt.tesla.core.context.ContextManagement.Context(), waitInfo);
+		Assert.assertFalse(message, result);
+	}
+
 
 	private static String toString(Q7WaitInfoRoot root) {
 		StringBuilder stream = new StringBuilder();
@@ -728,5 +774,52 @@ public class UIJobCollectorTest {
 	private void debug(String message) {
 //		System.out.printf("Junit Test: %s\n", message);
 	}
+	
+	
+	private static class ShortJob extends Job {
+		public ShortJob() {
+			super("short");
+			setPriority(Job.INTERACTIVE);
+			setSystem(true);
+			setUser(false);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			return Status.OK_STATUS;
+		}
+	}
+	
+	private interface Latch {
+		void run() throws InterruptedException;
+		
+	}
+	private static class LatchJob extends Job {
+		private final Latch latch;
+		public LatchJob(Latch latch) {
+			super("latch");
+			this.latch = Objects.requireNonNull(latch);
+			setPriority(Job.INTERACTIVE);
+		}
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				latch.run();
+			} catch (InterruptedException e) {
+				return Status.CANCEL_STATUS;
+			}
+			return Status.OK_STATUS;
+		}
+		
+	}
+	
+	private static void unsafeSleep(int ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
 
 }

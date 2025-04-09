@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.sherlock.aspects.jobs.internal.IJobsEventListener;
 import org.eclipse.rcptt.sherlock.core.reporting.IReportBuilder;
-import org.eclipse.rcptt.tesla.internal.ui.player.UIJobCollector;
+import org.eclipse.rcptt.tesla.internal.ui.player.SWTUIPlayer;
 import org.eclipse.rcptt.tesla.ui.IJobCollector.JobStatus;
 
 @SuppressWarnings("restriction")
@@ -87,7 +87,7 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobStart(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		JobStatus status = detectJobStatus((Job) job);
 		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
@@ -98,7 +98,7 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobFinish(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		JobStatus status = detectJobStatus((Job) job);
 		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
@@ -109,7 +109,7 @@ public class JobsInfoSupport implements IJobsEventListener,
 	}
 
 	private void jobUpdate(final InternalJob job) {
-		JobStatus status = UIJobCollector.detectJobStatus((Job) job);
+		JobStatus status = detectJobStatus((Job) job);
 		if (JobStatus.IGNORED.equals(status)) {
 			return;
 		}
@@ -117,6 +117,10 @@ public class JobsInfoSupport implements IJobsEventListener,
 		for (IReportBuilder builder : builders) {
 			ReportHelper.updateWaitInfo(builder.getCurrent(), "job", job.getClass().getName());
 		}
+	}
+	
+	private JobStatus detectJobStatus(Job job) {
+		return SWTUIPlayer.getPlayer().getCollector().detectJobStatus(job);
 	}
 
 	public void clear() {
