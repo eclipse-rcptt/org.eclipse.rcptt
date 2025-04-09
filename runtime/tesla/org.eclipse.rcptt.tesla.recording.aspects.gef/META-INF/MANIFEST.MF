@@ -12,7 +12,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)"
 onEnvironment: JavaSE-17
-Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.gef,  org.eclipse.draw2d
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.gef
 Bundle-ActivationPolicy: lazy

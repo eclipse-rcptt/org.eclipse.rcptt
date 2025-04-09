@@ -9,55 +9,56 @@
     Contributors:
     	Xored Software Inc - initial API and implementation and/or initial documentation
  -->
-
 <site>
-  <feature id="org.eclipse.rcptt.platform">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.core">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.launching">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.updates">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.external.dependencies.feature">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.ecl.server">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.tesla.ecl">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.ecl.core">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.ecl.ide">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.ecl.platform">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.ecl.platform.ui">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.tesla">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.watson">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.module.nebula">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.module.testrail">
-    <category name="rcptt"/>
-  </feature>
-  <feature id="org.eclipse.rcptt.module.zephyr">
-    <category name="rcptt"/>
-  </feature>
-  <category-def label="RCP Testing Tool" name="rcptt"/>
+   <feature id="org.eclipse.rcptt.platform">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.core">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.launching">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.updates">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.external.dependencies.feature">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.ecl.server">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.tesla.ecl">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.ecl.core">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.ecl.ide">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.ecl.platform">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.ecl.platform.ui">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.tesla">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.watson">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.module.nebula">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.module.testrail">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.module.zephyr">
+      <category name="rcptt"/>
+   </feature>
+   <feature id="org.eclipse.rcptt.modules.launching"/>
+   <bundle id="org.eclipse.rcptt.cli.common"/>
+   <category-def name="rcptt" label="RCP Testing Tool"/>
 </site>

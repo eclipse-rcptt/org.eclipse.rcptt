@@ -9,7 +9,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.views.log
-Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.views.log
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

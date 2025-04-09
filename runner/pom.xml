@@ -83,6 +83,23 @@
 							<arch>aarch64</arch>
 						</environment>
 					</environments>
+					<filters>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.ui.intro</id>
+							<removeAll />
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.ui</id>
+							<removeAll />
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.ui.ide</id>
+							<removeAll />
+						</filter>
+					</filters>
 				</configuration>
 			</plugin>
 			<plugin>
