@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import org.eclipse.core.internal.jobs.JobListeners;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -113,12 +112,9 @@ public class UIJobCollectorTest {
 		oscillatingJob.setPriority(Job.INTERACTIVE);
 	}
 
-	@SuppressWarnings({ "restriction", "resource" })
 	@Before
 	public void before() {
 		TeslaFeatures.getInstance().getOption(TeslaFeatures.REPORT_INCLUDE_ECLIPSE_METHODS_WAIT_DETAILS).setValue("true");
-		JobListeners.setJobListenerTimeout(250);
-		closer.register(JobListeners::resetJobListenerTimeout);
 	}
 		
 	@Before
@@ -569,11 +565,16 @@ public class UIJobCollectorTest {
 		AtomicInteger completeListenerFired = new AtomicInteger(0);
 		UIJobCollector subject = new UIJobCollector(parameters);
 		prepare(subject);
+		JobChangeAdapter listener = new JobChangeAdapter() {
+			public void done(IJobChangeEvent event) {
+				completeListenerFired.incrementAndGet();
+			};
+		};
 		try (CountingLatch latch = new CountingLatch()) {
 			class TestJob extends LatchJob {
 				public TestJob() {
 					super(latch::await);
-					addJobChangeListener(IJobChangeListener.onDone( e -> completeListenerFired.incrementAndGet()));
+					addJobChangeListener(listener);
 					closeJobAfterTest(this);
 				}
 			}
@@ -813,13 +814,5 @@ public class UIJobCollectorTest {
 		
 	}
 	
-	private static void unsafeSleep(int ms) {
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
-
 
 }
