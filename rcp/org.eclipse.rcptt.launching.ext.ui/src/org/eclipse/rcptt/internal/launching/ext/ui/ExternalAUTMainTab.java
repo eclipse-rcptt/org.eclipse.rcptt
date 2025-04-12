@@ -13,6 +13,7 @@ package org.eclipse.rcptt.internal.launching.ext.ui;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -92,10 +93,8 @@ public class ExternalAUTMainTab extends MainTab {
 								if (result != null) {
 									return result;
 								}
-								if (environment.getCompatibleVMs().length <= 0) {
-									return null;
-								}
-								return environment.getCompatibleVMs()[0];
+								return Arrays.stream(environment.getCompatibleVMs())
+										.filter(i -> environment.isStrictlyCompatible(i)).findFirst().orElse(null);
 							}
 						}
 					}
@@ -135,39 +134,28 @@ public class ExternalAUTMainTab extends MainTab {
 			@Override
 			public String validate() {
 				String value = super.validate();
-				if (currentTargetPlatform != null) {
-					StringBuilder archDetect = new StringBuilder();
-					OSArchitecture architecture = configArch == null ? currentTargetPlatform
-							.detectArchitecture(true, archDetect) : configArch;
-					boolean haveArch = false;
-					IVMInstall install = getSelectedJVM();
-					OSArchitecture jvmArch = null;
-					if (install != null) {
-						try {
-							jvmArch = JDTUtils.detect(install);
-						} catch (CoreException e) {
-							return e.getMessage();
-						}
-						if (jvmArch.equals(architecture)
-								|| (jvmArch.equals(OSArchitecture.x86_64) && JDTUtils
-										.canRun32bit(install))) {
-							haveArch = true;
-						}
-					}
-
-					if (install == null) {
-						return ("The selected AUT requires "
-								+ ((OSArchitecture.x86.equals(architecture)) ? "32 bit"
-										: "64 bit") + " but selected JVM is " + ((OSArchitecture.x86
-								.equals(jvmArch)) ? "32 bit" : "64 bit"));
-					}
-					if (!haveArch) {
-						return ("The selected AUT requires "
-								+ ((OSArchitecture.x86.equals(architecture)) ? "32 bit"
-										: "64 bit") + " Java VM which cannot be found.");
-					}
+				if (value != null) {
+					return value;
 				}
-				return value;
+				if (currentTargetPlatform == null) {
+					return null;
+				}
+				OSArchitecture architecture = configArch == null ? currentTargetPlatform
+						.detectArchitecture(true, null) : configArch;
+				IVMInstall install = getSelectedJVM();
+				if (install == null) {
+					return "The selected JVM can not be found. Ensure it is installed.";
+				}
+				
+				try {
+					OSArchitecture jvmArch = JDTUtils.detect(install);
+					if (!jvmArch.equals(architecture)) {
+						return "The selected AUT requires "+ architecture + " architecture, but selected JVM is " + jvmArch;
+					}
+				} catch (CoreException e) {
+					return e.getMessage();
+				}
+				return null;
 			}
 		};
 	}

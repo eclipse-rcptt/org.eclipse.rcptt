@@ -20,11 +20,10 @@
   </parent>
   <modules>
     <module>../../runtime/updates/org.eclipse.rcptt.updates-feature</module>
-    <module>../../modules/nebula</module>
     <module>../../launching</module>
-    <module>../../modules/testrail</module>
-    <module>../../modules/zephyr</module>
+    <module>../../modules</module>
     <module>../../rcp</module>
+    <module>../../cli</module>
     <module>../../testing</module>
 
     <module>../../repository/full</module>

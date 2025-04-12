@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -248,10 +247,7 @@ public class Q7ExternalLaunchDelegate extends
 						+ install.getInstallLocation().toString()
 						+ " detected architecture is " + jvmArch.name());
 
-		boolean canRun32bit = false;
-		if (jvmArch.equals(architecture)
-				|| (jvmArch.equals(OSArchitecture.x86_64) && (canRun32bit = JDTUtils
-						.canRun32bit(install)))) {
+		if (jvmArch.equals(architecture)) {
 			haveAUT = true;
 		}
 
@@ -271,21 +267,11 @@ public class Q7ExternalLaunchDelegate extends
 						+ configuration.getName()
 						+ ": JVM and AUT architectures are compatible: "
 						+ haveAUT
-						+ "."
-						+ (jvmArch.equals(OSArchitecture.x86_64) ? " JVM is 64bit and support running 32bit: "
-								+ canRun32bit
-								: ""));
+						+ ".");
 		if (!haveAUT) {
 			// Let's search for configuration and update JVM if possible.
 			haveAUT = updateJVM(configuration, architecture,
 					((ITargetPlatformHelper) info.target));
-
-			if (!haveAUT) {
-				// try to register current JVM, it may help
-				JDTUtils.registerCurrentJVM();
-				haveAUT = updateJVM(configuration, architecture,
-						((ITargetPlatformHelper) info.target));
-			}
 
 			if (haveAUT) {
 				Q7ExtLaunchingPlugin
@@ -333,7 +319,7 @@ public class Q7ExternalLaunchDelegate extends
 		try {
 			Job.getJobManager().join(
 					IBundlePoolConstansts.CLEAN_BUNDLE_POOL_JOB,
-					monitor);
+					SubMonitor.convert(monitor, 1));
 		} catch (Exception e1) {
 			Q7ExtLaunchingPlugin.getDefault().log(
 					"Failed to wait for bundle pool clear job", e1);
@@ -343,7 +329,7 @@ public class Q7ExternalLaunchDelegate extends
 	private static boolean updateJVM(ILaunchConfiguration configuration,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
 		
-		VmInstallMetaData jvm = JDTUtils.findVM(architecture);
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
 		if (jvm == null) {
 			return false;
 		}
@@ -494,10 +480,9 @@ public class Q7ExternalLaunchDelegate extends
 			File config = new File(getConfigDir(configuration), "config.ini");
 			Properties props = new Properties();
 
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(config));
-			props.load(in);
-			in.close();
+			try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(config))) {
+				props.load(in);
+			}
 
 			File location = target.getQ7Target().getInstallLocation();
 			if (location != null) {
@@ -516,10 +501,9 @@ public class Q7ExternalLaunchDelegate extends
 			properties.setBeginAdd(true);
 			properties.putAll(props);
 
-			BufferedOutputStream out = new BufferedOutputStream(
-					new FileOutputStream(config));
-			properties.store(out, "Configuration File");
-			out.close();
+			try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
+				properties.store(out, "Configuration File");
+			}
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -646,21 +630,31 @@ public class Q7ExternalLaunchDelegate extends
 		setBundlesToLaunch(info, bundlesToLaunch);
 
 		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
-
-		setDelegateFields(this, bundlesToLaunch.fModels, bundlesToLaunch.fAllBundles);
+		checkBundles(bundlesToLaunch);
+		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
 		// Copy all additional configuration area folders into PDE new
 		// configuration location.
 		copyConfiguratonFiles(configuration, info);
 		monitor.done();
 	}
+	
+	private void checkBundles(BundlesToLaunch launch) {
+		DependencyResolver resolver = new DependencyResolver(launch.fAllBundles);
+		Collection<IPluginModelBase> toDelete = resolver.checkPlugins(launch.fModels.keySet());
+		toDelete.forEach(plugin->{
+			launch.fAllBundles.remove(plugin.getBundleDescription().getName(), plugin);
+			launch.fModels.remove(plugin);
+		});
+		String message  = "Following bundles were unresolved:\n" + 
+		toDelete.stream().map(p -> p.getBundleDescription().getName()+"_"+p.getPluginBase().getVersion()).collect(Collectors.joining("\n"));
+		log(Status.info(message));
+	}
 
 	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
-
 		String path = target.getInstallLocation().getAbsolutePath();
 		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
 		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();
-
 		for (Entry<IPluginModelBase, String> entry : fModels.entrySet()) {
 			IPluginModelBase model = entry.getKey();
 			UniquePluginModel uniqueModel = new UniquePluginModel(model);
@@ -668,9 +662,12 @@ public class Q7ExternalLaunchDelegate extends
 			if (secondModel != null) {
 				if (secondModel.getInstallLocation().contains(path)) {
 					keysForRemove.add(secondModel);
+					continue;
 				} else {
 					keysForRemove.add(model);
+					continue;
 				}
+
 			} else {
 				cache.put(uniqueModel, model);
 			}
@@ -679,7 +676,7 @@ public class Q7ExternalLaunchDelegate extends
 			fModels.remove(key);
 		}
 	}
-
+	
 	public static class BundlesToLaunchCollector {
 		private void addInstallationBundle(TargetBundle bundle,
 				BundleStart hint, IProgressMonitor monitor) {
@@ -713,7 +710,7 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		public BundlesToLaunch getResult() {
-			return new BundlesToLaunch(rejectedBundles, plugins, latestVersions);
+			return new BundlesToLaunch(plugins, latestVersions);
 		}
 
 		private void put(IPluginModelBase plugin, BundleStart start) {
@@ -752,7 +749,6 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		private final Set<String> idsToSkip = new HashSet<String>();
-		private final Set<String> rejectedBundles = new LinkedHashSet<String>();
 		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<IPluginModelBase, BundleStart>();
 		private final Map<String, IPluginModelBase> latestVersions = new HashMap<String, IPluginModelBase>();
 	}
@@ -834,8 +830,7 @@ public class Q7ExternalLaunchDelegate extends
 		plugins.done();
 
 		try {
-			return new BundlesToLaunch(collector.rejectedBundles,
-				collector.plugins, collector.latestVersions);
+			return new BundlesToLaunch(collector.plugins, collector.latestVersions);
 		} finally {
 			if (monitor != null) {
 				monitor.done();
@@ -850,8 +845,7 @@ public class Q7ExternalLaunchDelegate extends
 	 *
 	 */
 	public static class BundlesToLaunch {
-		public BundlesToLaunch(Set<String> rejectedBundles,
-				Map<IPluginModelBase, BundleStart> plugins,
+		public BundlesToLaunch(Map<IPluginModelBase, BundleStart> plugins,
 				final Map<String, IPluginModelBase> latestVersions) {
 			this.resolvedBundles = plugins;
 
@@ -867,7 +861,7 @@ public class Q7ExternalLaunchDelegate extends
 			for (IPluginModelBase plugin: plugins.keySet()) {
 				multiMap.put(id(plugin), plugin);
 			}
-			fAllBundles = Maps.transformValues(multiMap.asMap(), ArrayList::new);
+			fAllBundles = multiMap;
 			fModels = new HashMap<IPluginModelBase, String>(Maps.transformValues(
 					resolvedBundles, new Function<BundleStart, String>() {
 						public String apply(BundleStart input) {
@@ -879,7 +873,7 @@ public class Q7ExternalLaunchDelegate extends
 		public final Map<IPluginModelBase, BundleStart> resolvedBundles;
 		public final Map<IPluginModelBase, BundleStart> latestVersionsOnly;
 		public final Map<IPluginModelBase, String> fModels;
-		public final Map<String, List<IPluginModelBase>> fAllBundles;
+		public final ListMultimap<String, IPluginModelBase> fAllBundles;
 	}
 
 	private static final String KEY_BUNDLES_TO_LAUNCH = "bundlesToLaunch";

@@ -11,7 +11,6 @@ Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.jface,
  org.eclipse.gmf.runtime.diagram.ui,
  org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)"
-Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.gmf.runtime.diagram.ui
 Export-Package: org.eclipse.rcptt.tesla.recording.aspects.gmf
 Bundle-ActivationPolicy: lazy
