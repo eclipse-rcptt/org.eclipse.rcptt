@@ -315,9 +315,10 @@ public class UIJobCollector implements IJobChangeListener {
 			return;
 		}
 		JobInfo info = null;
+		boolean isEmpty = isJoinEmpty();
 		synchronized (jobs) {
 			boolean reschedule = TeslaSWTAccess.getJobEventReSchedule(event) && state;
-			if (needDisable && isJoinEmpty()) {
+			if (needDisable && isEmpty) {
 				disable();
 			}
 			if (reschedule) {
@@ -971,6 +972,7 @@ public class UIJobCollector implements IJobChangeListener {
 
 	private boolean isJoinEmpty() {
 		List<Job> realJobs = new ArrayList<>();
+		Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
 		synchronized (jobs) {
 			if (jobs.isEmpty()) {
 				return true;
@@ -982,7 +984,6 @@ public class UIJobCollector implements IJobChangeListener {
 				Set<String> names = getSuperClassNames(job);
 
 				// Locate thread
-				Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
 				boolean toContinue = false;
 				for (Map.Entry<Thread, StackTraceElement[]> thread : traces.entrySet()) {
 					Context ctx = ContextManagement.makeContext(thread.getValue());
