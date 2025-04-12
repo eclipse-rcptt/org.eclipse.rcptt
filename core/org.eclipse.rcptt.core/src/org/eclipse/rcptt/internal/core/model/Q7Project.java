@@ -18,6 +18,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourceAttributes;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -215,11 +218,7 @@ public class Q7Project extends Openable implements IQ7Project {
 	}
 
 	private static boolean resourceExists(IResource resource) {
-		IPath path = resource.getLocation();
-		if (path == null) {
-			return false;
-		}
-		return path.toFile().exists();
+		return resource.exists();
 	}
 
 	public IQ7ProjectMetadata getMetadata() {
@@ -229,25 +228,39 @@ public class Q7Project extends Openable implements IQ7Project {
 		final Q7Folder rootFolder = (Q7Folder) getRootFolder();
 		IQ7ProjectMetadata metadata = rootFolder.getMetadata();
 
-		IResource resource = metadata.getResource();
-		Job createMetadataJob = new WorkspaceJob("Create Q7 project metadata") {
-			{
-				setRule(resource.getWorkspace().getRuleFactory().createRule(resource));
-			}
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) {
-				try {
-					if (!resourceExists(resource)) {
-						rootFolder.createMetadata(true,
-								new NullProgressMonitor());
-					}
-				} catch (ModelException e) {
-					RcpttPlugin.log(e);
-				}
-				return Status.OK_STATUS;
-			};
-		};
-		createMetadataJob.schedule();
+		if (!resourceExists(metadata.getResource())) {
+			createMetadataJob.schedule();
+		}
 		return metadata;
 	}
+	
+	private static final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+	private static final Job createMetadataJob = new WorkspaceJob("Create Q7 project metadata") {
+		{
+			setRule(workspace.getRuleFactory().modifyRule(workspace.getRoot()));
+		}
+		@Override
+		public IStatus runInWorkspace(IProgressMonitor monitor) {
+			try {
+				for (IProject p: workspace.getRoot().getProjects()) {
+					if (RcpttCore.hasRcpttNature(p)) {
+						ResourceAttributes attrs = p.getResourceAttributes();
+						if (attrs.isReadOnly() || attrs.isHidden()) {
+							continue;
+						}
+						IQ7Project rcpttProject = RcpttCore.create(p);
+						IResource resource = rcpttProject.getMetadata().getResource();
+						resource.refreshLocal(IResource.DEPTH_ZERO, monitor);
+						if (!resourceExists(resource)) {
+							((Q7Folder)rcpttProject.getRootFolder()).createMetadata(true, monitor);
+						}
+					}
+				}
+			} catch (CoreException  e) {
+				RcpttPlugin.log(e);
+			}
+			return Status.OK_STATUS;
+		};
+	};
+
 }

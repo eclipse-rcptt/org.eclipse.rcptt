@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,6 +73,8 @@ public class UIJobCollector implements IJobChangeListener {
 		int timeout();
 		/** If a job is scheduled with a longer delay, ignore it immediately **/
 		int delayToWaitFor(); 
+		Collection<IJobCollector> extensions();
+
 	}
 	
 	private final class NormalizedParameters implements IParameters {
@@ -106,6 +109,11 @@ public class UIJobCollector implements IJobChangeListener {
 		@Override
 		public int delayToWaitFor() {
 			return Math.min(master.delayToWaitFor(), timeout());
+		}
+
+		@Override
+		public Collection<IJobCollector> extensions() {
+			return master.extensions();
 		}
 	}
 
@@ -380,15 +388,14 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.rcptt.ecl.internal.debug.runtime.ServerSession",
 			"org.eclipse.ui.internal.Workbench$40" ))); // Workbench Auto-Save Job
 
-	public static JobStatus detectJobStatus(Job job) {
+	public JobStatus detectJobStatus(Job job) {
 		JobStatus status = null;
 		if (job.belongsTo(FAMILY)) {
 			return JobStatus.IGNORED;
 		}
-		IJobCollector[] collectors = JobCollectorExtensions.getDefault().getCollectors();
 
 		// Take first status
-		for (IJobCollector cl : collectors) {
+		for (IJobCollector cl : parameters.extensions()) {
 			JobStatus jobStatus = cl.testJob(job);
 			if (jobStatus != null && (!jobStatus.equals(JobStatus.UNKNOWN) && status == null)) {
 				status = jobStatus;
@@ -442,6 +449,11 @@ public class UIJobCollector implements IJobChangeListener {
 			@Override
 			public int delayToWaitFor() {
 				return TeslaLimits.getJobWaitForDelayedTimeout();
+			}
+
+			@Override
+			public Collection<IJobCollector> extensions() {
+				return Arrays.asList(JobCollectorExtensions.getDefault().getCollectors());
 			}
 		});
 	}
