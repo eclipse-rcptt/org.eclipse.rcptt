@@ -15,7 +15,6 @@ import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 /**
  * Describes bundle start level and autostart property
@@ -147,8 +146,8 @@ public class BundleStart {
 				!info.isMarkedAsStarted());
 	}
 
-	private final int level;
-	private final boolean autoStart;
+	public final int level;
+	public final boolean autoStart;
 
 	private boolean levelIsDefault;
 	private boolean autoStartIsDefault;

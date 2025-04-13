@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.internal.target;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
@@ -85,11 +86,11 @@ import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.core.target.P2TargetUtils;
 import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
 import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
-import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
+import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
@@ -102,7 +103,6 @@ import org.eclipse.rcptt.launching.internal.target.Q7Target.AutInstall;
 import org.eclipse.rcptt.launching.p2utils.P2Utils;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
-import org.eclipse.rcptt.util.FileUtil;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Objects;
@@ -121,7 +121,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private static final String OSGI_BUNDLES = "osgi.bundles";
 	public static final String SIMPLECONFIGURATOR = "org.eclipse.equinox.simpleconfigurator"; //$NON-NLS-1$
 	private static final String SC_BUNDLES_PATH = "configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"; //$NON-NLS-1$
-	private IStatus status = Status.OK_STATUS;
+	private final MultiStatus status = new MultiStatus(TargetPlatformHelper.class, 0, "Target platform resolution result");
 	private final ITargetDefinition target;
 	private final ArrayList<ITargetLocation> extra = new ArrayList<ITargetLocation>();
 	private IPluginModelBase[] models;
@@ -216,7 +216,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 					if (uri != null) {
 						File file = new File(uri);
 						if (!file.exists()) {
-							reportUnexistingFile(info);
+							// Skip problem of nonexistent file.
+							result.add(Status.warning("Skip nonexistent bundle: " + info.getSymbolicName()
+											+ ", then resolve configuration."));
 							continue;
 						}
 					}
@@ -232,14 +234,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return result;
 		}
 		return Status.OK_STATUS;
-	}
-
-	private void reportUnexistingFile(BundleInfo info) {
-		// Skip problem of nonexistent file.
-		Q7LaunchingPlugin.log(Q7LaunchingPlugin.createStatus(IStatus.WARNING,
-				"Skip nonexistent bundle: " + info.getSymbolicName()
-						+ ", then resolve configuration.",
-				null));
 	}
 
 	public IStatus getBundleWarningStatus() {
@@ -541,12 +535,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				return error("Bundle validation failed: " + b.toString());
 			}
 		} catch (CoreException e) {
-			Q7ExtLaunchingPlugin.getDefault().log(e);
-			return status = e.getStatus();
+			status.add(e.getStatus());
+			return status; 
 		} catch (OperationCanceledException e) {
-			return status = Status.CANCEL_STATUS;
+			status.add(Status.CANCEL_STATUS);
+			return status;
 		}
-		return status = Status.OK_STATUS;
+		return status;
 	}
 
 	private Status error(String message) {
@@ -610,16 +605,21 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		ITargetDefinition target = getTarget();
 		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 2);
 		try {
-			status = target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE));
-			if (!status.isOK())
+			status.add(target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE)));
+			if (isBad(status))
 				return status;
-			status = validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE));
-			if (!status.isOK())
+			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
+			if (isBad(status))
 				return status;
-			return status = getBundleStatus();
+			setStartLevels();
+			status.add(getBundleStatus());
+			return status;
+		} catch (IOException e) {
+			status.add(Status.error("Failed to resolve  target definition", e));
+			return status;
 		} finally {
 			m.done();
-		}
+	}
 	}
 
 	AutInstall getAutInstall() {
@@ -767,7 +767,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return resolveStatus;
 		}
 		if (getWeavingHook() == null) {
-			return status = createError("No org.eclipse.weaving hook plugin");
+			status.add(createError("No org.eclipse.weaving hook plugin"));
+			return status;
 		}
 		try {
 			save();
@@ -946,52 +947,22 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	private String readProductFromIniFile(File eclipseIniFile) {
-		BufferedReader in = null;
-		if (eclipseIniFile.exists()) {
-			try {
-				in = new BufferedReader(new FileReader(eclipseIniFile));
-				String str;
-				while ((str = in.readLine()) != null) {
-					if (str.trim().equals("-product")) { //$NON-NLS-1$
-						String product = in.readLine();
-						if (product != null) {
-							return product.trim();
-						}
-					}
-				}
-			} catch (IOException e) {
-				Q7ExtLaunchingPlugin.getDefault().log(e);
-			} finally {
-				if (in != null)
-					try {
-						in.close();
-					} catch (IOException e) {
-						Q7ExtLaunchingPlugin.getDefault().log(e);
-					}
-			}
+		if (!eclipseIniFile.exists()) {
+			return null;
 		}
-		return null;
-	}
-
-	private String readLauncherLibraryFromIniFile(File eclipseIniFile) {
-		BufferedReader in = null;
-		try {
-			if (eclipseIniFile.exists()) {
-				in = new BufferedReader(new FileReader(eclipseIniFile));
-				String str;
-				while ((str = in.readLine()) != null) {
-					if (str.trim().equals("--launcher.library")) { //$NON-NLS-1$
-						String result = in.readLine();
-						if (result != null) {
-							return result.trim();
-						}
+		try (
+			BufferedReader in = new BufferedReader(new FileReader(eclipseIniFile))) {
+			String str;
+			while ((str = in.readLine()) != null) {
+				if (str.trim().equals("-product")) { //$NON-NLS-1$
+					String product = in.readLine();
+					if (product != null) {
+						return product.trim();
 					}
 				}
 			}
 		} catch (IOException e) {
 			Q7ExtLaunchingPlugin.getDefault().log(e);
-		} finally {
-			FileUtil.safeClose(in);
 		}
 		return null;
 	}
@@ -1212,8 +1183,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return OSArchitecture.Unknown;
 	}
 
-	private Map<String, String> getRunlevelsFromSimpleConfigurator() {
-		Map<String, String> result = new HashMap<String, String>();
+	private Map<String, BundleStart> getRunlevelsFromSimpleConfigurator() throws IOException {
+		Map<String, BundleStart> result = new HashMap<>();
 		if (getTargetPlatformProfilePath() == null) {
 			return result;
 		}
@@ -1222,45 +1193,46 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (!infoFile.exists()) {
 			return result;
 		}
-		InputStream input = null;
-		try {
-			input = new FileInputStream(infoFile);
+		try (InputStream input = new FileInputStream(infoFile)) {
 			for (org.eclipse.equinox.internal.simpleconfigurator.utils.BundleInfo bi : (List<org.eclipse.equinox.internal.simpleconfigurator.utils.BundleInfo>) SimpleConfiguratorUtils
 					.readConfiguration(input, infoFile.toURI())) {
 				String name = bi.getSymbolicName();
 				if (name != null) {
-					result.put(name, String.format("%d:%b", bi.getStartLevel(), bi.isMarkedAsStarted()));
+					result.put(name, BundleStart
+							.fromBundle(new BundleInfo(bi.getLocation(), bi.getStartLevel(), bi.isMarkedAsStarted())));
 				}
 			}
-		} catch (Throwable e) {
-			FileUtil.safeClose(input);
 		}
 		return result;
 	}
 
-	public Map<String, String> getRunlevelsMap() {
-		Map<String, String> result = new HashMap<String, String>();
+	private Map<String, BundleStart> getRunlevelsMap() throws IOException {
+		Map<String, BundleStart> result = new HashMap<>();
 		String osgiBundles = getConfigIniProperty(OSGI_BUNDLES);
-		if (osgiBundles == null) {
-			return result;
-		}
-
-		if (osgiBundles.contains(SIMPLECONFIGURATOR)) {
-			return getRunlevelsFromSimpleConfigurator();
-		}
-
-		// AUT uses bundles specified in osgiBundlesProperty
-		StringTokenizer tokenizer = new StringTokenizer(osgiBundles, ","); //$NON-NLS-1$
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			int index = token.indexOf('@');
-			String id = index != -1 ? token.substring(0, index) : token;
-			String tk = token.substring(index + 1);
-			if (tk.indexOf(":") == -1) {
-				tk = tk + ":default";
+		if (osgiBundles != null) {
+			if (osgiBundles.contains(SIMPLECONFIGURATOR)) {
+				result.putAll(getRunlevelsFromSimpleConfigurator());
+			} else {
+				// AUT uses bundles specified in osgiBundlesProperty
+				StringTokenizer tokenizer = new StringTokenizer(osgiBundles, ","); //$NON-NLS-1$
+				while (tokenizer.hasMoreTokens()) {
+					String token = tokenizer.nextToken();
+					int index = token.indexOf('@');
+					if (index != -1) {
+						String id = token.substring(0, index);
+						String tk = token.substring(index + 1);
+						result.put(id, BundleStart.fromOsgiString(tk));
+					}
+				}
 			}
-			result.put(id, tk);
 		}
+
+		AutInstall install = getAutInstall();
+		
+		if (install != null) {
+			result.putAll(install.configIniBundles());
+		}
+
 		return result;
 	}
 
@@ -1692,8 +1664,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(eclipseProduct));
+			try (FileInputStream is = new FileInputStream(eclipseProduct)) {
+				props.load(is);
 				String appId = props.getProperty(PRODUCT_SITE_ID);
 				if (appId == null || appId.trim().length() == 0)
 					appId = ECLIPSE;
@@ -1819,4 +1791,36 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			Q7ExtLaunchingPlugin.getDefault().info(message);
 		}
 	}
+	
+	private void setStartLevels() throws IOException {
+		Map<String, BundleStart> levelMap = getRunlevelsMap();
+		
+		if (levelMap.isEmpty()) {
+			warning("No start levels are configured");
+		}
+		if (!target.isResolved()) {
+			throw new IllegalStateException("Target definition is unresolved");
+		}
+		
+		for (TargetBundle bundle : target.getBundles()) {
+			BundleStart bundleLevels = levelMap.get(bundle.getBundleInfo().getSymbolicName());
+			if (bundleLevels != null) {
+				try {
+					bundle.getBundleInfo().setStartLevel(bundleLevels.level);
+					bundle.getBundleInfo().setMarkedAsStarted(bundleLevels.autoStart);
+				} catch (RuntimeException e) {
+					throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundle.getBundleInfo().getSymbolicName(), bundleLevels), e);
+				}
+			}
+		}
+	}
+
+	private void warning(String message) {
+		status.add(Status.warning(message));
+	}
+	
+	private boolean isBad(IStatus status) {
+		return status.matches(IStatus.CANCEL | IStatus.ERROR);
+	}
+
 }
