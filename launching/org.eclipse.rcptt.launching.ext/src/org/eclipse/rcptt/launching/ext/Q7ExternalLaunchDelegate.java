@@ -688,7 +688,7 @@ public class Q7ExternalLaunchDelegate extends
 		public void addInstallationBundle(IPluginModelBase base,
 				BundleStart hint) {
 			String id = id(base);
-			idsToSkip.add(id);
+//			idsToSkip.add(id);
 			put(base, getStartInfo(base, hint));
 		}
 
@@ -723,8 +723,10 @@ public class Q7ExternalLaunchDelegate extends
 			if (id.equals(AJConstants.AJ_HOOK) || id.equals(AJConstants.AJ_RT)
 					|| id.equals(AJConstants.HOOK)) {
 				// remove previous bundles with specified id
-				Iterables.removeIf(plugins.entrySet(), isEqualsId(id));
-				latestVersions.remove(id);
+				IPluginModelBase existing = latestVersions.remove(id);
+				if (existing != null) {
+					plugins.keySet().remove(existing);
+				}
 			}
 
 			plugins.put(plugin, start);
@@ -732,7 +734,10 @@ public class Q7ExternalLaunchDelegate extends
 
 			if (existing == null
 					|| isGreater(version(plugin), version(existing))) {
-				latestVersions.put(id, plugin);
+				IPluginModelBase previous = latestVersions.put(id, plugin);
+				if (previous != null && plugin.getBundleDescription().isSingleton()) {
+					plugins.remove(previous);
+				}
 			}
 		}
 
