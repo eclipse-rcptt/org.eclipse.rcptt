@@ -622,7 +622,7 @@ public class Q7ExternalLaunchDelegate extends
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getQ7Target(), target.getTarget(), subm.split(50), configuration);
+		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getTarget(), subm.split(50));
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
@@ -712,19 +712,19 @@ public class Q7ExternalLaunchDelegate extends
 					plugins.keySet().remove(existing);
 				}
 			}
-
-			BundleStart alreadyPresent = plugins.put(plugin, start);
-			if (alreadyPresent != null) {
-				// Exact match found, plugin is not updated skip following updates and removals
-				return;
-			}
+			
 			IPluginModelBase existing = latestVersions.get(id);
-			if (existing == null
-					|| isGreater(version(plugin), version(existing))) {
-				IPluginModelBase previous = latestVersions.put(id, plugin);
-				if (previous != null && plugin.getBundleDescription().isSingleton()) {
-					plugins.remove(previous);
+			boolean newer = existing == null || isGreater(version(plugin), version(existing)); 
+			if (plugin.getBundleDescription().isSingleton()) {
+				if (!newer) {
+					return;
 				}
+				plugins.remove(existing);
+			}
+
+			plugins.put(plugin, start);
+			if (newer) {
+				latestVersions.put(id, plugin);
 			}
 		}
 		
@@ -748,8 +748,7 @@ public class Q7ExternalLaunchDelegate extends
 		return target.getInstall().configIniBundles().containsKey(TargetPlatformHelper.SIMPLECONFIGURATOR);
 	}
 
-	public static BundlesToLaunch collectBundlesCheck(Q7Target target, ITargetDefinition targetDefinition, IProgressMonitor monitor,
-			ILaunchConfiguration configuration) {
+	public static BundlesToLaunch collectBundlesCheck(ITargetDefinition targetDefinition, IProgressMonitor monitor) {
 		return collectBundles(targetDefinition, monitor);
 	}
 

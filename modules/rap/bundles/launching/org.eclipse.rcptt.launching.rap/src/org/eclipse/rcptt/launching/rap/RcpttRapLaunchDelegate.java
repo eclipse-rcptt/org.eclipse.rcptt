@@ -62,8 +62,6 @@ import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IFragmentModel;
 import org.eclipse.pde.core.plugin.IPluginBase;
@@ -220,8 +218,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundlesCheck(target.getQ7Target(),
-				target.getTarget(), subm.newChild(50), configuration);
+		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundlesCheck(target.getTarget(),
+				subm.newChild(50));
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
