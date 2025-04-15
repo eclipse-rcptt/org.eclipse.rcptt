@@ -21,11 +21,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -45,10 +47,12 @@ import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.osgi.framework.FrameworkUtil;
 
 public class Q7ExternalLaunchDelegateTest {
 	private final String NAME = getClass().getName();
@@ -147,8 +151,15 @@ public class Q7ExternalLaunchDelegateTest {
 		case Platform.OS_WIN32 -> Path.of("win32/win32/x86_64/rcptt");
 		default -> throw new IllegalStateException();
 		};
-		Path originalAut = Path.of(
-				"/Users/vasiligulevich/git/org.eclipse.rcptt/repository/full/target/products/org.eclipse.rcptt.platform.product").resolve(subPath);
+		
+		File bundleFileLocation = FileLocator.getBundleFileLocation(FrameworkUtil.getBundle(getClass())).orElseThrow();
+		// Sources location when started from PDE
+		Path originalAut = bundleFileLocation.toPath().getParent().getParent().resolve("repository/full/target/products/org.eclipse.rcptt.platform.product").resolve(subPath);
+		if (!Files.isDirectory(originalAut)) {
+			// Tycho Surefire has a different bundle path
+			originalAut = bundleFileLocation.toPath().getParent().getParent().getParent().getParent().resolve("repository/full/target/products/org.eclipse.rcptt.platform.product").resolve(subPath);
+		}
+		assertTrue(originalAut.toString(), Files.isDirectory(originalAut));
 		File autCopy = temporaryFolder.newFolder("aut");
 		FileUtil.copyFiles(originalAut.toFile(), autCopy);
 		return autCopy.toPath();
