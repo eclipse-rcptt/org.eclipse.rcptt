@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-
 import org.eclipse.rcptt.launching.Aut;
 
 /**
@@ -59,14 +57,8 @@ public class AutStorage {
 	}
 
 	public synchronized BaseAut getByLaunch(ILaunchConfiguration config) {
-		return byConfig.get(shell(config));
-	}
-
-	private ILaunchConfiguration shell(ILaunchConfiguration config) {
-		if (config instanceof ILaunchConfigurationWorkingCopy) {
-			config = ((ILaunchConfigurationWorkingCopy) config).getOriginal();
-		}
-		return config;
+		BaseAut result = byConfig.get(config);
+		return result;
 	}
 
 	private List<BaseAut> auts = new ArrayList<BaseAut>();

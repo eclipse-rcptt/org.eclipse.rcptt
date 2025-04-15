@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.launching.ext;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.AJConstants.OSGI_FRAMEWORK_EXTENSIONS;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 import static org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils.id;
@@ -33,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -626,7 +626,6 @@ public class Q7ExternalLaunchDelegate extends
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 		checkBundles(bundlesToLaunch);
 		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -648,32 +647,6 @@ public class Q7ExternalLaunchDelegate extends
 		log(Status.info(message));
 	}
 
-	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
-		String path = target.getInstallLocation().getAbsolutePath();
-		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
-		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();
-		for (Entry<IPluginModelBase, String> entry : fModels.entrySet()) {
-			IPluginModelBase model = entry.getKey();
-			UniquePluginModel uniqueModel = new UniquePluginModel(model);
-			IPluginModelBase secondModel = cache.get(uniqueModel);
-			if (secondModel != null) {
-				if (secondModel.getInstallLocation().contains(path)) {
-					keysForRemove.add(secondModel);
-					continue;
-				} else {
-					keysForRemove.add(model);
-					continue;
-				}
-
-			} else {
-				cache.put(uniqueModel, model);
-			}
-		}
-		for (IPluginModelBase key : keysForRemove) {
-			fModels.remove(key);
-		}
-	}
-	
 	public static class BundlesToLaunchCollector {
 
 		public void addInstallationBundle(IPluginModelBase base,
@@ -698,24 +671,14 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		private void put(IPluginModelBase plugin, BundleStart start) {
-
-			/**
-			 * Check for aspectj special plugins, they should be one version
-			 * only.
-			 **/
 			final String id = id(plugin);
-			if (id.equals(AJConstants.AJ_HOOK) || id.equals(AJConstants.AJ_RT)
-					|| id.equals(AJConstants.HOOK)) {
-				// remove previous bundles with specified id
-				IPluginModelBase existing = latestVersions.remove(id);
-				if (existing != null) {
-					plugins.keySet().remove(existing);
-				}
+			if (!uniqueModels.add(new UniquePluginModel(plugin))) {
+				return;
 			}
 			
 			IPluginModelBase existing = latestVersions.get(id);
 			boolean newer = existing == null || isGreater(version(plugin), version(existing)); 
-			if (plugin.getBundleDescription().isSingleton()) {
+			if (isSingleton(plugin)) {
 				if (!newer) {
 					return;
 				}
@@ -728,8 +691,19 @@ public class Q7ExternalLaunchDelegate extends
 			}
 		}
 		
-		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<IPluginModelBase, BundleStart>();
-		private final Map<String, IPluginModelBase> latestVersions = new HashMap<String, IPluginModelBase>();
+		private static boolean isSingleton(IPluginModelBase plugin) {
+			/**
+			 * Check for aspectj special plugins, they should be one version
+			 * only.
+			 **/
+			final String id = id(plugin);
+			return plugin.getBundleDescription().isSingleton() || id.equals(AJConstants.AJ_HOOK) || id.equals(AJConstants.AJ_RT)
+					|| id.equals(AJConstants.HOOK);
+		}
+		
+		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<>();
+		private final Map<String, IPluginModelBase> latestVersions = new HashMap<>();
+		private final Set<UniquePluginModel> uniqueModels = new HashSet<>();
 	}
 
 	public static boolean isQ7BundleContainer(ITargetLocation container) {
@@ -755,20 +729,14 @@ public class Q7ExternalLaunchDelegate extends
 	public static BundlesToLaunch collectBundles(ITargetDefinition targetDefinition, IProgressMonitor monitor) {
 		BundlesToLaunchCollector collector = new BundlesToLaunchCollector();
 		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", 2000);
-
-		TargetBundle[] bundles = targetDefinition.getAllBundles();
-		final SubMonitor plugins = SubMonitor.convert(subm.split(2000), bundles.length);
-		for (TargetBundle bundle : bundles) {
-			collector.addPluginBundle(bundle, plugins.split(1));
-		}
-		plugins.done();
-
 		try {
+			TargetBundle[] bundles = targetDefinition.getAllBundles();
+			for (TargetBundle bundle : bundles) {
+				collector.addPluginBundle(bundle, subm.split(1));
+			}
 			return new BundlesToLaunch(collector.plugins, collector.latestVersions);
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			done(monitor);
 		}
 	}
 

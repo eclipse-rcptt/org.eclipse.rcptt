@@ -36,79 +36,55 @@
 
    <plugin
          id="org.eclipse.rcptt.launching"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.common"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.ext"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.remote"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.injection"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.util"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.p2utils"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.core.launching"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.multiaut"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
+
+   <plugin
+         id="org.eclipse.osgi.compatibility.state"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.jdt.launching.macosx"
+         os="macosx"
+         version="0.0.0"/>
 
 </feature>

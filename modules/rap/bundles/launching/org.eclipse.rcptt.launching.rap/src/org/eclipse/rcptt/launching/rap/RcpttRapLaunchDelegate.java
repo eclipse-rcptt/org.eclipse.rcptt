@@ -223,7 +223,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
-		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 
 		setDelegateFields(this, bundlesToLaunch.fModels,  Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 

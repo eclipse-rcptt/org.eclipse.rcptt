@@ -38,6 +38,12 @@
 									<id>jakarta.annotation-api</id>
 									<versionRange>1.3.5</versionRange>
 								</requirement>
+								<requirement>
+									<!-- Tycho 2.7.5 surefire JUnit4 support imports javax.annotation package, but fails to add it to dependencies -->
+									<type>eclipse-feature</type>
+									<id>org.eclipse.rcptt.launching</id>
+									<versionRange>0.0.0</versionRange>
+								</requirement>
 							</extraRequirements>
 						</dependency-resolution>
 					</configuration>
