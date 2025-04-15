@@ -713,9 +713,12 @@ public class Q7ExternalLaunchDelegate extends
 				}
 			}
 
-			plugins.put(plugin, start);
+			BundleStart alreadyPresent = plugins.put(plugin, start);
+			if (alreadyPresent != null) {
+				// Exact match found, plugin is not updated skip following updates and removals
+				return;
+			}
 			IPluginModelBase existing = latestVersions.get(id);
-
 			if (existing == null
 					|| isGreater(version(plugin), version(existing))) {
 				IPluginModelBase previous = latestVersions.put(id, plugin);
