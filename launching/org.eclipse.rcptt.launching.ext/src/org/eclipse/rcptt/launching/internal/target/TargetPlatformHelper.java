@@ -172,20 +172,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return status;
 	}
 
-	@Deprecated
-	public String getErrorMessage() {
-		return getNonMultiStatusMessage(getStatus());
-	}
-
-	public String getWarningMessage() {
-		if (target != null) {
-			IStatus bundleStatus = getBundleWarningStatus();
-			return getNonMultiStatusMessage(bundleStatus);
-		}
-		return null;
-	}
-
-	public IStatus getBundleStatus() {
+	private IStatus getBundleStatus() {
 		ITargetLocation[] containers = getBundleContainers();
 		if (containers != null) {
 			// Check if the containers have any resolution problems
@@ -234,69 +221,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return result;
 		}
 		return Status.OK_STATUS;
-	}
-
-	public IStatus getBundleWarningStatus() {
-		ITargetLocation[] containers = getBundleContainers();
-		if (containers != null) {
-			// Check if the containers have any resolution problems
-			MultiStatus result = new MultiStatus(
-					PDECore.PLUGIN_ID,
-					0,
-					org.eclipse.pde.internal.core.target.Messages.TargetDefinition_5,
-					null);
-
-			// Check if any of the included bundles have problems
-			// build status from bundle list
-			TargetBundle[] bundles = target.getBundles();
-			for (int i = 0; i < bundles.length; i++) {
-				TargetBundle bundle = bundles[i];
-				IStatus status = bundle.getStatus();
-				if (!status.isOK()) {
-					BundleInfo info = bundle.getBundleInfo();
-					URI uri = info.getLocation();
-					if (uri != null) {
-						File file = new File(uri);
-						if (!file.exists()) {
-							// Skip problem of nonexistent file.
-							IStatus st = new Status(IStatus.WARNING,
-									status.getPlugin(), status.getMessage(),
-									status.getException());
-							result.add(st);
-						}
-					}
-
-				}
-			}
-
-			if (result.isOK()) {
-				// Return generic ok status instead of problem multi-status with
-				// no children
-				return Status.OK_STATUS;
-			}
-			return result;
-		}
-		return Status.OK_STATUS;
-	}
-
-	private String getNonMultiStatusMessage(IStatus st) {
-		if (st != null && st.isMultiStatus()) {
-			StringBuilder buf = new StringBuilder();
-			IStatus[] children = st.getChildren();
-			for (IStatus iStatus : children) {
-				if (iStatus.isMultiStatus()) {
-					String msg = getNonMultiStatusMessage(iStatus);
-					if (msg != null) {
-						buf.append(msg).append('\n');
-					}
-				}
-				if (!iStatus.isOK()) {
-					buf.append(iStatus.getMessage()).append('\n');
-				}
-			}
-			return buf.toString();
-		}
-		return st == null ? "" : st.getMessage();
 	}
 
 	private void initialize() {
@@ -721,7 +645,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return product;
 	}
 
-	public ITargetLocation[] getBundleContainers() {
+	private ITargetLocation[] getBundleContainers() {
 		if (target == null) {
 			return new ITargetLocation[0];
 		}
@@ -908,7 +832,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		return null;
 	}
-
+	
 	private List<File> getAppIniFiles() {
 		List<File> iniFiles = new ArrayList<File>();
 		if (getInstanceContainer() == null) {
