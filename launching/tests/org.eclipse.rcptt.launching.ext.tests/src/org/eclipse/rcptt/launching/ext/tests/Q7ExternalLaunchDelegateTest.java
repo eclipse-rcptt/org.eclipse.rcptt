@@ -13,21 +13,19 @@ package org.eclipse.rcptt.launching.ext.tests;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -44,15 +42,14 @@ import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
+import org.eclipse.rcptt.launching.ext.tests.DownloadCache.Request;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.osgi.framework.FrameworkUtil;
 
 public class Q7ExternalLaunchDelegateTest {
 	private final String NAME = getClass().getName();
@@ -144,25 +141,39 @@ public class Q7ExternalLaunchDelegateTest {
 		return Files.readString(infoPath, StandardCharsets.UTF_8);
 	}
 
-	private Path expandAut() throws IOException {
-		Path subPath = switch (Platform.getOS()) {
-		case Platform.OS_MACOSX -> Path.of("macosx/cocoa/aarch64/rcptt.app");
-		case Platform.OS_LINUX -> Path.of("linux/gtk/x86_64/rcptt");
-		case Platform.OS_WIN32 -> Path.of("win32/win32/x86_64/rcptt");
+	private final static DownloadCache CACHE = new DownloadCache(DownloadCache.DEFAULT_CACHE_ROOT);
+	private Path expandAut() throws IOException, InterruptedException {
+		Request request = switch (Platform.getOS()) {
+		case Platform.OS_MACOSX -> request("https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-macosx-cocoa-aarch64.dmg", "77ae164c4b11d18f162b1ff97b088865469b2267033d45169e4f7f14694767bb98a25a3697b33233ed8bc5bb17eb18f214c59913581938f757887ff8bdef960b");
+		case Platform.OS_LINUX -> request("https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-win32-x86_64.zip", "e90eb939cef8caada36a058bbed3a3b14c53e496f5feb439abc2e53332a4c71d3d43c02b8d202d88356eb318395551bce32db9d8e5e2fd1fc9e152e378dc325f");
+		case Platform.OS_WIN32 -> request("https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-linux-gtk-x86_64.tar.gz", "973c94a0a029c29d717823a53c3a65f99fa53d51f605872c5dd854620e16cd4cb2c2ff8a5892cd550a70ab19e1a0a0d2e792661e936bd3d2bef4532bc533048b");
 		default -> throw new IllegalStateException();
 		};
-		
-		File bundleFileLocation = FileLocator.getBundleFileLocation(FrameworkUtil.getBundle(getClass())).orElseThrow();
-		// Sources location when started from PDE
-		Path originalAut = bundleFileLocation.toPath().getParent().getParent().resolve("repository/full/target/products/org.eclipse.rcptt.platform.product").resolve(subPath);
-		if (!Files.isDirectory(originalAut)) {
-			// Tycho Surefire has a different bundle path
-			originalAut = bundleFileLocation.toPath().getParent().getParent().getParent().getParent().resolve("repository/full/target/products/org.eclipse.rcptt.platform.product").resolve(subPath);
+		Path distribution = CACHE.download(request);
+		Path installation = temporaryFolder.newFolder("extracted").toPath();
+		return extractApplicationTo(distribution, installation);
+	}
+	
+	private Path extractApplicationTo(Path archive, Path targetDirectory) throws IOException, InterruptedException {
+		String name = archive.getFileName().toString();
+		if (name.endsWith(".zip")) {
+			FileUtil.unzip(archive.toFile(), targetDirectory.toFile());
+			return targetDirectory;
+		} else if (name.endsWith(".dmg")) {
+			FileUtil.extractDmg(archive, targetDirectory);
+			Path result = targetDirectory.resolve("Eclipse.app");
+			Path config = result.resolve("Contents/Eclipse/configuration/config.ini");
+			if (!Files.isRegularFile(config)) {
+				throw new AssertionError(config.toString());
+			}
+			return result;
+		} else {
+			throw new IllegalArgumentException(archive.toString());
 		}
-		assertTrue(originalAut.toString(), Files.isDirectory(originalAut));
-		File autCopy = temporaryFolder.newFolder("aut");
-		FileUtil.copyFiles(originalAut.toFile(), autCopy);
-		return autCopy.toPath();
+	}
+
+	private DownloadCache.Request request(String uri, String sha512) {
+		return new Request(URI.create(uri), sha512);
 	}
 
 	private Command parse(String input) throws CoreException {
