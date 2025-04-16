@@ -8,7 +8,7 @@
  * Contributors:
  *     Xored Software Inc - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.eclipse.rcptt.launching.ext.tests;
+package org.eclipse.rcptt.launching.ext;
 
 import java.io.Closeable;
 import java.io.IOException;

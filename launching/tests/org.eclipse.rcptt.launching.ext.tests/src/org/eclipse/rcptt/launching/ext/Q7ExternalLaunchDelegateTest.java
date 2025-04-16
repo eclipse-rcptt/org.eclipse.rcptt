@@ -8,7 +8,7 @@
  * Contributors:
  *     Xored Software Inc - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.eclipse.rcptt.launching.ext.tests;
+package org.eclipse.rcptt.launching.ext;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -39,8 +38,7 @@ import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutManager;
-import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
+import org.eclipse.rcptt.launching.ext.tests.DownloadCache;
 import org.eclipse.rcptt.launching.ext.tests.DownloadCache.Request;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
@@ -61,6 +59,7 @@ public class Q7ExternalLaunchDelegateTest {
 	
 	private final ConsoleCapture consoleCapture = new ConsoleCapture();
 	
+	@SuppressWarnings("resource")
 	@Before
 	public void before() throws CoreException, IOException {
 		Q7TargetPlatformManager.delete(getClass().getName());
@@ -107,6 +106,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	}
 
+	@SuppressWarnings("resource")
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
 		Aut aut = createAut(installDir, commandLineArguments);
@@ -160,7 +160,7 @@ public class Q7ExternalLaunchDelegateTest {
 			FileUtil.unzip(archive.toFile(), targetDirectory.toFile());
 			return targetDirectory;
 		} else if (name.endsWith(".dmg")) {
-			FileUtil.extractDmg(archive, targetDirectory);
+			DmgExtract.extract(archive, targetDirectory);
 			Path result = targetDirectory.resolve("Eclipse.app");
 			Path config = result.resolve("Contents/Eclipse/configuration/config.ini");
 			if (!Files.isRegularFile(config)) {

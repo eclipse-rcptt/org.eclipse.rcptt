@@ -10,7 +10,7 @@
  * Contributors:
  *   Xored Software Inc - initial API and implementation
  ********************************************************************************/
-package org.eclipse.rcptt.util;
+package org.eclipse.rcptt.launching.ext;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 

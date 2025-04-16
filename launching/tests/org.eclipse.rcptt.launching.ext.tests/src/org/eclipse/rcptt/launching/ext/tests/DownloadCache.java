@@ -68,7 +68,7 @@ public final class DownloadCache implements Closeable {
 			return target;
 		}
 		if (Files.exists(tmp)) {
-			throw new IllegalStateException("Concurrent access to " + tmp);
+			throw new IllegalStateException("Concurrent access to " + tmp + " while downloading " + request.uri + ". Concurrent downloads are not supported yet.");
 		}
 		HttpRequest httpsRequest = HttpRequest.newBuilder()
 				.uri(request.uri())
@@ -91,6 +91,7 @@ public final class DownloadCache implements Closeable {
 			return target;
 		} catch (Throwable e) {
 			Files.deleteIfExists(tmp);
+			Files.deleteIfExists(target);
 			Files.delete(target.getParent());
 			throw e;
 		}

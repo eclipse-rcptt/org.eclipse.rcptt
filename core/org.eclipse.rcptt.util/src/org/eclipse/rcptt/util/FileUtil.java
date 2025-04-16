@@ -20,7 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -359,10 +358,6 @@ public class FileUtil {
 		}
 		z.close();
 		return filesCount;
-	}
-	
-	public static void extractDmg(Path dmgFile, Path targetDirectory) throws IOException, InterruptedException {
-		DmgExtract.extract(dmgFile, targetDirectory);
 	}
 
 	private static File resolve(File base, String name) {
