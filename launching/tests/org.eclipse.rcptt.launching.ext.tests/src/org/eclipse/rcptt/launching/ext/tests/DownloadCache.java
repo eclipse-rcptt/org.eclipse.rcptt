@@ -15,6 +15,7 @@ package org.eclipse.rcptt.launching.ext.tests;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -99,17 +100,16 @@ public final class DownloadCache implements Closeable {
 	
     private static String computeSHA512(Path input) throws IOException {
         try (InputStream fis = Files.newInputStream(input)) {
-        	MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+			MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
 
-            // Use DigestInputStream for automatic digest updating
-            try (DigestInputStream dis = new DigestInputStream(fis, sha512)) {
-                byte[] buffer = new byte[8192]; // 8KB buffer size
-                while (dis.read(buffer) != -1) {
-                    // Digest updated automatically by DigestInputStream
-                }
-            }
+			// Use DigestInputStream for automatic digest updating
+			try (DigestInputStream dis = new DigestInputStream(fis, sha512);
+					OutputStream nos = OutputStream.nullOutputStream()) {
+				// Digest updated automatically by DigestInputStream
+				dis.transferTo(nos);
+			}
 
-            return HexFormat.of().formatHex(sha512.digest());
+			return HexFormat.of().formatHex(sha512.digest());
         } catch(NoSuchAlgorithmException e) {
         	throw new IOException(e);
         }
