@@ -21,7 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -223,13 +225,43 @@ public class Q7ExternalLaunchDelegateTest {
 				if (entry.isDirectory()) {
 					if (!isDirectory(outputFile)) {
 						Files.createDirectory(outputFile);
+						applyUnixPermissions(entry, outputFile);
 					}
 				} else {
+					// Missing directory entries protection
+					Files.createDirectories(outputFile.getParent());
 					try (OutputStream out = Files.newOutputStream(outputFile)) {
 						Files.copy(tarInput, outputFile, StandardCopyOption.REPLACE_EXISTING);
 					}
+					applyUnixPermissions(entry, outputFile);
 				}
 			}
 		}
+	}
+
+	private static void applyUnixPermissions(TarArchiveEntry entry, Path path) throws IOException {
+	    int mode = entry.getMode();
+	    Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+
+	    // Owner
+	    if ((mode & 0400) != 0) perms.add(PosixFilePermission.OWNER_READ);
+	    if ((mode & 0200) != 0) perms.add(PosixFilePermission.OWNER_WRITE);
+	    if ((mode & 0100) != 0) perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+	    // Group
+	    if ((mode & 0040) != 0) perms.add(PosixFilePermission.GROUP_READ);
+	    if ((mode & 0020) != 0) perms.add(PosixFilePermission.GROUP_WRITE);
+	    if ((mode & 0010) != 0) perms.add(PosixFilePermission.GROUP_EXECUTE);
+
+	    // Others
+	    if ((mode & 0004) != 0) perms.add(PosixFilePermission.OTHERS_READ);
+	    if ((mode & 0002) != 0) perms.add(PosixFilePermission.OTHERS_WRITE);
+	    if ((mode & 0001) != 0) perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+	    try {
+	        Files.setPosixFilePermissions(path, perms);
+	    } catch (UnsupportedOperationException e) {
+	        // File system doesn’t support POSIX — silently skip
+	    }
 	}
 }
