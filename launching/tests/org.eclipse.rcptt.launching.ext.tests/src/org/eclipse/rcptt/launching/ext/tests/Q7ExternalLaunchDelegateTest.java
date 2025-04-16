@@ -35,7 +35,6 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.parser.EclCoreParser;
-import org.eclipse.rcptt.internal.launching.aut.ConsoleOutputListener;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
@@ -51,8 +50,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.google.common.io.Closer;
+
 public class Q7ExternalLaunchDelegateTest {
 	private final String NAME = getClass().getName();
+	private final Closer closer = Closer.create();
 	
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -65,44 +67,24 @@ public class Q7ExternalLaunchDelegateTest {
 		AutManager.INSTANCE.getAuts().stream().filter(aut -> NAME.equals(aut.getName())).forEach(Aut::delete);
 		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
 		JavaRuntime.setDefaultVMInstall(install.install, null);
+		closer.register(consoleCapture);
 	}
 	
 	@After
 	public void after() throws IOException {
-		consoleCapture.close();
-		String output = consoleCapture.getOutput();
-		assertFalse(output, output.contains("Unresolved requirement"));
-		System.out.println("AUT's output:");
-		System.out.println(output);
+		closer.close();
 	}
 	
 	@Test
-	public void aspectjIsInjected() throws CoreException, IOException, InterruptedException {
+	public void runtimeIsInjected() throws CoreException, IOException, InterruptedException {
 		Path installDir = expandAut();
 		assertFalse(readBundlesInfo(installDir).contains("org.aspectj.weaver"));
-		String result = (String) executeCommandInAnInstallation(installDir, Collections.emptyList(), "invoke-static -pluginId \"org.eclipse.core.runtime\" -className org.eclipse.core.runtime.Platform -methodName getBundle -args \"org.aspectj.weaver\" | invoke toString");
-		assertTrue(result, result.startsWith("org.aspectj.weaver_"));
-	}
-
-	private Object executeCommandInAnInstallation(Path installDir, List<String> commandLineArguments, String command)
-			throws CoreException, IOException, InterruptedException {
-		Aut aut = createAut(installDir, commandLineArguments);
-		ConsoleOutputListener outputListener = new ConsoleOutputListener();
-		try {
-			Command failingCommand = parse(command);
-			AutLaunch launch = aut.launch(null);
-			outputListener.startLogging(launch);
-			return launch.execute(failingCommand).toString();
-		} finally {
-			outputListener.stopLogging();
-			aut.delete();
-		}
-	}
-	
-	@Test
-	public void loggingIsNotDuplicated() throws CoreException, IOException, InterruptedException {
-		Path installDir = expandAut();
-		String result = (String) executeCommandInAnInstallation(installDir, List.of("-consoleLog"), "invoke-static -pluginId \"org.eclipse.ui.workbench\" -className \"org.eclipse.ui.internal.ConfigurationInfo\" -methodName \"getSystemSummary\"");
+		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		assertPluginIsInstalled(launch, "org.aspectj.weaver");
+		assertPluginIsInstalled(launch, "com.ibm.icu"); // Present in JDT, should not be eliminated by RCPTT
+		
+		Command command = parse("invoke-static -pluginId \"org.eclipse.ui.workbench\" -className \"org.eclipse.ui.internal.ConfigurationInfo\" -methodName \"getSystemSummary\"");
+		String result = launch.execute(command).toString();
 		Pattern pattern = Pattern.compile("^org.eclipse.rcptt.logging \\(.*$", Pattern.MULTILINE);
 		Matcher matcher = pattern.matcher(result);
 		ArrayList<String> lines = new ArrayList<>();
@@ -111,11 +93,29 @@ public class Q7ExternalLaunchDelegateTest {
 		}
 		
 		Set<String> unique = Set.copyOf(lines);
-		
+		assertFalse(lines.isEmpty());
 		assertTrue(lines.toString(), lines.size() == unique.size());
+		
+		String output = consoleCapture.getOutput();
+		assertFalse(output+"\nSystemSummary:\n" + result, output.contains("Unresolved requirement"));
 	}
 
+	private void assertPluginIsInstalled(AutLaunch aut, String symbolicName) throws CoreException, InterruptedException {
+		Command command = parse("invoke-static -pluginId \"org.eclipse.core.runtime\" -className org.eclipse.core.runtime.Platform -methodName getBundle -args \""+symbolicName+"\" | invoke toString");
+		String result = aut.execute(command).toString();
+		assertTrue(result, result.startsWith(symbolicName+ "_"));
+
+	}
+
+	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
+			throws CoreException, IOException, InterruptedException {
+		Aut aut = createAut(installDir, commandLineArguments);
+		closer.register(aut::delete);
+		return aut.launch(null);			
+	}
 	
+	
+		
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {
 		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(), new NullProgressMonitor());
 		target.setTargetName(NAME);
