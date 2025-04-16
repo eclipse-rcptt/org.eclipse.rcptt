@@ -91,6 +91,7 @@
             <iu><id>org.eclipse.emf.transaction.feature.group</id></iu>
             <iu><id>org.eclipse.emf.validation.feature.group</id></iu>
             <iu><id>org.eclipse.emf.feature.group</id></iu>
+            <iu><id>com.ibm.icu</id></iu>
 	  </ius>
 	</configuration>
       </plugin>
