@@ -107,7 +107,9 @@ public class Q7ExternalLaunchDelegateTest {
 		assertTrue(lines.toString(), lines.size() == unique.size());
 
 		String output = consoleCapture.getOutput();
-		assertFalse(output + "\nSystemSummary:\n" + result, output.contains("Unresolved requirement"));
+		String message = output + "\nSystemSummary:\n" + result;
+		assertFalse(message, output.contains("Unresolved requirement"));
+		assertFalse(message, output.contains("org.osgi.framework.BundleException:"));
 	}
 	
 	@Test
