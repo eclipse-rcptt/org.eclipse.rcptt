@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.ext;
 
+import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -107,6 +108,33 @@ public class Q7ExternalLaunchDelegateTest {
 		String output = consoleCapture.getOutput();
 		assertFalse(output + "\nSystemSummary:\n" + result, output.contains("Unresolved requirement"));
 	}
+	
+	@Test
+	public void surviveRestart() throws InterruptedException, CoreException, IOException {
+		Path installDir = expandAut();
+		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		launch.ping();
+		Command command = parse("restart-aut");
+		launch.execute(command);
+		for (;;) {
+			try {
+				launch.ping();
+				Thread.yield();
+			} catch (CoreException e) {
+				break;
+			}
+		}
+		for (long stop = currentTimeMillis() + 100000; currentTimeMillis() < stop; ) {
+			try {
+				launch.ping();
+				Thread.yield();
+				break;
+			} catch (CoreException e) {
+				// Expected for a while
+			}
+		}
+		launch.ping();
+	}
 
 	private void assertPluginIsInstalled(AutLaunch aut, String symbolicName)
 			throws CoreException, InterruptedException {
@@ -121,9 +149,14 @@ public class Q7ExternalLaunchDelegateTest {
 	@SuppressWarnings("resource")
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
-		Aut aut = createAut(installDir, commandLineArguments);
-		closer.register(aut::delete);
-		return aut.launch(null);
+		try {
+			Aut aut = createAut(installDir, commandLineArguments);
+			closer.register(aut::delete);
+			return aut.launch(null);
+		} catch (Throwable e) {
+			System.out.println(consoleCapture.getOutput());
+			throw e;
+		}
 	}
 
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {

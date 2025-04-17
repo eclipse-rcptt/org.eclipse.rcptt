@@ -440,12 +440,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			setState(AutLaunchState.RESTART);
 			ILaunchConfiguration launchConfiguration = launch.getLaunchConfiguration();
-			final ILaunchConfigurationWorkingCopy copy;
-			if (launchConfiguration.isWorkingCopy()) {
-				copy = ((ILaunchConfigurationWorkingCopy) launchConfiguration).getOriginal().getWorkingCopy();
-			} else {
-				copy = launchConfiguration.getWorkingCopy();
-			}
+			final ILaunchConfigurationWorkingCopy copy = launchConfiguration.getWorkingCopy();
 			LaunchInfoCache.copyCache(launchConfiguration, copy);
 			LaunchInfoCache.remove(launchConfiguration);
 			// To disable clear area during restart
