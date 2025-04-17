@@ -28,15 +28,30 @@ import com.google.common.io.Closer;
 final class ConsoleCapture implements Closeable {
 	private final StringBuffer buffer = new StringBuffer();
 	private final Closer closer = Closer.create();
-	
-	private final IStreamListener streamListener = new IStreamListener() {			
+	private final StringBuffer tail = new StringBuffer();
+
+	private final IStreamListener streamListener = new IStreamListener() {
 		@Override
 		public void streamAppended(String text, IStreamMonitor monitor) {
 			buffer.append(text);
+			String toPrint = "";
+			synchronized (tail) {
+				tail.append(text);
+				int pos = tail.lastIndexOf("\n");
+				if (pos <= 0) {
+					return;
+				}
+				toPrint = tail.substring(0, pos);
+				tail.delete(0, pos + 1);
+			}
+			
+			for (String line: toPrint.split("\n")) {
+				System.out.print("AUT output: " + line + "\n");
+			}
 		}
 	};
-	
-	private final ILaunchesListener2 launchesListener = new ILaunchesListener2() {	
+
+	private final ILaunchesListener2 launchesListener = new ILaunchesListener2() {
 		@Override
 		public void launchesRemoved(ILaunch[] launches) {
 		}
@@ -47,8 +62,8 @@ final class ConsoleCapture implements Closeable {
 
 		@Override
 		public synchronized void launchesChanged(ILaunch[] launches) {
-			for (ILaunch l: launches) {
-				for (IProcess p: l.getProcesses()) {
+			for (ILaunch l : launches) {
+				for (IProcess p : l.getProcesses()) {
 					capture(p.getStreamsProxy().getOutputStreamMonitor());
 					capture(p.getStreamsProxy().getErrorStreamMonitor());
 				}
@@ -59,24 +74,29 @@ final class ConsoleCapture implements Closeable {
 		public void launchesTerminated(ILaunch[] launches) {
 		}
 	};
-	
+
 	@SuppressWarnings("resource")
 	public ConsoleCapture() {
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 		manager.addLaunchListener(launchesListener);
 		closer.register(() -> manager.removeLaunchListener(launchesListener));
 	}
-	
+
 	public String getOutput() {
 		return buffer.toString();
 	}
-	
+
 	@Override
 	public void close() throws IOException {
-		closer.close();
+		try {
+			closer.close();
+		} finally {
+			System.out.print("AUT output: " + tail);
+		}
 	}
 
 	private final Set<Object> capturing = new HashSet<>();
+
 	@SuppressWarnings("resource")
 	private void capture(IStreamMonitor ouptutMonitor) {
 		if (capturing.add(ouptutMonitor)) {
@@ -85,5 +105,4 @@ final class ConsoleCapture implements Closeable {
 		}
 	}
 
-	
 }

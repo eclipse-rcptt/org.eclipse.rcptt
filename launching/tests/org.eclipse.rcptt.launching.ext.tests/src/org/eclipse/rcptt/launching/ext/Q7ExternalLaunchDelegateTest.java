@@ -37,6 +37,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -107,7 +108,7 @@ public class Q7ExternalLaunchDelegateTest {
 		assertTrue(lines.toString(), lines.size() == unique.size());
 
 		String output = consoleCapture.getOutput();
-		String message = output + "\nSystemSummary:\n" + result;
+		String message = "SystemSummary:\n" + result;
 		assertFalse(message, output.contains("Unresolved requirement"));
 		assertFalse(message, output.contains("org.osgi.framework.BundleException:"));
 	}
@@ -159,14 +160,11 @@ public class Q7ExternalLaunchDelegateTest {
 	@SuppressWarnings("resource")
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
-		try {
-			Aut aut = createAut(installDir, commandLineArguments);
-			closer.register(aut::delete);
-			return aut.launch(null);
-		} catch (Throwable e) {
-			System.out.println(consoleCapture.getOutput());
-			throw e;
-		}
+		Aut aut = createAut(installDir, commandLineArguments);
+		closer.register(aut::delete);
+		AutLaunch launch = aut.launch(null);
+		closer.register(launch::terminate);
+		return launch;
 	}
 
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {
@@ -182,8 +180,13 @@ public class Q7ExternalLaunchDelegateTest {
 		IExecutionEnvironment ee = JavaRuntime.getExecutionEnvironmentsManager().getEnvironment("JavaSE-21");
 		String containerPath = JavaRuntime.newJREContainerPath(ee).toPortableString();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, containerPath);
-
-		return AutManager.INSTANCE.getByLaunch(workingCopy);
+		ILaunchConfiguration saved = workingCopy.doSave();
+		try {
+			return AutManager.INSTANCE.getByLaunch(saved);
+		} catch(Throwable e) {
+			saved.delete();
+			throw e;
+		}
 	}
 
 	private String readBundlesInfo(Path installDir) throws IOException {
