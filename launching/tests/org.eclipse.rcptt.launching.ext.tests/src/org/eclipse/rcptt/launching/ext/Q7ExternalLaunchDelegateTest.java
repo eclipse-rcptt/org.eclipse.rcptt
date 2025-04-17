@@ -14,6 +14,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -116,7 +117,7 @@ public class Q7ExternalLaunchDelegateTest {
 		launch.ping();
 		Command command = parse("restart-aut");
 		launch.execute(command);
-		for (;;) {
+		for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; ) {
 			try {
 				launch.ping();
 				Thread.yield();
@@ -124,7 +125,14 @@ public class Q7ExternalLaunchDelegateTest {
 				break;
 			}
 		}
-		for (long stop = currentTimeMillis() + 100000; currentTimeMillis() < stop; ) {
+		
+		try {
+			launch.ping();
+			fail("AUT should be temporarily unavailable");
+		} catch (CoreException e) {
+		}
+		
+		for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
 			try {
 				launch.ping();
 				Thread.yield();
