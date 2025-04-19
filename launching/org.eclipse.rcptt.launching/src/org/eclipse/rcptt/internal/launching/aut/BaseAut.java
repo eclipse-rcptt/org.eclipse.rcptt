@@ -66,11 +66,12 @@ public class BaseAut implements Aut {
 	public void delete() {
 		ILaunchConfiguration config2 = getConfig();
 		try {
+			LaunchInfoCache.remove(config2);
+			BaseAutManager.INSTANCE.launchConfigurationRemoved(config2);			
 			config2.delete();
 		} catch (CoreException e) {
 			LOG.log(e.getStatus());
 		}
-		BaseAutManager.INSTANCE.launchConfigurationRemoved(config2);
 	}
 
 }

@@ -16,6 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +57,7 @@ import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -70,13 +73,15 @@ public class Q7ExternalLaunchDelegateTest {
 
 	private final ConsoleCapture consoleCapture = new ConsoleCapture();
 
+	@BeforeClass
+	public static void beforeClass() throws CoreException {
+		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
+		JavaRuntime.setDefaultVMInstall(install.install, null);
+	}
 	@SuppressWarnings("resource")
 	@Before
 	public void before() throws CoreException, IOException {
-		Q7TargetPlatformManager.delete(getClass().getName());
 		AutManager.INSTANCE.getAuts().stream().filter(aut -> NAME.equals(aut.getName())).forEach(Aut::delete);
-		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
-		JavaRuntime.setDefaultVMInstall(install.install, null);
 		closer.register(consoleCapture);
 	}
 
@@ -85,6 +90,20 @@ public class Q7ExternalLaunchDelegateTest {
 		closer.close();
 	}
 
+	
+	@Test
+	public void recreateAut() throws IOException, InterruptedException, CoreException {
+		Path installDir1 = expandAut();
+		Path installDir2 = temporaryFolder.newFolder("install2").toPath();
+		FileUtil.copyFiles(installDir1.toFile(), installDir2.toFile());
+		AutLaunch launch = startAut(installDir1, List.of("-consoleLog"));
+		assertNoErrorsInOutput();
+		launch.getAut().delete();
+		FileUtil.deleteFile(new File(temporaryFolder.getRoot(), "extracted"));
+		launch = startAut(installDir2, List.of("-consoleLog"));
+		assertNoErrorsInOutput();
+	}
+	
 	@Test
 	public void runtimeIsInjected() throws CoreException, IOException, InterruptedException {
 		Path installDir = expandAut();
@@ -93,9 +112,7 @@ public class Q7ExternalLaunchDelegateTest {
 		assertPluginIsInstalled(launch, "org.aspectj.weaver");
 		assertPluginIsInstalled(launch, "com.ibm.icu"); // Present in JDT, should not be eliminated by RCPTT
 
-		Command command = parse(
-				"invoke-static -pluginId \"org.eclipse.ui.workbench\" -className \"org.eclipse.ui.internal.ConfigurationInfo\" -methodName \"getSystemSummary\"");
-		String result = launch.execute(command).toString();
+		String result = getSystemSummary(launch);
 		Pattern pattern = Pattern.compile("^org.eclipse.rcptt.logging \\(.*$", Pattern.MULTILINE);
 		Matcher matcher = pattern.matcher(result);
 		ArrayList<String> lines = new ArrayList<>();
@@ -107,10 +124,7 @@ public class Q7ExternalLaunchDelegateTest {
 		assertFalse(lines.isEmpty());
 		assertTrue(lines.toString(), lines.size() == unique.size());
 
-		String output = consoleCapture.getOutput();
-		String message = "SystemSummary:\n" + result;
-		assertFalse(message, output.contains("Unresolved requirement"));
-		assertFalse(message, output.contains("org.osgi.framework.BundleException:"));
+		assertNoErrorsInOutput();
 	}
 	
 	@Test
@@ -118,6 +132,9 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
 		launch.ping();
+		assertPluginIsInstalled(launch, "org.aspectj.weaver");
+		assertPluginIsInstalled(launch, "com.ibm.icu"); // Present in JDT, should not be eliminated by RCPTT
+		getSystemSummary(launch);
 		Command command = parse("restart-aut");
 		launch.execute(command);
 		for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; ) {
@@ -145,6 +162,22 @@ public class Q7ExternalLaunchDelegateTest {
 			}
 		}
 		launch.ping();
+		assertNoErrorsInOutput();
+	}
+	
+	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
+		Command command = parse(
+				"invoke-static -pluginId \"org.eclipse.ui.workbench\" -className \"org.eclipse.ui.internal.ConfigurationInfo\" -methodName \"getSystemSummary\"");
+		String result = launch.execute(command).toString();
+		return result;
+	}
+
+	private void assertNoErrorsInOutput() {
+		String output = consoleCapture.getOutput();
+		Arrays.stream(output.split("\n")).forEach(line -> {
+			assertFalse(line, line.contains("Unresolved requirement"));
+			assertFalse(line, line.contains("org.osgi.framework.BundleException:"));
+		});
 	}
 
 	private void assertPluginIsInstalled(AutLaunch aut, String symbolicName)
@@ -161,28 +194,30 @@ public class Q7ExternalLaunchDelegateTest {
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
 		Aut aut = createAut(installDir, commandLineArguments);
-		closer.register(aut::delete);
 		AutLaunch launch = aut.launch(null);
 		closer.register(launch::terminate);
 		return launch;
 	}
 
+	@SuppressWarnings("resource")
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {
-		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(),
+		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(), NAME,
 				new NullProgressMonitor());
-		target.setTargetName(NAME);
 		ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 				.createLaunchConfiguration(target, NAME);
 		workingCopy.setAttribute(
 				IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 				String.join(" ", arguments));
-		workingCopy.setAttribute(IPDELauncherConstants.LOCATION, temporaryFolder.newFolder("ws").toString());
+		File wsDirectory = new File(temporaryFolder.getRoot(), "ws");
+		workingCopy.setAttribute(IPDELauncherConstants.LOCATION, wsDirectory.toString());
 		IExecutionEnvironment ee = JavaRuntime.getExecutionEnvironmentsManager().getEnvironment("JavaSE-21");
 		String containerPath = JavaRuntime.newJREContainerPath(ee).toPortableString();
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, containerPath);
 		ILaunchConfiguration saved = workingCopy.doSave();
 		try {
-			return AutManager.INSTANCE.getByLaunch(saved);
+			Aut result = AutManager.INSTANCE.getByLaunch(saved);
+			closer.register(result::delete);
+			return result;
 		} catch(Throwable e) {
 			saved.delete();
 			throw e;
@@ -214,12 +249,13 @@ public class Q7ExternalLaunchDelegateTest {
 		default -> throw new IllegalStateException();
 		};
 		Path distribution = CACHE.download(request);
-		Path installation = temporaryFolder.newFolder("extracted").toPath();
+		Path installation = temporaryFolder.getRoot().toPath().resolve("extracted");
 		return extractApplicationTo(distribution, installation);
 	}
 
 	private Path extractApplicationTo(Path archive, Path targetDirectory) throws IOException, InterruptedException {
 		String name = archive.getFileName().toString();
+		Files.createDirectories(targetDirectory);
 		if (name.endsWith(".zip")) {
 			FileUtil.unzip(archive.toFile(), targetDirectory.toFile());
 			Path result = targetDirectory.resolve("eclipse");
