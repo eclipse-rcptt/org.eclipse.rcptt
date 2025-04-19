@@ -123,8 +123,9 @@ public class Q7ExternalLaunchDelegateTest {
 		Set<String> unique = Set.copyOf(lines);
 		assertFalse(lines.isEmpty());
 		assertTrue(lines.toString(), lines.size() == unique.size());
-
-		assertNoErrorsInOutput();
+		
+		assertActive("org.aspectj.runtime", result);
+		assertActive("org.eclipse.equinox.weaving.aspectj", result);
 	}
 	
 	@Test
@@ -203,7 +204,7 @@ public class Q7ExternalLaunchDelegateTest {
 				new NullProgressMonitor());
 		ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 				.createLaunchConfiguration(target, NAME);
-//		workingCopy.setAttribute(IPDELauncherConstants.GENERATE_PROFILE, false);
+		workingCopy.setAttribute(IPDELauncherConstants.GENERATE_PROFILE, false);
 		workingCopy.setAttribute(
 				IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 				String.join(" ", arguments));
@@ -345,5 +346,13 @@ public class Q7ExternalLaunchDelegateTest {
 	    } catch (UnsupportedOperationException e) {
 	        // File system doesn’t support POSIX — silently skip
 	    }
+	}
+	
+	private void assertContains(String regex, String data) {
+		assertTrue(data, Pattern.compile(regex).matcher(data).find());
+	}
+	
+	private void assertActive(String bundleId, String systemInformation) {
+		assertContains(bundleId+" [^\\n]+ \\[Active\\]", systemInformation);
 	}
 }

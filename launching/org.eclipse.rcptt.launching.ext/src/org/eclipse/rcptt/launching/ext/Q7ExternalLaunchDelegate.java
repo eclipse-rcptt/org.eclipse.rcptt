@@ -501,6 +501,9 @@ public class Q7ExternalLaunchDelegate extends
 			try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
 				properties.store(out, "Configuration File");
 			}
+			// Workaround for https://github.com/eclipse-oomph/oomph/issues/152
+			// Create a configured directory so that Oomph can ensure it is writable and use it and not fall back to default 
+			new File(config.getParent(), ".p2").mkdirs();
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
