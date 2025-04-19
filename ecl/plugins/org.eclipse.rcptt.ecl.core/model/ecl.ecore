@@ -261,7 +261,7 @@
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
       <details key="description" value="Creates a new global variable declaration."/>
       <details key="returns" value="An internal object, describing a variable"/>
-      <details key="example" value="// declaring an empty list:&#xA;&#xA;global [val myList [list]]&#xA;&#xA;&#xA;&#xA;// filling the list with all New/... menu items:&#xA;&#xA;repeat [val index] -times [get-elements-count] -command {&#xA;&#xA;let [val oldlist [$myList]] [val itemName [get-item-property [$index] &quot;getText()&quot;]] {&#xA;&#xA;// check if the item is not separator or Other...&#xA;&#xA;if [and [$itemName | not-eq &quot;&quot;][$itemName | not-eq &quot;&amp;Other.*&quot;]] {&#xA;&#xA;global [val myList [appendToList [$oldlist] [$itemName]]] -override&#xA;&#xA;}&#xA;&#xA;}&#xA;&#xA;}"/>
+      <details key="example" value="// declaring an empty list:&#xA;&#xA;global [val myList [list]]&#xA;&#xA;&#xA;&#xA;// filling the list with all New/... menu items:&#xA;&#xA;repeat [val index] -times [get-elements-count] -command {&#xA;&#xA;let [val oldlist [$myList]] [val itemName [get-item-property [$index] &quot;getText()&quot;]] {&#xA;&#xA;// check if the item is not separator or Other...&#xA;&#xA;if [and [$itemName | not-eq &quot;&quot;][$itemName | not-eq &quot;&amp;Other.*&quot;]] {&#xA;&#xA;global [val myList [append [$oldlist] [$itemName]]] -override&#xA;&#xA;}&#xA;&#xA;}&#xA;&#xA;}"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="vals" upperBound="-1" eType="#//Declaration"
         containment="true"/>
