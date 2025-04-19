@@ -46,7 +46,6 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
@@ -151,10 +150,10 @@ public class NewAUTPage extends WizardPage {
 				helper.delete();
 				info.setValue(null);
 			}
+			String targetName = getTargetName();
 			runInDialog(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Validate AUT", 100);
 
 					TargetPlatformManager.clearTargets();
 					IStatus status = checkLocationExists(location);
@@ -164,13 +163,18 @@ public class NewAUTPage extends WizardPage {
 					}
 
 					try {
-						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, getTargetName(),
+						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, targetName,
 								monitor);
-						shell.getDisplay().asyncExec(new Runnable() {
-							public void run() {
-								info.setValue(platform);
-							}
-						});
+						if (platform.getStatus().matches(IStatus.CANCEL | IStatus.ERROR)) {
+							setStatus(platform.getStatus(), true);
+							platform.delete();
+						} else {
+							shell.getDisplay().asyncExec(new Runnable() {
+								public void run() {
+									info.setValue(platform);
+								}
+							});
+						}
 					} catch (final CoreException e) {
 						setStatus(e.getStatus(), true);
 					}

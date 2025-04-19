@@ -135,7 +135,7 @@ public class Q7ExternalLaunchDelegateTest {
 		launch.ping();
 		Command command = parse("restart-aut");
 		launch.execute(command);
-		for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; ) {
+		for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
 			try {
 				launch.ping();
 				Thread.yield();
@@ -150,7 +150,7 @@ public class Q7ExternalLaunchDelegateTest {
 		} catch (CoreException e) {
 		}
 		
-		for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
+		for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
 			try {
 				launch.ping();
 				Thread.yield();

@@ -28,11 +28,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutListener;
@@ -49,13 +49,15 @@ public class Q7TargetPlatformManager {
 	private static final ILog LOG = Platform.getLog(Q7TargetPlatformManager.class);
 	
 	static {
-		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-		AutManager.INSTANCE.addListener(new AutListener.AutAdapter() {
-			@Override
-			public void autRemoved(Aut aut) {
-				delete(aut.getConfig());
-			}
-		});
+		Job.createSystem("Defered initalization of AutManager listeners. AutManager is not initializaed yet.", monitor -> { 
+			AutManager.INSTANCE.addListener(new AutListener.AutAdapter() {
+				@Override
+				public void autRemoved(Aut aut) {
+					delete(aut.getConfig());
+				}
+			});
+			return Status.OK_STATUS;
+		}).schedule();
 	}
 
 	public synchronized static ITargetPlatformHelper findTarget(

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.target;
 
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.io.File;
@@ -69,7 +70,8 @@ public class TargetPlatformManager {
 		boolean isOk = false;
 		final ITargetPlatformService service = PDEHelper.getTargetService();
 		final ITargetDefinition target = service.newTarget();
-		ITargetPlatformHelper existing = findTarget(name, monitor);
+		SubMonitor sm = SubMonitor.convert(monitor, "Building target platform", 2);
+		ITargetPlatformHelper existing = findTarget(name, sm.split(1, SubMonitor.SUPPRESS_NONE));
 		if (existing != null) {
 			throw new CoreException(Status.error(name + " already exists"));
 		}
@@ -114,7 +116,7 @@ public class TargetPlatformManager {
 
 			info.setBundleContainers(containers
 					.toArray(new ITargetLocation[containers.size()]));
-			throwOnError(info.resolve(monitor));
+			throwOnError(info.resolve(sm.split(1, SubMonitor.SUPPRESS_NONE)));
 			isOk = true;
 			return info;
 		} catch (StackOverflowError e) {
@@ -128,6 +130,7 @@ public class TargetPlatformManager {
 		} finally {
 			if (!isOk)
 				info.delete();
+			done(monitor);
 		}
 	}
 

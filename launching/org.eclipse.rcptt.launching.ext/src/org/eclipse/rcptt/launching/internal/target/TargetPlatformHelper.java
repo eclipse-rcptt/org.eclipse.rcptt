@@ -12,6 +12,7 @@ package org.eclipse.rcptt.launching.internal.target;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.io.BufferedReader;
@@ -327,25 +328,25 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	private IPluginModelBase[] getTargetModels() {
-		calcModels();
-		return models;
+		calcModels(new NullProgressMonitor());
+		return Arrays.copyOf(models, models.length);
 	}
 
 	@Override
 	public IPluginModelBase getWeavingHook() {
-		calcModels();
+		calcModels(new NullProgressMonitor());
 		return weavingHook;
 	}
 
-	private void calcModels() {
+	private void calcModels(IProgressMonitor monitor) {
 		if (models == null) {
-			List<IPluginModelBase> bundles = sumBundles();
+			List<IPluginModelBase> bundles = sumBundles(monitor);
 			weavingHook = filterHooks(bundles);
 			models = bundles.toArray(new IPluginModelBase[0]);
 		}
 	}
 
-	private List<IPluginModelBase> sumBundles() {
+	private List<IPluginModelBase> sumBundles(IProgressMonitor monitor) {
 		TargetBundle[] bundles = getTarget().getAllBundles();
 		if (bundles == null) {
 			return new ArrayList<IPluginModelBase>();
@@ -356,7 +357,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 
 		PDEState state = new PDEState(uris.toArray(new URI[uris
-				.size()]), true, true, new NullProgressMonitor());
+				.size()]), true, true, monitor);
 		final List<IPluginModelBase> targetModels = new ArrayList<IPluginModelBase>(Arrays.asList(state
 				.getTargetModels()));
 
@@ -407,6 +408,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private IStatus validateBundles(IProgressMonitor monitor) {
 		ILaunchConfigurationWorkingCopy wc;
+		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
+		calcModels(sm.split(1, SubMonitor.SUPPRESS_NONE));
 		try {
 			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
 		} catch (CoreException e) {
@@ -448,7 +451,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		try {
 			StringBuilder b = new StringBuilder();
-			validation.run(monitor);
+			validation.run(sm.split(1));
 			Map input = validation.getInput();
 			Set<Map.Entry> entrySet = input.entrySet();
 			for (Map.Entry e : entrySet) {
@@ -460,6 +463,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			if (b.length() > 0) {
 				return error("Bundle validation failed: " + b.toString());
 			}
+			done(monitor);
 		} catch (CoreException e) {
 			status.add(e.getStatus());
 			return status; 
@@ -529,7 +533,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	public IStatus resolve(IProgressMonitor monitor) {
 		ITargetDefinition target = getTarget();
-		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 2);
+		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 3);
 		try {
 			status.add(target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
@@ -537,14 +541,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
 				return status;
-			setStartLevels();
+			setStartLevels(m.split(1, SubMonitor.SUPPRESS_NONE));
 			status.add(getBundleStatus());
 			return status;
 		} catch (BundleException | IOException e) {
 			status.add(Status.error("Failed to resolve  target definition", e));
 			return status;
 		} finally {
-			m.done();
+			done(monitor);
 	}
 	}
 
@@ -1718,7 +1722,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 	}
 	
-	private void setStartLevels() throws IOException, BundleException {
+	private void setStartLevels(SubMonitor monitor) throws IOException, BundleException {
 		Map<String, BundleStart> levelMap = getRunlevelsMap();
 		
 		if (levelMap.isEmpty()) {
@@ -1728,9 +1732,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			throw new IllegalStateException("Target definition is unresolved");
 		}
 		
-		for (TargetBundle bundle : target.getBundles()) {
+		TargetBundle[] bundles = target.getBundles();
+		monitor.beginTask("Setting bundle start levels", bundles.length);
+		for (TargetBundle bundle : bundles) {
+			monitor.subTask(bundle.getBundleInfo().getLocation().toString());
 			BundleStart bundleLevel = levelMap.getOrDefault(bundle.getBundleInfo().getSymbolicName(), BundleStart.DEFAULT);
 			bundleLevel = StartLevelSupport.getStartInfo(bundle.getBundleInfo().getManifest(), bundleLevel);
+			monitor.split(1);
 			if (bundleLevel != null) {
 				try {
 					bundle.getBundleInfo().setStartLevel(bundleLevel.level);
