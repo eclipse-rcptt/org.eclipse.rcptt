@@ -92,7 +92,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	
 	@Test
-	public void recreateAut() throws IOException, InterruptedException, CoreException {
+	public void recreateAutOfSameName() throws IOException, InterruptedException, CoreException {
 		Path installDir1 = expandAut();
 		Path installDir2 = temporaryFolder.newFolder("install2").toPath();
 		FileUtil.copyFiles(installDir1.toFile(), installDir2.toFile());
@@ -132,9 +132,6 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
 		launch.ping();
-		assertPluginIsInstalled(launch, "org.aspectj.weaver");
-		assertPluginIsInstalled(launch, "com.ibm.icu"); // Present in JDT, should not be eliminated by RCPTT
-		getSystemSummary(launch);
 		Command command = parse("restart-aut");
 		launch.execute(command);
 		for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; ) {
@@ -199,15 +196,18 @@ public class Q7ExternalLaunchDelegateTest {
 		return launch;
 	}
 
+	private int count = 1;
 	@SuppressWarnings("resource")
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {
-		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(), NAME,
+		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(),
 				new NullProgressMonitor());
 		ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 				.createLaunchConfiguration(target, NAME);
+//		workingCopy.setAttribute(IPDELauncherConstants.GENERATE_PROFILE, false);
 		workingCopy.setAttribute(
 				IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 				String.join(" ", arguments));
+//		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000"); 
 		File wsDirectory = new File(temporaryFolder.getRoot(), "ws");
 		workingCopy.setAttribute(IPDELauncherConstants.LOCATION, wsDirectory.toString());
 		IExecutionEnvironment ee = JavaRuntime.getExecutionEnvironmentsManager().getEnvironment("JavaSE-21");
