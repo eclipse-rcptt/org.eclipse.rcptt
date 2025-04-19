@@ -38,6 +38,7 @@ import org.eclipse.rcptt.internal.launching.aut.BaseAutLaunch;
 import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
+import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunchState;
@@ -414,6 +415,7 @@ public class AutThread extends Thread {
 		config.setAttribute(IQ7Launch.AUT_LOCATION, target.getTargetPlatformProfilePath());
 
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
+		Q7TargetPlatformManager.setHelper(config, target);
 		return config;
 	}
 

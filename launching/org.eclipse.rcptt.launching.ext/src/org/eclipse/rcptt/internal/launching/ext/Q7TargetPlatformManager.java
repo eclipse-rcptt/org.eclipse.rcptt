@@ -10,26 +10,53 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext;
 
+import static java.util.stream.Stream.of;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
+
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.launching.Aut;
+import org.eclipse.rcptt.launching.AutListener;
+import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 
+import com.google.common.base.Strings;
+
 public class Q7TargetPlatformManager {
 
-	private static Map<String, ITargetPlatformHelper> cachedHelpers = new HashMap<String, ITargetPlatformHelper>();
+	private static Map<String, ITargetPlatformHelper> cachedHelpers = Collections.synchronizedMap(new HashMap<>());
+	private static final ILog LOG = Platform.getLog(Q7TargetPlatformManager.class);
+	
+	static {
+		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+		AutManager.INSTANCE.addListener(new AutListener.AutAdapter() {
+			@Override
+			public void autRemoved(Aut aut) {
+				delete(aut.getConfig());
+			}
+		});
+	}
 
 	public synchronized static ITargetPlatformHelper findTarget(
 			ILaunchConfiguration config, IProgressMonitor monitor)
@@ -41,21 +68,21 @@ public class Q7TargetPlatformManager {
 			return null;
 		}
 
-		String targetPlatform = getTargetPlatformName(config);
+		ITargetPlatformHelper cached = familyOf(config).map(Q7TargetPlatformManager::getTargetPlatformName)
+				.map(cachedHelpers::get).filter(Objects::nonNull).findFirst().orElse(null);
 
-		ITargetPlatformHelper cached = cachedHelpers.get(targetPlatform);
 		if (cached != null) {
 			return cached;
 		}
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor, "Initialize target platform...", 2);
-		ITargetPlatformHelper info = TargetPlatformManager.findTarget(
-				targetPlatform, subMonitor.split(1), true);
-		assert info.getStatus().isOK();
-		monitor.worked(1);
-		monitor.done();
-		cachedHelpers.put(targetPlatform, info);
-		return info;
+		cached = familyOf(config).map(Q7TargetPlatformManager::getTargetPlatformName)
+				.map(name ->  TargetPlatformManager.findTarget(name, monitor))
+				.filter(Objects::nonNull)
+				.peek(tp -> tp.getStatus().isOK())
+				.findFirst().orElse(null);
+		done(monitor);
+		cachedHelpers.put(getTargetPlatformName(config), cached);
+		return cached;
 	}
 
 	/**
@@ -69,26 +96,21 @@ public class Q7TargetPlatformManager {
 	public synchronized static ITargetPlatformHelper getTarget(
 			ILaunchConfiguration config, IProgressMonitor monitor)
 			throws CoreException {
+		SubMonitor sm = SubMonitor.convert(monitor, "Initialize target platform...", 3);
 		String location = config.getAttribute(IQ7Launch.AUT_LOCATION, "");
 
 		if (!PDELocationUtils.validateProductLocation(location).isOK()) {
-			return newTargetPlatform(config, monitor, location);
+			return newTargetPlatform(config, sm.split(1), location);
+		}
+		
+		ITargetPlatformHelper result = findTarget(config, sm.split(1));
+		if (result != null) {
+			return result;
 		}
 
-		String targetPlatformName = getTargetPlatformName(config);
-
-		SubMonitor subMonitor = SubMonitor.convert(monitor, "Initialize target platform...", 2);
-		ITargetPlatformHelper info = TargetPlatformManager.findTarget(targetPlatformName, subMonitor.split(1), true);
-
-		if (info == null) {
-			info = newTargetPlatform(config, subMonitor.split(1), location);
-			assert info != null;
-		} else {
-			monitor.worked(1);
-		}
-		assert info != null;
-		monitor.done();
-		cachedHelpers.put(targetPlatformName, info);
+	    ITargetPlatformHelper info = newTargetPlatform(config, sm.split(1), location);
+	    assert findTarget(config, sm.split(1)) == info;
+		done(monitor);
 		return info;
 	}
 
@@ -97,9 +119,8 @@ public class Q7TargetPlatformManager {
 			String location) throws CoreException {
 
 		String name = getTargetPlatformName(config);
-		ITargetPlatformHelper info = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
+		ITargetPlatformHelper info = Q7TargetPlatformManager.createTargetPlatform(location, name, monitor);
 		assert info != null;
-		info.setTargetName(name);
 		info.save();
 		cachedHelpers.put(info.getName(), info);
 		return info;
@@ -113,7 +134,7 @@ public class Q7TargetPlatformManager {
 	}
 
 	public synchronized static ITargetPlatformHelper createTargetPlatform(
-			String location, IProgressMonitor monitor) throws CoreException {
+			String location, String name, IProgressMonitor monitor) throws CoreException {
 		boolean isOk = false;
 		if (monitor.isCanceled()) {
 			throw new CoreException(Status.CANCEL_STATUS);
@@ -122,7 +143,7 @@ public class Q7TargetPlatformManager {
 		try {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, "Create AUT configuration", 100);
 			platform = TargetPlatformManager
-					.createTargetPlatform(location, subMonitor.split(50));
+					.createTargetPlatform(location, name, subMonitor.split(50));
 			throwOnError(platform.getStatus());
 			IStatus rv = Q7TargetPlatformInitializer.initialize(platform, subMonitor.split(50));
 			throwOnError(rv);
@@ -148,7 +169,7 @@ public class Q7TargetPlatformManager {
 	 * @return
 	 * @throws CoreException
 	 */
-	public static String getTargetPlatformName(ILaunchConfiguration config) {
+	private static String getTargetPlatformName(ILaunchConfiguration config) {
 		String defValue = getTargetPlatformName(config.getName());
 		if (!config.exists())
 			return defValue;
@@ -160,7 +181,10 @@ public class Q7TargetPlatformManager {
 		}
 	}
 
-	public static String getTargetPlatformName(String name) {
+	private static String getTargetPlatformName(String name) {
+		if (Strings.isNullOrEmpty(name)) {
+			throw new IllegalArgumentException();
+		}
 		return "AUT " + name + " (Target Platform)";
 	}
 
@@ -172,9 +196,7 @@ public class Q7TargetPlatformManager {
 						new ILaunchConfigurationListener() {
 							public void launchConfigurationRemoved(
 									ILaunchConfiguration configuration) {
-								String target = getTargetPlatformName(configuration);
-								TargetPlatformManager.deleteTargetPlatform(target);
-								cachedHelpers.remove(target);
+								delete(configuration);
 							}
 
 							public void launchConfigurationChanged(
@@ -192,20 +214,36 @@ public class Q7TargetPlatformManager {
 						});
 	}
 
-	public synchronized static void setHelper(String name,
-			ITargetPlatformHelper info) {
-		cachedHelpers.put(name, info);
+	public synchronized static void setHelper(ILaunchConfigurationWorkingCopy config, ITargetPlatformHelper info) {
+		config.setAttribute(IQ7Launch.TARGET_PLATFORM, info.getName());
+		cachedHelpers.put(info.getName(), info);
 	}
 
-	public synchronized static ITargetPlatformHelper getHelper(String name) {
-		return cachedHelpers.get(name);
+	public synchronized static void delete(ILaunchConfiguration configuration) {
+		familyOf(configuration).map(Q7TargetPlatformManager::getTargetPlatformName)
+			.forEach(Q7TargetPlatformManager::delete);
+
 	}
 
-	public synchronized static void delete(String name) {
-		cachedHelpers.remove(name);
+	private synchronized static void delete(String name) {
+		ITargetPlatformHelper helper = cachedHelpers.remove(name);
+		if (helper != null) {
+			helper.delete();
+		}
+		TargetPlatformManager.deleteTargetPlatform(name);
 	}
 
 	public synchronized static void clear() {
 		cachedHelpers.clear();
+	}
+	
+	private static Stream<ILaunchConfiguration> familyOf(ILaunchConfiguration configuration) {
+		Stream<ILaunchConfigurationWorkingCopy> parents = Stream.empty();
+		ILaunchConfiguration original = null;
+		if (configuration instanceof ILaunchConfigurationWorkingCopy wc) {
+			parents = Stream.iterate(wc, Objects::nonNull, ILaunchConfigurationWorkingCopy::getParent);
+			original = wc.getOriginal();
+		}
+		return Stream.of(of(configuration), parents, of(original)).flatMap(Function.identity()).filter(Objects::nonNull);
 	}
 }

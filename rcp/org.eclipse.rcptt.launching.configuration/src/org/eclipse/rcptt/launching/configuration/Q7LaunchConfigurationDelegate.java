@@ -126,14 +126,7 @@ public class Q7LaunchConfigurationDelegate extends
 		LaunchInfoCache.CachedInfo info = LaunchInfoCache.getInfo(configuration);
 
 		String targetName = configuration.getName() + " with RCPTT";
-		ITargetPlatformHelper helper = Q7TargetPlatformManager
-				.getHelper(targetName);
-
-		// try to load existing configuration
-		if (helper == null) {
-			helper = TargetPlatformManager.findTarget(targetName,
-					sm.split(1), false);
-		}
+		ITargetPlatformHelper helper = Q7TargetPlatformManager.findTarget(configuration, sm.split(1));
 		
 		if (helper != null) {
 			IStatus status = helper.resolve(sm.split(1));
@@ -174,7 +167,9 @@ public class Q7LaunchConfigurationDelegate extends
 				warnings.add(status);
 			}
 			helper.save();
-			Q7TargetPlatformManager.setHelper(targetName, helper);
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, helper);
+			configuration = wc.doSave();
 		}
 		if (helper != null) {
 			info.target = helper;

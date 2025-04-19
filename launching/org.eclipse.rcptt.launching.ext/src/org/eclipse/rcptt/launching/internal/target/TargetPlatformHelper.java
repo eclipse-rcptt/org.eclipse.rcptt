@@ -237,11 +237,11 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 	}
 
-	public void setTargetName(String name) {
-		if (target != null) {
-			target.setName(name);
-		}
-	}
+//	public void setTargetName(String name) {
+//		if (target != null) {
+//			target.setName(name);
+//		}
+//	}
 
 	public String getName() {
 		if (target != null) {

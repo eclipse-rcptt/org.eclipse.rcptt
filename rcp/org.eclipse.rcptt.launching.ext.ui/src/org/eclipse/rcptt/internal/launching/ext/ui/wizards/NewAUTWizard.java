@@ -70,9 +70,6 @@ public class NewAUTWizard extends Wizard {
 			return false;
 		}
 		try {
-			target.setTargetName(Q7TargetPlatformManager
-					.getTargetPlatformName(page.getTargetName()));
-			target.save();
 			ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 					.createLaunchConfiguration(target, page.getTargetName());
 			OSArchitecture autArch = page.getArchitecture();
@@ -138,6 +135,7 @@ public class NewAUTWizard extends Wizard {
 
 			setDefaultsAttributes(workingCopy);
 			workingCopy.doSave();
+			target.save();
 
 			if (page.isLaunchNeeded()) {
 				LaunchUtils.launch(BaseAutManager.INSTANCE.getByName(workingCopy.getName()), getShell());

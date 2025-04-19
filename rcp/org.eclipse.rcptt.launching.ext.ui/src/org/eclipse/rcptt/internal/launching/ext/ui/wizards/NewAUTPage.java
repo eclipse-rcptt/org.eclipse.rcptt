@@ -164,7 +164,7 @@ public class NewAUTPage extends WizardPage {
 					}
 
 					try {
-						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location,
+						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, getTargetName(),
 								monitor);
 						shell.getDisplay().asyncExec(new Runnable() {
 							public void run() {
@@ -525,8 +525,7 @@ public class NewAUTPage extends WizardPage {
 		return architecture;
 	}
 
-	public void initializeExisting(String configName, String autLocation,
-			String targetName, final ILaunchConfiguration configuration) {
+	public void initializeExisting(String configName, String autLocation, final ILaunchConfiguration configuration) {
 		// Remove existing target platform
 		this.currentName = configName;
 		// TargetPlatformManager.deleteTargetPlatform(targetName);

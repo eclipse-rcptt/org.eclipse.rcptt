@@ -300,10 +300,8 @@ public class Q7ExternalLaunchDelegate extends
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
 			throws CoreException {
-		String targetPlatformName = Q7TargetPlatformManager.getTargetPlatformName(configuration);
-		Q7TargetPlatformManager.delete(targetPlatformName);
+		Q7TargetPlatformManager.delete(configuration);
 		LaunchInfoCache.remove(configuration);
-		TargetPlatformManager.deleteTargetPlatform(targetPlatformName);
 	}
 
 	private static boolean isHeadless(ILaunchConfiguration configuration)

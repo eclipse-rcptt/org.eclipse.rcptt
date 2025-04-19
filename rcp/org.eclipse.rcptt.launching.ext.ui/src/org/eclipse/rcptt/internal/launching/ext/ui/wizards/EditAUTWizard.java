@@ -78,10 +78,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			String configName = this.configuration.getName();
 			String autLocation = this.configuration.getAttribute(
 					IQ7Launch.AUT_LOCATION, "");
-			String targetName = Q7TargetPlatformManager.getTargetPlatformName(this.configuration);
-
-			page.initializeExisting(configName, autLocation, targetName,
-					this.configuration);
+			page.initializeExisting(configName, autLocation, this.configuration);
 			page.addAdvancedHandler(new Runnable() {
 				public void run() {
 					Shell shell = PlatformUI.getWorkbench()
@@ -119,13 +116,6 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			return false;
 		}
 		try {
-			String targetName = Q7TargetPlatformManager
-					.getTargetPlatformName(page.getTargetName());
-
-			TargetPlatformManager.deleteTargetPlatform(targetName);
-
-			target.setTargetName(targetName);
-			target.save();
 
 			// Delete all files in configuration area.
 			File area = LaunchConfigurationHelper
@@ -139,6 +129,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			ILaunchConfigurationWorkingCopy workingCopy = configuration
 					.getWorkingCopy();
 			Q7LaunchingUtil.updateLaunchConfiguration(target, workingCopy);
+			target.save();
 
 			workingCopy.rename(page.getTargetName());
 			OSArchitecture autArch = page.getArchitecture();

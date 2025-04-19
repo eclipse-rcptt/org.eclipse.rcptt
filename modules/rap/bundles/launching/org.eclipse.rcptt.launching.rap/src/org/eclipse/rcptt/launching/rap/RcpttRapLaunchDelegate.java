@@ -378,10 +378,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
 			throws CoreException {
-		String targetPlatformName = Q7TargetPlatformManager.getTargetPlatformName(configuration);
-		Q7TargetPlatformManager.delete(targetPlatformName);
+		Q7TargetPlatformManager.delete(configuration);
 		LaunchInfoCache.remove(configuration);
-		TargetPlatformManager.deleteTargetPlatform(targetPlatformName);
 	}
 
 	@Override

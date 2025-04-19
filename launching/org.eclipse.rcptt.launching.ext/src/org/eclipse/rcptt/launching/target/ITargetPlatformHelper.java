@@ -42,13 +42,6 @@ public interface ITargetPlatformHelper {
 	boolean isResolved();
 
 	/**
-	 * Set target platform name.
-	 * 
-	 * @param string
-	 */
-	void setTargetName(String name);
-
-	/**
 	 * Save current target platform to PDE.
 	 * @throws CoreException 
 	 */

@@ -91,11 +91,14 @@ public class InvokeAUTService implements ICommandService {
 		// Q7TargetPlatformManager.createTargetPlatform(location, monitor,
 		// addErrorsToLog)
 		ITargetPlatformHelper platform = Q7TargetPlatformManager
-				.createTargetPlatform(location,
+				.createTargetPlatform(location, cmd.getName(),
 						new NullProgressMonitor());
-
-		platform.setTargetName(Q7TargetPlatformManager.getTargetPlatformName(cmd.getName()));
 		
+		ILaunchConfigurationWorkingCopy launch = Q7LaunchingUtil
+				.createLaunchConfiguration(platform, cmd.getName());
+		
+		platform.save();
+
 		InjectionConfiguration configuration = InjectionFactory.eINSTANCE.createInjectionConfiguration();
 		configuration.getEntries().addAll(cmd.getInject());
 		
@@ -104,8 +107,6 @@ public class InvokeAUTService implements ICommandService {
 			throw new CoreException(rv);
 		
 
-		ILaunchConfigurationWorkingCopy launch = Q7LaunchingUtil
-				.createLaunchConfiguration(platform, cmd.getName());
 		launch.setAttribute(
 				IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 				"-os ${target.os} -arch ${target.arch} -nl ${target.nl} -consoleLog "

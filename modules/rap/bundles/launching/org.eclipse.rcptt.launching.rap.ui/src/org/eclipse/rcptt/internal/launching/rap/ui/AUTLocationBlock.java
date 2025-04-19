@@ -87,6 +87,7 @@ public class AUTLocationBlock {
 		fTab = tab;
 	}
 
+	private ILaunchConfiguration original;
 	public void updateInfo() {
 		// errorInfo = null;
 		final String location = getLocation();
@@ -100,12 +101,12 @@ public class AUTLocationBlock {
 		if (needUpdate && status.isOK()) {
 			info = null;
 			runInDialog(new IRunnableWithProgress() {
+
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						info = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
-						assert info.getStatus().isOK();
-						setStatus(info.getStatus());
+						info = Q7TargetPlatformManager.getTarget(original, monitor);
+						setStatus(info.resolve(monitor));
 					} catch (CoreException e) {
 						setStatus(e.getStatus());
 					}
@@ -188,11 +189,8 @@ public class AUTLocationBlock {
 	public void performApply(ILaunchConfigurationWorkingCopy config) throws CoreException {
 		config.setAttribute(IQ7Launch.AUT_LOCATION, getLocation());
 		if (info != null) {
-			info.setTargetName(Q7TargetPlatformManager
-					.getTargetPlatformName(config));
+			Q7TargetPlatformManager.setHelper(config, info);
 			info.save();
-			config.setAttribute(IQ7Launch.TARGET_PLATFORM, info.getName());
-			Q7TargetPlatformManager.setHelper(info.getName(), info);
 		}
 		config.setAttribute(IQ7Launch.UPDATE_TARGET_SUPPORTED, true);
 	}
@@ -202,6 +200,7 @@ public class AUTLocationBlock {
 	}
 
 	public void initializeFrom(final ILaunchConfiguration config) {
+		original = config;
 		String location = null;
 		try {
 			location = config.getAttribute(IQ7Launch.AUT_LOCATION, "");

@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetHandle;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -56,17 +55,26 @@ public class TargetPlatformManager {
 		if (!status.isOK())
 			Q7ExtLaunchingPlugin.log(status);
 	}
+	
+	
 
 	/**
 	 * Creates new target platform based on specified AUT location
+	 * @param name 
 	 * 
 	 * @throws CoreException
 	 */
-	public static ITargetPlatformHelper createTargetPlatform(final String location, IProgressMonitor monitor)
+	public static ITargetPlatformHelper createTargetPlatform(final String location, String name, IProgressMonitor monitor)
 			throws CoreException {
 		boolean isOk = false;
 		final ITargetPlatformService service = PDEHelper.getTargetService();
 		final ITargetDefinition target = service.newTarget();
+		ITargetPlatformHelper existing = findTarget(name, monitor);
+		if (existing != null) {
+			throw new CoreException(Status.error(name + " already exists"));
+		}
+		target.setName(name);
+		
 		final TargetPlatformHelper info = new TargetPlatformHelper(target);
 		try {
 			final List<ITargetLocation> containers = new ArrayList<ITargetLocation>();
@@ -125,14 +133,13 @@ public class TargetPlatformManager {
 
 	/**
 	 * Restore target platform from existing configuration
-	 * 
 	 * @param attribute
+	 * 
 	 * @return null if no target platform is found. Helper object otherwise.
 	 * @throws CoreException
 	 */
 	public static ITargetPlatformHelper findTarget(
-			final String requiredName, final IProgressMonitor monitorArg,
-			final boolean needResolve) throws CoreException {
+			final String requiredName, final IProgressMonitor monitorArg) {
 		SubMonitor monitor = SubMonitor.convert(monitorArg);
 		monitor.beginTask("Looking up " + requiredName, 2);
 
@@ -164,14 +171,6 @@ public class TargetPlatformManager {
 				if (name == null || !name.equals(requiredName))
 					continue;
 				final TargetPlatformHelper info = new TargetPlatformHelper(def);
-				if (needResolve) {
-					IStatus status = info.resolve(monitor.newChild(1, SubMonitor.SUPPRESS_NONE));
-					if (!status.isOK()) {
-						LaunchingPlugin.log(status);
-						info.delete();
-						return null;
-					}
-				}
 				return info;
 			}
 			return null;

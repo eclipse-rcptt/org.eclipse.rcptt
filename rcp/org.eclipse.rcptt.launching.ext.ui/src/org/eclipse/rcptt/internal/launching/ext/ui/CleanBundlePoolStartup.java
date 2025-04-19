@@ -26,6 +26,7 @@ import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
+import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.ui.IStartup;
 
@@ -66,14 +67,15 @@ public class CleanBundlePoolStartup implements IStartup {
 												.getLaunchManager()
 												.getLaunchConfigurations();
 										for (ILaunchConfiguration cfg : configurations) {
-											String platform = Q7TargetPlatformManager.getTargetPlatformName(cfg);
-											LaunchInfoCache.remove(cfg);
-											if (platform.length() > 0) {
-												TargetPlatformManager.deleteTargetPlatform(platform);
-												Q7LaunchUtils.deleteConfigFiles(cfg);
-												Q7TargetPlatformManager.clear();
+											ITargetPlatformHelper platform = Q7TargetPlatformManager.findTarget(cfg,
+													monitor);
+											if (platform != null) {
+												platform.delete();
 											}
+											LaunchInfoCache.remove(cfg);
+											Q7LaunchUtils.deleteConfigFiles(cfg);
 										}
+										Q7TargetPlatformManager.clear();
 
 										Q7LaunchingUtil
 												.cleanBundlePool(monitor);
