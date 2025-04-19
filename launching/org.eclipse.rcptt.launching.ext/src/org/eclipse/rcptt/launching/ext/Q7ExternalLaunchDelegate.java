@@ -90,6 +90,7 @@ import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.util.FileUtil;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Function;
@@ -651,19 +652,19 @@ public class Q7ExternalLaunchDelegate extends
 	public static class BundlesToLaunchCollector {
 
 		public void addInstallationBundle(IPluginModelBase base,
-				BundleStart hint) {
-			put(base, getStartInfo(base, hint));
+				BundleStart hint) throws BundleException, IOException {
+			put(base, getStartInfo(StartLevelSupport.loadManifest(base.getInstallLocation()), hint));
 		}
 
 		private void addPluginBundle(TargetBundle bundle, IProgressMonitor monitor) {
 			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				put(base, getStartInfo(base, BundleStart.fromBundle(bundle.getBundleInfo())));
+				put(base, BundleStart.fromBundle(bundle.getBundleInfo()));
 			}
 		}
 
 		public void addExtraBundle(TargetBundle bundle, IProgressMonitor monitor) {
 			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				put(base, getStartInfo(base, BundleStart.DEFAULT));
+				put(base,	BundleStart.fromBundle(bundle.getBundleInfo()));
 			}
 		}
 

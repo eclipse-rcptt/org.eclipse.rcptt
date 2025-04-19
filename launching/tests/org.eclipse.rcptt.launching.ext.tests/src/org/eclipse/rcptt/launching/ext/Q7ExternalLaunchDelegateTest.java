@@ -200,7 +200,7 @@ public class Q7ExternalLaunchDelegateTest {
 	private int count = 1;
 	@SuppressWarnings("resource")
 	private Aut createAut(Path installDir, List<String> arguments) throws CoreException, IOException {
-		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(),
+		ITargetPlatformHelper target = Q7TargetPlatformManager.createTargetPlatform(installDir.toString(), NAME,
 				new NullProgressMonitor());
 		ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 				.createLaunchConfiguration(target, NAME);

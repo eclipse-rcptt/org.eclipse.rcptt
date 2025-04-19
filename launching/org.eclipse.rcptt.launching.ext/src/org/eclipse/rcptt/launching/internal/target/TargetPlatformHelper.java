@@ -94,6 +94,7 @@ import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
+import org.eclipse.rcptt.launching.ext.StartLevelSupport;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.injection.Directory;
 import org.eclipse.rcptt.launching.injection.Entry;
@@ -103,6 +104,7 @@ import org.eclipse.rcptt.launching.internal.target.Q7Target.AutInstall;
 import org.eclipse.rcptt.launching.p2utils.P2Utils;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Objects;
@@ -538,7 +540,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			setStartLevels();
 			status.add(getBundleStatus());
 			return status;
-		} catch (IOException e) {
+		} catch (BundleException | IOException e) {
 			status.add(Status.error("Failed to resolve  target definition", e));
 			return status;
 		} finally {
@@ -1716,7 +1718,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 	}
 	
-	private void setStartLevels() throws IOException {
+	private void setStartLevels() throws IOException, BundleException {
 		Map<String, BundleStart> levelMap = getRunlevelsMap();
 		
 		if (levelMap.isEmpty()) {
@@ -1727,13 +1729,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		
 		for (TargetBundle bundle : target.getBundles()) {
-			BundleStart bundleLevels = levelMap.get(bundle.getBundleInfo().getSymbolicName());
-			if (bundleLevels != null) {
+			BundleStart bundleLevel = levelMap.getOrDefault(bundle.getBundleInfo().getSymbolicName(), BundleStart.DEFAULT);
+			bundleLevel = StartLevelSupport.getStartInfo(bundle.getBundleInfo().getManifest(), bundleLevel);
+			if (bundleLevel != null) {
 				try {
-					bundle.getBundleInfo().setStartLevel(bundleLevels.level);
-					bundle.getBundleInfo().setMarkedAsStarted(bundleLevels.autoStart);
+					bundle.getBundleInfo().setStartLevel(bundleLevel.level);
+					bundle.getBundleInfo().setMarkedAsStarted(bundleLevel.autoStart);
 				} catch (RuntimeException e) {
-					throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundle.getBundleInfo().getSymbolicName(), bundleLevels), e);
+					throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundle.getBundleInfo().getSymbolicName(), bundleLevel), e);
 				}
 			}
 		}

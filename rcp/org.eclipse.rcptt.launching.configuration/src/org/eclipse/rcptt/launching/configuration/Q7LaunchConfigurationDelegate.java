@@ -51,6 +51,7 @@ import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
+import org.osgi.framework.BundleException;
 
 import com.google.common.collect.Maps;
 
@@ -266,8 +267,12 @@ public class Q7LaunchConfigurationDelegate extends
 
 		for (Entry<IPluginModelBase, String> entry : Q7LaunchDelegateUtils
 				.getEclipseApplicationModels(this).entrySet()) {
-			collector.addInstallationBundle(entry.getKey(),
-					BundleStart.fromModelString(entry.getValue()));
+			try {
+				collector.addInstallationBundle(entry.getKey(),
+						BundleStart.fromModelString(entry.getValue()));
+			} catch (BundleException | IOException e) {
+				throw new CoreException(Status.error("Failed to process " + entry.getKey().getInstallLocation(), e));
+			}
 		}
 		ITargetLocation[] locations = target.getTarget().getTargetLocations();
 		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), locations.length);
