@@ -26,6 +26,8 @@ class Build implements Serializable {
           memory: "4Gi"
           cpu: "1"
       env:
+      - name: "HOME"
+        value: "/tmp"
       - name: "MAVEN_OPTS"
         value: "-Duser.home=/home/jenkins"
       - name: "XDG_CONFIG_HOME"
