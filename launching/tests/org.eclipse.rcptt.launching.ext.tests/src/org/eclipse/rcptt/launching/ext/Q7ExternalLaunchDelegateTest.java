@@ -97,6 +97,7 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir2 = temporaryFolder.newFolder("install2").toPath();
 		FileUtil.copyFiles(installDir1.toFile(), installDir2.toFile());
 		AutLaunch launch = startAut(installDir1, List.of("-consoleLog"));
+		assertPluginIsInstalled(launch, "com.ibm.icu");
 		assertNoErrorsInOutput();
 		launch.getAut().delete();
 		FileUtil.deleteFile(new File(temporaryFolder.getRoot(), "extracted"));
@@ -126,6 +127,8 @@ public class Q7ExternalLaunchDelegateTest {
 		
 		assertActive("org.aspectj.runtime", result);
 		assertActive("org.eclipse.equinox.weaving.aspectj", result);
+		assertNoErrorsInOutput();
+
 	}
 	
 	@Test
@@ -185,6 +188,7 @@ public class Q7ExternalLaunchDelegateTest {
 						+ symbolicName + "\" | invoke toString");
 		String result = aut.execute(command).toString();
 		assertTrue(result, result.startsWith(symbolicName + "_"));
+		System.out.println(result);
 
 	}
 

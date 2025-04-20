@@ -150,16 +150,14 @@ public class Q7TargetPlatformInitializer {
 		q7Deps.setUri(q7Info.deps.toString());
 
 		if (!hasRAP) {
-			if (!hasEMFTransaction) {
-				q7Deps.getUnits().add(EMF_TRANSACTION_FEATURE_GROUP);
-			}
-			if (!hasEMFValidation) {
-				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
-				q7Deps.getUnits().add("com.ibm.icu");
-			}
-			if (!hasEMF) {
-				q7Deps.getUnits().add(EMF_FEATURE_GROUP);
-			}
+//			if (!hasEMFTransaction) {
+//				q7Deps.getUnits().add(EMF_TRANSACTION_FEATURE_GROUP);
+//			}
+//			if (!hasEMFValidation) {
+//				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
+//				q7Deps.getUnits().add("com.ibm.icu");
+//			}
+			q7Deps.getUnits().add(EMF_FEATURE_GROUP);
 		}
 		if (hasRAP) {
 			q7Deps.getUnits().add(EQUINOX_EXECUTABLE_FEATURE_GROUP);
