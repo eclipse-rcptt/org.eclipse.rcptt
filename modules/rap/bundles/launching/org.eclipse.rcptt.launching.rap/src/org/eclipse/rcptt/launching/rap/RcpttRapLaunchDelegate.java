@@ -218,7 +218,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundlesCheck(target.getTarget(),
+		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundles(target,
 				subm.newChild(50));
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
@@ -313,8 +313,13 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
+		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				SubMonitor.convert(monitor, 2));
+		
+		if (target == null) {
+			throw new CoreException(Status.error("AUT " + configuration.getName() + " has lost its target platfom. Edit the AUT to restore it."));
+		}
+
 
 		if (monitor.isCanceled()) {
 			removeTargetPlatform(configuration);

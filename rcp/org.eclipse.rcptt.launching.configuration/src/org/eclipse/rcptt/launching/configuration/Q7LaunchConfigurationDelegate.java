@@ -33,8 +33,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetLocation;
-import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
@@ -274,20 +272,13 @@ public class Q7LaunchConfigurationDelegate extends
 				throw new CoreException(Status.error("Failed to process " + entry.getKey().getInstallLocation(), e));
 			}
 		}
-		ITargetLocation[] locations = target.getTarget().getTargetLocations();
-		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), locations.length);
+		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), target.size());
 		
-		for (ITargetLocation extra : locations) {
-			if (!Q7ExternalLaunchDelegate.isQ7BundleContainer(extra)) {
-				locationsMonitor.split(1);
-				continue;
-			}
-			TargetBundle[] bundles = extra.getBundles();
-			SubMonitor bundleMonitor = SubMonitor.convert(locationsMonitor.split(1), bundles.length);
-			for (TargetBundle bundle : bundles) {
-				collector.addExtraBundle(bundle, bundleMonitor.split(1));
-			}
-		}
+		target.getModels().forEach(m -> {
+			locationsMonitor.subTask(m.model().getPluginBase().getName());
+			collector.addPluginBundle(m.model(), m.startLevel());
+			locationsMonitor.split(1);
+		});
 
 		Q7ExternalLaunchDelegate.BundlesToLaunch bundles = collector.getResult();
 

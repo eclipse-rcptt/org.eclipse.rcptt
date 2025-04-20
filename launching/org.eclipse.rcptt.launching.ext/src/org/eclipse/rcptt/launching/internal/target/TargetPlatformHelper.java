@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.launching.internal.target;
 
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
@@ -93,6 +94,7 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
+import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate.UniquePluginModel;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.StartLevelSupport;
@@ -465,13 +467,11 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			}
 			done(monitor);
 		} catch (CoreException e) {
-			status.add(e.getStatus());
-			return status; 
+			return e.getStatus(); 
 		} catch (OperationCanceledException e) {
-			status.add(Status.CANCEL_STATUS);
-			return status;
+			return Status.CANCEL_STATUS;
 		}
-		return status;
+		return Status.OK_STATUS;
 	}
 
 	private Status error(String message) {
@@ -543,15 +543,39 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				return status;
 			setStartLevels(m.split(1, SubMonitor.SUPPRESS_NONE));
 			status.add(getBundleStatus());
+			index();
 			return status;
 		} catch (BundleException | IOException e) {
 			status.add(Status.error("Failed to resolve  target definition", e));
 			return status;
 		} finally {
 			done(monitor);
+		}
 	}
+	
+	private final Map<UniquePluginModel, IPluginModelBase> modelIndex = new HashMap<>();
+	private final Map<UniquePluginModel, TargetBundle> targetBundleIndex = new HashMap<>();
+	
+
+	private void index() {
+		if (!isResolved()) {
+			throw new IllegalStateException("Unresolved");
+		}
+		stream( getTargetModels()).forEach(m -> modelIndex.putIfAbsent(new UniquePluginModel(m), m));
+		
+		stream(target.getBundles()).forEach(bundle -> targetBundleIndex.put(new UniquePluginModel(bundle), bundle));
+
 	}
 
+	@Override
+	public Stream<Model> getModels() {
+		if (!isResolved()) {
+			throw new IllegalStateException("Unresolved");
+		}
+		// Iterating just over getTargetModels does not work - injections are missing
+		return targetBundleIndex.entrySet().stream().map(entry -> new Model(modelIndex.get(entry.getKey()), BundleStart.fromBundle(entry.getValue().getBundleInfo())));
+	}
+		
 	AutInstall getAutInstall() {
 		final Q7Target target = getQ7Target();
 		if (target == null) {
@@ -1075,6 +1099,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	public OSArchitecture detectArchitecture(
 			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
+		if (!isResolved()) {
+			throw new IllegalStateException("Unresolved");
+		}
 
 		String os = Platform.getOS();
 		TargetBundle[] bundles = target.getAllBundles();
@@ -1721,7 +1748,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			Q7ExtLaunchingPlugin.getDefault().info(message);
 		}
 	}
-	
 	private void setStartLevels(SubMonitor monitor) throws IOException, BundleException {
 		Map<String, BundleStart> levelMap = getRunlevelsMap();
 		
@@ -1756,6 +1782,11 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	
 	private boolean isBad(IStatus status) {
 		return status.matches(IStatus.CANCEL | IStatus.ERROR);
+	}
+
+	@Override
+	public int size() {
+		return targetBundleIndex.size();
 	}
 
 }

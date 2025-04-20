@@ -150,7 +150,6 @@ public class NewAUTPage extends WizardPage {
 				helper.delete();
 				info.setValue(null);
 			}
-			String targetName = getTargetName();
 			runInDialog(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
@@ -163,8 +162,7 @@ public class NewAUTPage extends WizardPage {
 					}
 
 					try {
-						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, targetName,
-								monitor);
+						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
 						if (platform.getStatus().matches(IStatus.CANCEL | IStatus.ERROR)) {
 							setStatus(platform.getStatus(), true);
 							platform.delete();

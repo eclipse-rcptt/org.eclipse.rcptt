@@ -22,10 +22,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -41,12 +39,9 @@ import org.eclipse.rcptt.launching.IQ7Launch;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 
-import com.google.common.base.Strings;
-
 public class Q7TargetPlatformManager {
 
 	private static Map<String, ITargetPlatformHelper> cachedHelpers = Collections.synchronizedMap(new HashMap<>());
-	private static final ILog LOG = Platform.getLog(Q7TargetPlatformManager.class);
 	
 	static {
 		Job.createSystem("Defered initalization of AutManager listeners. AutManager is not initializaed yet.", monitor -> { 
@@ -102,7 +97,7 @@ public class Q7TargetPlatformManager {
 		String location = config.getAttribute(IQ7Launch.AUT_LOCATION, "");
 
 		if (!PDELocationUtils.validateProductLocation(location).isOK()) {
-			return newTargetPlatform(config, sm.split(1), location);
+			return newTargetPlatform(sm.split(1), location);
 		}
 		
 		ITargetPlatformHelper result = findTarget(config, sm.split(1));
@@ -110,21 +105,18 @@ public class Q7TargetPlatformManager {
 			return result;
 		}
 
-	    ITargetPlatformHelper info = newTargetPlatform(config, sm.split(1), location);
+	    ITargetPlatformHelper info = newTargetPlatform( sm.split(1), location);
 	    assert findTarget(config, sm.split(1)) == info;
 		done(monitor);
 		return info;
 	}
 
-	private synchronized static ITargetPlatformHelper newTargetPlatform(
-			ILaunchConfiguration config, IProgressMonitor monitor,
+	private synchronized static ITargetPlatformHelper newTargetPlatform(IProgressMonitor monitor,
 			String location) throws CoreException {
 
-		String name = getTargetPlatformName(config);
-		ITargetPlatformHelper info = Q7TargetPlatformManager.createTargetPlatform(location, name, monitor);
+		ITargetPlatformHelper info = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
 		assert info != null;
 		info.save();
-		cachedHelpers.put(info.getName(), info);
 		return info;
 	}
 
@@ -136,16 +128,13 @@ public class Q7TargetPlatformManager {
 	}
 
 	public synchronized static ITargetPlatformHelper createTargetPlatform(
-			String location, String name, IProgressMonitor monitor) throws CoreException {
+			String location, IProgressMonitor monitor) throws CoreException {
 		boolean isOk = false;
-		if (monitor.isCanceled()) {
-			throw new CoreException(Status.CANCEL_STATUS);
-		}
 		ITargetPlatformHelper platform = null;
 		try {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, "Create AUT configuration", 100);
 			platform = TargetPlatformManager
-					.createTargetPlatform(location, name, subMonitor.split(50));
+					.createTargetPlatform(location, subMonitor.split(50));
 			throwOnError(platform.getStatus());
 			IStatus rv = Q7TargetPlatformInitializer.initialize(platform, subMonitor.split(50));
 			throwOnError(rv);
@@ -172,22 +161,13 @@ public class Q7TargetPlatformManager {
 	 * @throws CoreException
 	 */
 	private static String getTargetPlatformName(ILaunchConfiguration config) {
-		String defValue = getTargetPlatformName(config.getName());
-		if (!config.exists())
-			return defValue;
 		try {
-			return config.getAttribute(IQ7Launch.TARGET_PLATFORM, defValue);
+			String name = config.getAttribute(IQ7Launch.TARGET_PLATFORM, (String)null);
+			return name;
 		} catch (CoreException e) {
 			RcpttPlugin.log(e);
-			return defValue;
+			return null;
 		}
-	}
-
-	private static String getTargetPlatformName(String name) {
-		if (Strings.isNullOrEmpty(name)) {
-			throw new IllegalArgumentException();
-		}
-		return "AUT " + name + " (Target Platform)";
 	}
 
 	public synchronized static void initialize() {
@@ -217,12 +197,15 @@ public class Q7TargetPlatformManager {
 	}
 
 	public synchronized static void setHelper(ILaunchConfigurationWorkingCopy config, ITargetPlatformHelper info) {
+		if (info.getName().isEmpty()) {
+			throw new IllegalArgumentException("Empty target name");
+		}
 		config.setAttribute(IQ7Launch.TARGET_PLATFORM, info.getName());
 		cachedHelpers.put(info.getName(), info);
 	}
 
 	public synchronized static void delete(ILaunchConfiguration configuration) {
-		familyOf(configuration).map(Q7TargetPlatformManager::getTargetPlatformName)
+		familyOf(configuration).filter(ILaunchConfiguration::exists).map(Q7TargetPlatformManager::getTargetPlatformName)
 			.forEach(Q7TargetPlatformManager::delete);
 
 	}

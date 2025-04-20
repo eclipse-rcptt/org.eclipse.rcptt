@@ -188,7 +188,6 @@ public class AUTLocationBlock {
 	public void performApply(ILaunchConfigurationWorkingCopy config) throws CoreException {
 		config.setAttribute(IQ7Launch.AUT_LOCATION, getLocation());
 		if (info != null) {
-			Q7TargetPlatformManager.setHelper(config, info);
 			info.save();
 			Q7TargetPlatformManager.setHelper(config, info);
 		}
@@ -212,7 +211,7 @@ public class AUTLocationBlock {
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				try {
-					info = Q7TargetPlatformManager.getTarget(config, monitor);
+					info = Q7TargetPlatformManager.getTarget(original, monitor);
 				} catch (CoreException e) {
 					Activator.log(e);
 				}

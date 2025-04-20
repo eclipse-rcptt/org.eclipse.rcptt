@@ -65,6 +65,7 @@ public class AUTLocationBlock {
 	private ITargetPlatformHelper info;
 	// private String errorInfo;
 	private boolean needUpdate = true;
+	private ILaunchConfiguration original;
 
 	private class Listener extends SelectionAdapter implements ModifyListener {
 
@@ -87,7 +88,6 @@ public class AUTLocationBlock {
 		fTab = tab;
 	}
 
-	private ILaunchConfiguration original;
 	public void updateInfo() {
 		// errorInfo = null;
 		final String location = getLocation();
@@ -214,7 +214,7 @@ public class AUTLocationBlock {
 				try {
 					info = Q7TargetPlatformManager.findTarget(config, monitor);
 					if (info == null) {
-						info = Q7TargetPlatformManager.getTarget(config,
+						info = Q7TargetPlatformManager.getTarget(original,
 								monitor);
 					}
 				} catch (CoreException e) {

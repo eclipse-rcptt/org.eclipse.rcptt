@@ -61,18 +61,29 @@ public class TargetPlatformManager {
 
 	/**
 	 * Creates new target platform based on specified AUT location
-	 * @param name 
-	 * 
 	 * @throws CoreException
 	 */
-	public static ITargetPlatformHelper createTargetPlatform(final String location, String name, IProgressMonitor monitor)
+	public static ITargetPlatformHelper createTargetPlatform(final String location, IProgressMonitor monitor)
 			throws CoreException {
 		boolean isOk = false;
 		final ITargetPlatformService service = PDEHelper.getTargetService();
 		final ITargetDefinition target = service.newTarget();
+		
+		String namePrefix = "AUT " + location.replace("/", "_") + " ";
+		String name = namePrefix + 1;
 		SubMonitor sm = SubMonitor.convert(monitor, "Building target platform", 2);
-		ITargetPlatformHelper existing = findTarget(name, sm.split(1, SubMonitor.SUPPRESS_NONE));
+		SubMonitor sm2 = SubMonitor.convert(sm.split(1), "Selecting a name", 1000);
+		ITargetPlatformHelper existing = null;
+		for (int i = 1; i < 1000; i++) {
+			name = namePrefix + i;
+			existing = findTarget(name, sm2.split(1, SubMonitor.SUPPRESS_NONE));
+			if (existing == null) {
+				break;
+			}
+		}
+		
 		if (existing != null) {
+			PDEHelper.getTargetService().deleteTarget(target.getHandle());
 			throw new CoreException(Status.error(name + " already exists"));
 		}
 		target.setName(name);
@@ -157,7 +168,8 @@ public class TargetPlatformManager {
 		};
 		try {
 			ITargetHandle[] targets = PDEHelper.getTargetService().getTargets(
-					monitor.newChild(1));
+					monitor.split(1));
+			SubMonitor sm2 = monitor.split(1);
 			for (ITargetHandle handle : targets) {
 				if (monitor.isCanceled()) {
 					return null;
@@ -171,8 +183,11 @@ public class TargetPlatformManager {
 					continue;
 				}
 				String name = def.getName();
-				if (name == null || !name.equals(requiredName))
+				sm2.subTask(name);
+				if (name == null || !name.equals(requiredName)) {
+					sm2.split(1);
 					continue;
+				}
 				final TargetPlatformHelper info = new TargetPlatformHelper(def);
 				return info;
 			}

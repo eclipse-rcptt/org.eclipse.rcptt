@@ -91,8 +91,7 @@ public class InvokeAUTService implements ICommandService {
 		// Q7TargetPlatformManager.createTargetPlatform(location, monitor,
 		// addErrorsToLog)
 		ITargetPlatformHelper platform = Q7TargetPlatformManager
-				.createTargetPlatform(location, cmd.getName(),
-						new NullProgressMonitor());
+				.createTargetPlatform(location, new NullProgressMonitor());
 		
 		ILaunchConfigurationWorkingCopy launch = Q7LaunchingUtil
 				.createLaunchConfiguration(platform, cmd.getName());

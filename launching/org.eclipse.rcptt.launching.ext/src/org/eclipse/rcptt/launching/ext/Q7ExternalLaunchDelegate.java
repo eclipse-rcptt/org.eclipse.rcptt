@@ -60,11 +60,9 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
-import org.eclipse.pde.internal.core.PDEState;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.launching.PDEMessages;
 import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
@@ -87,7 +85,7 @@ import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.target.TargetPlatformManager;
+import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.util.FileUtil;
 import org.osgi.framework.BundleException;
@@ -179,7 +177,7 @@ public class Q7ExternalLaunchDelegate extends
 			return false;
 		}
 		
-		SubMonitor sm = SubMonitor.convert(monitor, 4);
+		SubMonitor sm = SubMonitor.convert(monitor, 100);
 		
 		if (!isHeadless(configuration)
 				&& !super.preLaunchCheck(configuration, mode,
@@ -197,27 +195,33 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
-				sm.split(2));
+		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+				sm.split(1));
+		if (target == null) {
+			throw new CoreException(Status.error("AUT " + configuration.getName() + " has lost its target platfom. Edit the AUT to restore it."));
+		}
+		
 
 		if (monitor.isCanceled()) {
-			removeTargetPlatform(configuration);
 			return false;
 		}
 
 		info.target = target;
 		final MultiStatus error = new MultiStatus(Q7ExtLaunchingPlugin.PLUGIN_ID, 0,
 				"Target platform initialization failed  for "
-						+ configuration.getName(),
+						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.getStatus());
+		error.add(target.resolve(sm.split(98)));
 
-		if (!error.isOK()) {
+		if (error.isOK()) {
+			Q7ExtLaunchingPlugin.log(error);
+		}
+
+		if (error.matches(IStatus.ERROR)) {
 			if (monitor.isCanceled()) {
 				removeTargetPlatform(configuration);
 				return false;
 			}
-			Q7ExtLaunchingPlugin.log(error);
 			removeTargetPlatform(configuration);
 			throw new CoreException(error);
 		}
@@ -624,7 +628,7 @@ public class Q7ExternalLaunchDelegate extends
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getTarget(), subm.split(50));
+		BundlesToLaunch bundlesToLaunch = collectBundles(target, subm.split(50));
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
@@ -655,17 +659,9 @@ public class Q7ExternalLaunchDelegate extends
 				BundleStart hint) throws BundleException, IOException {
 			put(base, getStartInfo(StartLevelSupport.loadManifest(base.getInstallLocation()), hint));
 		}
-
-		private void addPluginBundle(TargetBundle bundle, IProgressMonitor monitor) {
-			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				put(base, BundleStart.fromBundle(bundle.getBundleInfo()));
-			}
-		}
-
-		public void addExtraBundle(TargetBundle bundle, IProgressMonitor monitor) {
-			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				put(base,	BundleStart.fromBundle(bundle.getBundleInfo()));
-			}
+		
+		public void addPluginBundle(IPluginModelBase bundle, BundleStart startlevel) {
+			put(bundle, startlevel);
 		}
 
 		public BundlesToLaunch getResult() {
@@ -724,17 +720,14 @@ public class Q7ExternalLaunchDelegate extends
 		return target.getInstall().configIniBundles().containsKey(TargetPlatformHelper.SIMPLECONFIGURATOR);
 	}
 
-	public static BundlesToLaunch collectBundlesCheck(ITargetDefinition targetDefinition, IProgressMonitor monitor) {
-		return collectBundles(targetDefinition, monitor);
-	}
 
-	public static BundlesToLaunch collectBundles(ITargetDefinition targetDefinition, IProgressMonitor monitor) {
+	public static BundlesToLaunch collectBundles(ITargetPlatformHelper targetDefinition, IProgressMonitor monitor) {
 		BundlesToLaunchCollector collector = new BundlesToLaunchCollector();
-		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", 2000);
+		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", targetDefinition.size());
 		try {
-			TargetBundle[] bundles = targetDefinition.getAllBundles();
-			for (TargetBundle bundle : bundles) {
-				collector.addPluginBundle(bundle, subm.split(1));
+			for (Model m: ((Iterable<ITargetPlatformHelper.Model>)(targetDefinition.getModels()::iterator))) {
+				subm.split(1);
+				collector.addPluginBundle(m.model(), m.startLevel());
 			}
 			return new BundlesToLaunch(collector.plugins, collector.latestVersions);
 		} finally {
@@ -791,11 +784,6 @@ public class Q7ExternalLaunchDelegate extends
 		return (BundlesToLaunch) info.data.get(KEY_BUNDLES_TO_LAUNCH);
 	}
 
-	private static IPluginModelBase[] getModels(TargetBundle bundle, IProgressMonitor monitor) {
-		return new PDEState(new URI[] {
-			bundle.getBundleInfo().getLocation() }, true, true,
-				monitor).getTargetModels();
-	}
 
 	private static Version version(IPluginModelBase plugin) {
 		try {
@@ -849,6 +837,11 @@ public class Q7ExternalLaunchDelegate extends
 		public UniquePluginModel(IPluginModelBase model) {
 			version = model.getBundleDescription().getVersion();
 			name = model.getBundleDescription().getName();
+		}
+
+		public UniquePluginModel(TargetBundle bundle) {
+			version = Version.parseVersion(bundle.getBundleInfo().getVersion());
+			name = bundle.getBundleInfo().getSymbolicName();
 		}
 
 		@Override
