@@ -146,6 +146,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
+			sh "env"
       mvn "--version"
       def mvn = { pom ->
           this.mvn "clean ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
