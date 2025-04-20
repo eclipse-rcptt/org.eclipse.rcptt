@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.internal.target;
 
+import static com.google.common.base.Objects.equal;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.function.Predicate.isEqual;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
@@ -47,6 +49,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
@@ -56,7 +59,6 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -94,7 +96,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
-import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate.UniquePluginModel;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.StartLevelSupport;
@@ -112,6 +113,8 @@ import org.osgi.framework.Version;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 @SuppressWarnings("restriction")
 public class TargetPlatformHelper implements ITargetPlatformHelper {
@@ -126,10 +129,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private static final String OSGI_BUNDLES = "osgi.bundles";
 	public static final String SIMPLECONFIGURATOR = "org.eclipse.equinox.simpleconfigurator"; //$NON-NLS-1$
 	private static final String SC_BUNDLES_PATH = "configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"; //$NON-NLS-1$
-	private final MultiStatus status = new MultiStatus(TargetPlatformHelper.class, 0, "Target platform resolution result");
+	private MultiStatus status;
 	private final ITargetDefinition target;
 	private final ArrayList<ITargetLocation> extra = new ArrayList<ITargetLocation>();
-	private IPluginModelBase[] models;
 	private PDEExtensionRegistry registry;
 
 	private Q7Target q7target = new Q7Target();
@@ -137,6 +139,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	public TargetPlatformHelper(ITargetDefinition target) {
 		Preconditions.checkNotNull(target);
 		this.target = target;
+		resetIndex();
 		initialize();
 	}
 
@@ -152,17 +155,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return install.userArea;
 	}
 
-	@Deprecated
-	/** Use getStatus().isOK() instead */
-	public boolean isValid() {
-		return getStatus().isOK();
-	}
-
+	private boolean resolved = false;
 	public boolean isResolved() {
-		if (target != null) {
-			return target.isResolved();
-		}
-		return false;
+		return resolved;
 	}
 
 	public boolean isInstanceContainerValid() {
@@ -242,12 +237,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 	}
 
-//	public void setTargetName(String name) {
-//		if (target != null) {
-//			target.setName(name);
-//		}
-//	}
-
 	public String getName() {
 		if (target != null) {
 			return target.getName();
@@ -294,20 +283,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return target;
 	}
 
-	public void update() {
-		List<ITargetLocation> newContainers = new ArrayList<ITargetLocation>();
-		newContainers.addAll(Arrays.asList(target.getTargetLocations()));
-
-		if (extra != null) {
-			newContainers.addAll(extra);
-		}
-		target.setTargetLocations(newContainers
-				.toArray(new ITargetLocation[newContainers.size()]));
-		models = null;
-		registry = null;
-	}
-
 	private void addLocations(Collection<ITargetLocation> newLocations) throws CoreException {
+		resetIndex();
+		
 		List<ITargetLocation> newContainers = new ArrayList<ITargetLocation>();
 		newContainers.addAll(newLocations);
 		
@@ -325,70 +303,50 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		
 		target.setTargetLocations(newContainers
 				.toArray(new ITargetLocation[newContainers.size()]));
-		models = null;
-		registry = null;
-	}
-
-	private IPluginModelBase[] getTargetModels() {
-		calcModels(new NullProgressMonitor());
-		return Arrays.copyOf(models, models.length);
 	}
 
 	@Override
 	public IPluginModelBase getWeavingHook() {
-		calcModels(new NullProgressMonitor());
+		checkResolved();
 		return weavingHook;
 	}
 
-	private void calcModels(IProgressMonitor monitor) {
-		if (models == null) {
-			List<IPluginModelBase> bundles = sumBundles(monitor);
-			weavingHook = filterHooks(bundles);
-			models = bundles.toArray(new IPluginModelBase[0]);
+	private void computeModels(IProgressMonitor monitor) {
+		modelIndex.clear();
+		TargetBundle[] bundles = getTarget().getBundles();
+		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
+		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
+		// Restore incorrectly removed non-singletons. Actual filtering of singletons would be done in org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate.BundlesToLaunchCollector
+		for (TargetBundle bundle: bundles) {
+			Version version = Version.parseVersion(bundle.getBundleInfo().getVersion());
+			String id = bundle.getBundleInfo().getSymbolicName();
+			Collection<IPluginModelBase> models = modelIndex.get(id);
+			if (models.stream().map(m -> m.getBundleDescription().getVersion())
+					.anyMatch(isEqual(version))) {
+				return;
+			}
+			createModels(null, new URI[] { bundle.getBundleInfo().getLocation() }).forEach(models::add);
 		}
+		weavingHook = null;
 	}
 
-	private List<IPluginModelBase> sumBundles(IProgressMonitor monitor) {
-		TargetBundle[] bundles = getTarget().getAllBundles();
-		if (bundles == null) {
-			return new ArrayList<IPluginModelBase>();
-		}
-		List<URI> uris = new ArrayList<URI>();
-		for (TargetBundle bundle : bundles) {
-			uris.add(bundle.getBundleInfo().getLocation());
-		}
-
-		PDEState state = new PDEState(uris.toArray(new URI[uris
-				.size()]), true, true, monitor);
-		final List<IPluginModelBase> targetModels = new ArrayList<IPluginModelBase>(Arrays.asList(state
-				.getTargetModels()));
-
-		if (DEBUG_BUNDLES) {
-			final List<String> targetModelsLocations = new ArrayList<String>();
-			for (final IPluginModelBase model : targetModels) {
-				targetModelsLocations.add(model.getInstallLocation());
-			}
-			debug("Bundles: " + targetModelsLocations);
-		}
-
-		return targetModels;
+	private Stream<IPluginModelBase> createModels(IProgressMonitor monitor, URI[] locations) {
+		PDEState state = new PDEState(locations, true, true, monitor);
+		return stream(state.getTargetModels());
 	}
 
-	private IPluginModelBase filterHooks(List<IPluginModelBase> models) {
-		List<IPluginModelBase> hooks = new ArrayList<IPluginModelBase>();
-		for (IPluginModelBase model : models) {
-			String name = model.getBundleDescription().getSymbolicName();
-			if (Objects.equal(name, AJConstants.HOOK)) {
-				hooks.add(model);
-			}
-		}
+	private void filterHooks() {
+		weavingHook = null;
+		List<IPluginModelBase> hooks = modelIndex.values().stream()
+				.filter(model -> equal(model.getBundleDescription().getSymbolicName(), AJConstants.HOOK))
+				.collect(Collectors.toCollection(ArrayList::new));
 		switch (hooks.size()) {
 		case 0:
-			// no weaving hook
-			return null;
+			return;
 		case 1:
 			// one weaving hook, nothing to filter
-			return hooks.get(0);
+			weavingHook = hooks.get(0);
+			return;
 		default:
 			// find a hook with the latest version, remove other hooks
 			IPluginModelBase maxHook = hooks.get(0);
@@ -400,18 +358,16 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				}
 			}
 			hooks.remove(maxHook);
-			models.removeAll(hooks);
-			return maxHook;
+			modelIndex.values().removeAll(hooks);
+			weavingHook = maxHook;
 		}
 	}
 
 	private IPluginModelBase weavingHook;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private IStatus validateBundles(IProgressMonitor monitor) {
 		ILaunchConfigurationWorkingCopy wc;
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
-		calcModels(sm.split(1, SubMonitor.SUPPRESS_NONE));
 		try {
 			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
 		} catch (CoreException e) {
@@ -435,7 +391,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 						jvm.install.getName()));
 		
 		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
-				new HashSet(Arrays.asList(getTargetModels()))) {
+				new HashSet<>(modelIndex.values())) {
 			@Override
 			protected IExecutionEnvironment[] getMatchingEnvironments()
 					throws CoreException {
@@ -454,9 +410,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		try {
 			StringBuilder b = new StringBuilder();
 			validation.run(sm.split(1));
-			Map input = validation.getInput();
-			Set<Map.Entry> entrySet = input.entrySet();
-			for (Map.Entry e : entrySet) {
+			Map<Object, Object[]> input = validation.getInput();
+			for (Map.Entry<Object, Object[]> e : input.entrySet()) {
 				Object value = e.getKey();
 				if (value instanceof ResolverError) {
 					b.append(value.toString()).append("\n");
@@ -479,9 +434,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public String[] getProducts() {
-		if (!isValid()) {
-			return new String[0];
-		}
 		PDEExtensionRegistry reg = getRegistry();
 		Set<String> result = new TreeSet<String>();
 		IExtension[] extensions = reg.findExtensions("org.eclipse.core.runtime.products", false); //$NON-NLS-1$
@@ -499,12 +451,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return result.toArray(new String[result.size()]);
 	}
 
-	public String[] getApplications() {
-		if (!isValid()) {
-			return new String[0];
+	private void checkResolved() {
+		if (!isResolved()) {
+			throw new IllegalStateException("Unresolved");
 		}
-		PDEExtensionRegistry reg = getRegistry();
+	}
 
+	public String[] getApplications() {
+		PDEExtensionRegistry reg = getRegistry();
 		Set<String> result = new TreeSet<String>();
 		IExtension[] extensions = reg.findExtensions("org.eclipse.core.runtime.applications", false); //$NON-NLS-1$
 		for (int i = 0; i < extensions.length; i++) {
@@ -525,27 +479,35 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	private PDEExtensionRegistry getRegistry() {
+		checkResolved();
 		if (registry == null) {
-			registry = new PDEExtensionRegistry(getTargetModels());
+			if (modelIndex.isEmpty()) {
+				throw new IllegalStateException("Unresolved");
+			}
+			registry = new PDEExtensionRegistry(modelIndex.values().toArray(new IPluginModelBase[0]));
 		}
 		return registry;
 	}
 
 	public IStatus resolve(IProgressMonitor monitor) {
 		ITargetDefinition target = getTarget();
-		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 3);
+		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 4);
 		try {
 			status.add(target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
 				return status;
-			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
-			if (isBad(status))
-				return status;
+			computeModels(m.split(1, SubMonitor.SUPPRESS_NONE));
 			setStartLevels(m.split(1, SubMonitor.SUPPRESS_NONE));
 			status.add(getBundleStatus());
 			index();
+			filterHooks();
+			resolved = target.isResolved();
+			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
+			if (isBad(status))
+				return status;
 			return status;
-		} catch (BundleException | IOException e) {
+		} catch (Exception e) {
+			target.isResolved();
 			status.add(Status.error("Failed to resolve  target definition", e));
 			return status;
 		} finally {
@@ -553,29 +515,29 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 	}
 	
-	private final Map<UniquePluginModel, IPluginModelBase> modelIndex = new HashMap<>();
-	private final Map<UniquePluginModel, TargetBundle> targetBundleIndex = new HashMap<>();
+	private final Multimap<String, IPluginModelBase> modelIndex = HashMultimap.create();
+	private final Multimap<String, TargetBundle> targetBundleIndex = HashMultimap.create();
 	
-
 	private void index() {
-		if (!isResolved()) {
-			throw new IllegalStateException("Unresolved");
-		}
-		stream( getTargetModels()).forEach(m -> modelIndex.putIfAbsent(new UniquePluginModel(m), m));
-		
-		stream(target.getBundles()).forEach(bundle -> targetBundleIndex.put(new UniquePluginModel(bundle), bundle));
-
+		stream(target.getBundles()).forEach(bundle -> targetBundleIndex.put(bundle.getBundleInfo().getSymbolicName(), bundle));
+	}
+	
+	private void resetIndex() {
+		status = new MultiStatus(TargetPlatformHelper.class, 0, "Target platform resolution result");
+		resolved = false;
+		modelIndex.clear();
+		targetBundleIndex.clear();
+		registry = null;
 	}
 
 	@Override
 	public Stream<Model> getModels() {
-		if (!isResolved()) {
-			throw new IllegalStateException("Unresolved");
-		}
+		checkResolved();
 		// Iterating just over getTargetModels does not work - injections are missing
-		return targetBundleIndex.entrySet().stream().map(entry -> new Model(modelIndex.get(entry.getKey()), BundleStart.fromBundle(entry.getValue().getBundleInfo())));
+		// This is caused by removal of alternative versions of non-singleton plugins in org.eclipse.pde.internal.core.PDEState.createTargetModels(BundleDescription[])
+		return modelIndex.values().stream().map(this::toModel);
 	}
-		
+	
 	AutInstall getAutInstall() {
 		final Q7Target target = getQ7Target();
 		if (target == null) {
@@ -1099,10 +1061,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	public OSArchitecture detectArchitecture(
 			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
-		if (!isResolved()) {
-			throw new IllegalStateException("Unresolved");
-		}
-
+		checkResolved();
 		String os = Platform.getOS();
 		TargetBundle[] bundles = target.getAllBundles();
 		for (TargetBundle b : bundles) {
@@ -1251,8 +1210,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public String getEquinoxStartupPath(String packageName) {
-		IPluginModelBase[] targetModels = getTargetModels();
-		for (IPluginModelBase plugin : targetModels) {
+		checkResolved();
+		for (IPluginModelBase plugin : modelIndex.values()) {
 			if (plugin.getPluginBase().getId().equals(packageName)) {
 				String location = plugin.getInstallLocation();
 				if (new File(location).isFile()) {
@@ -1786,7 +1745,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	@Override
 	public int size() {
+		checkResolved();
 		return targetBundleIndex.size();
 	}
 
+	private Model toModel(IPluginModelBase model) {
+		TargetBundle bundle = targetBundleIndex.get(model.getBundleDescription().getSymbolicName()).iterator().next();
+		return new Model(model, BundleStart.fromBundle(bundle.getBundleInfo()));
+	}
+	
 }
