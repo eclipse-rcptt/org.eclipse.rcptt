@@ -26,6 +26,8 @@ class Build implements Serializable {
           memory: "4Gi"
           cpu: "1"
       env:
+      - name: "HOME"
+        value: "/tmp"
       - name: "MAVEN_OPTS"
         value: "-Duser.home=/home/jenkins"
       - name: "XDG_CONFIG_HOME"
@@ -146,6 +148,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
+			sh "env"
       mvn "--version"
       def mvn = { pom ->
           this.mvn "clean ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
