@@ -164,22 +164,25 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 
 			IVMInstall install = page.getJVMInstall();
 			if (install != null) {
-				workingCopy
-						.setAttribute(
-								IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-								String.format(
-										"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-										install.getVMInstallType().getId(),
-										install.getName()));
+				if (workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, (String)null) == null) {
+					workingCopy
+							.setAttribute(
+									IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
+									String.format(
+											"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
+											install.getVMInstallType().getId(),
+											install.getName()));
+				}
 			}
 
-			String programArgs = workingCopy
+			if (workingCopy
 					.getAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-							AUTLaunchArgumentsHelper
+							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String)null) == null) {
+				String programArgs = workingCopy
+						.getAttribute(
+								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+								AUTLaunchArgumentsHelper
 									.getInitialProgramArguments(autArch.name()));
-
-			if (programArgs.length() > 0) {
 				workingCopy
 						.setAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
