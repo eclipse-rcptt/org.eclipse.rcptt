@@ -14,7 +14,6 @@ import static com.google.common.base.Objects.equal;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.isEqual;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
@@ -316,6 +315,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		TargetBundle[] bundles = getTarget().getBundles();
 		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
 		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
+		if (DEBUG_BUNDLES) {
+			final List<String> targetModelsLocations = new ArrayList<String>();
+			for (final IPluginModelBase model : modelIndex.values()) {
+				targetModelsLocations.add(model.getInstallLocation());
+			}
+			debug("Bundles:\n" + String.join("\n", targetModelsLocations));
+		}
+
 		weavingHook = null;
 	}
 
@@ -479,6 +486,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public IStatus resolve(IProgressMonitor monitor) {
+		resetIndex();
 		ITargetDefinition target = getTarget();
 		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 4);
 		try {
