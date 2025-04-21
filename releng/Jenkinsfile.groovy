@@ -26,6 +26,8 @@ class Build implements Serializable {
           memory: "4Gi"
           cpu: "1"
       env:
+      - name: "HOME"
+        value: "/tmp"
       - name: "MAVEN_OPTS"
         value: "-Duser.home=/home/jenkins"
       - name: "XDG_CONFIG_HOME"
@@ -146,6 +148,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
+			sh "env"
       mvn "--version"
       def mvn = { pom ->
           this.mvn "clean ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
@@ -168,7 +171,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void archive() {
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
   }
 
   private void sh_with_return(String command) {
@@ -224,15 +227,18 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void _run_tests(String runner, String dir, String args) {
-    this.script.xvnc() {
-      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-          -Dci-maven-version=2.6.0-SNAPSHOT \
-          -DexplicitRunner=`readlink -f ${runner}` \
-          ${args}"
+		try {
+	    this.script.xvnc() {
+	      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
+	          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+	          -Dci-maven-version=2.6.0-SNAPSHOT \
+	          -DexplicitRunner=`readlink -f ${runner}` \
+	          ${args}"
+	    }
+	    this.script.sh "test -f ${dir}/target/results/tests.html"
+    } finally {
+	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
     }
-    this.script.sh "test -f ${dir}/target/results/tests.html"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
 
   void post_build_actions() {

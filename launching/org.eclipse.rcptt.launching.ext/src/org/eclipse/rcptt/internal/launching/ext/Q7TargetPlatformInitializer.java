@@ -156,6 +156,7 @@ public class Q7TargetPlatformInitializer {
 			}
 			if (!hasEMFValidation) {
 				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
+				q7Deps.getUnits().add("com.ibm.icu");
 			}
 			if (!hasEMF) {
 				q7Deps.getUnits().add(EMF_FEATURE_GROUP);
