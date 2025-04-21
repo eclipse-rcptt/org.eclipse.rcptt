@@ -27,7 +27,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.ui.IStartup;
 
 public class CleanBundlePoolStartup implements IStartup {
@@ -54,6 +53,9 @@ public class CleanBundlePoolStartup implements IStartup {
 				if (version == null || !version.equals(lastRuntimeVersion)) {
 					if (version != null) {
 						store.putValue(LAST_RUNTIME_VERSION, version);
+					}
+					if (lastRuntimeVersion.isEmpty()) {
+						return Status.OK_STATUS;
 					}
 					try {
 						ResourcesPlugin.getWorkspace().run(

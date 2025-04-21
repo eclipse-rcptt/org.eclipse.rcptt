@@ -198,7 +198,7 @@ public class Q7ExternalLaunchDelegate extends
 		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				sm.split(1));
 		if (target == null) {
-			throw new CoreException(Status.error("AUT " + configuration.getName() + " has lost its target platfom. Edit the AUT to restore it."));
+			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
 		}
 		
 
