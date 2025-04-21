@@ -190,6 +190,7 @@ public class PrepareExecutionWrapper extends Executable {
 			if (!id.equals(reportId)) {
 				throw new CoreException(createStatus("Expected item id: " + id + ", actual report id: " + reportId));
 			}
+			ReportHelper.appendLog(resultReport.getRoot(), LoggingCategory.NORMAL, getLog());
 		} catch (CoreException e) {
 			resultReport = generateReport(e.getStatus());
 		}
