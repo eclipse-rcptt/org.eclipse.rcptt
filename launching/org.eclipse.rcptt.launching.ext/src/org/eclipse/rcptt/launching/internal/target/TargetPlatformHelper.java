@@ -316,17 +316,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		TargetBundle[] bundles = getTarget().getBundles();
 		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
 		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
-		// Restore incorrectly removed non-singletons. Actual filtering of singletons would be done in org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate.BundlesToLaunchCollector
-		for (TargetBundle bundle: bundles) {
-			Version version = Version.parseVersion(bundle.getBundleInfo().getVersion());
-			String id = bundle.getBundleInfo().getSymbolicName();
-			Collection<IPluginModelBase> models = modelIndex.get(id);
-			if (models.stream().map(m -> m.getBundleDescription().getVersion())
-					.anyMatch(isEqual(version))) {
-				return;
-			}
-			createModels(null, new URI[] { bundle.getBundleInfo().getLocation() }).forEach(models::add);
-		}
 		weavingHook = null;
 	}
 
