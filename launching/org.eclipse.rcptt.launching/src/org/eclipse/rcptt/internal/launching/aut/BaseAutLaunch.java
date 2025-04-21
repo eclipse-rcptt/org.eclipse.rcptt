@@ -440,12 +440,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			setState(AutLaunchState.RESTART);
 			ILaunchConfiguration launchConfiguration = launch.getLaunchConfiguration();
-			final ILaunchConfigurationWorkingCopy copy;
-			if (launchConfiguration.isWorkingCopy()) {
-				copy = ((ILaunchConfigurationWorkingCopy) launchConfiguration).getOriginal().getWorkingCopy();
-			} else {
-				copy = launchConfiguration.getWorkingCopy();
-			}
+			final ILaunchConfigurationWorkingCopy copy = launchConfiguration.getWorkingCopy();
 			LaunchInfoCache.copyCache(launchConfiguration, copy);
 			LaunchInfoCache.remove(launchConfiguration);
 			// To disable clear area during restart
@@ -465,7 +460,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			copy.setAttribute(IPDELauncherConstants.CONFIG_CLEAR_AREA, configClearArea);
 			copy.setAttribute(IQ7Launch.ATTR_AUT_ID, "");
 			copy.doSave();
-			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch, copy);
+			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch);
 		} catch (Exception e) {
 			terminated(e);
 			Q7LaunchingPlugin.log(e);

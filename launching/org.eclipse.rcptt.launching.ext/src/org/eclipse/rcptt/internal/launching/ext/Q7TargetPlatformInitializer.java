@@ -11,12 +11,12 @@
 package org.eclipse.rcptt.internal.launching.ext;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 import static org.eclipse.rcptt.internal.launching.ext.Q7UpdateSiteExtensions.Q7RuntimeInfo.RAP_PLATFORM;
 import static org.eclipse.rcptt.internal.launching.ext.Q7UpdateSiteExtensions.Q7RuntimeInfo.SWT_PLATFORM;
 
 import java.net.URI;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
@@ -100,7 +99,7 @@ public class Q7TargetPlatformInitializer {
 		try {
 			// Check for dependencies
 			IMetadataRepository repository = PDEHelper.safeLoadRepository(
-					q7Info.q7,  SubMonitor.convert(monitor, 20));
+					q7Info.q7,  sm.split(20, SubMonitor.SUPPRESS_NONE));
 			if (repository == null) {
 				if (sm.isCanceled())
 					return Status.CANCEL_STATUS;
@@ -108,15 +107,15 @@ public class Q7TargetPlatformInitializer {
 			}
 
 			InjectionConfiguration injectionConfiguration = createInjectionConfiguration(
-					new NullProgressMonitor(), q7Info, map);
+					sm.split(20, SubMonitor.SUPPRESS_NONE), q7Info, map);
 			MultiStatus rv = new MultiStatus(PLUGIN_ID, 0, "Runtime injection failed for target platform " + target,
 					null);
 			if (injectionConfiguration != null) {
-				rv.add(target.applyInjection(injectionConfiguration,  SubMonitor.convert(
-						monitor, 60)));
+				rv.add(target.applyInjection(injectionConfiguration,  sm.split(40, SubMonitor.SUPPRESS_NONE)));
 				if (rv.matches(IStatus.CANCEL))
 					return rv;
 			}
+			done(monitor);
 			if (!rv.isOK())
 				return rv;
 			return Status.OK_STATUS;
@@ -151,16 +150,14 @@ public class Q7TargetPlatformInitializer {
 		q7Deps.setUri(q7Info.deps.toString());
 
 		if (!hasRAP) {
-			if (!hasEMFTransaction) {
-				q7Deps.getUnits().add(EMF_TRANSACTION_FEATURE_GROUP);
-			}
-			if (!hasEMFValidation) {
-				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
-				q7Deps.getUnits().add("com.ibm.icu");
-			}
-			if (!hasEMF) {
-				q7Deps.getUnits().add(EMF_FEATURE_GROUP);
-			}
+//			if (!hasEMFTransaction) {
+//				q7Deps.getUnits().add(EMF_TRANSACTION_FEATURE_GROUP);
+//			}
+//			if (!hasEMFValidation) {
+//				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
+//				q7Deps.getUnits().add("com.ibm.icu");
+//			}
+			q7Deps.getUnits().add(EMF_FEATURE_GROUP);
 		}
 		if (hasRAP) {
 			q7Deps.getUnits().add(EQUINOX_EXECUTABLE_FEATURE_GROUP);

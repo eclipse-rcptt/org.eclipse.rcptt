@@ -175,44 +175,6 @@ public class Q7LaunchDelegateUtils {
 		return plugin.getPluginBase().getId();
 	}
 
-	public static void addBundleToMap(IPluginModelBase model,
-			Map<Object, String> fModels, Map<String, String> runlevelsMap) {
-		String name = model.getBundleDescription().getSymbolicName();
-		if (name.equals(AJConstants.AJ_HOOK) || name.equals(AJConstants.AJ_RT)) {
-			PDEUtils.addBundleToMap(fModels, model, "1:true");
-		} else {
-			Map<String, String> manifest = StartLevelSupport.loadManifest(model
-					.getInstallLocation());
-			if (manifest != null) {
-				String startLevel = manifest
-						.get(StartLevelSupport.START_LEVEL_ATTR);
-				String autoStart = manifest
-						.get(StartLevelSupport.AUTO_START_ATTR);
-				if (startLevel == null && autoStart == null) {
-					if (runlevelsMap != null && runlevelsMap.containsKey(name)) {
-						PDEUtils.addBundleToMap(fModels, model,
-								runlevelsMap.get(name));
-						return;
-					}
-				}
-				if (startLevel == null) {
-					startLevel = "default";
-				}
-				if (autoStart == null) {
-					autoStart = "default";
-				}
-				PDEUtils.addBundleToMap(fModels, model, startLevel + ":"
-						+ autoStart);
-				return;
-			}
-			if (runlevelsMap != null && runlevelsMap.containsKey(name)) {
-				PDEUtils.addBundleToMap(fModels, model, runlevelsMap.get(name));
-			} else {
-				PDEUtils.addBundleToMap(fModels, model, "default:default");
-			}
-		}
-	}
-
 	public static void setDelegateFields(
 			EclipseApplicationLaunchConfiguration delegate,
 			Map<IPluginModelBase, String> models, Map<String, List<IPluginModelBase>> allBundles) throws CoreException {

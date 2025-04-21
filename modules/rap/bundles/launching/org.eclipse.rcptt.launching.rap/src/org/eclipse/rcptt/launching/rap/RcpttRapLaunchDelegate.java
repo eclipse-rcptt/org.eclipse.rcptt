@@ -62,8 +62,6 @@ import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IFragmentModel;
 import org.eclipse.pde.core.plugin.IPluginBase;
@@ -220,12 +218,11 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundlesCheck(target.getQ7Target(),
-				target.getTarget(), subm.newChild(50), configuration);
+		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundles(target,
+				subm.newChild(50));
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
-		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 
 		setDelegateFields(this, bundlesToLaunch.fModels,  Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -316,8 +313,13 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
+		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				SubMonitor.convert(monitor, 2));
+		
+		if (target == null) {
+			throw new CoreException(Status.error("AUT " + configuration.getName() + " has lost its target platfom. Edit the AUT to restore it."));
+		}
+
 
 		if (monitor.isCanceled()) {
 			removeTargetPlatform(configuration);
@@ -381,10 +383,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
 			throws CoreException {
-		String targetPlatformName = Q7TargetPlatformManager.getTargetPlatformName(configuration);
-		Q7TargetPlatformManager.delete(targetPlatformName);
+		Q7TargetPlatformManager.delete(configuration);
 		LaunchInfoCache.remove(configuration);
-		TargetPlatformManager.deleteTargetPlatform(targetPlatformName);
 	}
 
 	@Override

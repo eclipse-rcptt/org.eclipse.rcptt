@@ -13,11 +13,12 @@ package org.eclipse.rcptt.internal.launching.aut;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
-
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.ILaunchExecutor;
@@ -25,6 +26,7 @@ import org.eclipse.rcptt.launching.ILaunchExecutor;
 public class BaseAut implements Aut {
 
 	public static final int TERMINATE_CODE = 7788;
+	private static final ILog LOG = Platform.getLog(BaseAut.class);
 
 	public BaseAut(ILaunchConfiguration config, ILaunchExecutor executor) {
 		this.config = config;
@@ -59,5 +61,17 @@ public class BaseAut implements Aut {
 
 	private final ILaunchConfiguration config;
 	private final ILaunchExecutor executor;
+
+	@Override
+	public void delete() {
+		ILaunchConfiguration config2 = getConfig();
+		try {
+			LaunchInfoCache.remove(config2);
+			BaseAutManager.INSTANCE.launchConfigurationRemoved(config2);			
+			config2.delete();
+		} catch (CoreException e) {
+			LOG.log(e.getStatus());
+		}
+	}
 
 }

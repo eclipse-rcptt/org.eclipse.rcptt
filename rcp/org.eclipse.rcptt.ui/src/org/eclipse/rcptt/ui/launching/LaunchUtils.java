@@ -58,7 +58,6 @@ import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.Q7Launcher;
 import org.eclipse.rcptt.launching.utils.TestSuiteUtils;
-import org.eclipse.rcptt.ui.actions.SyncProgressMonitor;
 import org.eclipse.rcptt.ui.launching.aut.AUTConnectionErrorDialog;
 import org.eclipse.rcptt.ui.launching.aut.AUTSelectionDialog;
 import org.eclipse.rcptt.ui.utils.WorkbenchUtils;
@@ -380,8 +379,7 @@ public class LaunchUtils {
 
 				public void run(IProgressMonitor monitor) {
 					try {
-						launch.set(aut.launch(new SyncProgressMonitor(monitor,
-								shell.getDisplay())));
+						launch.set(aut.launch(monitor));
 						status.set(Status.OK_STATUS);
 					} catch (CoreException e) {
 						status.set(e.getStatus());
