@@ -27,17 +27,27 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.workspace.Q7Utils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.rcptt.util.StreamUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 public abstract class BasePersistenceModel implements IPersistenceModel {
+	private static final Bundle BUNDLE = FrameworkUtil.getBundle(BasePersistenceModel.class);
+	private static final ILog LOG = Platform.getLog(BUNDLE);
 
 	protected final Map<String, File> files = new HashMap<String, File>();
+	
 
 	protected abstract void doExtractAll(InputStream contents)
 			throws IOException;
@@ -45,7 +55,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 	protected abstract void doExtractFile(String fName, InputStream contents)
 			throws IOException;
 
-	protected abstract void doReadIndex(InputStream contents);
+	protected abstract void doReadIndex(InputStream contents) throws IOException;
 
 	protected abstract void doStoreTo(File file) throws FileNotFoundException,
 			IOException;
@@ -90,8 +100,14 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		try {
 			readIndex();
 		} catch (CoreException e) {
-			RcpttPlugin.log(e);
+			LOG.log(toMultiStatus("Failed to read " + Q7Utils.getLocation(element) , e));
+		} catch (IOException e) {
+			LOG.error("Failed to read " + Q7Utils.getLocation(element) , e);
 		}
+	}
+
+	private MultiStatus toMultiStatus(String message, CoreException e) {
+		return new MultiStatus(BUNDLE.getSymbolicName(), 0, new IStatus[] {e.getStatus()}, message, e);
 	}
 
 	public Resource getResource() {
@@ -103,7 +119,9 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		try {
 			readIndex();
 		} catch (CoreException e) {
-			RcpttPlugin.log(e);
+			LOG.log(toMultiStatus("Failed to write " + Q7Utils.getLocation(element) , e));
+		} catch (IOException e) {
+			LOG.error("Failed to write " + Q7Utils.getLocation(element) , e);
 		}
 	}
 
@@ -120,19 +138,13 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return files.keySet().toArray(new String[files.size()]);
 	}
 
-	private void readIndex() throws CoreException {
+	private void readIndex() throws CoreException, IOException {
 		assert !disposed;
-		InputStream contents = getContentsStream();
-		if (contents == null) {
-			return;
-		}
-		try {
-			doReadIndex(contents);
-		} finally {
-			try {
-				contents.close();
-			} catch (IOException e) {
+		try (InputStream contents = getContentsStream()) {
+			if (contents == null) {
+				return;
 			}
+			doReadIndex(contents);
 		}
 	}
 

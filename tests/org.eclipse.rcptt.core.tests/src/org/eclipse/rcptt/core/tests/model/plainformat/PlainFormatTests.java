@@ -12,18 +12,20 @@ package org.eclipse.rcptt.core.tests.model.plainformat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import org.junit.Test;
 
 import org.eclipse.rcptt.core.persistence.plain.IPlainConstants;
 import org.eclipse.rcptt.core.persistence.plain.MapMaker;
 import org.eclipse.rcptt.core.persistence.plain.PlainReader;
 import org.eclipse.rcptt.core.persistence.plain.PlainReader.Entry;
 import org.eclipse.rcptt.core.persistence.plain.PlainWriter;
+import org.junit.Test;
+
+import junit.framework.TestCase;
 
 public class PlainFormatTests {
 	@Test
@@ -44,7 +46,7 @@ public class PlainFormatTests {
 				+ "my ecl script\nmy second ecl command\n"
 				+ "my ecl script\nmy second ecl command\n"
 				+ "my ecl script\nmy second ecl command\n")
-				.getBytes(IPlainConstants.ENCODING);
+						.getBytes(IPlainConstants.ENCODING);
 
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		PlainWriter writer = new PlainWriter(bout, IPlainConstants.PLAIN_HEADER);
@@ -80,4 +82,18 @@ public class PlainFormatTests {
 			}
 		}
 	}
+
+	@Test
+	public void file() throws Exception {
+		try (InputStream is = Files
+				.newInputStream(Path.of("/Users/vasiligulevich/git/dt-products-rcptt-tests/functional",
+						"Q7/Contexts/ConfWithSybsystemsForComparison.ctx"));) {
+			PlainReader reader = new PlainReader(is);
+			Map<String, String> header = reader.readHeader();
+			for (Entry e = reader.readEntry(); e != null; e = reader.readEntry()) {
+				System.out.println(e.name);
+			}
+		}
+	}
+
 }

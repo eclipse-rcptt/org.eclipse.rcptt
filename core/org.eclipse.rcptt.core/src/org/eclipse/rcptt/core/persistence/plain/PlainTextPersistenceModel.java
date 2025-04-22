@@ -175,17 +175,9 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						}
 					}
 				} else {
-					throw new Exception("Q7 plain format version is unsupported.");
+					throw new PlainFormatException("Q7 plain format version is unsupported.");
 				}
 			}
-		} catch (PlainFormatException e) {
-			IFile file = element != null ? Q7Utils.getLocation(element) : null;
-			if (file != null) {
-				e.setFileName(file.getLocation().toString());
-			}
-			RcpttPlugin.log(e);
-		} catch (Exception e) {
-			RcpttPlugin.log(e);
 		} finally {
 			if (reader != null) {
 				reader.close();
@@ -194,7 +186,7 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 	}
 
 	@Override
-	protected synchronized void doReadIndex(InputStream contents) {
+	protected synchronized void doReadIndex(InputStream contents) throws IOException {
 		PlainReader reader = null;
 		try {
 			reader = new PlainReader(contents);
@@ -211,11 +203,9 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						putFileItem(entry.name, filePath);
 					}
 				} else {
-					throw new Exception("Q7 plain format version is unsupported.");
+					throw new PlainFormatException("Q7 plain format version is unsupported.");
 				}
 			}
-		} catch (Exception e) {
-			RcpttPlugin.log(e);
 		} finally {
 			if (reader != null) {
 				reader.close();

@@ -12,20 +12,22 @@ package org.eclipse.rcptt.core.persistence.plain;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
-import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.util.Base64;
 import org.eclipse.rcptt.util.FileUtil;
+
+import com.google.common.io.CharSource;
 
 public class PlainReader implements IPlainConstants {
 	private BufferedReader reader;
@@ -35,27 +37,8 @@ public class PlainReader implements IPlainConstants {
 		public String name;
 		private Object content;
 		public Map<String, String> attributes;
-		public String rawData;
 
 		public Object getContent() {
-			if (content == null && rawData != null) {
-				try {
-					byte[] decode = Base64.decode(rawData);
-					if (decode == null) {
-						RcpttPlugin.log(
-								"Failed to decode RCPTT file format, invalid content",
-								null);
-						return null;
-					}
-					ByteArrayInputStream bin = new ByteArrayInputStream(decode);
-					ZipInputStream zin = new ZipInputStream(bin);
-					zin.getNextEntry();
-					content = FileUtil.getStreamContent(zin);
-					rawData = null;
-				} catch (Exception e) {
-					RcpttPlugin.log(e);
-				}
-			}
 			return content;
 		}
 	}
@@ -68,7 +51,7 @@ public class PlainReader implements IPlainConstants {
 
 	private static final List<String> VALID_HEADERS = Arrays.asList(PLAIN_HEADER, PLAIN_METADATA, PLAIN_VERIFICATION,
 			LEGACY_PLAIN_HEADER, LEGACY_PLAIN_METADATA, LEGACY_PLAIN_VERIFICATION);
-	public Map<String, String> readHeader() throws Exception {
+	public Map<String, String> readHeader() throws IOException {
 		String header = reader.readLine();
 		if (header == null) {
 			return null;
@@ -96,7 +79,7 @@ public class PlainReader implements IPlainConstants {
 		return map;
 	}
 
-	private Map<String, String> readAttributes() throws IOException, Exception {
+	private Map<String, String> readAttributes() throws IOException {
 		Map<String, String> map = new HashMap<String, String>();
 		while (true) {
 			String line = reader.readLine();
@@ -129,7 +112,7 @@ public class PlainReader implements IPlainConstants {
 	 * @return
 	 * @throws IOException
 	 */
-	public Entry readEntry() throws Exception {
+	public Entry readEntry() throws IOException {
 		String entryHeader = reader.readLine();
 		if (entryHeader == null) {
 			return null;
@@ -146,39 +129,43 @@ public class PlainReader implements IPlainConstants {
 			entry.attributes = readAttributes();
 			entry.name = entry.attributes.get(ATTR_ENTRY_NAME);
 			String contentType = entry.attributes.get(ATTR_CONTENT_TYPE);
-			List<String> lines = new ArrayList<String>();
-			while (true) {
-				String line = reader.readLine();
-				if (line == null
-						|| line.trim().equals(entryHeader + NODE_POSTFIX)) {
-					break;
+			try (SeparatorReader separatorReader = new SeparatorReader(reader, entryHeader + NODE_POSTFIX)) {
+				if (contentType != null && contentType.contains("text")) {
+					// Text mode content
+					try (Stream<String> lines = new BufferedReader(separatorReader).lines()) {
+						StringBuilder builder = new StringBuilder();
+						lines.forEach(s -> builder.append(s).append("\n"));
+						String resultStr = builder.toString();
+						if (resultStr.endsWith("\n")) {
+							resultStr = resultStr.substring(0, resultStr.length()
+									- "\n".length());
+						}
+						entry.content = resultStr;
+					}
+				} else if (contentType != null && contentType.contains("binary")) {
+					// Base64 encoded content
+					CharSource charSource = new CharSource() {
+						@Override
+						public Reader openStream() throws IOException {
+							return separatorReader;
+						}
+					};
+					try (InputStream base64 = charSource.asByteSource(StandardCharsets.UTF_8).openStream();
+							InputStream decoded = Base64.getMimeDecoder().wrap(base64);
+							ZipInputStream zin = new ZipInputStream(decoded);
+							) {
+						zin.getNextEntry();
+						entry.content = FileUtil.getStreamContent(zin);
+					}
+	
 				}
-				lines.add(line);
 			}
-			if (contentType != null && contentType.contains("text")) {
-				// Text mode content
-				StringBuilder builder = new StringBuilder();
-				for (String s : lines) {
-					builder.append(s).append("\n");
-				}
-				String resultStr = builder.toString();
-				if (resultStr.endsWith("\n")) {
-					resultStr = resultStr.substring(0, resultStr.length()
-							- "\n".length());
-				}
-				entry.content = resultStr;
-			} else if (contentType != null && contentType.contains("binary")) {
-				// Base64 encoded content
-				StringBuilder builder = new StringBuilder();
-				for (String s : lines) {
-					builder.append(s);
-				}
-				entry.rawData = builder.toString();
-			}
+			reader.readLine();
+
 			return entry;
 
 		} else {
-			throw new PlainFormatException("Wrong RCPTT plain format");
+			throw new PlainFormatException("Wrong RCPTT plain format. Invalid entry header: " + entryHeader);
 		}
 	}
 
