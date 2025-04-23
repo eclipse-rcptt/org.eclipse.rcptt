@@ -12,20 +12,19 @@ package org.eclipse.rcptt.core.persistence.plain;
 
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-import org.junit.Assert;
+import org.eclipse.rcptt.core.persistence.plain.SeparatorReader.Separator;
 import org.junit.Test;
 
 import com.google.common.io.CharStreams;
 
 public class SeparatorReaderTest {
+	private static final Separator.Exact SEPARATOR = new Separator.Exact("SEP");
+
 
 	@Test
 	public void middle() throws IOException {
@@ -85,7 +84,7 @@ public class SeparatorReaderTest {
 	}
 
 	private static void assertSegment(String message, String expected, BufferedReader reader, int readSize) throws IOException {
-		try (SeparatorReader subject = new SeparatorReader(reader, "SEP")) {
+		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR)) {
 			StringBuilder sb = new StringBuilder();
 			char[] b= new char[readSize];
 			for (;;) {
@@ -101,7 +100,7 @@ public class SeparatorReaderTest {
 
 	private void assertValidSplit(String prefix, String suffix, String input) {
 		StringReader reader = new StringReader(input);
-		try (SeparatorReader subject = new SeparatorReader(reader, "SEP")) {
+		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR)) {
 			assertEquals(prefix, CharStreams.toString(subject));
 			assertEquals(suffix, CharStreams.toString(reader));
 		} catch (IOException e) {

@@ -12,23 +12,100 @@ package org.eclipse.rcptt.core.persistence.plain;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 
 
 /** Reads a markable stream until terminator
  *  Terminator is consumed.
  * **/
-public class SeparatorReader extends  java.io.Reader {
-	private final String terminator;
+public class SeparatorReader extends java.io.Reader {
+	private static final boolean DEBUG = false;
+	private final Separator terminator;
 	private final Reader reader;
 	private final StringBuilder tail = new StringBuilder();
 	private char[] tempBuffer = new char[5];
-
-	public SeparatorReader(Reader reader, String separator) {
-		this.terminator = separator;
-		this.reader = reader;
-		if (terminator.length() == 0) {
-			throw new IllegalArgumentException("Empty separator");
+	
+	public static class Match {
+		public final int start, end;
+		public Match(int start, int end) {
+			this.start = start;
+			this.end = end;
+			if (start < 0 || end <= start) {
+				throw new IllegalArgumentException();
+			}
 		}
+	}
+	
+	interface Separator {
+		int length();
+		Optional<Match> find(CharSequence input);
+		
+		public class WithSuffix implements Separator {
+			private final Separator separator;
+			private final Collection<String> suffixes;
+			private final int length;
+			public WithSuffix(Separator separator, Collection<String> suffixes) {
+				this.suffixes = new ArrayList<>(suffixes);
+				this.separator = Objects.requireNonNull(separator);
+				this.length = separator.length() + suffixes.stream().mapToInt(String::length).max().orElseThrow(() -> new IllegalArgumentException("suffixes can't be empty"));
+			}
+			@Override
+			public Optional<Match> find(CharSequence input) {
+				return separator.find(input).flatMap(match -> {
+					CharSequence actualSuffix = input.subSequence(match.end, input.length());
+					return suffixes.stream().filter(s -> startsWith(actualSuffix, s)).findFirst().map(s -> new Match(match.start, match.end + s.length()));
+				});
+			}
+			@Override
+			public int length() {
+				return length;
+			}
+		}
+		
+		public class Exact implements Separator {
+			private String separator;
+
+			public Exact(String string) {
+				this.separator = string;
+				if (string.isEmpty()) {
+					throw new IllegalArgumentException("Separator can't be empty");
+				}
+			}
+
+			@Override
+			public int length() {
+				return separator.length();
+			}
+
+			@Override
+			public Optional<Match> find(CharSequence input) {
+				// TODO optimize?
+				int position = input.toString().indexOf(separator);
+				if (position < 0) {
+					return Optional.empty();
+				}
+				return Optional.of(new Match(position, position+separator.length()));
+			}
+			
+		}
+	}
+	
+	private static boolean startsWith(CharSequence input, String prefix) {
+		for (int i = 0; i < input.length() && i < prefix.length(); i++) {
+			if (input.charAt(i) != prefix.charAt(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+
+	public SeparatorReader(Reader reader, Separator separator) {
+		this.terminator = Objects.requireNonNull(separator);
+		this.reader = reader;
 		if (!reader.markSupported()) {
 			throw new IllegalArgumentException("mark() support is required");
 		}
@@ -50,29 +127,37 @@ public class SeparatorReader extends  java.io.Reader {
 		} 
 		int oldTail = tail.length();
 		tail.append(tempBuffer, 0, result);
-		int position = tail.indexOf(terminator);
-		if (position >= 0) {
+		Match match = terminator.find(tail).orElse(null);
+		if (match != null) {
 			reader.reset();
-			int read = reader.read(tempBuffer, 0, position + terminator.length() - oldTail);
-			assert read == position + terminator.length();
+			long read = reader.skip(match.end - oldTail);
+			assert read == match.end - oldTail;
+			if (DEBUG) {
+				reader.mark(tempBuffer.length+1);
+				result = reader.read(tempBuffer, 0, Math.min(tempBuffer.length, 150));
+				reader.reset();
+				if (result > 0) {
+					System.out.println("After segment: " + new String(tempBuffer, 0, result));
+				}
+			}
 		}
 		return readTail(cbuf, off, len);
 	}
 	
 	private int readTail(char[] cbuf, int off, int len) {
-		if (tail.length() >= terminator.length()) {
-			int position = tail.indexOf(terminator);
-			if (position == 0) {
-				return -1;
-			} else if (position > 0) {
-				len = Math.min(position, len);
-				return cutTail(cbuf, off, len);
-			} else {
-				len = Math.min(len, tail.length() - terminator.length());
-				return cutTail(cbuf, off, len);
+		Match match = terminator.find(tail).orElse(null);
+		if (match == null) {
+			len = Math.min(len, tail.length() - terminator.length());
+			if (len <= 0) {
+				return 0;
 			}
+			return cutTail(cbuf, off, len);
 		}
-		return 0;
+		if (match.start == 0) {
+			return -1;
+		}
+		len = Math.min(match.start, len);
+		return cutTail(cbuf, off, len);
 	}
 
 	private int cutTail(char[] cbuf, int off, int len) {

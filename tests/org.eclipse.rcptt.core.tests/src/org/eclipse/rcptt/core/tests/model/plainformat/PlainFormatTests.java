@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.tests.model.plainformat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -23,9 +25,8 @@ import org.eclipse.rcptt.core.persistence.plain.MapMaker;
 import org.eclipse.rcptt.core.persistence.plain.PlainReader;
 import org.eclipse.rcptt.core.persistence.plain.PlainReader.Entry;
 import org.eclipse.rcptt.core.persistence.plain.PlainWriter;
+import org.junit.Assert;
 import org.junit.Test;
-
-import junit.framework.TestCase;
 
 public class PlainFormatTests {
 	@Test
@@ -61,39 +62,97 @@ public class PlainFormatTests {
 
 		// System.out.println(content);
 		ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-		PlainReader reader = new PlainReader(bin);
-		Map<String, String> map = reader.readHeader();
-		TestCase.assertNotNull(map);
-		// System.out.println(map);
-		while (true) {
-			Entry entry = reader.readEntry();
-			if (entry == null) {
-				break;
-			}
-			// System.out.println("entry:" + entry.name);
-			// System.out.println(entry.attributes);
-			if (entry.getContent() instanceof String) {
-				// System.out.println(entry.getContent());
-				TestCase.assertEquals(ecl_content, (String) entry.getContent());
-			} else if (entry.getContent() instanceof byte[]) {
-				// System.out.println(new String((byte[]) entry.getContent()));
-				TestCase.assertTrue(Arrays.equals(raw_content,
-						(byte[]) entry.getContent()));
+		try (PlainReader reader = new PlainReader(bin)) {
+			Map<String, String> map = reader.readHeader();
+			Assert.assertNotNull(map);
+			// System.out.println(map);
+			while (true) {
+				Entry entry = reader.readEntry();
+				if (entry == null) {
+					break;
+				}
+				// System.out.println("entry:" + entry.name);
+				// System.out.println(entry.attributes);
+				if (entry.getContent() instanceof String) {
+					// System.out.println(entry.getContent());
+					assertEquals(ecl_content, (String) entry.getContent());
+				} else if (entry.getContent() instanceof byte[]) {
+					// System.out.println(new String((byte[]) entry.getContent()));
+					assertTrue(Arrays.equals(raw_content,
+							(byte[]) entry.getContent()));
+				}
 			}
 		}
 	}
 
 	@Test
-	public void file() throws Exception {
-		try (InputStream is = Files
-				.newInputStream(Path.of("/Users/vasiligulevich/git/dt-products-rcptt-tests/functional",
-						"Q7/Contexts/ConfWithSybsystemsForComparison.ctx"));) {
-			PlainReader reader = new PlainReader(is);
-			Map<String, String> header = reader.readHeader();
-			for (Entry e = reader.readEntry(); e != null; e = reader.readEntry()) {
-				System.out.println(e.name);
-			}
+	public void invalidEntryHeaderReproducer() throws IOException {
+		try (PlainReader reader = new PlainReader(
+				getClass().getResourceAsStream("ConfWithSybsystemsForComparison.ctx"))) {
+			reader.readHeader();
+			assertEntryCount(13, reader);
 		}
 	}
 
+	@Test
+	public void illegalBase64EndingSequenceReproducer() throws IOException {
+		try (PlainReader reader = new PlainReader(
+				getClass().getResourceAsStream("ProjectWithParametersContext.ctx"))) {
+			reader.readHeader();
+			assertEntryCount(4, reader);
+		}
+	}
+	
+	@Test
+	public void illegalBase64EndingSequenceReproducer2() throws IOException {
+		try (PlainReader reader = new PlainReader(
+				getClass().getResourceAsStream("ProjectWithParametersContext2.txt"))) {
+			assertEntryCount(4, reader);
+		}
+	}
+
+
+	@Test
+	public void footerShouldOnlyBeRecognizedOnAseparateLine() throws Exception {
+		String data = """
+				--- RCPTT testcase ---
+				Format-Version: 1.0
+				Save-Time: 1/16/18 8:50 PM
+				Testcase-Type: ecl
+
+				------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+				Content-Type: text/ecl
+				Entry-Name: .content
+
+				>------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--" | verify-true
+				------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
+				""";
+		try (PlainReader reader = new PlainReader(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)))) {
+			reader.readHeader();
+			Entry e = reader.readEntry(); // should not throw
+			Assert.assertTrue(((String) e.getContent()).contains("verify-true"));
+		}
+	}
+
+	// @Test
+	// public void file() throws Exception {
+	// try (InputStream is = Files
+	// .newInputStream(Path.of("/Users/vasiligulevich/git/org.eclipse.rcptt",
+	// "rcpttTests/ECL_IDE_module/selfAUTTests/verifications/Workspace/VerifyWorkspace.test"));) {
+	// PlainReader reader = new PlainReader(is);
+	// Map<String, String> header = reader.readHeader();
+	// for (Entry e = reader.readEntry(); e != null; e = reader.readEntry()) {
+	// System.out.println(e.name);
+	// }
+	// }
+	// }
+
+	private void assertEntryCount(int expected, PlainReader reader) throws IOException {
+		int i = 0;
+		while (reader.readEntry() != null) {  // should not throw
+			i++;
+		}
+		assertEquals(expected, i);
+	}
+	
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence;
 
+import static java.lang.Math.min;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -33,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.workspace.Q7Utils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
@@ -195,9 +196,13 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			return null;
 		}
 		waitUntilExtracted(name);
-		if (!file.exists()) {
-			extractFile(name);
-			waitUntilExtracted(name);
+		try {
+			if (!file.exists()) {
+				extractFile(name);
+				waitUntilExtracted(name);
+			}
+		} catch (IOException e) {
+			LOG.error("Can't extract " + name + " from " + element);
 		}
 		if (file.exists()) {
 			try {
@@ -227,7 +232,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return new BufferedInputStream(new FileInputStream(file));
 	}
 
-	private void extractFile(String fName) {
+	private void extractFile(String fName) throws IOException {
 		initialize();
 		InputStream contents = null;
 		try {
@@ -242,8 +247,6 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				return;
 			}
 			doExtractFile(fName, contents);
-		} catch (Throwable e1) {
-			RcpttPlugin.log(e1);
 		} finally {
 			synchronized (extractions) {
 				extractions.remove(fName);
@@ -270,7 +273,11 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		File file = files.get(name);
 		if (file != null && file.exists()) {
 			file.delete();
-			extractFile(name);
+			try {
+				extractFile(name);
+			} catch (IOException e) {
+				LOG.error("Can't extract " + name + " from " + element);
+			}
 			return file.exists();
 		}
 		return false;
@@ -346,12 +353,12 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		removeAll();
 		String[] names = originalModel.getNames();
 		for (String name : names) {
-			InputStream inputStream = originalModel.read(name);
+			try (InputStream inputStream = originalModel.read(name);
 			OutputStream outputStream = store(name);
-			try {
+					) {
 				FileUtil.copy(inputStream, outputStream);
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new IllegalStateException(e);
 			}
 		}
 
@@ -373,35 +380,30 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 	}
 
 	public int size(String teslaContentEntry) {
-		InputStream stream = read(teslaContentEntry);
 		int result = 0;
-		if (stream != null) {
-			try {
-
-				byte[] buffer = new byte[4096];
-				int len = 0;
-				while ((len = stream.read(buffer)) > 0) {
-					result += len;
+		try (InputStream stream = read(teslaContentEntry)) {
+			if (stream != null) {
+				try {
+					result = (int) min(Integer.MAX_VALUE, stream.skip(Long.MAX_VALUE));
+				} finally {
+					StreamUtil.closeSilently(stream);
 				}
-			} catch (IOException e) {
-				result = 0;
-			} finally {
-				StreamUtil.closeSilently(stream);
 			}
+		} catch (IOException e) {
+			LOG.error("Can't extract " + teslaContentEntry + " from " + element);
 		}
 		return result;
 	}
 
 	public void rename(String oldName, String newName) {
-		InputStream read = read(oldName);
-		if (read != null) {
-			OutputStream store = store(newName);
-			try {
-				FileUtil.copy(read, store);
-				delete(oldName);
-			} catch (IOException e) {
-				RcpttPlugin.log(e);
+		try (InputStream read = read(oldName);
+			OutputStream store = store(newName)) {
+			if (read != null) {
+					FileUtil.copy(read, store);
+					delete(oldName);
 			}
+		} catch (IOException e ) {
+			throw new IllegalStateException(e);
 		}
 	}
 }

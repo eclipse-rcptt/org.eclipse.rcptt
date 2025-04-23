@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence.plain;
 
+import static java.util.Arrays.asList;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,24 +25,38 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
+import org.eclipse.rcptt.core.persistence.plain.SeparatorReader.Separator;
 import org.eclipse.rcptt.util.FileUtil;
 
 import com.google.common.io.CharSource;
 
-public class PlainReader implements IPlainConstants {
+public class PlainReader implements IPlainConstants, Closeable {
 	private BufferedReader reader;
 	private InputStream in;
 
 	public static class Entry {
-		public String name;
-		private Object content;
-		public Map<String, String> attributes;
+		public final String name;
+		private final Object content;
+		public final Map<String, String> attributes;
+
+		public Entry(String name, Map<String, String> attributes, Object content) {
+			super();
+			this.name = Objects.requireNonNull(name);
+			this.attributes = Objects.requireNonNull(attributes);
+			this.content = content;
+		}
 
 		public Object getContent() {
 			return content;
+		}
+		
+		@Override
+		public String toString() {
+			return name;
 		}
 	}
 
@@ -125,11 +142,10 @@ public class PlainReader implements IPlainConstants {
 			return null;
 		}
 		if (entryHeader.startsWith(NODE_PREFIX)) {
-			Entry entry = new Entry();
-			entry.attributes = readAttributes();
-			entry.name = entry.attributes.get(ATTR_ENTRY_NAME);
-			String contentType = entry.attributes.get(ATTR_CONTENT_TYPE);
-			try (SeparatorReader separatorReader = new SeparatorReader(reader, entryHeader + NODE_POSTFIX)) {
+			Map<String, String> attributes = readAttributes();
+			String name = attributes.get(ATTR_ENTRY_NAME);
+			String contentType = attributes.get(ATTR_CONTENT_TYPE);
+			try (SeparatorReader separatorReader = new SeparatorReader(reader, new Separator.WithSuffix(new Separator.Exact(entryHeader + NODE_POSTFIX), asList("\n", "\r\n")))) {
 				if (contentType != null && contentType.contains("text")) {
 					// Text mode content
 					try (Stream<String> lines = new BufferedReader(separatorReader).lines()) {
@@ -140,7 +156,8 @@ public class PlainReader implements IPlainConstants {
 							resultStr = resultStr.substring(0, resultStr.length()
 									- "\n".length());
 						}
-						entry.content = resultStr;
+						Entry entry = new Entry(name, attributes, resultStr);
+						return entry;
 					}
 				} else if (contentType != null && contentType.contains("binary")) {
 					// Base64 encoded content
@@ -155,20 +172,19 @@ public class PlainReader implements IPlainConstants {
 							ZipInputStream zin = new ZipInputStream(decoded);
 							) {
 						zin.getNextEntry();
-						entry.content = FileUtil.getStreamContent(zin);
+						Entry entry = new Entry(name, attributes, FileUtil.getStreamContent(zin));
+						return entry;
 					}
 	
 				}
 			}
-			reader.readLine();
-
-			return entry;
-
+			throw new PlainFormatException("Entry " + name + " has unknown content type");
 		} else {
 			throw new PlainFormatException("Wrong RCPTT plain format. Invalid entry header: " + entryHeader);
 		}
 	}
 
+	@Override
 	public void close() {
 		FileUtil.safeClose(reader);
 		FileUtil.safeClose(in);
