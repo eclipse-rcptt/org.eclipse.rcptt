@@ -84,6 +84,7 @@ public class SeparatorReader extends java.io.Reader {
 			public Optional<Match> find(CharSequence input) {
 				// TODO optimize?
 				int position = input.toString().indexOf(separator);
+//				int position = indexOfStart(input, separator); // twice as slow
 				if (position < 0) {
 					return Optional.empty();
 				}
@@ -91,6 +92,24 @@ public class SeparatorReader extends java.io.Reader {
 			}
 			
 		}
+	}
+	
+	private static int indexOfStart(CharSequence input, String pattern) {
+		int prefixLen = 0;
+		int length = input.length();
+		for (int position = 0; position < length; position++) {
+			char c = input.charAt(position);
+			char p = pattern.charAt(prefixLen);
+			if (c == p) {
+				prefixLen++;
+				if (prefixLen >= pattern.length()) {
+					return position - prefixLen + 1;
+				}
+			} else {
+				prefixLen = c == pattern.charAt(0) ? 1 : 0;
+			}
+		}
+		return -1;
 	}
 	
 	private static boolean startsWith(CharSequence input, String prefix) {
