@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.workspace.Q7Utils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
@@ -103,7 +104,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		} catch (CoreException e) {
 			LOG.log(toMultiStatus("Failed to read " + Q7Utils.getLocation(element) , e));
 		} catch (IOException e) {
-			LOG.error("Failed to read " + Q7Utils.getLocation(element) , e);
+			error("Failed to read " + Q7Utils.getLocation(element) , e);
 		}
 	}
 
@@ -122,7 +123,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		} catch (CoreException e) {
 			LOG.log(toMultiStatus("Failed to write " + Q7Utils.getLocation(element) , e));
 		} catch (IOException e) {
-			LOG.error("Failed to write " + Q7Utils.getLocation(element) , e);
+			error("Failed to write " + Q7Utils.getLocation(element) , e);
 		}
 	}
 
@@ -202,7 +203,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				waitUntilExtracted(name);
 			}
 		} catch (IOException e) {
-			LOG.error("Can't extract " + name + " from " + element);
+			error("Can't extract " + name + " from " + element);
 		}
 		if (file.exists()) {
 			try {
@@ -276,7 +277,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			try {
 				extractFile(name);
 			} catch (IOException e) {
-				LOG.error("Can't extract " + name + " from " + element);
+				error("Can't extract " + name + " from " + element);
 			}
 			return file.exists();
 		}
@@ -390,7 +391,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				}
 			}
 		} catch (IOException e) {
-			LOG.error("Can't extract " + teslaContentEntry + " from " + element);
+			error("Can't extract " + teslaContentEntry + " from " + element);
 		}
 		return result;
 	}
@@ -406,4 +407,13 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	void error(String message, Exception e) {
+		LOG.log(new Status(IStatus.ERROR, BUNDLE.getSymbolicName(), 0, message, e));
+	}
+	
+	void error(String message) {
+		error(message, null);
+	}
+	
 }

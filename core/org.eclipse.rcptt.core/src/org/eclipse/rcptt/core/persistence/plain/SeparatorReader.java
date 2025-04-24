@@ -181,7 +181,7 @@ public class SeparatorReader extends java.io.Reader {
 
 	private int cutTail(char[] cbuf, int off, int len) {
 		assert len > 0;
-		if (tail.isEmpty()) {
+		if (tail.length() == 0) {
 			return -1;
 		}
 		len = Math.min(tail.length(), len);
