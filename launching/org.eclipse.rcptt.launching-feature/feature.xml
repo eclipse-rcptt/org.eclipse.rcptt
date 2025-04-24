@@ -32,6 +32,7 @@
       <import feature="org.eclipse.rcptt.ecl.platform" version="2.6.0" match="compatible"/>
       <import feature="org.eclipse.rcptt.updates" version="2.6.0" match="compatible"/>
       <import feature="org.eclipse.rcptt.ecl.server" version="2.6.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.core" version="2.6.0.qualifier"/>
    </requires>
 
    <plugin
