@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence.plain;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 public interface IPlainConstants {
 	public static final String ENCODING = "utf-8";
+	public static final Charset ENCODING_OBJECT = StandardCharsets.UTF_8;
 	public static final int STRIP_LEN = 80;
 	public static final String NODE_POSTFIX = "--";
 	public static final String ATTR_ENTRY_NAME = "Entry-Name";

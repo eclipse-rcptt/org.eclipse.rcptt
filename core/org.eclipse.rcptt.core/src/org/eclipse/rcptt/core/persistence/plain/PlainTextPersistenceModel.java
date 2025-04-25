@@ -12,7 +12,6 @@ package org.eclipse.rcptt.core.persistence.plain;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -109,18 +108,9 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						}
 						File file = files.get(entry.name);
 						if (file != null && !file.exists()) {
-							try (OutputStream outputStream = internalStore(entry.name)) {
-								byte[] data = null;
-								if (entry.getContent() instanceof String) {
-									data = ((String) entry.getContent()).getBytes(ENCODING);
-								} else if (entry.getContent() instanceof byte[]) {
-									data = (byte[]) entry.getContent();
-								}
-								if (data != null) {
-									FileUtil.copy(new ByteArrayInputStream(data), outputStream);
-								} else {
-									throw new IOException("Wrong Plain file format");
-								}
+							try (OutputStream outputStream = internalStore(entry.name);
+								InputStream data = entry.getContent()) {
+								FileUtil.copy(data, outputStream);
 							}
 						}
 					}
@@ -146,22 +136,13 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 							break;
 						}
 						if (fName.equals(entry.name)) {
-							try(OutputStream outputStream = internalStore(fName)) {
-								byte[] data = null;
-								if (entry.getContent() instanceof String) {
-									data = ((String) entry.getContent()).getBytes(ENCODING);
-								} else if (entry.getContent() instanceof byte[]) {
-									data = (byte[]) entry.getContent();
-								}
-								if (data != null) {
-									FileUtil.copy(new ByteArrayInputStream(data), outputStream);
-								} else {
-									outputStream.close();
-									delete(fName);
-									throw new IOException("Wrong Plain file format");
-								}
+							try (OutputStream outputStream = internalStore(entry.name);
+									InputStream data = entry.getContent()) {
+									FileUtil.copy(data, outputStream);
 							}
+							break;
 						}
+						
 					}
 				} else {
 					throw new PlainFormatException("Q7 plain format version is unsupported.");

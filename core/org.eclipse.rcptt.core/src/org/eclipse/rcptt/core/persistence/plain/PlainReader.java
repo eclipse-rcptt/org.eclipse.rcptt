@@ -14,19 +14,19 @@ import static java.util.Arrays.asList;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.rcptt.core.persistence.plain.SeparatorReader.Separator;
@@ -36,22 +36,40 @@ import com.google.common.io.CharSource;
 
 public class PlainReader implements IPlainConstants, Closeable {
 	private BufferedReader reader;
-	private InputStream in;
+	private final InputStream in;
+	public Reader currentSegment;
 
 	public static class Entry {
 		public final String name;
-		private final Object content;
+		private final CharSource segment;
 		public final Map<String, String> attributes;
 
-		public Entry(String name, Map<String, String> attributes, Object content) {
+		public Entry(String name, Map<String, String> attributes, CharSource segment) {
 			super();
 			this.name = Objects.requireNonNull(name);
 			this.attributes = Objects.requireNonNull(attributes);
-			this.content = content;
+			this.segment = Objects.requireNonNull(segment);
 		}
 
-		public Object getContent() {
-			return content;
+		public InputStream getContent() throws IOException {
+			String contentType = attributes.get(ATTR_CONTENT_TYPE);
+			if (contentType != null && contentType.contains("text")) {
+				// Text mode content, remove trailing new line 
+				String content = segment.read();
+				String suffix = "\n";
+				if (content.endsWith(suffix)) {
+					content = content.substring(0, content.length() - suffix.length());
+				}
+				return new ByteArrayInputStream(content.getBytes(ENCODING_OBJECT));
+			} else if (contentType != null && contentType.contains("binary")) {
+				// Zipped, base64 encoded content, may be very large
+				InputStream segmentBytes = segment.asByteSource(ENCODING_OBJECT).openStream();
+				InputStream decoded = Base64.getMimeDecoder().wrap(segmentBytes);
+				ZipInputStream zin = new ZipInputStream(decoded);
+				zin.getNextEntry();
+				return zin;
+			}
+			throw new PlainFormatException("Entry " + name + " has unknown content type");
 		}
 		
 		@Override
@@ -130,6 +148,11 @@ public class PlainReader implements IPlainConstants, Closeable {
 	 * @throws IOException
 	 */
 	public Entry readEntry() throws IOException {
+		if (currentSegment != null) {
+			currentSegment.skip(Long.MAX_VALUE);
+			currentSegment.close();
+			currentSegment = null;
+		}
 		String entryHeader = reader.readLine();
 		if (entryHeader == null) {
 			return null;
@@ -141,44 +164,24 @@ public class PlainReader implements IPlainConstants, Closeable {
 		if (entryHeader == null) {
 			return null;
 		}
+		
 		if (entryHeader.startsWith(NODE_PREFIX)) {
 			Map<String, String> attributes = readAttributes();
 			String name = attributes.get(ATTR_ENTRY_NAME);
-			String contentType = attributes.get(ATTR_CONTENT_TYPE);
-			try (SeparatorReader separatorReader = new SeparatorReader(reader, new Separator.WithSuffix(new Separator.Exact(entryHeader + NODE_POSTFIX), asList("\n", "\r\n")))) {
-				if (contentType != null && contentType.contains("text")) {
-					// Text mode content
-					try (Stream<String> lines = new BufferedReader(separatorReader).lines()) {
-						StringBuilder builder = new StringBuilder();
-						lines.forEach(s -> builder.append(s).append("\n"));
-						String resultStr = builder.toString();
-						if (resultStr.endsWith("\n")) {
-							resultStr = resultStr.substring(0, resultStr.length()
-									- "\n".length());
-						}
-						Entry entry = new Entry(name, attributes, resultStr);
-						return entry;
-					}
-				} else if (contentType != null && contentType.contains("binary")) {
-					// Base64 encoded content
-					CharSource charSource = new CharSource() {
+			SeparatorReader separatorReader = new SeparatorReader(reader, new Separator.WithSuffix(new Separator.Exact(entryHeader + NODE_POSTFIX), asList("\n", "\r\n")));
+			currentSegment = separatorReader;
+			CharSource charSource = new CharSource() {
+				@Override
+				public Reader openStream() throws IOException {
+					return new FilterReader(separatorReader) {
 						@Override
-						public Reader openStream() throws IOException {
-							return separatorReader;
+						public void close() throws IOException {
+							// Do not close, next entry still needs to skip the rest of current segment
 						}
 					};
-					try (InputStream base64 = charSource.asByteSource(StandardCharsets.UTF_8).openStream();
-							InputStream decoded = Base64.getMimeDecoder().wrap(base64);
-							ZipInputStream zin = new ZipInputStream(decoded);
-							) {
-						zin.getNextEntry();
-						Entry entry = new Entry(name, attributes, FileUtil.getStreamContent(zin));
-						return entry;
-					}
-	
 				}
-			}
-			throw new PlainFormatException("Entry " + name + " has unknown content type");
+			};
+			return new Entry(name, attributes, charSource);
 		} else {
 			throw new PlainFormatException("Wrong RCPTT plain format. Invalid entry header: " + entryHeader);
 		}
