@@ -6,7 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Export-Package: org.eclipse.rcptt.core,
  org.eclipse.rcptt.core.model,
  org.eclipse.rcptt.core.model.index,
