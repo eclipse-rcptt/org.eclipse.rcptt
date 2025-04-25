@@ -6,7 +6,7 @@ Bundle-Version: 2.6.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Export-Package: org.eclipse.rcptt.profiling.core,
  org.eclipse.rcptt.sherlock.jobs.jobs,
  org.eclipse.rcptt.sherlock.jobs.jobs.impl,
