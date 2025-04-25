@@ -299,6 +299,14 @@ public abstract class Q7NamedElement extends Openable implements
 			return false;
 		return info.hasChanges();
 	}
+	
+	@Override
+	public Object getElementInfo() throws ModelException {
+		if (isWorkingCopy()) {
+			return getPerWorkingCopyInfo().resourceInfo;
+		}
+		return super.getElementInfo();
+	}
 
 	@Override
 	protected boolean isInWorkingCopyMode() {
