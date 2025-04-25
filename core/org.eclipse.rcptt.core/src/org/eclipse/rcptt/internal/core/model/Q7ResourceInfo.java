@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -76,7 +75,7 @@ public class Q7ResourceInfo extends OpenableElementInfo {
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
-				throw new RuntimeException("Empty resource " + uri);
+				throw new ModelException(new Q7Status(0, "Empty resource " + uri));
 			}
 			for (EObject eObject : contents) {
 				if (eObject instanceof NamedElement) {
