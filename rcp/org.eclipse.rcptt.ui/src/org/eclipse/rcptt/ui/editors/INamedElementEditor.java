@@ -18,7 +18,7 @@ public interface INamedElementEditor {
 
 	void doSave(IProgressMonitor monitor);
 
-	Object getAdapter(Class<?> class1);
+	public <T> T getAdapter(Class<T> adapter);
 
 	void renamed(boolean b);
 
