@@ -34,7 +34,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 public class MarkAllOccurencesJob extends UIJob {
 
 	private ITextSelection selection;
-	private boolean isCanceled = false;
 	private final EclEditor eclEditor;
 
 	public MarkAllOccurencesJob(EclEditor eclEditor) {
@@ -50,13 +49,9 @@ public class MarkAllOccurencesJob extends UIJob {
 		}
 		
 	}
-	void doCancel() {
-		isCanceled = true;
-		cancel();
-	}
 
 	private boolean isCanceled(IProgressMonitor progressMonitor) {
-		return isCanceled || progressMonitor.isCanceled();
+		return progressMonitor.isCanceled();
 	}
 
 	@Override
