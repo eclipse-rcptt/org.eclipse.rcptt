@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
@@ -26,35 +25,37 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-
 import org.eclipse.rcptt.core.ecl.model.Q7ElementContainer;
 import org.eclipse.rcptt.core.ecl.parser.ast.Node;
 import org.eclipse.rcptt.core.ecl.parser.model.Finder;
+import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
-public class MarkAllOccurencesJob extends Job {
+public class MarkAllOccurencesJob extends UIJob {
 
-	private final ITextSelection selection;
-	private boolean isCanceled = false;
+	private ITextSelection selection;
 	private final EclEditor eclEditor;
 
-	public MarkAllOccurencesJob(ITextSelection selection, EclEditor eclEditor) {
+	public MarkAllOccurencesJob(EclEditor eclEditor) {
 		super("ECL_EDITOR_MARK_ALL_OCCURENCES_JOB");
-		this.selection = selection;
 		this.eclEditor = eclEditor;
 	}
 
-	void doCancel() {
-		isCanceled = true;
+	void requestMark(ITextSelection selection) {
 		cancel();
+		this.selection = selection;
+		if (selection != null) {
+			schedule();
+		}
+		
 	}
 
 	private boolean isCanceled(IProgressMonitor progressMonitor) {
-		return isCanceled || progressMonitor.isCanceled();
+		return progressMonitor.isCanceled();
 	}
 
 	@Override
-	protected IStatus run(IProgressMonitor progressMonitor) {
+	public IStatus runInUIThread(IProgressMonitor progressMonitor) {
 		if (isCanceled(progressMonitor))
 			return Status.CANCEL_STATUS;
 
