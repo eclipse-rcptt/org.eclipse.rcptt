@@ -52,8 +52,7 @@ public class MarkAllOccurencesJobCanceler implements IDocumentListener, ITextInp
 	}
 
 	public void documentAboutToBeChanged(DocumentEvent event) {
-		if (editor.getMarkAllOccurencesJob() != null)
-			editor.getMarkAllOccurencesJob().doCancel();
+		editor.getMarkAllOccurencesJob().cancel();
 	}
 
 	public void documentChanged(DocumentEvent event) {
