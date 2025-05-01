@@ -69,6 +69,7 @@ jobs:
         if: always()
         uses: dorny/test-reporter@v2.0.0
         with:
+          name: Self test
           reporter: java-junit
           path: "**/target/*-reports/*.xml"
       - name: Archive results
