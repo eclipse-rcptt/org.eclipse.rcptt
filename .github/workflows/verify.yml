@@ -1,6 +1,8 @@
 name: Verify branch
 on:
   push
+permissions:
+  checks: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,13 +27,12 @@ jobs:
           if-no-files-found: error
           name: repository
           path: 'repository/rcptt/target/repository/**'
-      - name: Test Reporter
-        if: always()
-        uses: dorny/test-reporter@v2.0.0
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: always() # always run even if the previous step fails
         with:
-          name: Self test
-          reporter: java-junit
-          path: "**/target/*-reports/*.xml"
+          report_paths: '**/target/*-reports/*.xml'
+          fail_on_failure: true
       - name: Archive Runner
         uses: actions/upload-artifact@v4
         with:
@@ -66,14 +67,12 @@ jobs:
       - run: find . > list.txt
       - name: RCPTT Tests
         run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip --errors --batch-mode --no-transfer-progress
-      - name: Test Reporter
-        if: always()
-        uses: dorny/test-reporter@v2.0.0
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: always() # always run even if the previous step fails
         with:
-          name: Self test
-          reporter: java-junit
-          path: "**/target/*-reports/*.xml"
-          max-annotations: 0
+          report_paths: '**/target/*-reports/*.xml'
+          fail_on_failure: false
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
