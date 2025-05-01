@@ -62,8 +62,6 @@ import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IFragmentModel;
 import org.eclipse.pde.core.plugin.IPluginBase;
@@ -96,6 +94,7 @@ import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate.BundlesToLaunch;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
+import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
@@ -105,6 +104,7 @@ import org.eclipse.rcptt.util.FileUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 @SuppressWarnings("restriction")
 public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
@@ -200,7 +200,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			validatePluginDependencies(configuration, subMonitor.split(1));
 		}
 		validateProjectDependencies(configuration, subMonitor.split(1));
-		LauncherUtils.setLastLaunchMode(launch.getLaunchMode());
 		clear(configuration, subMonitor.split(1));
 		launch.setAttribute(IPDELauncherConstants.CONFIG_LOCATION, getConfigDir(configuration).toString());
 		synchronizeManifests(configuration, subMonitor.split(1));
@@ -219,14 +218,13 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundlesCheck(target.getQ7Target(),
-				target.getTarget(), subm.newChild(50), configuration);
+		BundlesToLaunch bundlesToLaunch = Q7ExternalLaunchDelegate.collectBundles(target,
+				subm.newChild(50));
 
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundlesToLaunch);
 
-		Q7ExternalLaunchDelegate.removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 
-		setDelegateFields(this, bundlesToLaunch.fModels, bundlesToLaunch.fAllBundles);
+		setDelegateFields(this, bundlesToLaunch.fModels,  Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
 		// Copy all additional configuration area folders into PDE new
 		// configuration location.
@@ -315,8 +313,13 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
+		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				SubMonitor.convert(monitor, 2));
+		
+		if (target == null) {
+			throw new CoreException(Status.error("AUT " + configuration.getName() + " has lost its target platfom. Edit the AUT to restore it."));
+		}
+
 
 		if (monitor.isCanceled()) {
 			removeTargetPlatform(configuration);
@@ -350,8 +353,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		OSArchitecture jvmArch = JDTUtils.detect(install);
 
-		if (jvmArch.equals(architecture)
-				|| (jvmArch.equals(OSArchitecture.x86_64) && (JDTUtils.canRun32bit(install)))) {
+		if (jvmArch.equals(architecture)) {
 			haveAUT = true;
 		}
 
@@ -363,12 +365,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		if (!haveAUT) {
 			// Let's search for configuration and update JVM if possible.
 			haveAUT = updateJVM(configuration, architecture, ((ITargetPlatformHelper) info.target));
-
-			if (!haveAUT) {
-				// try to register current JVM, it may help
-				JDTUtils.registerCurrentJVM();
-				haveAUT = updateJVM(configuration, architecture, ((ITargetPlatformHelper) info.target));
-			}
 
 		}
 		if (!haveAUT) {
@@ -387,10 +383,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
 			throws CoreException {
-		String targetPlatformName = Q7TargetPlatformManager.getTargetPlatformName(configuration);
-		Q7TargetPlatformManager.delete(targetPlatformName);
+		Q7TargetPlatformManager.delete(configuration);
 		LaunchInfoCache.remove(configuration);
-		TargetPlatformManager.deleteTargetPlatform(targetPlatformName);
 	}
 
 	@Override
@@ -480,9 +474,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
-		String override = configuration.getAttribute(
-				IQ7Launch.OVERRIDE_SECURE_STORAGE, (String) null);
-		if (override == null || "true".equals(override)) {
+		if (configuration.getAttribute(
+				IQ7Launch.OVERRIDE_SECURE_STORAGE, true)) {
 			// Override existing parameter
 			programArguments.add("-eclipse.keyring");
 			programArguments.add(getConfigDir(configuration).toString()
@@ -630,17 +623,17 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private void writeProperty(File config, OriginalOrderProperties properties)
 			throws FileNotFoundException, IOException {
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config));
-		properties.store(out, "Configuration File");
-		out.close();
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
+			properties.store(out, "Configuration File");
+		}
 	}
 
 	private Properties readProperty(File config) throws FileNotFoundException, IOException {
 		Properties props = new Properties();
 
-		BufferedInputStream in = new BufferedInputStream(new FileInputStream(config));
-		props.load(in);
-		in.close();
+		try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(config))) {
+			props.load(in);
+		}
 		return props;
 	}
 
@@ -728,13 +721,8 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	}
 
 	private static int findFreePort() throws CoreException {
-		try {
-			ServerSocket server = new ServerSocket(0);
-			try {
-				return server.getLocalPort();
-			} finally {
-				server.close();
-			}
+		try (ServerSocket server = new ServerSocket(0)) {
+			return server.getLocalPort();
 		} catch (IOException e) {
 			String msg = "Could not obtain a free port number."; //$NON-NLS-1$
 			String pluginId = PLUGIN_ID;
@@ -744,20 +732,12 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	}
 
 	private static boolean isPortBusy(int port) {
-		ServerSocket server = null;
-		try {
-			server = new ServerSocket(port);
+		try (ServerSocket server = new ServerSocket(port)) {
+			return false;
 		} catch (IOException e1) {
 			// assume that port is occupied when getting here
 		}
-		if (server != null) {
-			try {
-				server.close();
-			} catch (IOException e) {
-				// ignore
-			}
-		}
-		return server == null;
+		return true;
 	}
 
 	private URL getUrl() throws CoreException {
@@ -857,9 +837,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 					&& !interrupted
 					&& !monitor.isCanceled()
 					&& !launch.isTerminated()) {
-				try {
-					Socket socket = new Socket(URLBuilder.getHost(), port);
-					socket.close();
+				try (Socket socket = new Socket(URLBuilder.getHost(), port)) {
 					canConnect = true;
 				} catch (Exception e) {
 					// http service not yet started - wait a bit
@@ -955,7 +933,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 	private void clearDataLocation(ILaunchConfiguration configuration, IProgressMonitor monitor)
 			throws CoreException {
 		String resolvedDataLocation = getResolvedDataLoacation();
-		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, monitor);
+		LauncherUtils.clearWorkspace(configuration, resolvedDataLocation, launch.getLaunchMode(), monitor);
 	}
 
 	private void registerBrowserOpener() {
@@ -999,104 +977,91 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private static boolean updateJVM(ILaunchConfiguration configuration,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
-		IVMInstall jvmInstall = null;
 		OSArchitecture jvmArch = OSArchitecture.Unknown;
-		IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
-		boolean haveArch = false;
-		for (IVMInstallType ivmInstallType : types) {
-			IVMInstall[] installs = ivmInstallType.getVMInstalls();
-			for (IVMInstall ivmInstall : installs) {
-				jvmArch = JDTUtils.detect(ivmInstall);
-				if (jvmArch.equals(architecture)
-						|| (jvmArch.equals(OSArchitecture.x86_64) && JDTUtils
-								.canRun32bit(ivmInstall))) {
-					jvmInstall = ivmInstall;
-					haveArch = true;
-					break;
-				}
+		IVMInstall jvmInstall = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst()
+				.map(i -> i.install).orElse(null);
+		if (jvmInstall == null) {
+			return false;
+		}
+
+		ILaunchConfigurationWorkingCopy workingCopy = configuration
+				.getWorkingCopy();
+
+		String vmArgs = workingCopy.getAttribute(
+				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+				Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
+
+		OSArchitecture configArch;
+		String archAttrValue = configuration.getAttribute(
+				Q7LaunchingCommon.ATTR_ARCH, "");
+		if (archAttrValue.isEmpty())
+			configArch = null;
+		else
+			configArch = OSArchitecture.valueOf(archAttrValue);
+
+		OSArchitecture autArch = configArch == null ? target
+				.detectArchitecture(true, null) : configArch;
+
+		// there is no -d32 on Windows
+		if (!autArch.equals(jvmArch)
+				&& Platform.getOS().equals(Platform.OS_MACOSX)) {
+			if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
+				vmArgs += " " + ATTR_D32;
+			} else {
+				vmArgs = ATTR_D32;
 			}
 		}
-		if (haveArch) {
-			ILaunchConfigurationWorkingCopy workingCopy = configuration
-					.getWorkingCopy();
-
-			String vmArgs = workingCopy.getAttribute(
-					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-					Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
-
-			OSArchitecture configArch;
-			String archAttrValue = configuration.getAttribute(
-					Q7LaunchingCommon.ATTR_ARCH, "");
-			if (archAttrValue.isEmpty())
-				configArch = null;
-			else
-				configArch = OSArchitecture.valueOf(archAttrValue);
-
-			OSArchitecture autArch = configArch == null ? target
-					.detectArchitecture(true, null) : configArch;
-
-			// there is no -d32 on Windows
-			if (!autArch.equals(jvmArch)
-					&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-				if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-					vmArgs += " " + ATTR_D32;
-				} else {
-					vmArgs = ATTR_D32;
-				}
-			}
-			if (vmArgs != null && vmArgs.length() > 0) {
-				vmArgs = UpdateVMArgs.updateAttr(vmArgs);
-				workingCopy
-						.setAttribute(
-								IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-								vmArgs);
-			}
-
+		if (vmArgs != null && vmArgs.length() > 0) {
+			vmArgs = UpdateVMArgs.updateAttr(vmArgs);
 			workingCopy
 					.setAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-							String.format(
-									"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-									jvmInstall.getVMInstallType().getId(),
-									jvmInstall.getName()));
-
-			String programArgs = workingCopy
-					.getAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-							LaunchArgumentsHelper
-									.getInitialProgramArguments().trim());
-			if (programArgs.contains("${target.arch}")) {
-				programArgs = programArgs.replace("${target.arch}",
-						autArch.name());
-			} else {
-				if (programArgs.contains("-arch")) {
-					int pos = programArgs.indexOf("-arch ") + 6;
-					int len = 6;
-					int pos2 = programArgs.indexOf("x86_64", pos);
-					if (pos2 == -1) {
-						len = 3;
-						pos2 = programArgs.indexOf("x86", pos);
-					}
-					if (pos2 != -1) {
-						programArgs = programArgs.substring(0, pos)
-								+ autArch.name()
-								+ programArgs.substring(pos2 + len,
-										programArgs.length());
-					}
-				} else {
-					programArgs = programArgs + " -arch " + autArch.name();
-				}
-			}
-			if (programArgs.length() > 0) {
-				workingCopy
-						.setAttribute(
-								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-								programArgs);
-			}
-			workingCopy.doSave();
-			return true;
+							IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+							vmArgs);
 		}
-		return false;
+
+		workingCopy
+				.setAttribute(
+						IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
+						String.format(
+								"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
+								jvmInstall.getVMInstallType().getId(),
+								jvmInstall.getName()));
+
+		String programArgs = workingCopy
+				.getAttribute(
+						IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+						LaunchArgumentsHelper
+								.getInitialProgramArguments().trim());
+		if (programArgs.contains("${target.arch}")) {
+			programArgs = programArgs.replace("${target.arch}",
+					autArch.name());
+		} else {
+			if (programArgs.contains("-arch")) {
+				int pos = programArgs.indexOf("-arch ") + 6;
+				int len = 6;
+				int pos2 = programArgs.indexOf("x86_64", pos);
+				if (pos2 == -1) {
+					len = 3;
+					pos2 = programArgs.indexOf("x86", pos);
+				}
+				if (pos2 != -1) {
+					programArgs = programArgs.substring(0, pos)
+							+ autArch.name()
+							+ programArgs.substring(pos2 + len,
+									programArgs.length());
+				}
+			} else {
+				programArgs = programArgs + " -arch " + autArch.name();
+			}
+		}
+		if (programArgs.length() > 0) {
+			workingCopy
+					.setAttribute(
+							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+							programArgs);
+		}
+		workingCopy.doSave();
+		return true;
 	}
 
 	private static final String ATTR_D32 = "-d32";

@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tesla SWT Runtime for Eclipse 3.x
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.swt.e3x.rap;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.tesla.swt.e3x.rap.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.rap.ui;bundle-version="[3.1.0,4.0.0)",
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.tesla.core;bundle-version="[2.5.5,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
  org.aspectj.runtime,
  org.eclipse.rcptt.tesla.swt.aspects.rap
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 

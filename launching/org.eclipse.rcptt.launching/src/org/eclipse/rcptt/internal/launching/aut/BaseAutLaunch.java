@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.aut;
 
+import static java.lang.String.format;
 import static org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin.PLUGIN_ID;
 
 import java.io.IOException;
@@ -439,12 +440,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			setState(AutLaunchState.RESTART);
 			ILaunchConfiguration launchConfiguration = launch.getLaunchConfiguration();
-			final ILaunchConfigurationWorkingCopy copy;
-			if (launchConfiguration.isWorkingCopy()) {
-				copy = ((ILaunchConfigurationWorkingCopy) launchConfiguration).getOriginal().getWorkingCopy();
-			} else {
-				copy = launchConfiguration.getWorkingCopy();
-			}
+			final ILaunchConfigurationWorkingCopy copy = launchConfiguration.getWorkingCopy();
 			LaunchInfoCache.copyCache(launchConfiguration, copy);
 			LaunchInfoCache.remove(launchConfiguration);
 			// To disable clear area during restart
@@ -464,7 +460,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			copy.setAttribute(IPDELauncherConstants.CONFIG_CLEAR_AREA, configClearArea);
 			copy.setAttribute(IQ7Launch.ATTR_AUT_ID, "");
 			copy.doSave();
-			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch, copy);
+			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch);
 		} catch (Exception e) {
 			terminated(e);
 			Q7LaunchingPlugin.log(e);
@@ -1074,7 +1070,11 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			return context.connect(getHost(), getEclPort());
 		} catch (Exception e) {
-			throw new CoreException(Q7LaunchingPlugin.createStatus("Couldn't open ECL session", e));
+			String message = format("Couldn't open ECL session for %s:%d", getHost(), getEclPort());
+			if (launch.isTerminated()) {
+				message = "AUT is terminated";
+			}
+			throw new CoreException(Q7LaunchingPlugin.createStatus(message, e));
 		}
 	}
 

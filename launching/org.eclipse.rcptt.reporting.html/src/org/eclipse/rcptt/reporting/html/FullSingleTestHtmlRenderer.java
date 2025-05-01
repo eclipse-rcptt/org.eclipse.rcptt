@@ -15,6 +15,7 @@ import static com.google.common.collect.Iterables.transform;
 import static org.eclipse.rcptt.reporting.util.ReportUtils.replaceLineBreaks;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -233,6 +234,8 @@ public class FullSingleTestHtmlRenderer {
 			renderScreenShot((Screenshot) eObject, "");
 		} else if (eObject instanceof AdvancedInformation) {
 			renderAdvanced((AdvancedInformation) eObject);
+		} else if (eObject == null) {
+			writer.println("Event contains no data. This indicates a premature AUT termination.");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}
@@ -377,13 +380,20 @@ public class FullSingleTestHtmlRenderer {
 	private void renderException(EclException exception) {
 		Throwable throwable = ProcessStatusConverter.getThrowable(exception);
 		writer.println(escape(exception.getClassName())+": "+ escape(exception.getMessage()) + " <br>");
-			writer.println("<pre>");
-			try {
-				throwable.printStackTrace(writer);
-			} catch (Exception e) {
-				LOG.error("Failed to parse report exception", e);
+		StringWriter trace = new StringWriter(); 
+		try {
+			try (PrintWriter w = new PrintWriter(trace)) {
+				throwable.printStackTrace(w);
 			}
-			writer.println("</pre>");
+		} catch (Exception e) {
+			LOG.error("Failed to parse report exception", e);
+		}
+		writer.println("<pre>");
+		writer.println(escape(trace.toString()));
+		writer.println("</pre>");
+		if (exception.getStatus() != null) {
+			renderResult(exception.getStatus());
+		}
 	}
 
 	private void titledRow(String key, String value) {

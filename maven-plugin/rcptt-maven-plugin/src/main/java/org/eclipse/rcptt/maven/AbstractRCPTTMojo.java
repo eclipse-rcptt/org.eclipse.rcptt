@@ -103,7 +103,7 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 		if (runner == null) {
 			runner = new RCPTTCoords();
 		}
-		runner.setClassifier("");
+		runner.setClassifier(computeClassifier());
 		ComparableVersion version = parseVersion(runner.getVersion());
 		if(runner.getPlatform() == null){
 			runner.setPlatform(getDefaultPaltform(version));
@@ -115,6 +115,10 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 			runner.setGroupId(getDefaultGroup(version));
 		}
 		return runner;
+	}
+
+	private static String computeClassifier() {
+		return org.eclipse.rcptt.maven.util.CoordResolver.computeLocalClassifier();
 	}
 
 	/**

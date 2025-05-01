@@ -367,6 +367,7 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.ui.dialogs.FilteredItemsSelectionDialog$RefreshProgressMessageJob",
 			"org.eclipse.ui.internal.progress.AnimationManager$1",
 			"org.eclipse.ui.internal.progress.ProgressManager$6",
+			"org.eclipse.ui.internal.progress.ProgressManager$2",
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$1", // Since Oxygen
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$2", // Before Oxygen
 			"org.eclipse.rcptt.ecl.internal.core.Session$1",
@@ -834,7 +835,7 @@ public class UIJobCollector implements IJobChangeListener {
 				return false;
 			Context ctx = ContextManagement.makeContext(thread.getStackTrace());
 			return TeslaEventManager.getManager().isJobInSyncExec(job, ctx) || ctx.contains("java.lang.Thread", "sleep") || ctx.contains("java.lang.Object", "wait")
-					|| ctx.contains("java.util.concurrent.locks.LockSupport", "park");
+					|| ctx.contains("java.util.concurrent.locks.LockSupport", "park") || ctx.contains("sun.nio.ch.SocketDispatcher", "read0");
 		}
 		return false;
 	}

@@ -59,6 +59,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	private static final String AUT_ARGS = "-autArgs";
 	private static final String AUT_CONSOLE_PREFIX = "-autConsolePrefix";
 	private static final String AUT_VM = "-autVM";
+	private static final String AUT_EE = "-autExecutionEnvironment";
 	private static final String AUT_VM_ARGS = "-autVMArgs";
 	private static final String AUT_WS_PREFIX = "-autWsPrefix";
 	private static final String AUT_LOC = "-aut";
@@ -183,6 +184,9 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 		if (aut.getVm() != null) {
 			cmd.createArg().setValue(AUT_VM);
 			cmd.createArg().setValue(aut.getVm());
+		} else if (aut.executionEnvironment != null) {
+			cmd.createArg().setValue(AUT_EE);
+			cmd.createArg().setValue(aut.executionEnvironment);
 		}
 		// AUT enableSoftwareInstallation
 		if (aut.enableSoftwareInstallation())
@@ -316,8 +320,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	Thread ShutdownHook = new Thread() {
 		@Override
 		public void run() {
-			try {
-				new Socket("127.0.0.1", shutdownListenerPort);
+			try (Socket socket = new Socket("127.0.0.1", shutdownListenerPort)) {
 			} catch (IOException e) {
 				System.out.println(e);
 			}

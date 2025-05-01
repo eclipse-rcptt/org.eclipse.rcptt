@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="RCP Testing Tool IDE" uid="org.eclipse.rcptt.platform.product" id="org.eclipse.rcptt.platform.product" application="org.eclipse.ui.ide.workbench" version="2.5.5.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="RCP Testing Tool IDE" uid="org.eclipse.rcptt.platform.product" id="org.eclipse.rcptt.platform.product" application="org.eclipse.ui.ide.workbench" version="2.6.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/about.png"/>
@@ -310,8 +310,6 @@
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.equinox.p2.core.feature"/>
-      <feature id="org.eclipse.ecf.core.ssl.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
       <feature id="org.eclipse.rcp"/>
@@ -332,6 +330,7 @@
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <property name="eclipse.e4.inject.javax.disabled" value="true" />
    </configurations>
 
 </product>

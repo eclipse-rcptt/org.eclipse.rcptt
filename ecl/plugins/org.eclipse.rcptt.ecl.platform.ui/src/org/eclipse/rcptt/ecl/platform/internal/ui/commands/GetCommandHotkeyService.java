@@ -19,7 +19,6 @@ import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.formatting.KeyFormatterFactory;
 import org.eclipse.rcptt.ecl.core.Command;
-import org.eclipse.rcptt.ecl.platform.ui.PlatformUIPlugin;
 import org.eclipse.rcptt.ecl.platform.ui.commands.GetHotkey;
 import org.eclipse.rcptt.ecl.runtime.ICommandService;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
@@ -48,7 +47,7 @@ public class GetCommandHotkeyService implements ICommandService {
 				return Status.OK_STATUS;
 			}
 		}
-		return new Status(IStatus.ERROR, PlatformUIPlugin.PLUGIN_ID, "No keyboard hotkey is defined for "
+		return Utils.error("No keyboard hotkey is defined for "
 				+ getCommand.getCommandId() + " in current context");
 	}
 

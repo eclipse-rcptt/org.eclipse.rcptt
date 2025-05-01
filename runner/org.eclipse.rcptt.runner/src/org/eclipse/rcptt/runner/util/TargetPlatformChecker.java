@@ -78,8 +78,7 @@ public class TargetPlatformChecker {
 		String location = PDELocationUtils.getProductLocation(conf.location).getAbsolutePath();
 		PrintStreamMonitor outMonitor = new PrintStreamMonitor(true);
 		if (conf.config != null) {
-			targetPlatform = TargetPlatformManager.createTargetPlatform(
-					location, outMonitor);
+			targetPlatform = TargetPlatformManager.createTargetPlatform(location, outMonitor);
 			Map<String, Version> versions = targetPlatform.getVersions();
 			Q7Info q7Info = Q7TargetPlatformInitializer.getInfo(targetPlatform, versions);
 			if (!conf.onlySpecified) {
@@ -102,7 +101,6 @@ public class TargetPlatformChecker {
 				aspectsSite.setUri(q7Info.aspectj.toString());
 				conf.config.getEntries().add(aspectsSite);
 			}
-			targetPlatform.setTargetName("AUT");
 			IStatus rv = targetPlatform.applyInjection(conf.config, outMonitor);
 			if (!rv.isOK())
 				throw new CoreException(rv);
@@ -113,9 +111,7 @@ public class TargetPlatformChecker {
 		} else { // Try to initialize using Q7 bundled runtime
 			targetPlatform = Q7TargetPlatformManager.createTargetPlatform(
 					location, outMonitor);
-			targetPlatform.setTargetName("AUT");
 		}
-		targetPlatform.save();
 		// Check for few core q7, tesla plugins are available.
 		if (!Q7PluginValidator.validate(targetPlatform)) {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID,

@@ -107,8 +107,7 @@ public class Q7LaunchingUtil {
 	public static void updateLaunchConfiguration(ITargetPlatformHelper target,
 			final ILaunchConfigurationWorkingCopy config) throws CoreException {
 		if (target != null) {
-			Q7TargetPlatformManager.delete(target.getName());
-			Q7TargetPlatformManager.setHelper(target.getName(), target);
+			Q7TargetPlatformManager.setHelper(config, target);
 
 			config.setAttribute(IQ7Launch.TARGET_PLATFORM, target.getName());
 

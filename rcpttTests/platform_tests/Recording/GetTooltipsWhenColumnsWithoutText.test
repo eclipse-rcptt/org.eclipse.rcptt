@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _XS8ZEFqHEeSjvvK1muLiaA
-Runtime-Version: 1.5.3.qualifier
-Save-Time: 10/27/14 12:12 PM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/8/25, 11:12 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -15,11 +15,11 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 get-view Tasks | get-tree | get-column-header Location | click
-get-view Tasks | get-tree | get-item 2 -column Priority 
+get-view Tasks | get-tree | get-item 2 -column Priority
 	| get-property "values['Description']" 
 	| equals "FIXME Very important action" | verify-true
 	
-get-view Tasks | get-tree | get-item 1 -column Priority  
+get-view Tasks | get-tree | get-item 1 -column Priority
     | get-property "values['Description']" 
     | equals "TODO Auto-generated method stub" | verify-true
     

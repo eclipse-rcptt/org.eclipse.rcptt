@@ -9,11 +9,10 @@
     Contributors:
     	Xored Software Inc - initial API and implementation and/or initial documentation
  -->
-
 <feature
       id="org.eclipse.rcptt.runner.integration"
       label="%featureName"
-      version="2.5.5.qualifier"
+      version="2.6.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -32,80 +31,62 @@
 
    <includes
          id="org.eclipse.rcptt.core"
-         version="2.5.5.qualifier"/>
+         version="2.6.0.qualifier"/>
 
    <includes
          id="org.eclipse.rcptt.launching"
-         version="2.5.5.qualifier"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         download-size="0"
-         install-size="0"
-         version="2.5.5.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="com.google.gson"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.rcptt.watson.core"
-         download-size="0"
-         install-size="0"
-         version="2.5.5.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
-         download-size="0"
-         install-size="0"
-         version="2.5.5.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="org.eclipse.jface"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.swt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.validation"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.transaction"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.rcptt.watson.jobs"
-         download-size="0"
-         install-size="0"
-         version="2.5.5.qualifier"
-         unpack="false"/>
+         version="2.6.0.qualifier"/>
 
    <plugin
          id="com.google.guava"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.osgi.compatibility.state"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.transport.ecf"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.touchpoint.natives"
+         version="0.0.0"/>
 
 </feature>

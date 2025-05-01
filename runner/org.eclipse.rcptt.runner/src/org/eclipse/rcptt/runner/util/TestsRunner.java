@@ -88,13 +88,10 @@ public class TestsRunner {
 
 		TestSuite[] tests;
 		tests = findScenarios();
-		if (tests.length > 0) {
-			return runTests(tests);
-		} else {
-			System.out.println("No tests to run.");
+		if (tests.length <= 0) {
+			throw new IllegalArgumentException("No tests found.");
 		}
-
-		return null;
+		return runTests(tests);
 	}
 
 	private static List<String> buildTestNamePatterns(List<String> globs) {
@@ -370,9 +367,6 @@ public class TestsRunner {
 			throw new RuntimeException(e1);
 		} catch (InterruptedException e) {
 			HeadlessRunnerPlugin.getDefault().info("Execution interrupted");
-		}
-		catch( Exception e ) {
-			HeadlessRunnerPlugin.getDefault().info("Unexpected error happened...", e);
 		}
 		finally {
 			skipRemaining(runnables, "Execution finished");

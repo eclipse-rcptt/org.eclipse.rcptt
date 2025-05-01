@@ -2,20 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime Gef Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.gef.aspects;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
  org.eclipse.gef,
  org.eclipse.jface,
- org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.tesla.core.am;bundle-version="[2.5.5,3.0.0)",
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.5.5,3.0.0)"
-onEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework
+ org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.0,3.0.0)"
 Eclipse-SupplementBundle: org.eclipse.gef
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.gef,
  org.eclipse.rcptt.tesla.gef.aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Activator: org.eclipse.rcptt.tesla.gef.GefAspectsActivator
+Automatic-Module-Name: org.eclipse.rcptt.tesla.gef.aspects

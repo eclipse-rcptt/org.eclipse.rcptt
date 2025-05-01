@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-
 <!--
- <copyright>
- </copyright>
+Copyright (c) 2025 Xored Software Inc and others
 
- $Id$
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License 2.0 which is available at
+http://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+Contributors:
+    Xored Software Inc - initial API and implementation
 -->
 
 <plugin>
@@ -70,6 +75,11 @@
       <scriptlet
             class="org.eclipse.rcptt.ecl.platform.internal.ui.commands.FromClipboardService"
             name="FromClipboard"
+            namespace="http://www.eclipse.org/ecl/platform.ui/commands.ecore">
+      </scriptlet>
+      <scriptlet
+            class="org.eclipse.rcptt.ecl.platform.internal.ui.commands.ExecuteCommandService"
+            name="ExecuteCommand"
             namespace="http://www.eclipse.org/ecl/platform.ui/commands.ecore">
       </scriptlet>
    </extension>

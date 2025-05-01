@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Workbench Context Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.ctx.workbench.aspect;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.ctx.workbench.aspect.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.views.log
-Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.views.log
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.workbench.aspect
+Automatic-Module-Name: org.eclipse.rcptt.ctx.workbench.aspect

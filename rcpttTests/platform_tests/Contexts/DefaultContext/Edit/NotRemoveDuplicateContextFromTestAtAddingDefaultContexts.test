@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _dIzusI_XEeK23bkAp9HBOg
-Runtime-Version: 2.5.5.202406261930
-Save-Time: 6/27/24, 2:08 PM
+Runtime-Version: 2.6.0.202504111505
+Save-Time: 5/1/25, 8:10 PM
 Tags: Context, DefaultContext, selfAUT
 Testcase-Type: ecl
 
@@ -75,7 +75,9 @@ with [get-editor "P1 is left" | get-section Contexts | get-table] {
         | verify-true
 }
 get-editor "P1 is left" | get-button Replay | click
-wait-execution
+
+waitForTaskToComplete
+
 get-view "Execution View" | get-tree | get-item "P1 is left.*" | get-property childCount | equals 4 
     | verify-true
 get-view "Execution View" | get-tree 

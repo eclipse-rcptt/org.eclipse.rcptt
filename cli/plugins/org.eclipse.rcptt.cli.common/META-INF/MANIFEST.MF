@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Automatic-Module-Name: org.eclipse.rcptt.runner
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.rcptt.cli.common;singleton:=true
+Bundle-Version: 2.6.0.qualifier
+Require-Bundle: org.eclipse.core.resources,
+ org.eclipse.equinox.common,
+ org.eclipse.core.filesystem
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-21

@@ -1,14 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_IeEQkPSUEeCE1L2j6bYoFw
 Element-Name: FilterSearchWorksWithInvalidTestFiles
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _VRxNoPinEeCV55qqbrOgoQ
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:04 PM
+Runtime-Version: 2.6.0.202503071721
+Save-Time: 3/7/25, 10:30 PM
 Tags: SearchReplace
 Testcase-Type: ecl
 
@@ -36,7 +35,7 @@ TEST STEPS
 Content-Type: text/ecl
 Entry-Name: .content
 
-get-view "Test Explorer" | get-tree | select "Q7Project/TestCase1" | get-menu "Open With/Text Editor" | click
+get-view "Test Explorer" | get-tree | select "Q7Project/TestCase1" | get-menu "Open With/Plain Text Editor" | click
 with [get-editor "TestCase1.test" | get-text-viewer] {
     set-caret-pos 20 58
     select-range 20 59 1 1

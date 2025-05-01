@@ -42,6 +42,27 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.ctx.preferences.ui.wizard.PreferencesAddWizard;
+import org.eclipse.rcptt.ctx.preferences.ui.wizard.PreferencesImportWizard;
+import org.eclipse.rcptt.internal.preferences.PrefUtils;
+import org.eclipse.rcptt.internal.ui.Images;
+import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
+import org.eclipse.rcptt.preferences.ListPrefData;
+import org.eclipse.rcptt.preferences.PrefData;
+import org.eclipse.rcptt.preferences.PrefNode;
+import org.eclipse.rcptt.preferences.PreferencesContext;
+import org.eclipse.rcptt.preferences.PreferencesFactory;
+import org.eclipse.rcptt.preferences.PreferencesPackage;
+import org.eclipse.rcptt.preferences.SecurePrefNode;
+import org.eclipse.rcptt.preferences.SettingsNode;
+import org.eclipse.rcptt.preferences.StringPrefData;
+import org.eclipse.rcptt.ui.commons.listcelleditor.StringListCellEditor;
+import org.eclipse.rcptt.ui.context.BaseContextEditor;
+import org.eclipse.rcptt.ui.controls.SectionWithComposite;
+import org.eclipse.rcptt.ui.editors.EditorHeader;
+import org.eclipse.rcptt.ui.utils.UIContentAdapter;
+import org.eclipse.rcptt.ui.utils.WorkbenchUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -58,27 +79,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
-
-import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.ctx.preferences.ui.wizard.PreferencesAddWizard;
-import org.eclipse.rcptt.ctx.preferences.ui.wizard.PreferencesImportWizard;
-import org.eclipse.rcptt.internal.preferences.PrefUtils;
-import org.eclipse.rcptt.internal.ui.Images;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.preferences.ListPrefData;
-import org.eclipse.rcptt.preferences.PrefData;
-import org.eclipse.rcptt.preferences.PrefNode;
-import org.eclipse.rcptt.preferences.PreferencesContext;
-import org.eclipse.rcptt.preferences.PreferencesPackage;
-import org.eclipse.rcptt.preferences.SecurePrefNode;
-import org.eclipse.rcptt.preferences.SettingsNode;
-import org.eclipse.rcptt.preferences.StringPrefData;
-import org.eclipse.rcptt.ui.commons.listcelleditor.StringListCellEditor;
-import org.eclipse.rcptt.ui.context.BaseContextEditor;
-import org.eclipse.rcptt.ui.controls.SectionWithComposite;
-import org.eclipse.rcptt.ui.editors.EditorHeader;
-import org.eclipse.rcptt.ui.utils.UIContentAdapter;
-import org.eclipse.rcptt.ui.utils.WorkbenchUtils;
 
 public class PreferencesContextEditor extends BaseContextEditor {
 	private TreeViewer viewer;
@@ -98,7 +98,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 			IWorkbenchSite site, EditorHeader header) {
 		Section section = new SectionWithComposite("Preferences",
 				Section.TITLE_BAR | Section.TWISTIE | Section.EXPANDED)
-				.numColumns(2).create(parent, toolkit);
+						.numColumns(2).create(parent, toolkit);
 		Composite composite = (Composite) section.getClient();
 		Button cleanPreferencesButton = toolkit.createButton(composite,
 				"Clear preferences", SWT.CHECK);
@@ -187,8 +187,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button importButton = toolkit.createButton(panel,
 				"Import Preferences...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(importButton);
-		importButton.setImage(Images.getImageDescriptor(
-				Images.PREFERENCES_IMPORT).createImage());
+		importButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		importButton.addSelectionListener(new SelectionAdapter() {
 
@@ -203,8 +202,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 
 		Button addButton = toolkit.createButton(panel, "Add...", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(addButton);
-		addButton.setImage(Images.getImageDescriptor(Images.PREFERENCES_IMPORT)
-				.createImage());
+		addButton.setImage(Images.getImage(Images.PREFERENCES_IMPORT));
 
 		addButton.addSelectionListener(new SelectionAdapter() {
 
@@ -220,8 +218,7 @@ public class PreferencesContextEditor extends BaseContextEditor {
 		Button removeButton = toolkit.createButton(panel, "Remove", SWT.PUSH);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(removeButton);
 		removeButton.setImage(PlatformUI.getWorkbench().getSharedImages()
-				.getImageDescriptor(ISharedImages.IMG_ETOOL_DELETE)
-				.createImage());
+				.getImage(ISharedImages.IMG_ETOOL_DELETE));
 		dbc.bindValue(WidgetProperties.enabled().observe(removeButton),
 				new ComputedValue<Boolean>() {
 
@@ -453,6 +450,14 @@ public class PreferencesContextEditor extends BaseContextEditor {
 	public void addContext(PreferencesContext context) {
 		PreferencesContext current = getContextElement();
 		mergePrefNodes(current.getContent(), context.getContent());
+		if (context.getSettings() != null) {
+			if (current.getSettings() == null) {
+				current.setSettings(PreferencesFactory.eINSTANCE
+						.createSettingsNode());
+				current.getSettings().setName(PrefUtils.DIALOG_SETTINGS_NODE_NAME);
+			}
+			mergePrefNodes(current.getSettings().getChilds(), context.getSettings().getChilds());
+		}
 	}
 
 	private void mergePrefNodes(EList<PrefNode> content,

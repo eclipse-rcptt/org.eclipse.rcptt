@@ -31,6 +31,9 @@ public class EclInformationContol extends BrowserInformationControl {
 	}
 
 	public static boolean isAvailable(Shell parent) {
+		if (parent == null || parent.isDisposed()) {
+			return false;
+		}
 		return BrowserInformationControl.isAvailable(parent);
 	}
 

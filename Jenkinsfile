@@ -1,7 +1,19 @@
+/********************************************************************************
+ * Copyright (c) 2025 Xored Software Inc and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Xored Software Inc - initial API and implementation
+ ********************************************************************************/
 def library
 node {
   checkout scm
-  result = load('releng/Jenkinsfile.groovy')(this)
+  def result = load('releng/Jenkinsfile.groovy')(this)
   assert result != null
   library = result
 }
@@ -9,14 +21,15 @@ node {
 pipeline {
   agent {
     kubernetes {
-      label 'rcptt-build-agent-3.5.4'
       yaml library.YAML_BUILD_AGENT
     }
   }
 
   options {
-     buildDiscarder(logRotator(numToKeepStr: '3', daysToKeepStr: '10'))
+     timestamps()
+     buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '10', removeLastBuild: true, artifactNumToKeepStr: '1'))
      disableConcurrentBuilds()
+     timeout(time: 10, unit: 'HOURS')
   }
 
   stages {

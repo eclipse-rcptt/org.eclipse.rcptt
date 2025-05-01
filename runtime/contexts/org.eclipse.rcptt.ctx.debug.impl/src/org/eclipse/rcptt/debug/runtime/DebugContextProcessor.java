@@ -527,6 +527,9 @@ public class DebugContextProcessor implements IContextProcessor {
 	}
 
 	private static byte[] captureImage(Image image) {
+		if (image == null) {
+			return null;
+		}
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		ImageLoader loader = new ImageLoader();
 		loader.data = new ImageData[] { image.getImageData() };

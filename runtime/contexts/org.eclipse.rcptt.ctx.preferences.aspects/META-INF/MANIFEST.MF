@@ -1,17 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.rcptt.ctx.preferences.aspects;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
  org.eclipse.ui
-onEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.ui.workbench
 Export-Package: org.eclipse.rcptt.runtime.ui.preferences,
  org.eclipse.rcptt.runtime.ui.preferences.aspects
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.internal.runtime.ui.preferences.Activator
 Bundle-Name: RCPTT Preferences Context Aspects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Automatic-Module-Name: org.eclipse.rcptt.ctx.preferences.aspects

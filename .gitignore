@@ -36,7 +36,12 @@ maven-plugin/rcptt-maven-plugin/rcptt-maven-plugin.iml
 maven-plugin/rcptt-maven-modules.iml
 .idea
 .tycho-consumer-pom.xml
+.polyglot.feature.xml
+.polyglot.pom.tycho
+.polyglot.META-INF
+pom.tycho
 tycho*equinox
 tycho_reactor_agent*
 tycho*secure_storage
 .ICE-unix
+*.bck

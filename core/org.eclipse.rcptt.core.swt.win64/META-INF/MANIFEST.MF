@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Win64 fragment
 Bundle-SymbolicName: org.eclipse.rcptt.core.swt.win64;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Fragment-Host: org.eclipse.rcptt.core.swt;bundle-version="[2.5.5,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Fragment-Host: org.eclipse.rcptt.core.swt;bundle-version="[2.6.0,3.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-PlatformFilter: (&(osgi.ws=win32) (osgi.arch=x86_64))
 Export-Package: org.eclipse.rcptt.util.swt

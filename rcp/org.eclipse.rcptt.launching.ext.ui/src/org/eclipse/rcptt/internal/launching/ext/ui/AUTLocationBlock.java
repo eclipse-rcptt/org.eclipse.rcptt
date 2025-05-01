@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.Launch;
 import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -87,6 +88,8 @@ public class AUTLocationBlock {
 		fTab = tab;
 	}
 
+	private ILaunchConfiguration original;
+	
 	public void updateInfo() {
 		// errorInfo = null;
 		final String location = getLocation();
@@ -102,7 +105,7 @@ public class AUTLocationBlock {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						info = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
+						info = Q7TargetPlatformManager.getTarget(original, monitor);
 						assert info.getStatus().isOK();
 					} catch (CoreException e) {
 						setStatus(e.getStatus());
@@ -185,11 +188,8 @@ public class AUTLocationBlock {
 	public void performApply(ILaunchConfigurationWorkingCopy config) throws CoreException {
 		config.setAttribute(IQ7Launch.AUT_LOCATION, getLocation());
 		if (info != null) {
-			info.setTargetName(Q7TargetPlatformManager
-					.getTargetPlatformName(config));
 			info.save();
-			config.setAttribute(IQ7Launch.TARGET_PLATFORM, info.getName());
-			Q7TargetPlatformManager.setHelper(info.getName(), info);
+			Q7TargetPlatformManager.setHelper(config, info);
 		}
 		config.setAttribute(IQ7Launch.UPDATE_TARGET_SUPPORTED, true);
 	}
@@ -199,6 +199,7 @@ public class AUTLocationBlock {
 	}
 
 	public void initializeFrom(final ILaunchConfiguration config) {
+		original = config;
 		String location = null;
 		try {
 			location = config.getAttribute(IQ7Launch.AUT_LOCATION, "");
@@ -210,11 +211,7 @@ public class AUTLocationBlock {
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				try {
-					info = Q7TargetPlatformManager.findTarget(config, monitor);
-					if (info == null) {
-						info = Q7TargetPlatformManager.getTarget(config,
-								monitor);
-					}
+					info = Q7TargetPlatformManager.getTarget(original, monitor);
 				} catch (CoreException e) {
 					Activator.log(e);
 				}

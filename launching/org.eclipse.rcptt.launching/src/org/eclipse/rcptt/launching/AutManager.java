@@ -29,7 +29,7 @@ public interface AutManager {
 	/**
 	 * Shared thread-safe instance of the {@link AutManager}
 	 */
-	static AutManager INSTANCE = BaseAutManager.INSTANCE;
+	static final AutManager INSTANCE = BaseAutManager.INSTANCE;
 
 	/**
 	 * Return list of all registered AUTs. AUT will be created automatically

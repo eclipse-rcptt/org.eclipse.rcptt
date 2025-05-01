@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _DsMOIMe_EeCxZoPRptqJ7A
-Runtime-Version: 1.5.5.201502210521
-Save-Time: 2/25/15 11:35 AM
+Runtime-Version: 2.5.5.202404041628
+Save-Time: 3/8/25, 10:56 AM
 Tags: ECL_IDE_module, selfAUT, Reporting
 Testcase-Type: ecl
 
@@ -58,7 +58,7 @@ with [get-view "Test Explorer" | get-tree] {
 get-view "Test Explorer" | get-tree | select "q7project/simpleTest1.junit.xml" | double-click -nowait
 
 get-view "Test Explorer" | get-tree | select "q7project/simpleTest1.junit.xml" | select "q7project/simpleTest1.junit.xml" 
-    | get-menu "Open With/Text Editor" | click
+    | get-menu "Open With/Plain Text Editor" | click
 get-editor "simpleTest1.junit.xml" | get-editbox | get-property rawValue 
     | contains "skipped=\"0\"" | verify-true
 get-editor "simpleTest1.junit.xml" | get-editbox | get-property rawValue 

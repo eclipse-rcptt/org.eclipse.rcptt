@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.launching.rap;singleton:=true
-Bundle-Version: 2.5.5.qualifier
+Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.debug.core,
  org.eclipse.pde.launching,
  org.eclipse.equinox.registry,
  org.eclipse.core.variables,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.launching.ext,
+ org.eclipse.rcptt.launching.ext;bundle-version="2.5.2",
  org.eclipse.rcptt.launching,
  org.eclipse.jdt.launching,
  org.eclipse.rcptt.launching.common,
@@ -24,3 +24,4 @@ Require-Bundle: org.eclipse.debug.core,
  org.eclipse.rcptt.tesla.core,
  org.eclipse.rcptt.core.launching
 Export-Package: org.eclipse.rcptt.launching.rap
+Automatic-Module-Name: org.eclipse.rcptt.launching.rap

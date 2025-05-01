@@ -1,3 +1,15 @@
+/********************************************************************************
+ * Copyright (c) 2025 Xored Software Inc and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Xored Software Inc - initial API and implementation
+ ********************************************************************************/
 package org.eclipse.rcptt.internal.launching;
 
 import static org.eclipse.core.runtime.Path.fromPortableString;
@@ -9,6 +21,7 @@ import java.util.Arrays;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -51,14 +64,19 @@ public class TestSuiteElementCollectorTest {
 		try (InputStream is = TestSuiteElementCollectorTest.class.getResourceAsStream(bundleAbsoluteProjecRoot.append(".project").toPortableString())) {
 			description = WORKSPACE.loadProjectDescription(is);
 			project = WORKSPACE.getRoot().getProject(description.getName());
-			project.create(description, null);
-			project.open(null);
-			for (IPath filePath: relativeProjectFiles) {
-				IFile file = project.getFile(filePath);
-				try(InputStream fis = TestSuiteElementCollectorTest.class.getResourceAsStream(bundleAbsoluteProjecRoot.append(filePath).toPortableString())) {
-					file.create(fis, true, null);
-				}
-			}
+			// Workspace operation is needed due to concurrency with org.eclipse.rcptt.internal.core.model.Q7Project.getMetadata()
+			WORKSPACE.run(monitor -> {
+				project.create(description, null);
+				project.open(null);
+				for (IPath filePath: relativeProjectFiles) {
+					IFile file = project.getFile(filePath);
+					try(InputStream fis = TestSuiteElementCollectorTest.class.getResourceAsStream(bundleAbsoluteProjecRoot.append(filePath).toPortableString())) {
+						file.create(fis, true, null); 
+					} catch (IOException e) {
+						throw new AssertionError(e);
+					}
+				}				
+			}, WORKSPACE.getRuleFactory().createRule(project), IWorkspace.AVOID_UPDATE, null);
 			return project;
 		} catch (Exception e) {
 			RcpttPlugin.log(e);
@@ -71,6 +89,17 @@ public class TestSuiteElementCollectorTest {
 		IWorkspaceDescription d = WORKSPACE.getDescription();
 		d.setAutoBuilding(false);
 		WORKSPACE.setDescription(d);
-		WORKSPACE.getRoot().getProject("1").delete(true, null);
+		deleteProject("1");
+		deleteProject("testSuiteReferencingCorruptedResource");
+	}
+	
+	private void deleteProject(String name) throws CoreException {
+		IProject project = WORKSPACE.getRoot().getProject(name);
+		if (!project.exists()) {
+			project.create(null);
+		}
+		project.open(null);
+		project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		project.delete(IResource.ALWAYS_DELETE_PROJECT_CONTENT, null);
 	}
 }

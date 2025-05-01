@@ -7,67 +7,92 @@
     https://www.eclipse.org/legal/epl-v20.html
      
     Contributors:
-    	Xored Software Inc - initial API and implementation and/or initial documentation
+    	Xored Software Inc - initial API and implementation and/or initial
+documentation
  -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.eclipse.rcptt</groupId>
-	<artifactId>rcptt-maven-modules</artifactId>
-	<version>2.5.5-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>RCPTT maven support modules</name>
-	<url>http://eclipse.org/rcptt</url>
-	<distributionManagement>
-		<repository>
-			<id>repo.eclipse.org</id>
-			<name>RCPTT Repository - Releases</name>
-			<url>https://repo.eclipse.org/content/repositories/rcptt-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>repo.eclipse.org</id>
-			<name>RCPTT Repository - Snapshots</name>
-			<url>https://repo.eclipse.org/content/repositories/rcptt-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-	<modules>
-		<module>rcptt-maven-plugin</module>
-		<module>rcptt-maven-util</module>
-	</modules>
-	<build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.eclipse.tycho</groupId>
-              <artifactId>tycho-versions-plugin</artifactId>
-              <version>1.5.1</version>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.10.1</version>
-            </plugin>
-          </plugins>
-       </pluginManagement>
-        
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<id>remove-old-installations</id>
-						<goals>
-							<goal>remove-project-artifact</goal>
-						</goals>
-						<configuration>
-							<removeAll>true</removeAll>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencies/>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.eclipse.rcptt</groupId>
+  <artifactId>rcptt-maven-modules</artifactId>
+  <version>2.6.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>RCPTT maven support modules</name>
+  <url>http://eclipse.org/rcptt</url>
+
+  <licenses>
+    <license>
+      <name>EPL-2.0</name>
+      <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
+    </license>
+  </licenses>
+  
+  <distributionManagement>
+    <repository>
+      <id>repo.eclipse.org</id>
+      <name>RCPTT Repository - Releases</name>
+      <url>https://repo.eclipse.org/content/repositories/rcptt-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>repo.eclipse.org</id>
+      <name>RCPTT Repository - Snapshots</name>
+      <url>https://repo.eclipse.org/content/repositories/rcptt-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>8</maven.compiler.release>
+  </properties>
+
+  <prerequisites>
+    <maven>3.9.0</maven>
+  </prerequisites>
+  
+  <modules>
+    <module>rcptt-maven-plugin</module>
+    <module>rcptt-maven-util</module>
+  </modules>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.14.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>remove-old-installations</id>
+            <goals>
+              <goal>remove-project-artifact</goal>
+            </goals>
+            <configuration>
+              <removeAll>true</removeAll>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+      <artifactId>maven-source-plugin</artifactId>
+       <version>3.3.1</version>
+      <executions>
+        <execution>
+          <id>attach-sources</id>
+          <goals><goal>jar</goal></goals> 
+        </execution>
+      </executions>
+    </plugin>
+    </plugins>
+  </build>
 </project>
