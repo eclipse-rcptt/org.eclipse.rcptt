@@ -40,7 +40,7 @@
           </snapshots>
           <id>rap-rcptt-runtime</id>
           <layout>p2</layout>
-          <url>file:/${user.dir}/modules/rap/repositories/org.eclipse.rcptt.runtime-updatesite.rap/target/repository/</url>
+          <url>${buildUrl}/modules/rap/repositories/org.eclipse.rcptt.runtime-updatesite.rap/target/repository/</url>
         </repository>
       </repositories>
     </profile>
