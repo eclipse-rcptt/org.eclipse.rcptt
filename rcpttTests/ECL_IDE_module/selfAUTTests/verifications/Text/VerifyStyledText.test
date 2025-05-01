@@ -1,14 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _byweYBOEEeO4t6fOTB-8xg,_4zI9AWpgEeCzId1Gnkds9A,_ZQYygK2sEeCqBbDEJWufvQ
 Element-Name: VerifyStyledText
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _hAve0BOHEeOQfY3M4mNcSA
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:04 PM
+Runtime-Version: 2.6.0.202504111505
+Save-Time: 5/2/25, 1:28 AM
 Tags: selfAUT, verification
 Testcase-Type: ecl
 
@@ -32,8 +31,10 @@ Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "MyProject/TC" | double-click
 get-editor TC | get-button Replay | click
+waitForTaskToComplete
 get-view "Test Explorer" | get-tree | select "MyProject/StyledTextVerification" | double-click
 get-editor StyledTextVerification | get-button Verify | click
+waitForTaskToComplete
 get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text | equals "" | verify-true
 get-editor StyledTextVerification | get-section "Widget Text" | get-editbox -after [get-label "Widget:"] 
     | set-text-offset 52 0
