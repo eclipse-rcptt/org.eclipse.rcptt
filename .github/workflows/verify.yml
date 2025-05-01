@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: results
+          name: self_results
           path: |
             list.txt
             rcpttTests/target/results/**
@@ -149,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: results
+          name: mockup_results
           path: |
             list.txt
             rcpttTests/target/results/**
