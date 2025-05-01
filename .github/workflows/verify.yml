@@ -124,7 +124,7 @@ jobs:
           path: repository/target/repository/
       - run: find . > list.txt
       - name: RCPTT Tests
-        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip --errors --batch-mode --no-transfer-progress
+        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DmockupsRepository=file://`pwd`/repository/target/repository  --errors --batch-mode --no-transfer-progress
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
