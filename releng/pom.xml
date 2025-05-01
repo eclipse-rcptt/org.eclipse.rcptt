@@ -342,6 +342,31 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!-- Workaround for https://github.com/eclipse-tycho/tycho/issues/4952
+           tycho-packaging-plugin generates timestamps even when they are not needed for qualifier  
+      -->
+      <id>forceContextQualifier</id>
+      <activation>
+        <property>
+          <name>forceContextQualifier</name>
+        </property>
+      </activation>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>${tycho-groupid}</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+                <version>${tycho-version}</version>
+                <configuration>
+                  <timestampProvider>default</timestampProvider>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
   </profiles>
   <pluginRepositories>
     <pluginRepository>
