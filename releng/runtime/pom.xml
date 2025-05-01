@@ -70,7 +70,7 @@ documentation -->
 							<complianceLevel>${ajJavaCompilance}</complianceLevel>
 							<aspectDirectory>src</aspectDirectory>
 							<Xlint>ignore</Xlint>
-							<Xreweavable>true</Xreweavable>
+							
 							<deprecation>true</deprecation>
 							<!--ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile-->
 						</configuration>
