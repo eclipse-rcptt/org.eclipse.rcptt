@@ -36,6 +36,7 @@
     <ajJavaTarget>1.8</ajJavaTarget>
 		<ajJavaCompilance>1.8</ajJavaCompilance>
 		<cbi-version>1.3.2</cbi-version>
+		<buildUrl>file:/${user.dir}</buildUrl>
 	</properties>
 	<prerequisites>
 		<maven>3.9.0</maven>
