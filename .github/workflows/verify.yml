@@ -2,8 +2,30 @@ name: Verify branch
 on:
   push
 jobs:
+  mockup_build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: xored/q7.quality.mockups
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - uses: stCarolas/setup-maven@v5
+      with:
+        maven-version: 3.9.9
+    - run: mvn clean verify
+    - name: Archive update site
+      uses: actions/upload-artifact@v4
+      with:
+        if-no-files-found: error
+        name: mockup_repository
+        path: 'repository/target/repository/**'
   build:
     runs-on: ubuntu-latest
+    needs: mockup_build
     container:
       image: basilevs/ubuntu-rcptt:3.7.1 
       env:
@@ -37,7 +59,7 @@ jobs:
           if-no-files-found: error
           name: ide
           path: repository/full/target/products/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip
-  test:
+  self_test:
     runs-on: ubuntu-latest
     needs: build
     container:
@@ -59,6 +81,50 @@ jobs:
       - run: find . > list.txt
       - name: RCPTT Tests
         run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip --errors --batch-mode --no-transfer-progress
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: results
+          path: |
+            list.txt
+            rcpttTests/target/results/**
+            rcpttTests/target/surefire-reports/**
+            rcpttTests/target/**/*log
+            rcpttTests/target/**/*.info
+            rcpttTests/target/**/*.ini
+            **/*.hrpof
+  mockup_test:
+    runs-on: ubuntu-latest
+    needs: build
+    container:
+      image: basilevs/ubuntu-rcptt:3.7.1 
+      env:
+        DISPLAY: :1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: xored/q7.quality.mockups
+      - uses: actions/cache@v4
+        with:
+          key: mockups_maven
+          path: |
+            /root/.m2/repository
+      - name: VNC
+        run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
+      - name: Download Runner
+        uses: actions/download-artifact@v4
+        with:
+          name: runner
+      - name: Download Mockups
+        uses: actions/download-artifact@v4
+        with:
+          name: mockup_repository
+          path: repository/target/repository/
+      - run: find . > list.txt
+      - name: RCPTT Tests
+        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip --errors --batch-mode --no-transfer-progress
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
