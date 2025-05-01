@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.tests.model.plainformat;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.eclipse.rcptt.core.persistence.plain.IPlainConstants;
@@ -79,5 +83,25 @@ public class PlainFormatTests {
 						(byte[]) entry.getContent()));
 			}
 		}
+	}
+	
+	@Test
+	// Yes, normalization is not reasonable. It sucks.
+	// Will have to keep for backward compatibility.
+	// Discovered while fixing memory consumption in PlainTextPersistenceModel 
+	public void textFormatNormalizesNewLines() throws Exception {
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		PlainWriter writer = new PlainWriter(bout, IPlainConstants.PLAIN_HEADER);
+		writer.writeHeader(Collections.emptyMap());
+		writer.writeNode("text_data_with_carriage_return", null, "line 1\r\nline 2\r\n");
+		writer.close();
+		PlainReader reader = new PlainReader(new ByteArrayInputStream(bout.toByteArray()));
+		reader.readHeader();
+		Entry entry = reader.readEntry();
+		assertEquals("text_data_with_carriage_return", entry.name);
+		assertEquals("line 1\nline 2\n", entry.getContent());
+		
+		
+		
 	}
 }
