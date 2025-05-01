@@ -1,0 +1,75 @@
+name: Verify branch
+on:
+  push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: basilevs/ubuntu-rcptt:3.7.1 
+      env:
+        DISPLAY: :1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          key: m2repository
+          path: |
+            /root/.m2/repository
+      - name: VNC
+        run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
+      - name: Build
+        run: ./build.sh -DforceContextQualifier=`date '+%Y%M%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+      - name: Archive update site
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: repository
+          path: 'repository/rcptt/target/repository/**'
+      - name: Archive Runner
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: runner
+          path: runner/product/target/products/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip
+      - name: Archive IDE
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: ide
+          path: repository/full/target/products/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    container:
+      image: basilevs/ubuntu-rcptt:3.7.1 
+      env:
+        DISPLAY: :1
+    steps:
+      - uses: actions/checkout@v4
+      - name: VNC
+        run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
+      - name: Download Runner
+        uses: actions/download-artifact@v4
+        with:
+          name: runner
+      - name: Download IDE
+        uses: actions/download-artifact@v4
+        with:
+          name: ide
+      - run: find . > list.txt
+      - name: RCPTT Tests
+        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip --errors --batch-mode --no-transfer-progress
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: results
+          path: |
+            list.txt
+            rcpttTests/target/results/**
+            rcpttTests/target/surefire-reports/**
+            rcpttTests/target/**/*log
+            rcpttTests/target/**/*.info
+            rcpttTests/target/**/*.ini
+            **/*.hrpof
