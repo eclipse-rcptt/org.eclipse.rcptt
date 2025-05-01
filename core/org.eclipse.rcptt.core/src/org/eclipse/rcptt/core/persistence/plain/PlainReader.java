@@ -56,6 +56,9 @@ public class PlainReader implements IPlainConstants, Closeable {
 			if (contentType != null && contentType.contains("text")) {
 				// Text mode content, remove trailing new line 
 				String content = segment.read();
+				// Normalize EOL. Yes, this is not an obvious design decision.
+				// The idea is probably to use EOLs specific to target like workspace resource or OS
+				content = content.replaceAll("\r\n", "\n");
 				String suffix = "\n";
 				if (content.endsWith(suffix)) {
 					content = content.substring(0, content.length() - suffix.length());
