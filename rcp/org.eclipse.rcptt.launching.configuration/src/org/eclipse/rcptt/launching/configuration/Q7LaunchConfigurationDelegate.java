@@ -33,8 +33,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetLocation;
-import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
@@ -51,6 +49,7 @@ import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
+import org.osgi.framework.BundleException;
 
 import com.google.common.collect.Maps;
 
@@ -126,14 +125,7 @@ public class Q7LaunchConfigurationDelegate extends
 		LaunchInfoCache.CachedInfo info = LaunchInfoCache.getInfo(configuration);
 
 		String targetName = configuration.getName() + " with RCPTT";
-		ITargetPlatformHelper helper = Q7TargetPlatformManager
-				.getHelper(targetName);
-
-		// try to load existing configuration
-		if (helper == null) {
-			helper = TargetPlatformManager.findTarget(targetName,
-					sm.split(1), false);
-		}
+		ITargetPlatformHelper helper = Q7TargetPlatformManager.findTarget(configuration, sm.split(1));
 		
 		if (helper != null) {
 			IStatus status = helper.resolve(sm.split(1));
@@ -174,7 +166,9 @@ public class Q7LaunchConfigurationDelegate extends
 				warnings.add(status);
 			}
 			helper.save();
-			Q7TargetPlatformManager.setHelper(targetName, helper);
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, helper);
+			configuration = wc.doSave();
 		}
 		if (helper != null) {
 			info.target = helper;
@@ -271,23 +265,20 @@ public class Q7LaunchConfigurationDelegate extends
 
 		for (Entry<IPluginModelBase, String> entry : Q7LaunchDelegateUtils
 				.getEclipseApplicationModels(this).entrySet()) {
-			collector.addInstallationBundle(entry.getKey(),
-					BundleStart.fromModelString(entry.getValue()));
+			try {
+				collector.addInstallationBundle(entry.getKey(),
+						BundleStart.fromModelString(entry.getValue()));
+			} catch (BundleException | IOException e) {
+				throw new CoreException(Status.error("Failed to process " + entry.getKey().getInstallLocation(), e));
+			}
 		}
-		ITargetLocation[] locations = target.getTarget().getTargetLocations();
-		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), locations.length);
+		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), target.size());
 		
-		for (ITargetLocation extra : locations) {
-			if (!Q7ExternalLaunchDelegate.isQ7BundleContainer(extra)) {
-				locationsMonitor.split(1);
-				continue;
-			}
-			TargetBundle[] bundles = extra.getBundles();
-			SubMonitor bundleMonitor = SubMonitor.convert(locationsMonitor.split(1), bundles.length);
-			for (TargetBundle bundle : bundles) {
-				collector.addExtraBundle(bundle, bundleMonitor.split(1));
-			}
-		}
+		target.getModels().forEach(m -> {
+			locationsMonitor.subTask(m.model().getPluginBase().getName());
+			collector.addPluginBundle(m.model(), m.startLevel());
+			locationsMonitor.split(1);
+		});
 
 		Q7ExternalLaunchDelegate.BundlesToLaunch bundles = collector.getResult();
 

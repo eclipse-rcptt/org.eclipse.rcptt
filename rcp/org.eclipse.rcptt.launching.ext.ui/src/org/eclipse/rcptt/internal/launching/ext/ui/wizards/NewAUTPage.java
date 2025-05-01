@@ -46,7 +46,6 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
@@ -154,7 +153,6 @@ public class NewAUTPage extends WizardPage {
 			runInDialog(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Validate AUT", 100);
 
 					TargetPlatformManager.clearTargets();
 					IStatus status = checkLocationExists(location);
@@ -164,13 +162,17 @@ public class NewAUTPage extends WizardPage {
 					}
 
 					try {
-						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location,
-								monitor);
-						shell.getDisplay().asyncExec(new Runnable() {
-							public void run() {
-								info.setValue(platform);
-							}
-						});
+						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
+						if (platform.getStatus().matches(IStatus.CANCEL | IStatus.ERROR)) {
+							setStatus(platform.getStatus(), true);
+							platform.delete();
+						} else {
+							shell.getDisplay().asyncExec(new Runnable() {
+								public void run() {
+									info.setValue(platform);
+								}
+							});
+						}
 					} catch (final CoreException e) {
 						setStatus(e.getStatus(), true);
 					}
@@ -525,8 +527,7 @@ public class NewAUTPage extends WizardPage {
 		return architecture;
 	}
 
-	public void initializeExisting(String configName, String autLocation,
-			String targetName, final ILaunchConfiguration configuration) {
+	public void initializeExisting(String configName, String autLocation, final ILaunchConfiguration configuration) {
 		// Remove existing target platform
 		this.currentName = configName;
 		// TargetPlatformManager.deleteTargetPlatform(targetName);

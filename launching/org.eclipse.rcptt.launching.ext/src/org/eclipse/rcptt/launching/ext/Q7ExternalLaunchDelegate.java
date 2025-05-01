@@ -11,9 +11,9 @@
 package org.eclipse.rcptt.launching.ext;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.AJConstants.OSGI_FRAMEWORK_EXTENSIONS;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
-import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.status;
 import static org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils.id;
 import static org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils.setDelegateFields;
 import static org.eclipse.rcptt.launching.ext.StartLevelSupport.getStartInfo;
@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -61,13 +60,10 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
-import org.eclipse.pde.internal.core.PDEState;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
-import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
 import org.eclipse.pde.internal.launching.PDEMessages;
 import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.VMHelper;
@@ -89,14 +85,14 @@ import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.target.TargetPlatformManager;
+import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.util.FileUtil;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
@@ -181,7 +177,7 @@ public class Q7ExternalLaunchDelegate extends
 			return false;
 		}
 		
-		SubMonitor sm = SubMonitor.convert(monitor, 4);
+		SubMonitor sm = SubMonitor.convert(monitor, 100);
 		
 		if (!isHeadless(configuration)
 				&& !super.preLaunchCheck(configuration, mode,
@@ -199,27 +195,33 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.getTarget(configuration,
-				sm.split(2));
+		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+				sm.split(1));
+		if (target == null) {
+			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+		}
+		
 
 		if (monitor.isCanceled()) {
-			removeTargetPlatform(configuration);
 			return false;
 		}
 
 		info.target = target;
 		final MultiStatus error = new MultiStatus(Q7ExtLaunchingPlugin.PLUGIN_ID, 0,
 				"Target platform initialization failed  for "
-						+ configuration.getName(),
+						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.getStatus());
+		error.add(target.resolve(sm.split(98)));
 
-		if (!error.isOK()) {
+		if (error.isOK()) {
+			Q7ExtLaunchingPlugin.log(error);
+		}
+
+		if (error.matches(IStatus.ERROR)) {
 			if (monitor.isCanceled()) {
 				removeTargetPlatform(configuration);
 				return false;
 			}
-			Q7ExtLaunchingPlugin.log(error);
 			removeTargetPlatform(configuration);
 			throw new CoreException(error);
 		}
@@ -303,10 +305,8 @@ public class Q7ExternalLaunchDelegate extends
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
 			throws CoreException {
-		String targetPlatformName = Q7TargetPlatformManager.getTargetPlatformName(configuration);
-		Q7TargetPlatformManager.delete(targetPlatformName);
+		Q7TargetPlatformManager.delete(configuration);
 		LaunchInfoCache.remove(configuration);
-		TargetPlatformManager.deleteTargetPlatform(targetPlatformName);
 	}
 
 	private static boolean isHeadless(ILaunchConfiguration configuration)
@@ -504,6 +504,9 @@ public class Q7ExternalLaunchDelegate extends
 			try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(config))) {
 				properties.store(out, "Configuration File");
 			}
+			// Workaround for https://github.com/eclipse-oomph/oomph/issues/152
+			// Create a configured directory so that Oomph can ensure it is writable and use it and not fall back to default 
+			new File(config.getParent(), ".p2").mkdirs();
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -625,11 +628,10 @@ public class Q7ExternalLaunchDelegate extends
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		BundlesToLaunch bundlesToLaunch = collectBundlesCheck(target.getQ7Target(), target.getTarget(), subm.split(50), configuration);
+		BundlesToLaunch bundlesToLaunch = collectBundles(target, subm.split(50));
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		removeDuplicatedModels(bundlesToLaunch.fModels, target.getQ7Target());
 		checkBundles(bundlesToLaunch);
 		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
@@ -651,62 +653,15 @@ public class Q7ExternalLaunchDelegate extends
 		log(Status.info(message));
 	}
 
-	public static void removeDuplicatedModels(Map<IPluginModelBase, String> fModels, Q7Target target) {
-		String path = target.getInstallLocation().getAbsolutePath();
-		List<IPluginModelBase> keysForRemove = new ArrayList<IPluginModelBase>();
-		Map<UniquePluginModel, IPluginModelBase> cache = new HashMap<UniquePluginModel, IPluginModelBase>();
-		for (Entry<IPluginModelBase, String> entry : fModels.entrySet()) {
-			IPluginModelBase model = entry.getKey();
-			UniquePluginModel uniqueModel = new UniquePluginModel(model);
-			IPluginModelBase secondModel = cache.get(uniqueModel);
-			if (secondModel != null) {
-				if (secondModel.getInstallLocation().contains(path)) {
-					keysForRemove.add(secondModel);
-					continue;
-				} else {
-					keysForRemove.add(model);
-					continue;
-				}
-
-			} else {
-				cache.put(uniqueModel, model);
-			}
-		}
-		for (IPluginModelBase key : keysForRemove) {
-			fModels.remove(key);
-		}
-	}
-	
 	public static class BundlesToLaunchCollector {
-		private void addInstallationBundle(TargetBundle bundle,
-				BundleStart hint, IProgressMonitor monitor) {
-			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				addInstallationBundle(base, hint);
-			}
-		}
 
 		public void addInstallationBundle(IPluginModelBase base,
-				BundleStart hint) {
-			String id = id(base);
-			idsToSkip.add(id);
-			put(base, getStartInfo(base, hint));
+				BundleStart hint) throws BundleException, IOException {
+			put(base, getStartInfo(StartLevelSupport.loadManifest(base.getInstallLocation()), hint));
 		}
-
-		private void addPluginBundle(TargetBundle bundle, IProgressMonitor monitor) {
-			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				String id = id(base);
-
-				if (idsToSkip.contains(id)) {
-					continue;
-				}
-				put(base, getStartInfo(base, BundleStart.DEFAULT));
-			}
-		}
-
-		public void addExtraBundle(TargetBundle bundle, IProgressMonitor monitor) {
-			for (IPluginModelBase base : getModels(bundle, monitor)) {
-				put(base, getStartInfo(base, BundleStart.DEFAULT));
-			}
+		
+		public void addPluginBundle(IPluginModelBase bundle, BundleStart startlevel) {
+			put(bundle, startlevel);
 		}
 
 		public BundlesToLaunch getResult() {
@@ -714,43 +669,39 @@ public class Q7ExternalLaunchDelegate extends
 		}
 
 		private void put(IPluginModelBase plugin, BundleStart start) {
+			final String id = id(plugin);
+			if (!uniqueModels.add(new UniquePluginModel(plugin))) {
+				return;
+			}
+			
+			IPluginModelBase existing = latestVersions.get(id);
+			boolean newer = existing == null || isGreater(version(plugin), version(existing)); 
+			if (isSingleton(plugin)) {
+				if (!newer) {
+					return;
+				}
+				plugins.remove(existing);
+			}
 
+			plugins.put(plugin, start);
+			if (newer) {
+				latestVersions.put(id, plugin);
+			}
+		}
+		
+		private static boolean isSingleton(IPluginModelBase plugin) {
 			/**
 			 * Check for aspectj special plugins, they should be one version
 			 * only.
 			 **/
 			final String id = id(plugin);
-			if (id.equals(AJConstants.AJ_HOOK) || id.equals(AJConstants.AJ_RT)
-					|| id.equals(AJConstants.HOOK)) {
-				// remove previous bundles with specified id
-				Iterables.removeIf(plugins.entrySet(), isEqualsId(id));
-				latestVersions.remove(id);
-			}
-
-			plugins.put(plugin, start);
-			IPluginModelBase existing = latestVersions.get(id);
-
-			if (existing == null
-					|| isGreater(version(plugin), version(existing))) {
-				latestVersions.put(id, plugin);
-			}
+			return plugin.getBundleDescription().isSingleton() || id.equals(AJConstants.AJ_HOOK) || id.equals(AJConstants.AJ_RT)
+					|| id.equals(AJConstants.HOOK);
 		}
-
-		private Predicate<Entry<IPluginModelBase, BundleStart>> isEqualsId(
-				final String id) {
-			return new Predicate<Map.Entry<IPluginModelBase, BundleStart>>() {
-				public boolean apply(Entry<IPluginModelBase, BundleStart> input) {
-					if (id.equals(id(input.getKey()))) {
-						return true;
-					}
-					return false;
-				}
-			};
-		}
-
-		private final Set<String> idsToSkip = new HashSet<String>();
-		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<IPluginModelBase, BundleStart>();
-		private final Map<String, IPluginModelBase> latestVersions = new HashMap<String, IPluginModelBase>();
+		
+		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<>();
+		private final Map<String, IPluginModelBase> latestVersions = new HashMap<>();
+		private final Set<UniquePluginModel> uniqueModels = new HashSet<>();
 	}
 
 	public static boolean isQ7BundleContainer(ITargetLocation container) {
@@ -769,72 +720,18 @@ public class Q7ExternalLaunchDelegate extends
 		return target.getInstall().configIniBundles().containsKey(TargetPlatformHelper.SIMPLECONFIGURATOR);
 	}
 
-	public static void setBundlesLevels(Q7Target target, Map<String, String> levelMap) {
-		final ProfileBundleContainer profileBundleContainer = target.getInstall().container;
-		if (profileBundleContainer != null) {
-			for (TargetBundle bundle : target.getInstall().getBundles()) {
-				String bundleLevels = levelMap.get(bundle.getBundleInfo().getSymbolicName());
-				if (bundleLevels != null) {
-					try {
-						String[] strings = bundleLevels.split(":");
-						int level = Integer.parseInt(strings[0]);
-						boolean started = Boolean.parseBoolean(strings[1]);
-						bundle.getBundleInfo().setStartLevel(level);
-						bundle.getBundleInfo().setMarkedAsStarted(started);
-					} catch (Exception e) {
-						// ignore parsing exception
-					}
-				}
-			}
-		} else {
-			log(status("Profile Bundle Container is EMPTY.")); //$NON-NLS-1$
-		}
 
-	}
-
-	public static BundlesToLaunch collectBundlesCheck(Q7Target target, ITargetDefinition targetDefinition, IProgressMonitor monitor,
-			ILaunchConfiguration configuration) {
-		if (target.getInstall() != null && isAutConfigSimpleconfiguratorSet(target)) {
-			final CachedInfo info = LaunchInfoCache.getInfo(configuration);
-			TargetPlatformHelper targetHelper = (TargetPlatformHelper) ((ITargetPlatformHelper) info.target);
-			Map<String, String> levelMap = targetHelper.getRunlevelsMap();
-			setBundlesLevels(target, levelMap);
-		}
-
-		return collectBundles(target, targetDefinition, monitor);
-	}
-
-	public static BundlesToLaunch collectBundles(Q7Target target, ITargetDefinition targetDefinition, IProgressMonitor monitor) {
+	public static BundlesToLaunch collectBundles(ITargetPlatformHelper targetDefinition, IProgressMonitor monitor) {
 		BundlesToLaunchCollector collector = new BundlesToLaunchCollector();
-		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", 3000);
-		SubMonitor install = subm.split(1000);
-
-		if (target.getInstall() != null) {
-			Map<String, BundleStart> bundlesFromConfig = target.getInstall().configIniBundles();
-			TargetBundle[] installationBundles = target.getInstall().getBundles();
-			install.beginTask("Scanning " + target.getInstall().getInstallLocation(), installationBundles.length);
-			for (TargetBundle bundle : target.getInstall().getBundles()) {
-				BundleStart hint = MoreObjects.firstNonNull(bundlesFromConfig.get(bundle
-						.getBundleInfo().getSymbolicName()),
-						BundleStart.fromBundle(bundle.getBundleInfo()));
-				collector.addInstallationBundle(bundle, hint, install.split(1));
-			}
-		}
-		install.done();
-
-		TargetBundle[] bundles = targetDefinition.getAllBundles();
-		final SubMonitor plugins = SubMonitor.convert(subm.split(2000), bundles.length);
-		for (TargetBundle bundle : bundles) {
-			collector.addPluginBundle(bundle, plugins.split(1));
-		}
-		plugins.done();
-
+		SubMonitor subm = SubMonitor.convert(monitor, "Collecting bundles", targetDefinition.size());
 		try {
+			for (Model m: ((Iterable<ITargetPlatformHelper.Model>)(targetDefinition.getModels()::iterator))) {
+				subm.split(1);
+				collector.addPluginBundle(m.model(), m.startLevel());
+			}
 			return new BundlesToLaunch(collector.plugins, collector.latestVersions);
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			done(monitor);
 		}
 	}
 
@@ -887,11 +784,6 @@ public class Q7ExternalLaunchDelegate extends
 		return (BundlesToLaunch) info.data.get(KEY_BUNDLES_TO_LAUNCH);
 	}
 
-	private static IPluginModelBase[] getModels(TargetBundle bundle, IProgressMonitor monitor) {
-		return new PDEState(new URI[] {
-			bundle.getBundleInfo().getLocation() }, true, true,
-				monitor).getTargetModels();
-	}
 
 	private static Version version(IPluginModelBase plugin) {
 		try {
@@ -945,6 +837,11 @@ public class Q7ExternalLaunchDelegate extends
 		public UniquePluginModel(IPluginModelBase model) {
 			version = model.getBundleDescription().getVersion();
 			name = model.getBundleDescription().getName();
+		}
+
+		public UniquePluginModel(TargetBundle bundle) {
+			version = Version.parseVersion(bundle.getBundleInfo().getVersion());
+			name = bundle.getBundleInfo().getSymbolicName();
 		}
 
 		@Override

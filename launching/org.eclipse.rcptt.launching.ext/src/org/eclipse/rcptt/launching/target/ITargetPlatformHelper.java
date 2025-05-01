@@ -12,15 +12,17 @@ package org.eclipse.rcptt.launching.target;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
+import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.injection.InjectionConfiguration;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
@@ -40,13 +42,6 @@ public interface ITargetPlatformHelper {
 	 * @return
 	 */
 	boolean isResolved();
-
-	/**
-	 * Set target platform name.
-	 * 
-	 * @param string
-	 */
-	void setTargetName(String name);
 
 	/**
 	 * Save current target platform to PDE.
@@ -131,8 +126,6 @@ public interface ITargetPlatformHelper {
 
 	String getTemplateConfigLocation();
 
-	String getBundlesList();
-
 	OriginalOrderProperties getConfigIniProperties();
 
 	OSArchitecture detectArchitecture(boolean preferCurrentVmArchitecture,
@@ -148,7 +141,15 @@ public interface ITargetPlatformHelper {
 
 	IStatus getStatus();
 
-	public ITargetDefinition getTarget();
+	record Model(IPluginModelBase model, BundleStart startLevel) {
+		public Model {
+			Objects.requireNonNull(model);
+			Objects.requireNonNull(startLevel);
+		}
+	};
+	Stream<Model> getModels();
 
 	Map<String, Version> getVersions() throws CoreException;
+
+	int size();
 }

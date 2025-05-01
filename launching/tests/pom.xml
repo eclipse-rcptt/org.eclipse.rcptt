@@ -24,25 +24,5 @@
 		<module>org.eclipse.rcptt.reporting.html.tests</module>
 	</modules>
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.tycho</groupId>
-					<artifactId>target-platform-configuration</artifactId>
-					<configuration>
-						<dependency-resolution>
-							<extraRequirements>
-								<requirement>
-									<!-- Tycho 2.7.5 surefire JUnit4 support imports javax.annotation package, but fails to add it to dependencies -->
-									<type>eclipse-plugin</type>
-									<id>jakarta.annotation-api</id>
-									<versionRange>1.3.5</versionRange>
-								</requirement>
-							</extraRequirements>
-						</dependency-resolution>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

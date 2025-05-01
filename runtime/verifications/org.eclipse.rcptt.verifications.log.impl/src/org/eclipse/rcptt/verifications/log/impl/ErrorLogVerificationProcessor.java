@@ -45,15 +45,15 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 	 */
 	private static class LogEntry {
 		final IStatus status;
-		final INodeBuilder node;
+		private boolean isContext;
 
-		LogEntry(IStatus status, INodeBuilder node) {
+		LogEntry(IStatus status, boolean isContext) {
+			this.isContext = isContext;
 			if( status == null) {
 				throw new NullPointerException("Status should not be null"); //$NON-NLS-1$
 			}
 			this.status = status;
 			
-			this.node = node;
 		}
 	}
 
@@ -87,7 +87,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 		whiteList.addAll(logVerification.getRequired());
 		ErrorList errors = new ErrorList();
 		for (LogEntry entry : testLog) {
-			boolean ignoreContext = !logVerification.isIncludeContexts() && isContext(entry.node);
+			boolean ignoreContext = !logVerification.isIncludeContexts() && entry.isContext;
 			if (ignoreContext || isWhiteListed(whiteList, entry.status)) {
 				continue;
 			}
@@ -120,7 +120,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 	@Override
 	synchronized public void logging(IStatus status, String plugin) {
 		INodeBuilder node = ReportManager.getCurrentReportNode();
-		testLog.add(new LogEntry(status, node));
+		testLog.add(new LogEntry(status, isContext(node)));
 	}
 	
 	private boolean isWhiteListed(Iterable<LogEntryPredicate> whiteList, IStatus status) {
@@ -143,7 +143,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 			rv.setIncludeContexts(((ErrorLogVerification) param).isIncludeContexts());
 		}
 		for (LogEntry entry : testLog) {
-			if (!rv.isIncludeContexts() && isContext(entry.node)) {
+			if (!rv.isIncludeContexts() && entry.isContext) {
 				continue; // Error happened during context execution and the verification is configured to ignore them.
 			}
 			rv.getAllowed().add(createMatchingPredicate(entry.status));

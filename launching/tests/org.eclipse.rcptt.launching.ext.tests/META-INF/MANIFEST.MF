@@ -1,11 +1,21 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Automatic-Module-Name: org.eclipse.rcptt.launching.ext.tests
 Bundle-Name: Tests
 Bundle-SymbolicName: org.eclipse.rcptt.launching.ext.tests
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Fragment-Host: org.eclipse.rcptt.launching.ext;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.junit;bundle-version="4.8.2",
  org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.core.ecl.core;bundle-version="[2.6.0,3.0.0)"
+ org.eclipse.rcptt.core.ecl.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.updates.aspectj.e44x;bundle-version="2.6.0",
+ org.eclipse.rcptt.updates.extra;bundle-version="2.6.0",
+ org.eclipse.rcptt.updates.kepler;bundle-version="2.6.0",
+ org.eclipse.rcptt.updates.runtime.e4x;bundle-version="2.6.0",
+ org.eclipse.equinox.p2.transport.ecf;bundle-version="1.4.500",
+ org.eclipse.equinox.p2.touchpoint.natives;bundle-version="1.5.600",
+ org.eclipse.jdt.launching,
+ org.apache.commons.commons-compress;bundle-version="1.27.1",
+ org.apache.commons.lang3;bundle-version="3.17.0"

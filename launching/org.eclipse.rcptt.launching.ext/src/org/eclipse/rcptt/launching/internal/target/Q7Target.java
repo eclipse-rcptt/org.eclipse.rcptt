@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.core.target.ITargetLocation;
-import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
@@ -82,10 +81,6 @@ public class Q7Target {
 		public AutInstall(ProfileBundleContainer container) {
 			this.container = container;
 			this.userArea = null;
-		}
-
-		public TargetBundle[] getBundles() {
-			return container.getBundles();
 		}
 
 		public boolean usesSimpleConfigurator() {

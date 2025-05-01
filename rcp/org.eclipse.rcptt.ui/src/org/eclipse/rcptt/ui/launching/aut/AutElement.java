@@ -58,7 +58,7 @@ public class AutElement {
 	}
 
 	public void remove() throws CoreException {
-		aut.getConfig().delete();
+		aut.delete();
 	}
 
 	public void stop() {

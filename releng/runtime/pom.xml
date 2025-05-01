@@ -23,7 +23,7 @@ documentation -->
 	</parent>
 
 	<properties>
-		<coreRepository>file:/${user.dir}/repository/core/target/repository</coreRepository>
+		<coreRepository>${buildUrl}/repository/core/target/repository</coreRepository>
 		<orbitRepository>
 			http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
 	</properties>

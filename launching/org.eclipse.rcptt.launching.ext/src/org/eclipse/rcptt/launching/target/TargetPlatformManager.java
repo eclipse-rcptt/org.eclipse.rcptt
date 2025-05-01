@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.target;
 
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.io.File;
@@ -27,7 +28,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetHandle;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -56,10 +56,11 @@ public class TargetPlatformManager {
 		if (!status.isOK())
 			Q7ExtLaunchingPlugin.log(status);
 	}
+	
+	
 
 	/**
 	 * Creates new target platform based on specified AUT location
-	 * 
 	 * @throws CoreException
 	 */
 	public static ITargetPlatformHelper createTargetPlatform(final String location, IProgressMonitor monitor)
@@ -67,6 +68,26 @@ public class TargetPlatformManager {
 		boolean isOk = false;
 		final ITargetPlatformService service = PDEHelper.getTargetService();
 		final ITargetDefinition target = service.newTarget();
+		
+		String namePrefix = "AUT " + location.replace("/", "_") + " ";
+		String name = namePrefix + 1;
+		SubMonitor sm = SubMonitor.convert(monitor, "Building target platform", 2);
+		SubMonitor sm2 = SubMonitor.convert(sm.split(1), "Selecting a name", 1000);
+		ITargetPlatformHelper existing = null;
+		for (int i = 1; i < 1000; i++) {
+			name = namePrefix + i;
+			existing = findTarget(name, sm2.split(1, SubMonitor.SUPPRESS_NONE));
+			if (existing == null) {
+				break;
+			}
+		}
+		
+		if (existing != null) {
+			PDEHelper.getTargetService().deleteTarget(target.getHandle());
+			throw new CoreException(Status.error(name + " already exists"));
+		}
+		target.setName(name);
+		
 		final TargetPlatformHelper info = new TargetPlatformHelper(target);
 		try {
 			final List<ITargetLocation> containers = new ArrayList<ITargetLocation>();
@@ -106,7 +127,7 @@ public class TargetPlatformManager {
 
 			info.setBundleContainers(containers
 					.toArray(new ITargetLocation[containers.size()]));
-			throwOnError(info.resolve(monitor));
+			throwOnError(info.resolve(sm.split(1, SubMonitor.SUPPRESS_NONE)));
 			isOk = true;
 			return info;
 		} catch (StackOverflowError e) {
@@ -120,19 +141,19 @@ public class TargetPlatformManager {
 		} finally {
 			if (!isOk)
 				info.delete();
+			done(monitor);
 		}
 	}
 
 	/**
 	 * Restore target platform from existing configuration
-	 * 
 	 * @param attribute
+	 * 
 	 * @return null if no target platform is found. Helper object otherwise.
 	 * @throws CoreException
 	 */
 	public static ITargetPlatformHelper findTarget(
-			final String requiredName, final IProgressMonitor monitorArg,
-			final boolean needResolve) throws CoreException {
+			final String requiredName, final IProgressMonitor monitorArg) {
 		SubMonitor monitor = SubMonitor.convert(monitorArg);
 		monitor.beginTask("Looking up " + requiredName, 2);
 
@@ -147,7 +168,8 @@ public class TargetPlatformManager {
 		};
 		try {
 			ITargetHandle[] targets = PDEHelper.getTargetService().getTargets(
-					monitor.newChild(1));
+					monitor.split(1));
+			SubMonitor sm2 = monitor.split(1);
 			for (ITargetHandle handle : targets) {
 				if (monitor.isCanceled()) {
 					return null;
@@ -161,17 +183,12 @@ public class TargetPlatformManager {
 					continue;
 				}
 				String name = def.getName();
-				if (name == null || !name.equals(requiredName))
+				sm2.subTask(name);
+				if (name == null || !name.equals(requiredName)) {
+					sm2.split(1);
 					continue;
-				final TargetPlatformHelper info = new TargetPlatformHelper(def);
-				if (needResolve) {
-					IStatus status = info.resolve(monitor.newChild(1, SubMonitor.SUPPRESS_NONE));
-					if (!status.isOK()) {
-						LaunchingPlugin.log(status);
-						info.delete();
-						return null;
-					}
 				}
+				final TargetPlatformHelper info = new TargetPlatformHelper(def);
 				return info;
 			}
 			return null;

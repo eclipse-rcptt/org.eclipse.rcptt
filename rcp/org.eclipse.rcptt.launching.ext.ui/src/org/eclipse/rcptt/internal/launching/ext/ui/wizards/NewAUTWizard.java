@@ -24,14 +24,12 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.pde.internal.launching.IPDEConstants;
 import org.eclipse.pde.internal.launching.launcher.LaunchConfigurationHelper;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.launching.aut.BaseAutManager;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
-import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.IQ7Launch;
@@ -41,7 +39,6 @@ import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.utils.AUTLaunchArgumentsHelper;
 import org.eclipse.rcptt.ui.launching.LaunchUtils;
-import org.eclipse.ui.IWorkbench;
 
 @SuppressWarnings("restriction")
 public class NewAUTWizard extends Wizard {
@@ -52,13 +49,20 @@ public class NewAUTWizard extends Wizard {
 		setWindowTitle("New Application Under Test");
 	}
 
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-	}
-
 	@Override
 	public void addPages() {
 		page = new NewAUTPage("new", "New Application Under Test", null);
 		addPage(page);
+	}
+	
+	@Override
+	public boolean performCancel() {
+		ITargetPlatformHelper target = page.getTarget();
+		if (target != null) {
+			target.delete();
+		}
+		
+		return super.performCancel();
 	}
 
 	@Override
@@ -70,9 +74,6 @@ public class NewAUTWizard extends Wizard {
 			return false;
 		}
 		try {
-			target.setTargetName(Q7TargetPlatformManager
-					.getTargetPlatformName(page.getTargetName()));
-			target.save();
 			ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 					.createLaunchConfiguration(target, page.getTargetName());
 			OSArchitecture autArch = page.getArchitecture();
@@ -138,6 +139,7 @@ public class NewAUTWizard extends Wizard {
 
 			setDefaultsAttributes(workingCopy);
 			workingCopy.doSave();
+			target.save();
 
 			if (page.isLaunchNeeded()) {
 				LaunchUtils.launch(BaseAutManager.INSTANCE.getByName(workingCopy.getName()), getShell());

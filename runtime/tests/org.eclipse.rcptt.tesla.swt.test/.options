@@ -1,4 +1,4 @@
-org.eclipse.rcptt.tesla.swt/debug/debugReportOutput=true
-org.eclipse.rcptt.tesla.swt/debug/jobCollector=true
+org.eclipse.rcptt.tesla.swt/debug/debugReportOutput=false
+org.eclipse.rcptt.tesla.swt/debug/jobCollector=false
 org.eclipse.rcptt.tesla.swt/debug/proceed=false
 org.eclipse.rcptt.tesla.swt/debug/shellSelect=false

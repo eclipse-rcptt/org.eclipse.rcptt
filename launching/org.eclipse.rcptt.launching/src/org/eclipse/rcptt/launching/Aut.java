@@ -73,4 +73,6 @@ public interface Aut {
 	 */
 	List<AutLaunch> getLaunches();
 
+	void delete();
+
 }

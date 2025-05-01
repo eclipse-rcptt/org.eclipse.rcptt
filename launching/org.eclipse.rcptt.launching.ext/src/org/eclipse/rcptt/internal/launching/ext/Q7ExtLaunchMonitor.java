@@ -138,11 +138,18 @@ public class Q7ExtLaunchMonitor {
 					throw new CoreException(
 							new Status(
 									IStatus.ERROR,
-									Q7ExtLaunchingPlugin.PLUGIN_ID,
+									getClass(),
 									BaseAut.TERMINATE_CODE,
-									"Process was terminated while waiting for AUT startup data",
+									"AUT was terminated while waiting for startup data",
 									null));
 				}
+			}
+			if (aut.getLaunch().isTerminated()) {
+				throw new CoreException(new Status(
+						IStatus.ERROR, getClass(),
+						BaseAut.TERMINATE_CODE,
+						"AUT's process was terminated while waiting for startup data",
+						null));
 			}
 			synchronized (this) {
 				if (start != null) {
