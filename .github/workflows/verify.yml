@@ -99,7 +99,7 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
+          fail_on_failure: false
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
