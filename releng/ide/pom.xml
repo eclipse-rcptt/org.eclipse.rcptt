@@ -76,12 +76,12 @@
     <repository>
       <id>orbit-osgi</id>
       <layout>p2</layout>
-      <url>https://download.eclipse.org/tools/orbit/simrel/maven-osgi/release/4.33.0/</url>
+      <url>https://download.eclipse.org/tools/orbit/simrel/maven-osgi/2025-03/</url>
     </repository>
     <repository>
       <id>orbit-bnd</id>
       <layout>p2</layout>
-      <url>https://download.eclipse.org/tools/orbit/simrel/maven-bnd/release/4.33.0/</url>
+      <url>https://download.eclipse.org/tools/orbit/simrel/maven-bnd/2025-03/</url>
     </repository>
     <repository>
       <id>core</id>
