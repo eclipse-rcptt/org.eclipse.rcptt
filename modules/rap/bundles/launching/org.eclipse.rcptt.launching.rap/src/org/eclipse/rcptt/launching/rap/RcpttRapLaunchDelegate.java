@@ -349,7 +349,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		OSArchitecture architecture = ((configArch == null) ? ((ITargetPlatformHelper) info.target)
 				.detectArchitecture(true, detectMsg) : configArch);
 
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+		IVMInstall install = Q7ExternalLaunchDelegate.getVMInstall(configuration, (ITargetPlatformHelper) info.target);
 
 		OSArchitecture jvmArch = JDTUtils.detect(install);
 
@@ -482,7 +482,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 					+ IPath.SEPARATOR + SECURE_STORAGE_FILE_NAME);
 		}
 
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+		IVMInstall install = Q7ExternalLaunchDelegate.getVMInstall(configuration, target);
 		programArguments.add("-vm");
 		programArguments.add(install.getInstallLocation().toString());
 
