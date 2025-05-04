@@ -178,6 +178,7 @@ public class Q7ExternalLaunchDelegateTest {
 		Arrays.stream(output.split("\n")).forEach(line -> {
 			assertFalse(line, line.contains("Unresolved requirement"));
 			assertFalse(line, line.contains("org.osgi.framework.BundleException:"));
+			assertFalse(line, line.contains("IllegalStateException"));
 		});
 	}
 
