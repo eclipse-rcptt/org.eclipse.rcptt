@@ -1061,6 +1061,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		checkResolved();
 		String os = Platform.getOS();
 		TargetBundle[] bundles = target.getAllBundles();
+		String archName = target.getArch();
+		if (archName != null) {
+			try {
+				return OSArchitecture.valueOf(archName);
+			} catch (IllegalArgumentException e) {
+				return OSArchitecture.Unknown;
+			}
+		}
 		for (TargetBundle b : bundles) {
 			BundleInfo info = b.getBundleInfo();
 			String name = info.getSymbolicName();
