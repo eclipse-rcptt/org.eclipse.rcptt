@@ -36,9 +36,6 @@ public class TargetPlatformHelperTest {
 		closer.close();
 	}
 
-	/**
-	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160
-	 */
 	@Test
 	public void detectArchitecture() throws CoreException, IOException {
 		ITargetHandle handle = createTarget("wrongLauncher.target");
@@ -47,6 +44,20 @@ public class TargetPlatformHelperTest {
 		throwIfProblem(subject.resolve(null));
 		Assert.assertEquals(OSArchitecture.aarch64, subject.detectArchitecture(null));
 	}
+	
+	/**
+	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160
+	 */
+	@Test
+	public void respectExplicitArchitecture() throws CoreException, IOException {
+		ITargetHandle handle = createTarget("wrongLauncher.target");
+		ITargetDefinition definition = handle.getTargetDefinition();
+		definition.setArch("x86_64");
+		TargetPlatformHelper subject = new TargetPlatformHelper(definition);
+		throwIfProblem(subject.resolve(null));
+		Assert.assertEquals(OSArchitecture.x86_64, subject.detectArchitecture(null));
+	}
+
 
 	@SuppressWarnings("resource")
 	private ITargetHandle createTarget(String resource) {
