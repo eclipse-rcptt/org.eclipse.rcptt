@@ -365,46 +365,50 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private IPluginModelBase weavingHook;
 
 	private IStatus validateBundles(IProgressMonitor monitor) {
-		ILaunchConfigurationWorkingCopy wc;
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
+		ILaunchConfigurationWorkingCopy wc = null;
+		LaunchValidationOperation validation;
 		try {
 			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
+			StringBuilder message = new StringBuilder();
+			OSArchitecture architecture = detectArchitecture(message);
+			if (architecture == null || architecture == OSArchitecture.Unknown) {
+				return error(message.toString());
+			}
+			VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
+			if (jvm == null) {
+				return error ("No JVM for architecture " + architecture + " is registered");
+			}
+			
+			wc.setAttribute(
+					IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
+					String.format(
+							"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
+							jvm.install.getVMInstallType().getId(),
+							jvm.install.getName()));
+			
+			validation = new LaunchValidationOperation(wc,
+					new HashSet<>(modelIndex.values())) {
+				@Override
+				protected IExecutionEnvironment[] getMatchingEnvironments()
+						throws CoreException {
+					IExecutionEnvironmentsManager manager = JavaRuntime
+							.getExecutionEnvironmentsManager();
+					IExecutionEnvironment[] envs = manager
+							.getExecutionEnvironments();
+					return envs;
+				}
+			};
 		} catch (CoreException e) {
 			return e.getStatus();
-		}
-		StringBuilder message = new StringBuilder();
-		OSArchitecture architecture = detectArchitecture(message);
-		if (architecture == null || architecture == OSArchitecture.Unknown) {
-			return error(message.toString());
-		}
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
-		if (jvm == null) {
-			return error ("No JVM for architecture " + architecture + " is registered");
-		}
-		
-		wc.setAttribute(
-				IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-				String.format(
-						"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-						jvm.install.getVMInstallType().getId(),
-						jvm.install.getName()));
-		
-		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
-				new HashSet<>(modelIndex.values())) {
-			@Override
-			protected IExecutionEnvironment[] getMatchingEnvironments()
-					throws CoreException {
-				IExecutionEnvironmentsManager manager = JavaRuntime
-						.getExecutionEnvironmentsManager();
-				IExecutionEnvironment[] envs = manager
-						.getExecutionEnvironments();
-				return envs;
+		} finally {
+			if (wc != null) {
+				try {
+					wc.delete();
+				} catch (CoreException e) {
+					return e.getStatus();
+				}
 			}
-		};
-		try {
-			wc.delete();
-		} catch (CoreException e1) {
-			return e1.getStatus();
 		}
 		try {
 			StringBuilder b = new StringBuilder();

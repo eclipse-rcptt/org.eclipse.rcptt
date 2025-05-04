@@ -17,6 +17,7 @@ import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.launching.p2utils.P2Utils;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -41,18 +42,36 @@ public class TargetPlatformHelperTest {
 	 */
 	@Test
 	public void detectArchitecture() throws CoreException, IOException {
-		ITargetHandle handle = createTarget("wrongLauncher.target");
-		ITargetDefinition definition = handle.getTargetDefinition();
-		TargetPlatformHelper subject = new TargetPlatformHelper(definition);
-		throwIfProblem(subject.resolve(null));
-		Assert.assertEquals(OSArchitecture.aarch64, subject.detectArchitecture(null));
+		String os = Platform.getOS();
+		int count = 0;
+		for (String arch: Platform.knownOSArchValues()) {
+			String resourceName = String.format("%s_%s.target", os, arch);
+			if (!resourceExists(resourceName)) {
+				continue;
+			}
+			count++;
+			ITargetHandle handle = createTarget(resourceName);
+			ITargetDefinition definition = handle.getTargetDefinition();
+			TargetPlatformHelper subject = new TargetPlatformHelper(definition);
+			throwIfProblem(subject.resolve(null));
+			Assert.assertEquals(OSArchitecture.valueOf(arch), subject.detectArchitecture(null));
+		}
+		Assume.assumeTrue(count > 0);
+	}
+
+	private boolean resourceExists(String resourceName) {
+		try (InputStream is = getClass().getResourceAsStream(resourceName)) {
+			return is != null;
+		} catch(IOException e) {
+			return false;
+		}
 	}
 
 	@SuppressWarnings("resource")
 	private ITargetHandle createTarget(String resource) {
 		try {
 			ITargetPlatformService service = P2Utils.getTargetService();
-			Path targetFile = temporaryFolder.newFile("target.target").toPath();
+			Path targetFile = temporaryFolder.newFile().toPath();
 			try (InputStream is = getClass().getResourceAsStream(resource)) {
 				Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
 			}
