@@ -128,8 +128,7 @@ public interface ITargetPlatformHelper {
 
 	OriginalOrderProperties getConfigIniProperties();
 
-	OSArchitecture detectArchitecture(boolean preferCurrentVmArchitecture,
-			StringBuilder detectMsg);
+	OSArchitecture detectArchitecture(StringBuilder detectMsg);
 
 	String getRuntimeVersion();
 

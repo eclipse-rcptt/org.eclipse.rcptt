@@ -314,6 +314,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		modelIndex.clear();
 		TargetBundle[] bundles = getTarget().getBundles();
 		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
+		if (locations.length == 0) {
+			throw new IllegalStateException("Target definition can't be empty");
+		}
 		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
 		if (DEBUG_BUNDLES) {
 			final List<String> targetModelsLocations = new ArrayList<String>();
@@ -370,7 +373,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return e.getStatus();
 		}
 		StringBuilder message = new StringBuilder();
-		OSArchitecture architecture = detectArchitecture(true, message);
+		OSArchitecture architecture = detectArchitecture(message);
 		if (architecture == null || architecture == OSArchitecture.Unknown) {
 			return error(message.toString());
 		}
@@ -502,6 +505,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
 				return status;
+			if (status.isOK()) {
+				return Status.OK_STATUS;
+			}
 			return status;
 		} catch (Exception e) {
 			target.isResolved();
@@ -1057,7 +1063,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public OSArchitecture detectArchitecture(
-			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
+			StringBuilder detectMsg) {
 		checkResolved();
 		String os = Platform.getOS();
 		TargetBundle[] bundles = target.getAllBundles();

@@ -232,7 +232,7 @@ public class Q7ExternalLaunchDelegate extends
 		StringBuilder detectMsg = new StringBuilder();
 
 		OSArchitecture architecture = ((configArch == null) ? ((ITargetPlatformHelper) info.target)
-				.detectArchitecture(true, detectMsg) : configArch);
+				.detectArchitecture(detectMsg) : configArch);
 
 		Q7ExtLaunchingPlugin.getDefault().info(
 				Q7_LAUNCHING_AUT + configuration.getName()
@@ -255,7 +255,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		if (!haveAUT
 				&& architecture != OSArchitecture.Unknown
-				&& target.detectArchitecture(false, new StringBuilder()) == OSArchitecture.Unknown) {
+				&& target.detectArchitecture(new StringBuilder()) == OSArchitecture.Unknown) {
 			Q7ExtLaunchingPlugin
 					.getDefault()
 					.info("Cannot determine AUT architecture, sticking to architecture of selected JVM, which is "
@@ -353,7 +353,7 @@ public class Q7ExternalLaunchDelegate extends
 			configArch = OSArchitecture.valueOf(archAttrValue);
 
 		OSArchitecture autArch = configArch == null ? target
-				.detectArchitecture(true, null) : configArch;
+				.detectArchitecture(null) : configArch;
 
 		// there is no -d32 on Windows
 		if (!autArch.equals(jvmArch)
