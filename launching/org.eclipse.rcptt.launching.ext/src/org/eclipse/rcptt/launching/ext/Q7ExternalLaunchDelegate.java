@@ -213,7 +213,7 @@ public class Q7ExternalLaunchDelegate extends
 				null);
 		error.add(target.resolve(sm.split(98)));
 
-		if (error.isOK()) {
+		if (!error.isOK()) {
 			Q7ExtLaunchingPlugin.log(error);
 		}
 
