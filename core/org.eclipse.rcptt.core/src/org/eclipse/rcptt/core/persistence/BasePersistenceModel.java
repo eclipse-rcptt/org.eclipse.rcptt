@@ -134,6 +134,9 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		// Make index
 		try {
 			assert !disposed;
+			if (indexed) {
+				return;
+			}
 			indexed = true;
 			try (InputStream contents = getContentsStream()) {
 				if (contents == null) {
