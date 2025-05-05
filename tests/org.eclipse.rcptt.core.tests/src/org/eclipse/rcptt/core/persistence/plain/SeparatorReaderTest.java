@@ -23,7 +23,6 @@ import org.junit.Test;
 import com.google.common.io.CharStreams;
 
 public class SeparatorReaderTest {
-	private static final Separator.Exact SEPARATOR = new Separator.Exact("SEP");
 
 
 	@Test
@@ -46,6 +45,10 @@ public class SeparatorReaderTest {
 	@Test
 	public void multiple() throws IOException {
 		assertValidSplit("abc", "SEPdef", "abcSEPSEPdef");
+	}
+	
+	@Test
+	public void abutted() {
 		assertValidSplit("abcSE", "def", "abcSESEPdef");
 	}
 	
@@ -84,7 +87,7 @@ public class SeparatorReaderTest {
 	}
 
 	private static void assertSegment(String message, String expected, BufferedReader reader, int readSize) throws IOException {
-		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR)) {
+		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR())) {
 			StringBuilder sb = new StringBuilder();
 			char[] b= new char[readSize];
 			for (;;) {
@@ -100,12 +103,17 @@ public class SeparatorReaderTest {
 
 	private void assertValidSplit(String prefix, String suffix, String input) {
 		StringReader reader = new StringReader(input);
-		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR)) {
+		try (SeparatorReader subject = new SeparatorReader(reader, SEPARATOR())) {
 			assertEquals(prefix, CharStreams.toString(subject));
 			assertEquals(suffix, CharStreams.toString(reader));
 		} catch (IOException e) {
 			throw new AssertionError(e);
 		}
 	}
+	
+	private static Separator SEPARATOR() {
+		return new Separator.Exact("SEP");
+	}
+
 
 }
