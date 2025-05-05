@@ -93,7 +93,7 @@ public class PersistenceManager implements IPlainConstants {
 		return getModel(detectFormatProxy(file), element);
 	}
 
-	public synchronized IPersistenceModel getModel(
+	private synchronized IPersistenceModel getModel(
 			IPersistenceModelFactory factory, Resource element) {
 		if (element == null) {
 			return null;

@@ -98,14 +98,6 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		assert nonExistent != null;
 		rootPath = nonExistent;
 		this.root = rootPath.toFile();
-		// Make index
-		try {
-			readIndex();
-		} catch (CoreException e) {
-			LOG.log(toMultiStatus("Failed to read " + Q7Utils.getLocation(element) , e));
-		} catch (IOException e) {
-			error("Failed to read " + Q7Utils.getLocation(element) , e);
-		}
 	}
 
 	private MultiStatus toMultiStatus(String message, CoreException e) {
@@ -116,15 +108,10 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return this.element;
 	}
 
-	public void setInternalContent(byte[] internalContent) {
+	public synchronized void setInternalContent(byte[] internalContent) {
 		this.internalContent = internalContent;
-		try {
-			readIndex();
-		} catch (CoreException e) {
-			LOG.log(toMultiStatus("Failed to write " + Q7Utils.getLocation(element) , e));
-		} catch (IOException e) {
-			error("Failed to write " + Q7Utils.getLocation(element) , e);
-		}
+		indexed = false;
+		readIndex();
 	}
 
 	private void initialize() {
@@ -133,21 +120,31 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 	}
 
 	public boolean hasElements() {
+		readIndex();
 		return !files.isEmpty();
 	}
 
 	public String[] getNames() {
+		readIndex();
 		return files.keySet().toArray(new String[files.size()]);
 	}
 
-	private void readIndex() throws CoreException, IOException {
-		assert !disposed;
-		try (InputStream contents = getContentsStream()) {
-			if (contents == null) {
-				return;
+	private boolean indexed = false;
+	private synchronized void readIndex() {
+		// Make index
+		try {
+			assert !disposed;
+			indexed = true;
+			try (InputStream contents = getContentsStream()) {
+				if (contents == null) {
+					return;
+				}
+				doReadIndex(contents);
 			}
-			doReadIndex(contents);
+		} catch (IOException e) {
+			error("Failed to read " + Q7Utils.getLocation(element) , e);
 		}
+
 	}
 
 	protected InputStream getContentsStream() {
