@@ -189,20 +189,19 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 
 	public InputStream read(String name) {
 		assert !disposed;
-		File file = files.get(name);
-		if (file == null) {
-			return null;
-		}
 		waitUntilExtracted(name);
+		File file = files.get(name);
 		try {
-			if (!file.exists()) {
+			if (file == null || !file.exists()) {
 				extractFile(name);
 				waitUntilExtracted(name);
+				file = files.get(name);
 			}
 		} catch (IOException e) {
 			error("Can't extract " + name + " from " + element);
+			return null;
 		}
-		if (file.exists()) {
+		if (file != null && file.exists()) {
 			try {
 				return getInput(file);
 			} catch (FileNotFoundException e) {
