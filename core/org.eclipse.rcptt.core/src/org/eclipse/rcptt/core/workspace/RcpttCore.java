@@ -283,9 +283,9 @@ public class RcpttCore {
 		try {
 			NamedElement namedElement = context.getNamedElement();
 			if (namedElement instanceof GroupContext) {
-				return ((GroupContext) namedElement).getContextReferences();
+				return copy(((GroupContext) namedElement).getContextReferences());
 			} else if (namedElement instanceof SuperContext) {
-				return ((SuperContext) namedElement).getContextReferences();
+				return copy(((SuperContext) namedElement).getContextReferences());
 			} else if (namedElement instanceof CapabilityContext) {
 				final CapabilityContext ccontext = (CapabilityContext) namedElement;
 				final Set<String> result = new LinkedHashSet<String>();
@@ -913,5 +913,9 @@ public class RcpttCore {
 			return null;
 		}
 		return element.getResource().getFullPath().toString();
+	}
+	
+	private static <T> List<T> copy(List<T> input) {
+		return new ArrayList<>(input);
 	}
 }
