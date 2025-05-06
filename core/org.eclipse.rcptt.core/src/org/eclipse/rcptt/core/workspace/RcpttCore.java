@@ -529,6 +529,9 @@ public class RcpttCore {
 
 	public IContext findContext(IQ7NamedElement element, boolean ignoreErrors,
 			String contextId, IWorkspaceFinder finder) {
+		if (finder == null) {
+			finder = WorkspaceFinder.getInstance();
+		}
 		IContext[] context = finder.findContext(element, contextId);
 		IContext result = null;
 		if (context != null && context.length > 0) {
