@@ -239,7 +239,7 @@ public class Q7ExternalLaunchDelegate extends
 						+ ": Detected AUT architecture is "
 						+ architecture.name() + "." + detectMsg.toString());
 
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+		IVMInstall install = getVMInstall(configuration, target);
 
 		OSArchitecture jvmArch = JDTUtils.detect(install);
 
@@ -281,7 +281,7 @@ public class Q7ExternalLaunchDelegate extends
 						.info(Q7_LAUNCHING_AUT
 								+ configuration.getName()
 								+ "JVM configuration is updated to compatible one: "
-								+ VMHelper.getVMInstall(configuration)
+								+ getVMInstall(configuration, target)
 										.getInstallLocation());
 			}
 
@@ -301,6 +301,10 @@ public class Q7ExternalLaunchDelegate extends
 
 		monitor.done();
 		return true;
+	}
+
+	public static IVMInstall getVMInstall(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
+		return VMHelper.getVMInstall(configuration, target.getModels().map(m -> m.model()).collect(Collectors.toSet()));
 	}
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
@@ -518,7 +522,7 @@ public class Q7ExternalLaunchDelegate extends
 					+ IPath.SEPARATOR + SECURE_STORAGE_FILE_NAME);
 		}
 
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+		IVMInstall install = getVMInstall(configuration, target);
 		programArgs.add("-vm");
 		programArgs.add(install.getInstallLocation().toString());
 
@@ -580,15 +584,15 @@ public class Q7ExternalLaunchDelegate extends
 		args.clear();
 		args.addAll(UpdateVMArgs.addHook(argsCopy, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS)));
 
-		args.addAll(vmSecurityArguments(config));
+		args.addAll(vmSecurityArguments(config, target));
 		
 		args.add("-Declipse.vmargs=" + Joiner.on("\n").join(args) + "\n");
 	}
 	
-	public static List<String> vmSecurityArguments(ILaunchConfiguration configuration) throws CoreException {
+	public static List<String> vmSecurityArguments(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
 		// Magic constant from org.eclipse.jdt.internal.launching.environments.ExecutionEnvironmentAnalyzer
 		ArrayList<String> result = new ArrayList<>();
-		Set<String> envs = getMatchingEnvironments(configuration);
+		Set<String> envs = getMatchingEnvironments(configuration, target);
 		if (envs.contains("JavaSE-11")) {
 			result.addAll(Arrays.asList(
 					"--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -604,8 +608,8 @@ public class Q7ExternalLaunchDelegate extends
 		return result;
 	}
 	
-	private static Set<String> getMatchingEnvironments(ILaunchConfiguration configuration) throws CoreException {
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+	private static Set<String> getMatchingEnvironments(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
+		IVMInstall install = getVMInstall(configuration, target);
 		if (install == null)
 			return Collections.emptySet();
 

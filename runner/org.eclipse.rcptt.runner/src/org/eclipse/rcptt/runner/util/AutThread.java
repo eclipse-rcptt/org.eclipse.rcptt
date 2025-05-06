@@ -44,6 +44,7 @@ import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
@@ -218,7 +219,7 @@ public class AutThread extends Thread {
 			boolean haveAUT = false;
 			OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(true, null);
 			if (!architecture.equals(OSArchitecture.Unknown)) {
-				IVMInstall install = VMHelper.getVMInstall(savedConfig);
+				IVMInstall install = Q7ExternalLaunchDelegate.getVMInstall(savedConfig, tpc.getTargetPlatform());
 				try {
 					OSArchitecture jvmArch = JDTUtils.detect(install);
 					if (jvmArch.equals(architecture)) {
