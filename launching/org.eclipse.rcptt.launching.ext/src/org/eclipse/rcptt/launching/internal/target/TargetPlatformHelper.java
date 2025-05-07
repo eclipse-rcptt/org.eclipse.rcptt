@@ -14,6 +14,7 @@ import static com.google.common.base.Objects.equal;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
@@ -110,6 +111,7 @@ import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -517,6 +519,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	
 	private void index() {
 		stream(target.getBundles()).forEach(bundle -> targetBundleIndex.put(bundle.getBundleInfo().getSymbolicName(), bundle));
+		targetBundleIndex.removeAll(null);
 	}
 	
 	private void resetIndex() {
@@ -1059,38 +1062,40 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	public OSArchitecture detectArchitecture(
 			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
 		checkResolved();
+		String architecture = target.getArch();
+		if (architecture != null) {
+			return OSArchitecture.valueOf(architecture);
+		}
+		
 		String os = Platform.getOS();
-		TargetBundle[] bundles = target.getAllBundles();
-		for (TargetBundle b : bundles) {
-			BundleInfo info = b.getBundleInfo();
-			String name = info.getSymbolicName();
-			if (name != null && name.startsWith("org.eclipse.equinox.launcher")) {
-				if (!name.contains(os)) {
-					continue;
-				}
-				URI location = info.getLocation();
-				if (location == null || location.getPath() == null) {
-					continue;
-				}
-					
-				if (name.contains("aarch64")) {
-					if (detectMsg != null) {
-						detectMsg.append("aarch64 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.aarch64;
-				} else if (name.contains("x86_64")) {
-					if (detectMsg != null) {
-						detectMsg.append("x86_64 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.x86_64;
-				} else if (name.contains("x86")) {
-					if (detectMsg != null) {
-						detectMsg.append("x86 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.x86;
-					
-				}
+		Set<String> launcherLibraries = targetBundleIndex.keySet().stream().filter(name -> name.startsWith("org.eclipse.equinox.launcher") && name.contains(os)).collect(Collectors.toSet());
+		if (launcherLibraries.size() != 1) {
+			if (detectMsg != null) {
+				detectMsg.append("Multiple launcher libraries are found in target platform: " + Joiner.on(", ").join(launcherLibraries));
 			}
+			return OSArchitecture.Unknown;
+		}
+		
+		String name = launcherLibraries.iterator().next();
+		if (name.contains("aarch64")) {
+			if (detectMsg != null) {
+				detectMsg.append("aarch64 arch is selected because AUT uses " + name);
+			}
+			return OSArchitecture.aarch64;
+		} else if (name.contains("x86_64")) {
+			if (detectMsg != null) {
+				detectMsg.append("x86_64 arch is selected because AUT uses " + name);
+			}
+			return OSArchitecture.x86_64;
+		} else if (name.contains("x86")) {
+			if (detectMsg != null) {
+				detectMsg.append("x86 arch is selected because AUT uses " + name);
+			}
+			return OSArchitecture.x86;
+		}
+
+		if (detectMsg != null) {
+			detectMsg.append("Unrecognized launcher architecture: " + name);
 		}
 
 		return OSArchitecture.Unknown;
@@ -1239,8 +1244,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	@Override
 	public Map<String, org.eclipse.equinox.p2.metadata.Version> getVersions() throws CoreException {
-		if (!getStatus().isOK())
-			throw new CoreException(getStatus());
+		checkResolved();
 		return AUTInformation.getInformationMap(target);
 	}
 
@@ -1706,30 +1710,33 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 	private void setStartLevels(SubMonitor monitor) throws IOException, BundleException {
 		Map<String, BundleStart> levelMap = getRunlevelsMap();
-		
-		if (levelMap.isEmpty()) {
-			warning("No start levels are configured");
-		}
 		if (!target.isResolved()) {
 			throw new IllegalStateException("Target definition is unresolved");
 		}
-		
+
 		TargetBundle[] bundles = target.getBundles();
 		monitor.beginTask("Setting bundle start levels", bundles.length);
 		for (TargetBundle bundle : bundles) {
-			monitor.subTask(bundle.getBundleInfo().getLocation().toString());
-			BundleStart bundleLevel = levelMap.getOrDefault(bundle.getBundleInfo().getSymbolicName(), BundleStart.DEFAULT);
-			bundleLevel = StartLevelSupport.getStartInfo(bundle.getBundleInfo().getManifest(), bundleLevel);
+			BundleInfo bundleInfo = bundle.getBundleInfo();
+			monitor.subTask(bundleInfo.getLocation().toString());
+			BundleStart bundleLevel = levelMap.getOrDefault(bundleInfo.getSymbolicName(), BundleStart.DEFAULT);
+			bundleLevel = StartLevelSupport.getStartInfo(bundleInfo.getManifest(), bundleLevel);
 			monitor.split(1);
-			if (bundleLevel != null) {
-				try {
-					bundle.getBundleInfo().setStartLevel(bundleLevel.level);
-					bundle.getBundleInfo().setMarkedAsStarted(bundleLevel.autoStart);
-				} catch (RuntimeException e) {
-					throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundle.getBundleInfo().getSymbolicName(), bundleLevel), e);
-				}
+			if (bundleLevel.isDefault()) {
+				continue;
+			}
+			try {
+				bundleInfo.setStartLevel(bundleLevel.level);
+				bundleInfo.setMarkedAsStarted(bundleLevel.autoStart);
+			} catch (RuntimeException e) {
+				throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundleInfo.getSymbolicName(), bundleLevel), e);
 			}
 		}
+		if (!stream(bundles).map(TargetBundle::getBundleInfo).map(BundleStart::fromBundle).anyMatch(not(BundleStart::isDefault))) {
+			// this happens only if target platform has no bundles from org.eclipse.rcptt.launching.ext.StartLevelSupport.predefined
+			warning("No start levels are configured");
+		}
+		
 	}
 
 	private void warning(String message) {
