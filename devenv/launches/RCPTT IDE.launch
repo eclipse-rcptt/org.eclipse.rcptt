@@ -34,8 +34,8 @@
         <setEntry value="bcpg@default:default"/>
         <setEntry value="bcprov@default:default"/>
         <setEntry value="com.google.gson@default:default"/>
-        <setEntry value="com.google.guava*33.4.6.jre@default:default"/>
         <setEntry value="com.google.guava.failureaccess@default:default"/>
+        <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.ibm.icu@default:default"/>
         <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.sun.jna.platform@default:default"/>
@@ -500,7 +500,6 @@
         <setEntry value="org.eclipse.rcptt.tesla.recording.core.ecl@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.core@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.swt.fragment@default:false"/>
-        <setEntry value="org.eclipse.rcptt.ui.activities@default:default"/>
         <setEntry value="org.eclipse.rcptt.ui.report@default:default"/>
         <setEntry value="org.eclipse.rcptt.ui@default:default"/>
         <setEntry value="org.eclipse.rcptt.updates.aspectj.e44x@default:default"/>

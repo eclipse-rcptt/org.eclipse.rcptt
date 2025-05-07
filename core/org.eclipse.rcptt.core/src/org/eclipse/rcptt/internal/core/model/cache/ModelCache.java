@@ -23,7 +23,7 @@ public class ModelCache {
 
 	// public static final int DEFAULT_PKG_SIZE = 500; // average 1782 bytes per
 
-	public static final int DEFAULT_OPENABLE_SIZE = 100; // average 6629
+	public static final int DEFAULT_OPENABLE_SIZE = 10000; // average 6629
 
 	public static final int DEFAULT_CHILDREN_SIZE = 100 * 20; // average 20
 
