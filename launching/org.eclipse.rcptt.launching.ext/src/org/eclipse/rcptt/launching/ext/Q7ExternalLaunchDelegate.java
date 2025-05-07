@@ -636,7 +636,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		setBundlesToLaunch(info, bundlesToLaunch);
 
-		checkBundles(bundlesToLaunch);
+		removeUnresolved(bundlesToLaunch);
 		setDelegateFields(this, bundlesToLaunch.fModels, Maps.transformValues(bundlesToLaunch.fAllBundles.asMap(), ArrayList::new));
 
 		// Copy all additional configuration area folders into PDE new
@@ -645,7 +645,7 @@ public class Q7ExternalLaunchDelegate extends
 		monitor.done();
 	}
 	
-	private void checkBundles(BundlesToLaunch launch) {
+	public static void removeUnresolved(BundlesToLaunch launch) {
 		DependencyResolver resolver = new DependencyResolver(launch.fAllBundles);
 		Collection<IPluginModelBase> toDelete = resolver.checkPlugins(launch.fModels.keySet());
 		toDelete.forEach(plugin->{

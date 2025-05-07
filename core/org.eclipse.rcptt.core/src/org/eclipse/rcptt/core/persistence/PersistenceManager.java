@@ -521,4 +521,13 @@ public class PersistenceManager implements IPlainConstants {
 		}
 		return null;
 	}
+
+	public int cachedSize(Resource res) {
+		IFile file = WorkspaceSynchronizer.getFile(res);
+		if (!file.exists() || !file.isSynchronized(IResource.DEPTH_INFINITE)) {
+			return 0;
+		}
+		File fs = file.getLocation().toFile();
+		return (int) Math.min(fs.length(), Integer.MAX_VALUE);
+	}
 }
