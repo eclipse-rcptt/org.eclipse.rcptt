@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.zip.ZipInputStream;
 import org.eclipse.rcptt.core.persistence.plain.SeparatorReader.Separator;
 import org.eclipse.rcptt.util.FileUtil;
 
+import com.google.common.io.BaseEncoding;
 import com.google.common.io.CharSource;
 
 public class PlainReader implements IPlainConstants, Closeable {
@@ -171,7 +173,9 @@ public class PlainReader implements IPlainConstants, Closeable {
 		if (entryHeader.startsWith(NODE_PREFIX)) {
 			Map<String, String> attributes = readAttributes();
 			String name = attributes.get(ATTR_ENTRY_NAME);
-			SeparatorReader separatorReader = new SeparatorReader(reader, new Separator.WithSuffix(new Separator.Exact(entryHeader + NODE_POSTFIX), asList("\n", "\r\n")));
+			SeparatorReader separatorReader = new SeparatorReader(reader,
+					new Separator.Any(new Separator.Exact(entryHeader + NODE_POSTFIX + "\n"),
+							new Separator.Exact(entryHeader + NODE_POSTFIX + "\r\n")));
 			currentSegment = separatorReader;
 			CharSource charSource = new CharSource() {
 				@Override

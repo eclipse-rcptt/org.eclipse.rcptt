@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence.plain;
 
+import static java.util.Arrays.stream;
+
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 /** Reads a markable stream until terminator
@@ -27,103 +30,93 @@ public class SeparatorReader extends java.io.Reader {
 	private final Reader reader;
 	private final StringBuilder tail = new StringBuilder();
 	private char[] tempBuffer = new char[5];
+	private boolean done = false;
+	private final int term_length;
 	
-	public static class Match {
+	public static final class Match {
 		public final int start, end;
 		public Match(int start, int end) {
-			this.start = start;
+			this.start=start;
 			this.end = end;
-			if (start < 0 || end <= start) {
-				throw new IllegalArgumentException();
+			if (start >= end) {
+				throw new IllegalArgumentException(start + " >= " + end);
 			}
 		}
 	}
-	
+	/** Stateful detector of a delimiter in a stream */
 	interface Separator {
+		/** @return a position of delimiter start. Negative if delimiter started before current input.*/
+		Optional<Match> accept(char[] input, int len);
 		int length();
-		Optional<Match> find(CharSequence input);
-		
-		public class WithSuffix implements Separator {
-			private final Separator separator;
-			private final Collection<String> suffixes;
-			private final int length;
-			public WithSuffix(Separator separator, Collection<String> suffixes) {
-				this.suffixes = new ArrayList<>(suffixes);
-				this.separator = Objects.requireNonNull(separator);
-				this.length = separator.length() + suffixes.stream().mapToInt(String::length).max().orElseThrow(() -> new IllegalArgumentException("suffixes can't be empty"));
+		public static final class Any implements Separator {
+			private final Separator[] delegates;
+			public Any(Separator ... delegates) {
+				this.delegates = Arrays.copyOf(delegates, delegates.length);
+				if (this.delegates.length == 0) {
+					throw new IllegalArgumentException("Can't be empty");
+				}
+				if (stream(this.delegates).anyMatch(Objects::isNull)) {
+					throw new NullPointerException();
+				}
 			}
+
 			@Override
-			public Optional<Match> find(CharSequence input) {
-				return separator.find(input).flatMap(match -> {
-					CharSequence actualSuffix = input.subSequence(match.end, input.length());
-					return suffixes.stream().filter(s -> startsWith(actualSuffix, s)).findFirst().map(s -> new Match(match.start, match.end + s.length()));
-				});
+			public Optional<Match> accept(char[] input, int len) {
+				return stream(delegates)
+					.map(d -> d.accept(input, len))
+					.flatMap(m -> m.map(Stream::of).orElse(Stream.empty()))
+					.min(Comparator.comparingInt(m -> m.start));
 			}
+			
 			@Override
 			public int length() {
-				return length;
+				return stream(delegates).mapToInt(Separator::length).max().orElseThrow(() -> new AssertionError());
 			}
 		}
-		
-		public class Exact implements Separator {
-			private String separator;
+
+		public static final class Exact implements Separator {
+			private final char[] separator;
+			private int position = 0;
 
 			public Exact(String string) {
-				this.separator = string;
+				this.separator = string.toCharArray();
 				if (string.isEmpty()) {
 					throw new IllegalArgumentException("Separator can't be empty");
 				}
 			}
 
 			@Override
-			public int length() {
-				return separator.length();
+			public Optional<Match> accept(char[] input, int len) {
+				if (position >= separator.length) {
+					throw new IllegalStateException("Can't operate in COMPLETE state");
+				}
+				for (int i = 0; i < len; i++ ) {
+					if (input[i] == separator[position]) {
+						position++;
+						if (position >= separator.length) {
+							return Optional.of(new Match(i - position + 1, i + 1));
+						}
+					} else {
+						position = input[i] == separator[0] ? 1 : 0;
+					}
+				}
+				return Optional.empty();
 			}
 
 			@Override
-			public Optional<Match> find(CharSequence input) {
-				// TODO optimize?
-				int position = input.toString().indexOf(separator);
-//				int position = indexOfStart(input, separator); // twice as slow
-				if (position < 0) {
-					return Optional.empty();
-				}
-				return Optional.of(new Match(position, position+separator.length()));
-			}
-			
-		}
-	}
-	
-	private static int indexOfStart(CharSequence input, String pattern) {
-		int prefixLen = 0;
-		int length = input.length();
-		for (int position = 0; position < length; position++) {
-			char c = input.charAt(position);
-			char p = pattern.charAt(prefixLen);
-			if (c == p) {
-				prefixLen++;
-				if (prefixLen >= pattern.length()) {
-					return position - prefixLen + 1;
-				}
-			} else {
-				prefixLen = c == pattern.charAt(0) ? 1 : 0;
+			public int length() {
+				return separator.length;
 			}
 		}
-		return -1;
 	}
-	
-	private static boolean startsWith(CharSequence input, String prefix) {
-		for (int i = 0; i < input.length() && i < prefix.length(); i++) {
-			if (input.charAt(i) != prefix.charAt(i)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
+
 
 	public SeparatorReader(Reader reader, Separator separator) {
 		this.terminator = Objects.requireNonNull(separator);
+		this.term_length = terminator.length();
+		if (term_length <=0) {
+			throw new IllegalArgumentException("Delimiter can't be empty");
+		}
 		this.reader = reader;
 		if (!reader.markSupported()) {
 			throw new IllegalArgumentException("mark() support is required");
@@ -132,54 +125,56 @@ public class SeparatorReader extends java.io.Reader {
 	
 	@Override
 	public int read(char[] cbuf, int off, int len) throws IOException {
-		int result = readTail(cbuf, off, len);
-		if (result != 0) {
-			return result;
-		}
-		if (tempBuffer.length < len) {
-			tempBuffer = new char[len];
-		}
-		reader.mark(tempBuffer.length+1);
-		result = reader.read(tempBuffer, 0, tempBuffer.length);
-		if (result < 0) {
-			return cutTail(cbuf, off, len);
-		} 
-		int oldTail = tail.length();
-		tail.append(tempBuffer, 0, result);
-		Match match = terminator.find(tail).orElse(null);
-		if (match != null) {
-			reader.reset();
-			long read = reader.skip(match.end - oldTail);
-			assert read == match.end - oldTail;
-			if (DEBUG) {
-				reader.mark(tempBuffer.length+1);
-				result = reader.read(tempBuffer, 0, Math.min(tempBuffer.length, 150));
+		for (;;) {
+			if (done) {
+				return consumeTail(cbuf, off, len);
+			}
+			
+			if (tail.length() > term_length) {
+				len = Math.min(len, tail.length() - terminator.length());
+				return consumeTail(cbuf, off, len);
+			}
+			
+			if (tempBuffer.length < len) {
+				tempBuffer = new char[len];
+			}
+			
+			reader.mark(tempBuffer.length+1);
+			int result = reader.read(tempBuffer, 0, tempBuffer.length);
+			if (result < 0) {
+				done = true;
+				return consumeTail(cbuf, off, len);
+			} 
+			Optional<Match> position = terminator.accept(tempBuffer, result);
+			if (position.isPresent()) {
+				done = true;
+				result = Math.min(position.get().start, result);
+			}
+			assert tail.length() + result >= 0;
+			assert result > -terminator.length();
+			if (result > 0) {
+				tail.append(tempBuffer, 0, result);
+			} else if (result < 0) {
+				tail.delete(tail.length() + result, tail.length());
+			}
+			if (done) {
 				reader.reset();
-				if (result > 0) {
-					System.out.println("After segment: " + new String(tempBuffer, 0, result));
+				long read = reader.skip(position.get().end);
+				assert read == position.get().end;
+				if (DEBUG) {
+					reader.mark(tempBuffer.length+1);
+					result = reader.read(tempBuffer, 0, Math.min(tempBuffer.length, 150));
+					reader.reset();
+					if (result > 0) {
+						System.out.println("After segment: " + new String(tempBuffer, 0, result));
+					}
 				}
+				return consumeTail(cbuf, off, len);
 			}
 		}
-		return readTail(cbuf, off, len);
-	}
-	
-	private int readTail(char[] cbuf, int off, int len) {
-		Match match = terminator.find(tail).orElse(null);
-		if (match == null) {
-			len = Math.min(len, tail.length() - terminator.length());
-			if (len <= 0) {
-				return 0;
-			}
-			return cutTail(cbuf, off, len);
-		}
-		if (match.start == 0) {
-			return -1;
-		}
-		len = Math.min(match.start, len);
-		return cutTail(cbuf, off, len);
 	}
 
-	private int cutTail(char[] cbuf, int off, int len) {
+	private int consumeTail(char[] cbuf, int off, int len) {
 		assert len > 0;
 		if (tail.length() == 0) {
 			return -1;
