@@ -29,7 +29,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ajdt43repository>http://download.eclipse.org/tools/ajdt/431/dev/update/</ajdt43repository>
     <signExcludeInnerJars>true</signExcludeInnerJars>
-    <eclipse-pde-repository>https://download.eclipse.org/releases/milestone</eclipse-pde-repository>
+    <eclipse-pde-repository>https://download.eclipse.org/releases/2025-03/</eclipse-pde-repository>
     <aspectj_version>1.14.0</aspectj_version>
     <aspectj_dep>1.9.7</aspectj_dep>
     <ajJavaSource>1.8</ajJavaSource>

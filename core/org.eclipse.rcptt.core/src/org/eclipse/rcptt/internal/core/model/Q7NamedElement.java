@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -87,7 +88,13 @@ public abstract class Q7NamedElement extends Openable implements
 		}
 
 		Q7ResourceInfo resourceInfo = (Q7ResourceInfo) info;
-		resourceInfo.load((IFile) getResource());
+		IFile resource = (IFile) getResource();
+		try {
+			resourceInfo.load(resource);
+		} catch (Throwable e) {
+			e.addSuppressed(new IOException("Reading " + resource));
+			throw e;
+		}
 		if (isInWorkingCopyMode() && !indexing) {
 			if (resourceInfo.getNamedElement() == null) {
 				resourceInfo.createNamedElement(createNamedElement());

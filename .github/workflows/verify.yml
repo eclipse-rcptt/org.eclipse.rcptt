@@ -1,6 +1,7 @@
 name: Verify branch
 on:
-  push
+- push
+- pull_request
 permissions:
   checks: write
 jobs:
@@ -42,7 +43,7 @@ jobs:
       - name: VNC
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Build
-        run: ./build.sh -DforceContextQualifier=`date '+%Y%M%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: Archive update site
         uses: actions/upload-artifact@v4
         with:
@@ -90,7 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mockup_repository
-          path: repository/target/repository/
+          path: mockup_repository
       - run: find . > list.txt
       - name: RCPTT Tests
         run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip -Dmockup_repository=file://`pwd`/mockup_repository --errors --batch-mode --no-transfer-progress

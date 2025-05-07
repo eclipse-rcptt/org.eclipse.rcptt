@@ -37,7 +37,7 @@ public class Q7LazyResource extends XMIResourceImpl implements ILazyEMFResolver 
 
 	public String resolveStringValue(EAttribute ref, EObject self) {
 		if( ScenarioPackage.Literals.NAMED_ELEMENT__DESCRIPTION.equals(ref)) {
-			return PersistenceManager.getInstance().loadDescription(this, self);			
+			return PersistenceManager.getInstance().loadDescription(this, self);
 		}
 		return null;
 	}

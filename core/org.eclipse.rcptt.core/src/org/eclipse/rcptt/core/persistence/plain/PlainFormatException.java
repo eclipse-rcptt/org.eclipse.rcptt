@@ -12,7 +12,9 @@
  ********************************************************************************/
 package org.eclipse.rcptt.core.persistence.plain;
 
-public class PlainFormatException extends Exception {
+import java.io.IOException;
+
+public class PlainFormatException extends IOException {
 	private static final long serialVersionUID = 1L;
 	private String fileName = "";
 
