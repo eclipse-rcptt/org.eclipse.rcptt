@@ -56,6 +56,7 @@ public class ModelCache {
 		case Context:
 		case TestSuite:
 		case Verification:
+		case ProjectMetadata:
 			return this.openableCache.get(element);
 		default:
 			return this.childrenCache.get(element);
@@ -75,6 +76,7 @@ public class ModelCache {
 		case Context:
 		case TestSuite:
 		case Verification:
+		case ProjectMetadata:
 			return this.openableCache.peek(element);
 		default:
 			return this.childrenCache.get(element);
@@ -94,6 +96,7 @@ public class ModelCache {
 		case TestCase:
 		case TestSuite:
 		case Verification:
+		case ProjectMetadata:
 			this.openableCache.put(element, info);
 			break;
 		default:
@@ -113,6 +116,7 @@ public class ModelCache {
 		case Context:
 		case TestSuite:
 		case Verification:
+		case ProjectMetadata:
 			this.openableCache.remove(element);
 			break;
 		default:
