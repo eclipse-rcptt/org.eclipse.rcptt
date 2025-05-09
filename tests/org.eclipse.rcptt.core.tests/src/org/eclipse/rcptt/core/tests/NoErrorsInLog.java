@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024-2024 Xored Software Inc and others.
+ * Copyright (c) 2024 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ public class NoErrorsInLog extends ExternalResource {
 	
 	@Override
 	protected void after() {
+		System.gc(); // Detect leaks with org.eclipse.rcptt.core.persistence.LeakDetector
 		log.removeLogListener(listener);
 		synchronized (statusLog) {
 			if (statusLog.matches(IStatus.ERROR)) {
