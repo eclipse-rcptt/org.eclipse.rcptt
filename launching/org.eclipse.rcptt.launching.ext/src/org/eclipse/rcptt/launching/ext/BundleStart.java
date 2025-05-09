@@ -141,9 +141,9 @@ public class BundleStart {
 	}
 
 	public static BundleStart fromBundle(BundleInfo info) {
-		return new BundleStart(info.getStartLevel(), info.isMarkedAsStarted(),
+		return internDefault(new BundleStart(info.getStartLevel(), info.isMarkedAsStarted(),
 				info.getStartLevel() == BundleInfo.NO_LEVEL,
-				!info.isMarkedAsStarted());
+				!info.isMarkedAsStarted()));
 	}
 
 	public final int level;
@@ -159,5 +159,8 @@ public class BundleStart {
 		return fromModelString(Joiner.on(':').join(
 				MoreObjects.firstNonNull(q7sl, DEF_STR),
 				MoreObjects.firstNonNull(q7as, DEF_STR)));
+	}
+	private static BundleStart internDefault(BundleStart info) {
+		return info.isDefault() ? DEFAULT : info;
 	}
 }
