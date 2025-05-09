@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.rcptt.core.model.IOpenable;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.Q7Status;
+import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 
 public abstract class Openable extends Q7Element implements IOpenable {
 
@@ -33,17 +35,15 @@ public abstract class Openable extends Q7Element implements IOpenable {
 	}
 
 	protected abstract boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException;
 
-	protected void openParent(Object childInfo,
-			Map<IQ7Element, Object> newElements, IProgressMonitor pm)
+	protected void openParent(Object childInfo, IProgressMonitor pm)
 			throws ModelException {
 
 		Openable openableParent = (Openable) getOpenableParent();
 		if (openableParent != null && !openableParent.isOpen()) {
-			openableParent.generateInfos(openableParent.createElementInfo(),
-					newElements, pm);
+			openableParent.generateInfos(openableParent.createElementInfo(), pm);
 		}
 	}
 
@@ -54,38 +54,32 @@ public abstract class Openable extends Q7Element implements IOpenable {
 		return parentElement.exists();
 	}
 
-	public void open(IProgressMonitor pm) throws ModelException {
-		getElementInfo(pm);
-	}
-
-	protected void generateInfos(Object info,
-			Map<IQ7Element, Object> newElements, IProgressMonitor monitor)
+	protected void generateInfos(Object info, IProgressMonitor monitor)
 			throws ModelException {
 		// open the parent if necessary
-		openParent(info, newElements, monitor);
+		openParent(info, monitor);
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
 
-		newElements.put(this, info);
 
 		// build the structure of the openable (this will open the buffer if
 		// needed)
-		try {
-			OpenableElementInfo openableElementInfo = (OpenableElementInfo) info;
-			boolean isStructureKnown = buildStructure(openableElementInfo,
-					monitor, newElements, getResource());
-			openableElementInfo.setIsStructureKnown(isStructureKnown);
-		} catch (ModelException e) {
-			newElements.remove(this);
-			throw e;
-		}
+		OpenableElementInfo openableElementInfo = (OpenableElementInfo) info;
+		boolean isStructureKnown = buildStructure(openableElementInfo,
+				monitor, getResource());
+		openableElementInfo.setIsStructureKnown(isStructureKnown);
 	}
 
 	protected void closing(Object info) throws ModelException {
 	}
 
+	@Override
+	public OpenableElementInfo getElementInfo() {
+		return (OpenableElementInfo) super.getElementInfo();
+	}
+	
 	public boolean isOpen() {
-		return ModelManager.getModelManager().getInfo(this) != null;
+		return getElementInfo().isStructureKnown();
 	}
 
 	protected boolean resourceExists() {

@@ -171,12 +171,8 @@ public class DeltaProcessor {
 	private void addToParentInfo(Openable child) {
 		Openable parent = (Openable) child.getParent();
 		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
-				info.addChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+			Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
+			info.addChild(child);
 		}
 	}
 
@@ -1012,12 +1008,8 @@ public class DeltaProcessor {
 	private void removeFromParentInfo(Openable child) {
 		Openable parent = (Openable) child.getParent();
 		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
-				info.removeChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+			Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
+			info.removeChild(child);
 		}
 	}
 

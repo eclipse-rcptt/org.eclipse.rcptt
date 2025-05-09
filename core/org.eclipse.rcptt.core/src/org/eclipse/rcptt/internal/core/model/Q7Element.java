@@ -11,9 +11,7 @@
 package org.eclipse.rcptt.internal.core.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
@@ -36,27 +34,25 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		this.parent = parent;
 	}
 
-	public Object getElementInfo() throws ModelException {
-		return getElementInfo(null);
-	}
-
-	public Object getElementInfo(IProgressMonitor monitor)
-			throws ModelException {
+	public Q7ElementInfo getElementInfo() {
 		ModelManager manager = ModelManager.getModelManager();
-		Object info = manager.getInfo(this);
-		if (info != null)
-			return info;
-		return openWhenClosed(createElementInfo(), monitor);
+		return manager.getInfo(this, Q7ElementInfo.class, () -> {
+			return createElementInfo();
+		});
+	}
+	
+	public final void open(IProgressMonitor progress) throws ModelException {
+		openWhenClosed(getElementInfo(), progress);		
 	}
 
-	protected abstract Object createElementInfo();
+	protected abstract Q7ElementInfo createElementInfo();
 
 	protected boolean isInWorkingCopyMode() {
 		return false;
 	}
 
 	protected abstract void generateInfos(Object info,
-			Map<IQ7Element, Object> newElements, IProgressMonitor pm)
+			IProgressMonitor pm)
 			throws ModelException;
 
 	public IOpenable getOpenable() {
@@ -67,31 +63,19 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		return (IOpenable) this.parent;
 	}
 
-	protected final synchronized Object openWhenClosed(Object info,
+	protected final synchronized Q7ElementInfo openWhenClosed(Q7ElementInfo info,
 			IProgressMonitor monitor) throws ModelException {
-		ModelManager manager = ModelManager.getModelManager();
-		Map<IQ7Element, Object> newElements = new HashMap<IQ7Element, Object>();
-		generateInfos(info, newElements, monitor);
-		if (info == null) {
-			info = newElements.get(this);
-		}
-		if (info == null) {
-			throw newNotPresentException();
-		}
-		manager.putInfos(this, newElements);
-		Object info2 = manager.getInfo(this);
-		return info2;
+		generateInfos(info, monitor);
+		return info;
 	}
 
 	public void close() throws ModelException {
 		ModelManager.getModelManager().removeInfoAndChildren(this);
 	}
 
-	protected abstract void closing(Object info) throws ModelException;
-
 	public boolean exists() {
 		try {
-			getElementInfo();
+			open(null);
 			return true;
 		} catch (ModelException e) {
 			if (e.getStatus() instanceof Q7Status)
@@ -137,12 +121,8 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 
 	public IQ7Element[] getChildren(IProgressMonitor monitor)
 			throws ModelException {
-		Object elementInfo = getElementInfo(monitor);
-		if (elementInfo instanceof Q7ElementInfo) {
-			return ((Q7ElementInfo) elementInfo).getChildren();
-		} else {
-			return NO_ELEMENTS;
-		}
+		open(monitor);
+		return getElementInfo().getChildren();
 	}
 
 	/**
@@ -177,12 +157,8 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 	}
 
 	public boolean hasChildren() throws ModelException {
-		Object elementInfo = ModelManager.getModelManager().getInfo(this);
-		if (elementInfo instanceof Q7ElementInfo) {
-			return ((Q7ElementInfo) elementInfo).getChildren().length > 0;
-		} else {
-			return true;
-		}
+		 Q7ElementInfo elementInfo = getElementInfo();
+		return elementInfo.getChildren().length > 0;
 	}
 
 	public void accept(IQ7ElementVisitor visitor) throws ModelException {

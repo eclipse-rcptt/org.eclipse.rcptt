@@ -72,7 +72,7 @@ public class Q7Model extends Openable implements IQ7Model {
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		List<IQ7Project> result = new ArrayList<IQ7Project>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
@@ -94,7 +94,7 @@ public class Q7Model extends Openable implements IQ7Model {
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected ModelInfo createElementInfo() {
 		return new ModelInfo();
 	}
 

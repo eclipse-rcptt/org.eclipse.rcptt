@@ -47,7 +47,7 @@ public class Q7ProjectMetadata extends Q7NamedElement implements
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7ResourceInfo createElementInfo() {
 		return new Q7ResourceInfo(IPlainConstants.PLAIN_METADATA, Q7ResourceInfo.toURI(getResource()));
 	}
 

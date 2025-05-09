@@ -18,8 +18,10 @@ import java.util.Map;
 import org.eclipse.rcptt.core.model.IParent;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
+import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.Q7Element;
@@ -166,12 +168,12 @@ public class Q7ElementDeltaBuilder {
 			return;
 		}
 
-		Q7ElementInfo newInfo = null;
+		Q7ElementInfo newInfo;
 		try {
+			newElement.getOpenable().open(null);
 			newInfo = (Q7ElementInfo) ((Q7Element) newElement).getElementInfo();
-		} catch (ModelException npe) {
-			RcpttPlugin.log(npe);
-			return;
+		} catch (ModelException e) {
+			throw new IllegalStateException(e);
 		}
 
 		this.findContentChange(oldInfo, newInfo, newElement);
@@ -201,14 +203,13 @@ public class Q7ElementDeltaBuilder {
 		}
 
 		if (element instanceof IParent) {
-			Q7ElementInfo info = null;
+			Q7ElementInfo info;
 			try {
+				element.getOpenable().open(null);
 				info = (Q7ElementInfo) ((Q7Element) element).getElementInfo();
-			} catch (ModelException npe) {
-				RcpttPlugin.log(npe);
-				return;
+			} catch (ModelException e) {
+				throw new IllegalStateException(e);
 			}
-
 			IQ7Element[] children = info.getChildren();
 			if (children != null) {
 				int length = children.length;
@@ -329,10 +330,17 @@ public class Q7ElementDeltaBuilder {
 		if (depth >= this.maxDepth) {
 			return;
 		}
-		Q7ElementInfo info = (Q7ElementInfo) ModelManager.getModelManager().getInfo(
-				element);
-		if (info == null) // no longer in the model.
-			return;
+		Q7ElementInfo info;
+		try {
+			element.getOpenable().open(null);
+			info = ((Q7Element)element).getElementInfo();
+			assert info != null;
+		} catch (ModelException e) {
+			if (e.getStatus() instanceof Q7Status)
+				if (((Q7Status) e.getStatus()).getStatusCode() == Q7StatusCode.NotPressent)
+					return;
+			throw new RuntimeException(e); 
+		}
 		this.putElementInfo(element, info);
 
 		if (element instanceof IParent) {
@@ -352,6 +360,7 @@ public class Q7ElementDeltaBuilder {
 		if (depth < this.maxDepth && newElement instanceof IParent) {
 			Q7ElementInfo info = null;
 			try {
+				newElement.getOpenable().open(null);
 				info = (Q7ElementInfo) ((Q7Element) newElement).getElementInfo();
 			} catch (ModelException npe) {
 				RcpttPlugin.log(npe);

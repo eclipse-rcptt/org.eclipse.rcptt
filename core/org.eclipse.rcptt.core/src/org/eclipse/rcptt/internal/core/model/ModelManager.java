@@ -13,10 +13,11 @@ package org.eclipse.rcptt.internal.core.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -93,32 +94,22 @@ public class ModelManager {
 		workspace.removeResourceChangeListener(this.deltaState);
 	}
 
-	public synchronized Object getInfo(IQ7Element element) {
-		return this.cache.getInfo(element);
+	public interface Factory<T> {
+		T get() throws ModelException;
 	}
-
-	protected synchronized void putInfos(IQ7Element openedElement,
-			Map<IQ7Element, Object> newElements) {
-		// remove children
-		Object existingInfo = this.cache.peekAtInfo(openedElement);
-		if (openedElement instanceof IParent
-				&& existingInfo instanceof Q7ElementInfo) {
-			IQ7Element[] children = ((Q7ElementInfo) existingInfo)
-					.getChildren();
-			for (int i = 0, size = children.length; i < size; ++i) {
-				Q7Element child = (Q7Element) children[i];
-				try {
-					child.close();
-				} catch (ModelException e) {
-					// ignore
-				}
-			}
+	
+	private class ExceptionWrapper extends RuntimeException {
+		private static final long serialVersionUID = -2525039584022289733L;
+		public ExceptionWrapper(Exception e) {
+			super(Objects.requireNonNull(e));
 		}
-		Iterator<Map.Entry<IQ7Element, Object>> iterator = newElements
-				.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<IQ7Element, Object> element = iterator.next();
-			this.cache.putInfo(element.getKey(), element.getValue());
+	}
+	
+	public <T> T getInfo(IQ7Element element, Class<T> clazz, Supplier<T> factory) {
+		try {
+			return this.cache.getInfo(element, clazz, factory);
+		} catch (ExceptionWrapper e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -126,7 +117,6 @@ public class ModelManager {
 			throws ModelException {
 		Object info = this.cache.peekAtInfo(element);
 		if (info != null) {
-			element.closing(info);
 			if (element instanceof IParent && info instanceof Q7ElementInfo) {
 				IQ7Element[] children = ((Q7ElementInfo) info).getChildren();
 				for (int i = 0, size = children.length; i < size; ++i) {

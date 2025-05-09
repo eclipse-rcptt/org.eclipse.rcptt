@@ -103,7 +103,7 @@ public class Q7InternalContext extends Q7Context {
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		return true;
 	}

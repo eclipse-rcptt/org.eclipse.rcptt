@@ -87,7 +87,7 @@ public class Q7InternalTestCase extends Q7TestCase {
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		return true;
 	}

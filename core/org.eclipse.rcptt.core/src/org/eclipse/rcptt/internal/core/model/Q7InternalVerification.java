@@ -103,7 +103,7 @@ public class Q7InternalVerification extends Q7Verification {
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		return true;
 	}

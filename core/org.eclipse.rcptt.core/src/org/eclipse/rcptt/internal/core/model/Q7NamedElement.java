@@ -54,7 +54,7 @@ public abstract class Q7NamedElement extends Openable implements
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7ResourceInfo createElementInfo() {
 		return new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, Q7ResourceInfo.toURI(getResource()));
 	}
 
@@ -62,7 +62,7 @@ public abstract class Q7NamedElement extends Openable implements
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		// Check if not working copy
 		if (!isInWorkingCopyMode()) {
@@ -165,7 +165,7 @@ public abstract class Q7NamedElement extends Openable implements
 		if (!isWorkingCopy()) {
 			return false;
 		}
-		Object info = ModelManager.getModelManager().getInfo(this);
+		Object info = ModelManager.getModelManager().getInfo(this, Object.class, () -> createElementInfo());
 		if (info == null) {
 			return false;
 		}
@@ -300,19 +300,15 @@ public abstract class Q7NamedElement extends Openable implements
 			if (info != null)
 				return info.hasChanges();
 		}
-		ModelManager manager = ModelManager.getModelManager();
-		info = (Q7ResourceInfo) manager.getInfo(this);
-		if (info == null)
-			return false;
-		return info.hasChanges();
+		return getElementInfo().hasChanges();
 	}
 	
 	@Override
-	public Object getElementInfo() throws ModelException {
+	public Q7ResourceInfo getElementInfo() {
 		if (isWorkingCopy()) {
 			return getPerWorkingCopyInfo().resourceInfo;
 		}
-		return super.getElementInfo();
+		return (Q7ResourceInfo) super.getElementInfo();
 	}
 
 	@Override

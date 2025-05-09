@@ -85,8 +85,7 @@ public class Q7Folder extends Openable implements IQ7Folder {
 	}
 
 	@Override
-	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm,
-			Map<IQ7Element, Object> newElements, IResource underlyingResource)
+	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, IResource underlyingResource)
 			throws ModelException {
 		// check whether this folder can be opened
 		if (!underlyingResource.isAccessible())
@@ -273,7 +272,7 @@ public class Q7Folder extends Openable implements IQ7Folder {
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7FolderInfo createElementInfo() {
 		return new Q7FolderInfo();
 	}
 

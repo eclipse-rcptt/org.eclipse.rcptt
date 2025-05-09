@@ -45,6 +45,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.resources.Activator;
@@ -307,19 +308,18 @@ public class WSUtils {
 
 		IResource path = getLinkResource(fileLink);
 		if (path == null || !(path instanceof IFile))
-			throw new ModelException(new Status(Status.ERROR,
-					Activator.PLUGIN_ID, String.format(
+			throw new ModelException(new Q7Status(Status.ERROR,
+					String.format(
 							"File of link %s/%s is not found.",
 							fileLink.getProject(), fileLink.getPath())));
 
 		try {
 			return FileUtil.getStreamContent(((IFile) path).getContents());
 		} catch (CoreException e) {
-			throw new ModelException(new Status(Status.ERROR,
-					Activator.PLUGIN_ID, String.format(
+			throw new ModelException(new Q7Status(Status.ERROR, new IllegalStateException(
+					String.format(
 							"Failed to load content of linked file %s/%s",
-							fileLink.getProject(), fileLink.getPath()),
-					e));
+							fileLink.getProject(), fileLink.getPath()), e)));
 		}
 	}
 
@@ -355,8 +355,7 @@ public class WSUtils {
 
 		IContainer container = getLinkContainer(folderLink);
 		if (container == null)
-			throw new ModelException(new Status(Status.ERROR,
-					Activator.PLUGIN_ID, String.format(
+			throw new ModelException(new Q7Status(Status.ERROR, String.format(
 							"Can not resolve folder link %s/%s.",
 							folderLink.getProject(), folderLink.getPath())));
 

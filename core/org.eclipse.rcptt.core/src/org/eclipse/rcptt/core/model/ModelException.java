@@ -31,7 +31,7 @@ public class ModelException extends CoreException {
 		this(new Q7Status(0, message));
 	}
 
-	public ModelException(IStatus status) {
+	public ModelException(Q7Status status) {
 		super(status);
 	}
 
@@ -39,7 +39,11 @@ public class ModelException extends CoreException {
 		super(exception.getStatus());
 		this.nestedCoreException = exception;
 	}
-
+	
+	public Q7Status getQ7Status() {
+		return (Q7Status) getStatus();
+	}
+	
 	public Throwable getException() {
 		if (this.nestedCoreException == null) {
 			return getStatus().getException();
