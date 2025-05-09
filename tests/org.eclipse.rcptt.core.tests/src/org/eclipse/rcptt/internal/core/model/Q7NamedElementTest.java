@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2025 Xored Software Inc and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ *     Xored Software Inc - initial API and implementation and/or initial documentation
+ *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
 import java.io.IOException;
@@ -9,7 +19,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
@@ -24,7 +33,6 @@ public class Q7NamedElementTest {
 	private static final IWorkspace WORKSPACE = ResourcesPlugin.getWorkspace();
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject("TEST");
 	private static final IFile TESTCASE_FILE = PROJECT.getFile("testcase.test");
-	private IQ7Project q7project;
 	
 	@Rule
 	public final NoErrorsInLog NO_ERRORS = new NoErrorsInLog(RcpttCore.class);
@@ -42,7 +50,6 @@ public class Q7NamedElementTest {
 		IProjectDescription deQ7ion = WORKSPACE.newProjectDescription(PROJECT.getName());
 		deQ7ion.setNatureIds(new String[] { RcpttNature.NATURE_ID });
 		PROJECT.create(deQ7ion, null);
-		q7project =  RcpttCore.create(PROJECT);
 		PROJECT.open(null);
 	}
 
@@ -59,7 +66,6 @@ public class Q7NamedElementTest {
 			ITestCase testcase = (ITestCase) RcpttCore.create(currentFile);
 			Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID());
 		}
-		System.gc(); // Should not log errors. See org.eclipse.rcptt.core.persistence.LeakDetector
 	}
 
 }
