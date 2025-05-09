@@ -120,6 +120,7 @@ public abstract class Q7NamedElement extends Openable implements
 			info = getPerWorkingCopyInfo().resourceInfo;
 		}
 		if (info == null) {
+			open(null);
 			info = (Q7ResourceInfo) getElementInfo();
 		}
 		if (info == null || info.getNamedElement() == null) {

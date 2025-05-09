@@ -10,28 +10,19 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.rcptt.core.model.IOpenable;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.core.model.Q7Status;
-import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 
 public abstract class Openable extends Q7Element implements IOpenable {
 
 	protected Openable(Q7Element parent) throws IllegalArgumentException {
 		super(parent);
-	}
-
-	public boolean canBeRemovedFromCache() {
-		return true;
 	}
 
 	protected abstract boolean buildStructure(OpenableElementInfo info,

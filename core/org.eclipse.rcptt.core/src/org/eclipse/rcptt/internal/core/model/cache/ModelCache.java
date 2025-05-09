@@ -12,19 +12,20 @@ package org.eclipse.rcptt.internal.core.model.cache;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.model.ModelInfo;
+import org.eclipse.rcptt.internal.core.model.Openable;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.common.cache.Cache;
@@ -56,6 +57,14 @@ public class ModelCache {
 					try {
 						((Closeable) value).close();
 					} catch (IOException e) {
+						LOG.log(error(e));
+					}
+				}
+				IQ7Element key = notification.getKey();
+				if (key instanceof Openable) {
+					try {
+						((Openable) key).close();
+					} catch (ModelException e) {
 						LOG.log(error(e));
 					}
 				}
@@ -91,7 +100,10 @@ public class ModelCache {
 		this.openableCache.invalidate(element);
 	}
 	
-	private IStatus error(IOException e) {
+	private IStatus error(Exception e) {
+		if (e instanceof CoreException) {
+			return new MultiStatus(LOG.getBundle().getSymbolicName(), 0, new IStatus[] {((CoreException) e).getStatus()}, e.getMessage(), e);
+		}
 		return new Status(IStatus.ERROR, LOG.getBundle().getSymbolicName(), 0, e.getMessage(), e);
 	}
 
