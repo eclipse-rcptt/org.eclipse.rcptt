@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,7 +31,7 @@ import org.eclipse.rcptt.core.scenario.NamedElement;
 import org.eclipse.rcptt.internal.core.Q7LazyResource;
 import org.eclipse.rcptt.internal.core.model.cache.ILRUCacheable;
 
-public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable {
+public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable, Closeable {
 	private final Resource resource;
 	private NamedElement element;
 	public long timestamp;
@@ -166,5 +167,10 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		}
 		
 		return PersistenceManager.getInstance().cachedSize(res);
+	}
+
+	@Override
+	public void close() {
+		unload();
 	}
 }

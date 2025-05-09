@@ -26,12 +26,14 @@ import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.model.ModelInfo;
 import org.eclipse.rcptt.internal.core.model.Openable;
+import org.eclipse.rcptt.internal.core.model.Q7ResourceInfo;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 
 public class ModelCache {
 	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(ModelCache.class));
@@ -71,7 +73,13 @@ public class ModelCache {
 			}
 
 		};
-		openableCache  = CacheBuilder.newBuilder().softValues().expireAfterAccess(10, TimeUnit.MINUTES).removalListener(removalListener).build();
+		Weigher<IQ7Element, Object> weigher = (ignored, info) -> {
+			if (info instanceof Q7ResourceInfo) {
+				return ((Q7ResourceInfo) info).getCacheFootprint();
+			}
+			return 1000;
+		};
+		openableCache  = CacheBuilder.newBuilder().weigher(weigher).maximumWeight(50_000_000).expireAfterAccess(10, TimeUnit.MINUTES).removalListener(removalListener).build();
 	}
 
 	/**
