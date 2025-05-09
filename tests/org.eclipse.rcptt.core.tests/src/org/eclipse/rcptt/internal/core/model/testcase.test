@@ -1,0 +1,50 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _byweYBOEEeO4t6fOTB-8xg,_4zI9AWpgEeCzId1Gnkds9A,_ZQYygK2sEeCqBbDEJWufvQ
+Element-Name: TryToVerifyUnresolvedWidget
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _-dqP0BOHEeOQfY3L4mNcSA
+Runtime-Version: 2.4.0.201901310013
+Save-Time: 2/4/19 9:24 PM
+Tags: selfAUT, verification
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view "Test Explorer" | get-tree | select "MyProject/TC" | double-click
+get-editor TC | get-button Replay | click
+with [get-view "Test Explorer" | get-tree] {
+    select "MyProject/TextVerification" | double-click
+    select "MyProject/TextVerification" | double-click
+    select "MyProject/StyledTextVerification" | double-click
+}
+with [get-editor StyledTextVerification] {
+    with [get-section "Widget Text"] {
+        get-editbox -after [get-label "Widget:"] | set-text-offset 52 0
+        get-editbox -after [get-label "Widget:"] | type-text 2
+        get-editbox -after [get-label "Widget:"] | key-type "M1+s"
+    }
+    get-button Verify | click
+}
+get-view "Execution View" | get-editbox -after [get-label "Message:"] | get-property text 
+    | equals "Scriptlet GetTextViewer2 not found\n"
+    + "\tat get-text-viewer2 (line 1)" | verify-true
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

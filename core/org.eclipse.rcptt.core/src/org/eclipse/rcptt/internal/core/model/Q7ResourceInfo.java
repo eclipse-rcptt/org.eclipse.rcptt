@@ -28,8 +28,9 @@ import org.eclipse.rcptt.core.persistence.PersistenceManager;
 import org.eclipse.rcptt.core.persistence.plain.PlainTextPersistenceModel;
 import org.eclipse.rcptt.core.scenario.NamedElement;
 import org.eclipse.rcptt.internal.core.Q7LazyResource;
+import org.eclipse.rcptt.internal.core.model.cache.ILRUCacheable;
 
-public class Q7ResourceInfo extends OpenableElementInfo {
+public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable {
 	private final Resource resource;
 	private NamedElement element;
 	public long timestamp;
@@ -155,5 +156,15 @@ public class Q7ResourceInfo extends OpenableElementInfo {
 
 	public void updatePersistenceModel(IPersistenceModel newModel) {
 		PersistenceManager.getInstance().replaceModelWith(resource, newModel);
+	}
+
+	@Override
+	public int getCacheFootprint() {
+		Resource res = getResource();
+		if (res == null) {
+			return 0;
+		}
+		
+		return PersistenceManager.getInstance().cachedSize(res);
 	}
 }
