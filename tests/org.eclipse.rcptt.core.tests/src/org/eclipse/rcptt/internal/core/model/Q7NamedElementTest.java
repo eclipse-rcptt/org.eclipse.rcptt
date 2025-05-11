@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -54,17 +58,40 @@ public class Q7NamedElementTest {
 	}
 
 	@Test
-	public void noResourceleaks() throws CoreException, IOException {
-		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
-			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
-		}
-		IFile previousFile = TESTCASE_FILE;
-		for (int i = 0; i < 10000; i++) {
-			IFile currentFile = PROJECT.getFile("t"+i+".test");
-			previousFile.move(currentFile.getFullPath(), true, false, null);
-			previousFile = currentFile;
-			ITestCase testcase = (ITestCase) RcpttCore.create(currentFile);
-			Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID());
+	public void noResourceleaksID() {
+		noResourceleaks(testcase -> Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID()));
+	}
+	
+	@Test
+	public void noResourceleaksExists() {
+		noResourceleaks(testcase -> assertTrue(testcase.exists()));
+	}
+
+	
+	private interface ThrowingConsumer<T> {
+		void accept(T data) throws Exception;
+	}
+	
+	public void noResourceleaks(ThrowingConsumer<ITestCase> action) {
+		try {
+			try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+				TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+			}
+			IFile previousFile = TESTCASE_FILE;
+			for (int i = 0; i < 1000; i++) {
+				IFile currentFile = PROJECT.getFile("t"+i+".test");
+				previousFile.move(currentFile.getFullPath(), true, false, null);
+				previousFile = currentFile;
+				ITestCase testcase = (ITestCase) RcpttCore.create(currentFile);
+				action.accept(testcase);
+				if ( i % 2 == 0) {
+					action.accept(testcase); // sometimes single access does not cause leak
+				}
+				System.gc(); // Detect leaks with org.eclipse.rcptt.core.persistence.LeakDetector
+				NO_ERRORS.assertNoErrors();
+			}
+		} catch (Exception e) {
+			throw new AssertionError(e);
 		}
 	}
 
