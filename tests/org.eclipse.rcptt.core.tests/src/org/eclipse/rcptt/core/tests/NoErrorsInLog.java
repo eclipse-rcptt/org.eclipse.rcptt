@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.tests;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.ILogListener;
@@ -37,6 +39,13 @@ public class NoErrorsInLog extends ExternalResource {
 		this.log = Platform.getLog(FrameworkUtil.getBundle(clazzToWatchLogFor));
 		this.statusLog = new MultiStatus("org.eclipse.rcptt.tesla.swt.test", 0, "Errors in the error log", null);
 	}
+	
+	public void assertNoErrors() {
+		synchronized (statusLog) {
+			checkErrors();
+		}
+	}
+	
 	@Override
 	protected void before() throws Throwable {
 		super.before();
@@ -48,11 +57,19 @@ public class NoErrorsInLog extends ExternalResource {
 		System.gc(); // Detect leaks with org.eclipse.rcptt.core.persistence.LeakDetector
 		log.removeLogListener(listener);
 		synchronized (statusLog) {
-			if (statusLog.matches(IStatus.ERROR)) {
-				throw new AssertionError(new CoreException(statusLog));
-			}
+			checkErrors();
 		}
 		super.after();
+	}
+
+	private void checkErrors() throws AssertionError {
+		if (statusLog.matches(IStatus.ERROR)) {
+			Arrays.stream(statusLog.getChildren()).filter(s -> s.matches(IStatus.ERROR)).map(s -> s.getException())
+					.filter(RuntimeException.class::isInstance).map(RuntimeException.class::cast).forEach(e -> {
+						throw e;
+					});
+			throw new AssertionError(new CoreException(statusLog));
+		}
 	}
 
 }
