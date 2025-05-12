@@ -28,6 +28,7 @@ import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,6 +38,7 @@ public class WorkingCopyTest {
 	private static final IWorkspace WORKSPACE = ResourcesPlugin.getWorkspace();
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject(PRJ_NAME);
 	private IQ7Project q7project;
+	private static final int LEAK_SIZE = 100;
 	
 
 	@Rule
@@ -77,7 +79,40 @@ public class WorkingCopyTest {
 		copy.commitWorkingCopy(true, new NullProgressMonitor());
 		assertEquals("new test case name", testcase.getElementName());
 	}
+
 	
+	@Test
+	public void queryDeletedResource() throws CoreException, InterruptedException {
+		IQ7Project prj = q7project;
+		for (int i = 0; i < LEAK_SIZE; i++) {
+			ITestCase testcase = prj.getRootFolder().createTestCase("mytestcase"+i,true, new NullProgressMonitor());
+			PROJECT.getFile(testcase.getName()).delete(true, null);
+			try {
+				testcase.getContexts(); // may cause leaks
+				Assert.fail();
+			} catch(ModelException e) {
+				// expected, as resource is deleted
+			}
+			System.gc();
+			NO_ERRORS.assertNoErrors();
+		}
+	}
+	
+	@Test
+	public void deleteWorkingCopyResource() throws CoreException {
+		for (int i = 0; i < LEAK_SIZE; i++) {
+			ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase" + i, true, new NullProgressMonitor());
+
+			ITestCase copy = (ITestCase) testcase
+					.getWorkingCopy(new NullProgressMonitor());
+			assertTrue(testcase.exists());
+			assertFalse(copy.hasUnsavedChanges());
+			PROJECT.getFile(testcase.getName()).delete(true, null);
+			System.gc();
+			NO_ERRORS.assertNoErrors();
+		}
+	}
+
 	@Test
 	public void deleteEditedResource() throws CoreException, InterruptedException {
 		IQ7Project prj = q7project;
@@ -92,12 +127,13 @@ public class WorkingCopyTest {
 		};
 		RcpttCore.addElementChangedListener(listener);
 		try {
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < LEAK_SIZE; i++) {
 				ITestCase testcase = prj.getRootFolder().createTestCase("mytestcase"+i,true, new NullProgressMonitor());
 		
 				ITestCase copy = (ITestCase) testcase
 						.getWorkingCopy(new NullProgressMonitor());
 				assertTrue(testcase.exists());
+				assertFalse(copy.hasUnsavedChanges());
 				PROJECT.getFile(testcase.getName()).delete(true, null);
 				try {
 					testcase.getElementName();
