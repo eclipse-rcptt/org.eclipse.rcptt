@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.internal.target;
 
-import static com.google.common.base.Objects.equal;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
+import static org.osgi.framework.Version.valueOf;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,10 +43,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -73,7 +75,6 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IFileArtifactRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
@@ -96,10 +97,10 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
+import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.StartLevelSupport;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.injection.Directory;
 import org.eclipse.rcptt.launching.injection.Entry;
 import org.eclipse.rcptt.launching.injection.InjectionConfiguration;
@@ -112,7 +113,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -171,6 +171,23 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return new Status(IStatus.ERROR, PLUGIN_ID, "Target platform is unset");
 		}
 		return status;
+	}
+	
+	
+	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
+	static {
+		var oi = OBJECTWEB_INCOMPATIBILITY;
+		oi.put(valueOf("9.6.0"), "JavaSE-21");
+		oi.put(valueOf("9.7.0"), "JavaSE-22");
+		oi.put(valueOf("9.7.1"), "JavaSE-23");
+		oi.put(valueOf("9.8.0"), "JavaSE-24");
+	}
+	
+	public Set<String> getIncompatibleExecutionEnvironments() {
+		checkResolved();
+		return modelIndex.get("org.objectweb.asm").stream().map(base -> base.getPluginBase().getVersion())
+				.map(Version::parseVersion).map(OBJECTWEB_INCOMPATIBILITY::get).filter(java.util.Objects::nonNull)
+				.collect(Collectors.toSet());
 	}
 
 	private IStatus getBundleStatus() {
@@ -336,7 +353,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private void filterHooks() {
 		weavingHook = null;
 		List<IPluginModelBase> hooks = modelIndex.values().stream()
-				.filter(model -> equal(model.getBundleDescription().getSymbolicName(), AJConstants.HOOK))
+				.filter(model -> Objects.equals(model.getBundleDescription().getSymbolicName(), AJConstants.HOOK))
 				.collect(Collectors.toCollection(ArrayList::new));
 		switch (hooks.size()) {
 		case 0:
@@ -376,17 +393,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (architecture == null || architecture == OSArchitecture.Unknown) {
 			return error(message.toString());
 		}
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
-		if (jvm == null) {
-			return error ("No JVM for architecture " + architecture + " is registered");
-		}
 		
-		wc.setAttribute(
-				IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-				String.format(
-						"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-						jvm.install.getVMInstallType().getId(),
-						jvm.install.getName()));
+		try {
+			if (Q7ExternalLaunchDelegate.updateJVM(wc, architecture, this)) {
+				return Status.error(String.format("No compatible JRE is configured. Architecture: %s, incompatible environments: %s", architecture, getIncompatibleExecutionEnvironments()));
+			}
+		} catch (CoreException e) {
+			return e.getStatus();
+		}
 		
 		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
 				new HashSet<>(modelIndex.values())) {
@@ -1178,7 +1192,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				if (bundles != null) {
 					for (TargetBundle iResolvedBundle : bundles) {
 						BundleInfo info = iResolvedBundle.getBundleInfo();
-						if (Objects.equal(info.getSymbolicName(), name)) {
+						if (Objects.equals(info.getSymbolicName(), name)) {
 							return new Version(info.getVersion());
 						}
 					}

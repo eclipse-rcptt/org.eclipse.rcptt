@@ -272,10 +272,11 @@ public class Q7ExternalLaunchDelegate extends
 						+ ".");
 		if (!haveAUT) {
 			// Let's search for configuration and update JVM if possible.
-			haveAUT = updateJVM(configuration, architecture,
-					((ITargetPlatformHelper) info.target));
+			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+			haveAUT = updateJVM(workingCopy, architecture,  ((ITargetPlatformHelper) info.target));
 
 			if (haveAUT) {
+				workingCopy.doSave();
 				Q7ExtLaunchingPlugin
 						.getDefault()
 						.info(Q7_LAUNCHING_AUT
@@ -287,12 +288,7 @@ public class Q7ExternalLaunchDelegate extends
 
 		}
 		if (!haveAUT) {
-			String errorMessage = "The "
-					+ configuration.getName()
-					+ " requires "
-					+ ((OSArchitecture.x86.equals(architecture)) ? "32 bit"
-							: "64 bit")
-					+ " Java VM which cannot be found.";
+			String errorMessage = String.format("Select a compatible Runtime JRE. Architecture: %s, incompatible with: ", architecture, target.getIncompatibleExecutionEnvironments());
 			Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
 			removeTargetPlatform(configuration);
 			throw new CoreException(new Status(IStatus.ERROR,
@@ -326,10 +322,10 @@ public class Q7ExternalLaunchDelegate extends
 		}
 	}
 
-	private static boolean updateJVM(ILaunchConfiguration configuration,
+	public static boolean updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
 		
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> isCompatible(m, architecture, target.getIncompatibleExecutionEnvironments())).findFirst().orElse(null);
 		if (jvm == null) {
 			return false;
 		}
@@ -337,15 +333,12 @@ public class Q7ExternalLaunchDelegate extends
 		OSArchitecture jvmArch = jvm.arch;
 		IVMInstall jvmInstall = jvm.install;
 		
-		ILaunchConfigurationWorkingCopy workingCopy = configuration
-				.getWorkingCopy();
-
 		String vmArgs = workingCopy.getAttribute(
 				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 				Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
 
 		OSArchitecture configArch;
-		String archAttrValue = configuration.getAttribute(
+		String archAttrValue = workingCopy.getAttribute(
 				Q7LaunchingCommon.ATTR_ARCH, "");
 		if (archAttrValue.isEmpty())
 			configArch = null;
@@ -413,8 +406,11 @@ public class Q7ExternalLaunchDelegate extends
 							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 							programArgs);
 		}
-		workingCopy.doSave();
 		return true;
+	}
+
+	private static boolean isCompatible(VmInstallMetaData m, OSArchitecture architecture, Set<String> incompatibleExecutionEnvironments) {
+		return m.arch.equals(architecture) && Collections.disjoint(incompatibleExecutionEnvironments, m.compatibleEnvironments);
 	}
 
 	private static String getSubstitutedString(String text)
