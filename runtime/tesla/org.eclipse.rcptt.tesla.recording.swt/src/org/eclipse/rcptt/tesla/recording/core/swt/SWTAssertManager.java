@@ -887,6 +887,13 @@ public class SWTAssertManager implements IRecordingProcessor,
 				selectionShell.setBackground(selectionShell.getDisplay()
 						.getSystemColor(SWT.COLOR_RED));
 				selectionShell.setText("Hover");
+				Shell copy = selectionShell;
+				copy.addDisposeListener(ignored -> {
+					Region region = copy.getRegion();
+					if (region != null) {
+						region.dispose();
+					}
+				});
 				disposeMenuPopups();
 				clearPopupMenus();
 			}
