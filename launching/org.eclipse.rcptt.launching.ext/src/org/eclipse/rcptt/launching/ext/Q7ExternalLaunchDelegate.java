@@ -60,6 +60,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
+import org.eclipse.pde.core.plugin.TargetPlatform;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
@@ -521,6 +522,12 @@ public class Q7ExternalLaunchDelegate extends
 		IVMInstall install = VMHelper.getVMInstall(configuration);
 		programArgs.add("-vm");
 		programArgs.add(install.getInstallLocation().toString());
+		
+		for (int archIndex = programArgs.indexOf("-arch"); archIndex >= 0;  archIndex = programArgs.indexOf("-arch")) {
+			// org.eclipse.pde.launching.AbstractPDELaunchConfiguration.getProgramArguments(ILaunchConfiguration) uses incorrect architecture from TargetPlatform.getOSArch()
+			programArgs.remove(archIndex);
+			programArgs.remove(archIndex);
+		}
 
 		info.programArgs = programArgs.toArray(new String[programArgs.size()]);
 		Q7ExtLaunchingPlugin.getDefault().info(
