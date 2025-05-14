@@ -10,27 +10,41 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.ext;
 
+import static java.util.Arrays.stream;
+
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public final class VmInstallMetaData {
 	public final IVMInstall install;
 	public final OSArchitecture arch;
-	private VmInstallMetaData(IVMInstall install, OSArchitecture arch) {
+	public final Set<String> compatibleEnvironments;
+	private VmInstallMetaData(IVMInstall install, OSArchitecture arch, Collection<String> environments) {
 		super();
 		Preconditions.checkArgument(!OSArchitecture.Unknown.equals(arch));
 		this.install = Objects.requireNonNull(install);
 		this.arch = Objects.requireNonNull(arch);
+		Preconditions.checkArgument(!environments.isEmpty());
+		this.compatibleEnvironments = Set.copyOf(environments);
 	}
 	
 	public static Optional<VmInstallMetaData> adapt(IVMInstall install) {
@@ -39,7 +53,12 @@ public final class VmInstallMetaData {
 			if (OSArchitecture.Unknown.equals(jvmArch)) {
 				return Optional.empty();
 			}
-			return Optional.of(new VmInstallMetaData(install, jvmArch));
+			IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+			Set<String> environments = Arrays.stream(manager.getExecutionEnvironments())
+					.filter(env -> Arrays.stream(env.getCompatibleVMs()).anyMatch(install::equals))
+					.map(IExecutionEnvironment::getId)
+					.collect(Collectors.toSet());
+			return Optional.of(new VmInstallMetaData(install, jvmArch, environments));
 		} catch (CoreException e) {
 			RcpttPlugin.log(e);
 			return Optional.empty();
@@ -52,12 +71,28 @@ public final class VmInstallMetaData {
 	}
 	
 	public static Stream<VmInstallMetaData> all() {
-		return JDTUtils.installedVms().map(VmInstallMetaData::adapt).flatMap(Optional::stream);
+		IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+		Multimap<IVMInstall, IExecutionEnvironment> environments = HashMultimap.create();
+		stream(manager.getExecutionEnvironments())
+			.forEach(env -> stream(env.getCompatibleVMs()).forEach( vm -> environments.put(vm, env) ));
+		return JDTUtils.installedVms().map(vm -> adapt(vm, environments.get(vm))).flatMap(Optional::stream);
 	}
 	
+	private static Optional<VmInstallMetaData>  adapt(IVMInstall install, Collection<IExecutionEnvironment> environments) {
+		try {
+			OSArchitecture jvmArch = JDTUtils.detect(install);
+			if (OSArchitecture.Unknown.equals(jvmArch)) {
+				return Optional.empty();
+			}
+			return Optional.of(new VmInstallMetaData(install, jvmArch, environments.stream().map(IExecutionEnvironment::getId).toList()));
+		} catch (CoreException e) {
+			RcpttPlugin.log(e);
+			return Optional.empty();
+		}
+	}
+
 	public static VmInstallMetaData register(Path location) throws CoreException {
 		IVMInstall install = JDTUtils.registerVM(location.toFile());
-		OSArchitecture arch = JDTUtils.detect(install);
-		return new VmInstallMetaData(install, arch);
+		return adapt(install).orElseThrow();
 	}
 }
