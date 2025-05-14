@@ -177,10 +177,10 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
 	static {
 		var oi = OBJECTWEB_INCOMPATIBILITY;
-		oi.put(valueOf("9.6.0"), "JavaSE-21");
-		oi.put(valueOf("9.7.0"), "JavaSE-22");
-		oi.put(valueOf("9.7.1"), "JavaSE-23");
-		oi.put(valueOf("9.8.0"), "JavaSE-24");
+		oi.put(valueOf("9.6.0"), "JavaSE-23");
+		oi.put(valueOf("9.7.0"), "JavaSE-24");
+		oi.put(valueOf("9.7.1"), "JavaSE-25");
+		oi.put(valueOf("9.8.0"), "JavaSE-26");
 	}
 	
 	public Set<String> getIncompatibleExecutionEnvironments() {
