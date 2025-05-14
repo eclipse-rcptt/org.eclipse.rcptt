@@ -395,7 +395,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		
 		try {
-			if (Q7ExternalLaunchDelegate.updateJVM(wc, architecture, this)) {
+			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, this)) {
 				return Status.error(String.format("No compatible JRE is configured. Architecture: %s, incompatible environments: %s", architecture, getIncompatibleExecutionEnvironments()));
 			}
 		} catch (CoreException e) {
