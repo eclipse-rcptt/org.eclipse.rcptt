@@ -29,7 +29,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.pde.internal.launching.IPDEConstants;
-import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
@@ -39,17 +38,16 @@ import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
-import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.rap.RAPLaunchConfig;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.utils.AUTLaunchArgumentsHelper;
 import org.eclipse.rcptt.runner.HeadlessRunner;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.PrintStreamMonitor;
@@ -211,14 +209,11 @@ public class AutThread extends Thread {
 				config.setAttribute(IPDELauncherConstants.GENERATE_PROFILE, true);
 			}
 
-			ILaunchConfiguration savedConfig;
-			savedConfig = config.doSave();
-
 			// Validate JVM compatibility
 			boolean haveAUT = false;
 			OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(true, null);
 			if (!architecture.equals(OSArchitecture.Unknown)) {
-				IVMInstall install = VMHelper.getVMInstall(savedConfig);
+				IVMInstall install = VMHelper.getVMInstall(config);
 				try {
 					OSArchitecture jvmArch = JDTUtils.detect(install);
 					if (jvmArch.equals(architecture)) {
@@ -230,13 +225,14 @@ public class AutThread extends Thread {
 				if (!haveAUT) {
 					// Let's search for configuration and update JVM if
 					// possible.
-					haveAUT = updateJVM(savedConfig, tpc.getTargetPlatform());
+					haveAUT = updateJVM(config, tpc.getTargetPlatform());
 
 				}
 				if (!haveAUT) {
 					String errorMessage = "FAIL: AUT requires "
 							+ architecture
-							+ " Java VM which cannot be found.\nPlease specify -autVM {javaPath} command line argument to use different JVM.\nCurrent used JVM is: "
+							+ " Java VM. It is incompatible with " + tpc.getTargetPlatform().getIncompatibleExecutionEnvironments()
+							+ ". Such VM cannot be found.\nPlease specify -autVM {javaPath} command line argument to use different JVM.\nCurrent used JVM is: "
 							+ install.getInstallLocation().toString();
 					Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
 					throw new CoreException(
@@ -246,61 +242,31 @@ public class AutThread extends Thread {
 			if (!architecture.equals(OSArchitecture.Unknown)) {
 				// Update -arch to be correct
 				try {
-					String finalArgs = savedConfig
+					String finalArgs = config
 							.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "");
 					finalArgs = finalArgs.replace("${target.arch}", architecture.name());
 
-					ILaunchConfigurationWorkingCopy copy = savedConfig.getWorkingCopy();
-					copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, finalArgs.toString());
-
-					savedConfig = copy.doSave();
+					config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, finalArgs.toString());
 				} catch (Throwable e) {
 					throw new CoreException(
 							new Status(IStatus.ERROR, Q7ExtLaunchingPlugin.PLUGIN_ID, e.getMessage(), e));
 				}
 			}
 
-			return savedConfig;
+			return config.doSave();
 		}
 	}
 
 
 	
-	private boolean updateJVM(ILaunchConfiguration configuration, ITargetPlatformHelper target) {
+	private boolean updateJVM(ILaunchConfigurationWorkingCopy configuration, ITargetPlatformHelper target) {
 		try {
-			OSArchitecture autArch = target.detectArchitecture(true, null);
-			final VmInstallMetaData jvmInstall = VmInstallMetaData.all().filter(i -> i.arch.equals(autArch)).findFirst().orElse(null);
-			if (jvmInstall == null) {
-				return false;
+			StringBuilder error = new StringBuilder();
+			OSArchitecture autArch = target.detectArchitecture(true, error);
+			if (autArch == OSArchitecture.Unknown) {
+				throw new CoreException(Status.error("Failed to detect AUT architecture: " + error));
 			}
-			
-			assert autArch.equals(jvmInstall.arch);
-			
-			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
-
-			String vmArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-					target.getIniVMArgs());
-			if (vmArgs == null) {
-				// Lets use current runner vm arguments
-				vmArgs = LaunchArgumentsHelper.getInitialVMArguments().trim();
-			} else {
-				vmArgs = vmArgs.trim();
-			}
-			if (vmArgs != null && vmArgs.length() > 0) {
-				vmArgs = UpdateVMArgs.updateAttr(vmArgs);
-				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
-			}
-
-			workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, jvmInstall.formatVmContainerPath());
-
-			String programArgs = workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-					AUTLaunchArgumentsHelper.getInitialProgramArguments(autArch.name()));
-
-			if (programArgs.length() > 0) {
-				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, programArgs);
-			}
-			workingCopy.doSave();
-			return true;
+			return Q7ExternalLaunchDelegate.updateJVM(configuration, autArch, target);
 		} catch (Throwable e) {
 			RcpttPlugin.log(e);
 		}

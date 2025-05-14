@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
@@ -152,4 +153,6 @@ public interface ITargetPlatformHelper {
 	Map<String, Version> getVersions() throws CoreException;
 
 	int size();
+	
+	public Set<String> getIncompatibleExecutionEnvironments();
 }

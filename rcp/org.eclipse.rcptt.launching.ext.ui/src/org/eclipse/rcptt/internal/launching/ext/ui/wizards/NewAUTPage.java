@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext.ui.wizards;
 
+import static java.util.Collections.disjoint;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
@@ -244,12 +245,17 @@ public class NewAUTPage extends WizardPage {
 	}
 
 	private boolean findJVM() throws CoreException {		
-		VmInstallMetaData result = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
+		VmInstallMetaData result = VmInstallMetaData.all().filter(m -> isCompatible(m)).findFirst().orElse(null);
 		if (result == null)
 			return false;
 		jvmInstall = result.install;
 		jvmArch = result.arch;
 		return true;
+	}
+
+	private boolean isCompatible(VmInstallMetaData m) {
+		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
+		return m.arch.equals(architecture) && disjoint(m.compatibleEnvironments, helper.getIncompatibleExecutionEnvironments());
 	}
 	
 	private boolean validateAUTName() {
