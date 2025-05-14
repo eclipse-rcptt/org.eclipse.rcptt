@@ -227,7 +227,7 @@ public class Q7ExternalLaunchDelegate extends
 			throw new CoreException(error);
 		}
 
-		boolean haveAUT = false;
+		boolean jvmFound = false;
 
 		OSArchitecture configArch = null;
 		StringBuilder detectMsg = new StringBuilder();
@@ -251,17 +251,17 @@ public class Q7ExternalLaunchDelegate extends
 						+ " detected architecture is " + jvmArch.name());
 
 		if (jvmArch.equals(architecture)) {
-			haveAUT = true;
+			jvmFound = true;
 		}
 
-		if (!haveAUT
+		if (!jvmFound
 				&& architecture != OSArchitecture.Unknown
 				&& target.detectArchitecture(false, new StringBuilder()) == OSArchitecture.Unknown) {
 			Q7ExtLaunchingPlugin
 					.getDefault()
 					.info("Cannot determine AUT architecture, sticking to architecture of selected JVM, which is "
 							+ jvmArch.name());
-			haveAUT = true;
+			jvmFound = true;
 		}
 
 		Q7ExtLaunchingPlugin
@@ -269,14 +269,14 @@ public class Q7ExternalLaunchDelegate extends
 				.info(Q7_LAUNCHING_AUT
 						+ configuration.getName()
 						+ ": JVM and AUT architectures are compatible: "
-						+ haveAUT
+						+ jvmFound
 						+ ".");
-		if (!haveAUT) {
+		if (!jvmFound) {
 			// Let's search for configuration and update JVM if possible.
 			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
-			haveAUT = updateJVM(workingCopy, architecture,  ((ITargetPlatformHelper) info.target));
+			jvmFound = updateJVM(workingCopy, architecture,  ((ITargetPlatformHelper) info.target));
 
-			if (haveAUT) {
+			if (jvmFound) {
 				workingCopy.doSave();
 				Q7ExtLaunchingPlugin
 						.getDefault()
@@ -288,7 +288,7 @@ public class Q7ExternalLaunchDelegate extends
 			}
 
 		}
-		if (!haveAUT) {
+		if (!jvmFound) {
 			String errorMessage = String.format("Select a compatible Runtime JRE. Architecture: %s, incompatible with: ", architecture, target.getIncompatibleExecutionEnvironments());
 			Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
 			removeTargetPlatform(configuration);
@@ -330,41 +330,7 @@ public class Q7ExternalLaunchDelegate extends
 		if (jvm == null) {
 			return false;
 		}
-		
-		OSArchitecture jvmArch = jvm.arch;
 		IVMInstall jvmInstall = jvm.install;
-		
-		String vmArgs = workingCopy.getAttribute(
-				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-				Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
-
-		OSArchitecture configArch;
-		String archAttrValue = workingCopy.getAttribute(
-				Q7LaunchingCommon.ATTR_ARCH, "");
-		if (archAttrValue.isEmpty())
-			configArch = null;
-		else
-			configArch = OSArchitecture.valueOf(archAttrValue);
-
-		OSArchitecture autArch = configArch == null ? target
-				.detectArchitecture(true, null) : configArch;
-
-		// there is no -d32 on Windows
-		if (!autArch.equals(jvmArch)
-				&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-			if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-				vmArgs += " " + ATTR_D32;
-			} else {
-				vmArgs = ATTR_D32;
-			}
-		}
-		if (vmArgs != null && vmArgs.length() > 0) {
-			vmArgs = UpdateVMArgs.updateAttr(vmArgs);
-			workingCopy
-					.setAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-							vmArgs);
-		}
 
 		workingCopy
 				.setAttribute(
@@ -373,40 +339,6 @@ public class Q7ExternalLaunchDelegate extends
 								"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
 								jvmInstall.getVMInstallType().getId(),
 								jvmInstall.getName()));
-
-		String programArgs = workingCopy
-				.getAttribute(
-						IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-						LaunchArgumentsHelper
-								.getInitialProgramArguments().trim());
-		if (programArgs.contains("${target.arch}")) {
-			programArgs = programArgs.replace("${target.arch}",
-					autArch.name());
-		} else {
-			if (programArgs.contains("-arch")) {
-				int pos = programArgs.indexOf("-arch ") + 6;
-				int len = 6;
-				int pos2 = programArgs.indexOf("x86_64", pos);
-				if (pos2 == -1) {
-					len = 3;
-					pos2 = programArgs.indexOf("x86", pos);
-				}
-				if (pos2 != -1) {
-					programArgs = programArgs.substring(0, pos)
-							+ autArch.name()
-							+ programArgs.substring(pos2 + len,
-									programArgs.length());
-				}
-			} else {
-				programArgs = programArgs + " -arch " + autArch.name();
-			}
-		}
-		if (programArgs.length() > 0) {
-			workingCopy
-					.setAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-							programArgs);
-		}
 		return true;
 	}
 
@@ -584,6 +516,10 @@ public class Q7ExternalLaunchDelegate extends
 		args.addAll(UpdateVMArgs.addHook(argsCopy, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS)));
 
 		args.addAll(vmSecurityArguments(config));
+		
+		ArrayList<String> copy = new ArrayList<>(args);
+		args.clear();
+		args.addAll(UpdateVMArgs.updateAttr(copy));
 		
 		args.add("-Declipse.vmargs=" + Joiner.on("\n").join(args) + "\n");
 	}
