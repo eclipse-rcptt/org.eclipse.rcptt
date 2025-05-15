@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _XS8ZEFqHEeSjvvK1muLiaA
-Runtime-Version: 2.5.5.202404041628
-Save-Time: 3/8/25, 11:12 PM
+Runtime-Version: 2.6.0.qualifier
+Save-Time: 5/9/25, 11:35 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -24,14 +24,12 @@ get-view Tasks | get-tree | get-item 1 -column Priority
     | equals "TODO Auto-generated method stub" | verify-true
     
 with [get-view Tasks | get-tree] {
-    get-item "FIXME Very important action" -column Description | get-property "values['Priority']" | equals 2 
-        | verify-true
-    get-item "FIXME Very important action" -column Description | get-property "values['Completion']" | equals false 
-        | verify-true
-    get-item "TODO Auto-generated method stub" -column Description | get-property "values['Priority']" | equals 1 
-        | verify-true
-    get-item "TODO Auto-generated method stub" -column Description | get-property "values['Completion']" 
-        | equals false | verify-true
+	with [get-item -path "FIXME Very important action" -column Description] {
+    	get-property "cells[1].image.path" | equals "org.eclipse.ui.ide/icons/full/obj16/hprio_tsk.png" | verify-true
+    	get-property "cells[1].image" | equals "" | verify-false
+    }
+    get-item "TODO Auto-generated method stub" -column Description |  get-property "cells[1].image" | equals "" | verify-true
+    
 }
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

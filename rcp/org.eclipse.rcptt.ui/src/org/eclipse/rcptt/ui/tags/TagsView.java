@@ -149,6 +149,9 @@ public class TagsView extends ViewPart {
 		Job setInputJob = new UIJob(tagsViewer.getControl().getDisplay(), "Initialize tags view") {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (tagsViewer.getControl().isDisposed()) {
+					return Status.OK_STATUS;
+				}
 				final TagsRegistry tagsRegistry = Q7UIPlugin.getDefault().getTags();
 				tagsLabelListener = new EContentAdapter() {
 					@Override

@@ -141,7 +141,7 @@ public class ExternalAUTMainTab extends MainTab {
 					return null;
 				}
 				OSArchitecture architecture = configArch == null ? currentTargetPlatform
-						.detectArchitecture(true, null) : configArch;
+						.detectArchitecture(null) : configArch;
 				IVMInstall install = getSelectedJVM();
 				if (install == null) {
 					return "The selected JVM can not be found. Ensure it is installed.";
