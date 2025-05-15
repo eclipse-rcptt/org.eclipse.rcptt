@@ -211,7 +211,7 @@ public class AutThread extends Thread {
 
 			// Validate JVM compatibility
 			boolean haveAUT = false;
-			OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(true, null);
+			OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(null);
 			if (!architecture.equals(OSArchitecture.Unknown)) {
 				IVMInstall install = VMHelper.getVMInstall(config);
 				try {
@@ -262,9 +262,13 @@ public class AutThread extends Thread {
 	private boolean updateJVM(ILaunchConfigurationWorkingCopy configuration, ITargetPlatformHelper target) {
 		try {
 			StringBuilder error = new StringBuilder();
-			OSArchitecture autArch = target.detectArchitecture(true, error);
+			OSArchitecture autArch = target.detectArchitecture(error);
 			if (autArch == OSArchitecture.Unknown) {
 				throw new CoreException(Status.error("Failed to detect AUT architecture: " + error));
+			}
+			final VmInstallMetaData jvmInstall = VmInstallMetaData.all().filter(i -> i.arch.equals(autArch)).findFirst().orElse(null);
+			if (jvmInstall == null) {
+				return false;
 			}
 			return Q7ExternalLaunchDelegate.updateJVM(configuration, autArch, target);
 		} catch (Throwable e) {
@@ -286,7 +290,7 @@ public class AutThread extends Thread {
 		System.out.println("AUT-" + autId + ":" + "Application: " + tpc.getTargetPlatform().getDefaultApplication());
 
 		StringBuilder archDetect = new StringBuilder();
-		OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(true, archDetect);
+		OSArchitecture architecture = tpc.getTargetPlatform().detectArchitecture(archDetect);
 		System.out
 				.println("AUT-" + autId + ":" + "Architecture: " + architecture.name() + "\n" + archDetect.toString());
 
