@@ -46,7 +46,13 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		Object info = manager.getInfo(this);
 		if (info != null)
 			return info;
-		return openWhenClosed(createElementInfo(), monitor);
+		Object result = createElementInfo();
+		try {
+			return openWhenClosed(result, monitor);
+		} catch (Throwable e) {
+			closing(result);
+			throw e;
+		}
 	}
 
 	protected abstract Object createElementInfo();
