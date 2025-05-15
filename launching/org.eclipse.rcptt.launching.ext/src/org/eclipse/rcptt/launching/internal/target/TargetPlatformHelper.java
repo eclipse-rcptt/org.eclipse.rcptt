@@ -333,6 +333,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		modelIndex.clear();
 		TargetBundle[] bundles = getTarget().getBundles();
 		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
+		if (locations.length == 0) {
+			throw new IllegalStateException("Target definition can't be empty");
+		}
 		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
 		if (DEBUG_BUNDLES) {
 			final List<String> targetModelsLocations = new ArrayList<String>();
@@ -381,27 +384,24 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private IPluginModelBase weavingHook;
 
 	private IStatus validateBundles(IProgressMonitor monitor) {
-		ILaunchConfigurationWorkingCopy wc;
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
+		ILaunchConfigurationWorkingCopy wc = null;
 		try {
 			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
-		StringBuilder message = new StringBuilder();
-		OSArchitecture architecture = detectArchitecture(true, message);
-		if (architecture == null || architecture == OSArchitecture.Unknown) {
-			return error(message.toString());
-		}
-		
-		try {
+			StringBuilder message = new StringBuilder();
+			OSArchitecture architecture = detectArchitecture(message);
+			if (architecture == null || architecture == OSArchitecture.Unknown) {
+				return error(message.toString());
+			}
 			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, this)) {
-				return Status.error(String.format("No compatible JRE is configured. Architecture: %s, incompatible environments: %s", architecture, getIncompatibleExecutionEnvironments()));
+				return Status.error(String.format(
+						"No compatible JRE is configured. Architecture: %s, incompatible environments: %s",
+						architecture, getIncompatibleExecutionEnvironments()));
 			}
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
-		
+
 		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
 				new HashSet<>(modelIndex.values())) {
 			@Override
@@ -434,7 +434,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			}
 			done(monitor);
 		} catch (CoreException e) {
-			return e.getStatus(); 
+			return e.getStatus();
 		} catch (OperationCanceledException e) {
 			return Status.CANCEL_STATUS;
 		}
@@ -518,6 +518,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
 				return status;
+			if (status.isOK()) {
+				return Status.OK_STATUS;
+			}
 			return status;
 		} catch (Exception e) {
 			target.isResolved();
@@ -1074,7 +1077,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public OSArchitecture detectArchitecture(
-			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
+			StringBuilder detectMsg) {
 		checkResolved();
 		String architecture = target.getArch();
 		if (architecture != null) {

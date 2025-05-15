@@ -124,7 +124,7 @@ public class Q7LaunchingUtil {
 			if (product == null && application == null) {
 				throw new CoreException(
 						Q7LaunchingPlugin
-								.createStatus("Failed to launch AUT since there is no Product and Application ID found."));
+								.createStatus("Failed to launch AUT since no Product and Application ID are found."));
 			}
 			config.setAttribute(IQ7Launch.AUT_LOCATION,
 					target.getTargetPlatformProfilePath());
