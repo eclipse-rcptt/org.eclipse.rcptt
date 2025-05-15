@@ -219,7 +219,7 @@ public class NewAUTPage extends WizardPage {
 			}
 		}
 
-		architecture = helper.detectArchitecture(false, new StringBuilder());
+		architecture = helper.detectArchitecture(new StringBuilder());
 		if (OSArchitecture.Unknown.equals(architecture)) {
 			setError("Unable to detect AUT's architecture.");
 			return;
