@@ -14,6 +14,7 @@ package org.eclipse.rcptt.ui.editors;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -68,7 +69,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 @SuppressWarnings("restriction")
@@ -538,7 +538,7 @@ public class PropertyCellEditor extends TextCellEditor {
 			if (url == null) {
 				return styles = "";
 			}
-			return styles = Resources.toString(url, Charsets.UTF_8);
+			return styles = Resources.toString(url, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			Q7UIPlugin.log(e);
 			return styles = "";
