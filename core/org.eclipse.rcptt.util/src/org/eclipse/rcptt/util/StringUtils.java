@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.util;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,23 +25,16 @@ public final class StringUtils {
 		return new ComparisonCompactor(20, expected, actual).compact();
 	}
 
-	public static final String UTF_8 = "UTF-8";
-	private static final String ASCII_7 = "US-ASCII";
-
-	private static byte[] safeGetBytes(String data, String encoding) {
-		try {
-			return data.getBytes(encoding);
-		} catch (UnsupportedEncodingException e) {
-			return data.getBytes();
-		}
+	private static byte[] safeGetBytes(String data, Charset encoding) {
+		return data.getBytes(encoding);
 	}
 
 	public static byte[] getUtf8Bytes(String s) {
-		return safeGetBytes(s, UTF_8);
+		return safeGetBytes(s, StandardCharsets.UTF_8);
 	}
 
 	public static byte[] getAscii7Bytes(String s) {
-		return safeGetBytes(s, ASCII_7);
+		return safeGetBytes(s, StandardCharsets.US_ASCII);
 	}
 
 	public static boolean isBlank(String string) {
