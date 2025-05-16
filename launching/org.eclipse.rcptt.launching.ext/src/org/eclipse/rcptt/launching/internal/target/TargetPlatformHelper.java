@@ -51,6 +51,8 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1085,37 +1087,24 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		
 		String os = Platform.getOS();
-		Set<String> launcherLibraries = targetBundleIndex.keySet().stream().filter(name -> name.startsWith("org.eclipse.equinox.launcher") && name.contains(os)).collect(Collectors.toSet());
-		if (launcherLibraries.size() != 1) {
+		// Find org.eclipse.equinox.launcher.cocoa.macosx.aarch64
+		// Skip org.eclipse.equinox.launcher.cocoa.macosx
+		Pattern prefix = Pattern.compile(("org.eclipse.equinox.launcher.[\\w\\d]+."+os+".").replace(".", "\\."));
+		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> removePrefix(name, prefix)).flatMap(Optional::stream).collect(Collectors.toSet());
+		if (launcherArchitectures.size() != 1) {
 			if (detectMsg != null) {
-				detectMsg.append("Multiple launcher libraries are found in target platform: " + Joiner.on(", ").join(launcherLibraries));
+				detectMsg.append("Multiple launcher architectures are found in target platform: " + Joiner.on(", ").join(launcherArchitectures));
 			}
 			return OSArchitecture.Unknown;
 		}
 		
-		String name = launcherLibraries.iterator().next();
-		if (name.contains("aarch64")) {
-			if (detectMsg != null) {
-				detectMsg.append("aarch64 arch is selected because AUT uses " + name);
-			}
-			return OSArchitecture.aarch64;
-		} else if (name.contains("x86_64")) {
-			if (detectMsg != null) {
-				detectMsg.append("x86_64 arch is selected because AUT uses " + name);
-			}
-			return OSArchitecture.x86_64;
-		} else if (name.contains("x86")) {
-			if (detectMsg != null) {
-				detectMsg.append("x86 arch is selected because AUT uses " + name);
-			}
-			return OSArchitecture.x86;
-		}
-
+		String name = launcherArchitectures.iterator().next();
+		OSArchitecture result = OSArchitecture.valueOf(name);
 		if (detectMsg != null) {
-			detectMsg.append("Unrecognized launcher architecture: " + name);
+			detectMsg.append(result).append(" arch detected");
 		}
 
-		return OSArchitecture.Unknown;
+		return result;
 	}
 
 	private Map<String, BundleStart> getRunlevelsFromSimpleConfigurator() throws IOException {
@@ -1773,6 +1762,16 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private Model toModel(IPluginModelBase model) {
 		TargetBundle bundle = targetBundleIndex.get(model.getBundleDescription().getSymbolicName()).iterator().next();
 		return new Model(model, BundleStart.fromBundle(bundle.getBundleInfo()));
+	}
+	
+	private Optional<String> removePrefix(String input, Pattern prefix) {
+		Matcher matcher = prefix.matcher(input);
+		if (matcher.find()) {
+			if (matcher.start() == 0) {
+				return Optional.of(input.substring(matcher.end()));
+			}
+		}
+		return Optional.empty();
 	}
 	
 }
