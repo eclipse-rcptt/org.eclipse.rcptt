@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore,
  org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.core.ecl.core;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.core.launching,
  org.eclipse.rcptt.core.launching.events,

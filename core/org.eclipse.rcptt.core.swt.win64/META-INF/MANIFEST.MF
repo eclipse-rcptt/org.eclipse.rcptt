@@ -5,6 +5,6 @@ Bundle-SymbolicName: org.eclipse.rcptt.core.swt.win64;singleton:=true
 Bundle-Version: 2.6.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Fragment-Host: org.eclipse.rcptt.core.swt;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Eclipse-PlatformFilter: (&(osgi.ws=win32) (osgi.arch=x86_64))
 Export-Package: org.eclipse.rcptt.util.swt

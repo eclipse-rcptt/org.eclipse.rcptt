@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ctx.script;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.rcptt.core.ecl.parser;bundle-version="[2.6.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ctx.extensions
 Automatic-Module-Name: org.eclipse.rcptt.ctx.extensions

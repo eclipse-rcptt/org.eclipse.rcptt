@@ -46,7 +46,13 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		Object info = manager.getInfo(this);
 		if (info != null)
 			return info;
-		return openWhenClosed(createElementInfo(), monitor);
+		Object result = createElementInfo();
+		try {
+			return openWhenClosed(result, monitor);
+		} catch (Throwable e) {
+			closing(result);
+			throw e;
+		}
 	}
 
 	protected abstract Object createElementInfo();
@@ -67,26 +73,19 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		return (IOpenable) this.parent;
 	}
 
-	protected synchronized Object openWhenClosed(Object info,
+	protected final synchronized Object openWhenClosed(Object info,
 			IProgressMonitor monitor) throws ModelException {
 		ModelManager manager = ModelManager.getModelManager();
-		final boolean isWC = isInWorkingCopyMode();
-		try {
-			Map<IQ7Element, Object> newElements = new HashMap<IQ7Element, Object>();
-			generateInfos(info, newElements, monitor);
-			if (info == null) {
-				info = newElements.get(this);
-			}
-			if (info == null) {
-				throw newNotPresentException();
-			}
-			if (!isWC) {
-				// Do not put info if in working copy mode
-				manager.putInfos(this, newElements);
-			}
-		} finally {
+		Map<IQ7Element, Object> newElements = new HashMap<IQ7Element, Object>();
+		generateInfos(info, newElements, monitor);
+		if (info == null) {
+			info = newElements.get(this);
 		}
-		Object info2 = isWC ? info : manager.getInfo(this);
+		if (info == null) {
+			throw newNotPresentException();
+		}
+		manager.putInfos(this, newElements);
+		Object info2 = manager.getInfo(this);
 		return info2;
 	}
 

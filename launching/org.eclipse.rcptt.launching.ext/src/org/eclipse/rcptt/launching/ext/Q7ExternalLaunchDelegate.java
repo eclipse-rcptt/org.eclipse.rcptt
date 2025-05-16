@@ -60,6 +60,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
+import org.eclipse.pde.core.plugin.TargetPlatform;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
@@ -226,13 +227,13 @@ public class Q7ExternalLaunchDelegate extends
 			throw new CoreException(error);
 		}
 
-		boolean haveAUT = false;
+		boolean jvmFound = false;
 
 		OSArchitecture configArch = null;
 		StringBuilder detectMsg = new StringBuilder();
 
 		OSArchitecture architecture = ((configArch == null) ? ((ITargetPlatformHelper) info.target)
-				.detectArchitecture(true, detectMsg) : configArch);
+				.detectArchitecture(detectMsg) : configArch);
 
 		Q7ExtLaunchingPlugin.getDefault().info(
 				Q7_LAUNCHING_AUT + configuration.getName()
@@ -250,17 +251,17 @@ public class Q7ExternalLaunchDelegate extends
 						+ " detected architecture is " + jvmArch.name());
 
 		if (jvmArch.equals(architecture)) {
-			haveAUT = true;
+			jvmFound = true;
 		}
 
-		if (!haveAUT
+		if (!jvmFound
 				&& architecture != OSArchitecture.Unknown
-				&& target.detectArchitecture(false, new StringBuilder()) == OSArchitecture.Unknown) {
+				&& target.detectArchitecture(new StringBuilder()) == OSArchitecture.Unknown) {
 			Q7ExtLaunchingPlugin
 					.getDefault()
 					.info("Cannot determine AUT architecture, sticking to architecture of selected JVM, which is "
 							+ jvmArch.name());
-			haveAUT = true;
+			jvmFound = true;
 		}
 
 		Q7ExtLaunchingPlugin
@@ -268,14 +269,15 @@ public class Q7ExternalLaunchDelegate extends
 				.info(Q7_LAUNCHING_AUT
 						+ configuration.getName()
 						+ ": JVM and AUT architectures are compatible: "
-						+ haveAUT
+						+ jvmFound
 						+ ".");
-		if (!haveAUT) {
+		if (!jvmFound) {
 			// Let's search for configuration and update JVM if possible.
-			haveAUT = updateJVM(configuration, architecture,
-					((ITargetPlatformHelper) info.target));
+			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+			jvmFound = updateJVM(workingCopy, architecture,  ((ITargetPlatformHelper) info.target));
 
-			if (haveAUT) {
+			if (jvmFound) {
+				workingCopy.doSave();
 				Q7ExtLaunchingPlugin
 						.getDefault()
 						.info(Q7_LAUNCHING_AUT
@@ -286,13 +288,8 @@ public class Q7ExternalLaunchDelegate extends
 			}
 
 		}
-		if (!haveAUT) {
-			String errorMessage = "The "
-					+ configuration.getName()
-					+ " requires "
-					+ ((OSArchitecture.x86.equals(architecture)) ? "32 bit"
-							: "64 bit")
-					+ " Java VM which cannot be found.";
+		if (!jvmFound) {
+			String errorMessage = String.format("Select a compatible Runtime JRE. Architecture: %s, incompatible with: ", architecture, target.getIncompatibleExecutionEnvironments());
 			Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
 			removeTargetPlatform(configuration);
 			throw new CoreException(new Status(IStatus.ERROR,
@@ -330,52 +327,14 @@ public class Q7ExternalLaunchDelegate extends
 		}
 	}
 
-	private static boolean updateJVM(ILaunchConfiguration configuration,
+	public static boolean updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
 		
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst().orElse(null);
+		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> isCompatible(m, architecture, target.getIncompatibleExecutionEnvironments())).findFirst().orElse(null);
 		if (jvm == null) {
 			return false;
 		}
-		
-		OSArchitecture jvmArch = jvm.arch;
 		IVMInstall jvmInstall = jvm.install;
-		
-		ILaunchConfigurationWorkingCopy workingCopy = configuration
-				.getWorkingCopy();
-
-		String vmArgs = workingCopy.getAttribute(
-				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-				Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
-
-		OSArchitecture configArch;
-		String archAttrValue = configuration.getAttribute(
-				Q7LaunchingCommon.ATTR_ARCH, "");
-		if (archAttrValue.isEmpty())
-			configArch = null;
-		else
-			configArch = OSArchitecture.valueOf(archAttrValue);
-
-		OSArchitecture autArch = configArch == null ? target
-				.detectArchitecture(true, null) : configArch;
-
-		// there is no -d32 on Windows
-		if (!autArch.equals(jvmArch)
-				&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-			if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-				vmArgs += " " + ATTR_D32;
-			} else {
-				vmArgs = ATTR_D32;
-			}
-		}
-		if (vmArgs != null && vmArgs.length() > 0) {
-			vmArgs = UpdateVMArgs.updateAttr(vmArgs);
-			workingCopy
-					.setAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-							vmArgs);
-		}
-
 		workingCopy
 				.setAttribute(
 						IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
@@ -383,42 +342,11 @@ public class Q7ExternalLaunchDelegate extends
 								"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
 								jvmInstall.getVMInstallType().getId(),
 								jvmInstall.getName()));
-
-		String programArgs = workingCopy
-				.getAttribute(
-						IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-						LaunchArgumentsHelper
-								.getInitialProgramArguments().trim());
-		if (programArgs.contains("${target.arch}")) {
-			programArgs = programArgs.replace("${target.arch}",
-					autArch.name());
-		} else {
-			if (programArgs.contains("-arch")) {
-				int pos = programArgs.indexOf("-arch ") + 6;
-				int len = 6;
-				int pos2 = programArgs.indexOf("x86_64", pos);
-				if (pos2 == -1) {
-					len = 3;
-					pos2 = programArgs.indexOf("x86", pos);
-				}
-				if (pos2 != -1) {
-					programArgs = programArgs.substring(0, pos)
-							+ autArch.name()
-							+ programArgs.substring(pos2 + len,
-									programArgs.length());
-				}
-			} else {
-				programArgs = programArgs + " -arch " + autArch.name();
-			}
-		}
-		if (programArgs.length() > 0) {
-			workingCopy
-					.setAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-							programArgs);
-		}
-		workingCopy.doSave();
 		return true;
+	}
+
+	private static boolean isCompatible(VmInstallMetaData m, OSArchitecture architecture, Set<String> incompatibleExecutionEnvironments) {
+		return m.arch.equals(architecture) && Collections.disjoint(incompatibleExecutionEnvironments, m.compatibleEnvironments);
 	}
 
 	private static String getSubstitutedString(String text)
@@ -525,6 +453,12 @@ public class Q7ExternalLaunchDelegate extends
 		IVMInstall install = getVMInstall(configuration, target);
 		programArgs.add("-vm");
 		programArgs.add(install.getInstallLocation().toString());
+		
+		for (int archIndex = programArgs.indexOf("-arch"); archIndex >= 0;  archIndex = programArgs.indexOf("-arch")) {
+			// org.eclipse.pde.launching.AbstractPDELaunchConfiguration.getProgramArguments(ILaunchConfiguration) uses incorrect architecture from TargetPlatform.getOSArch()
+			programArgs.remove(archIndex);
+			programArgs.remove(archIndex);
+		}
 
 		info.programArgs = programArgs.toArray(new String[programArgs.size()]);
 		Q7ExtLaunchingPlugin.getDefault().info(
@@ -585,6 +519,10 @@ public class Q7ExternalLaunchDelegate extends
 		args.addAll(UpdateVMArgs.addHook(argsCopy, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS)));
 
 		args.addAll(vmSecurityArguments(config, target));
+		
+		ArrayList<String> copy = new ArrayList<>(args);
+		args.clear();
+		args.addAll(UpdateVMArgs.updateAttr(copy));
 		
 		args.add("-Declipse.vmargs=" + Joiner.on("\n").join(args) + "\n");
 	}

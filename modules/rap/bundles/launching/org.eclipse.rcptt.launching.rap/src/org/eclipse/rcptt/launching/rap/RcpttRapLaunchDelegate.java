@@ -347,7 +347,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		StringBuilder detectMsg = new StringBuilder();
 
 		OSArchitecture architecture = ((configArch == null) ? ((ITargetPlatformHelper) info.target)
-				.detectArchitecture(true, detectMsg) : configArch);
+				.detectArchitecture(detectMsg) : configArch);
 
 		IVMInstall install = Q7ExternalLaunchDelegate.getVMInstall(configuration, (ITargetPlatformHelper) info.target);
 
@@ -358,7 +358,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		}
 
 		if (!haveAUT && architecture != OSArchitecture.Unknown
-				&& target.detectArchitecture(false, new StringBuilder()) == OSArchitecture.Unknown) {
+				&& target.detectArchitecture(new StringBuilder()) == OSArchitecture.Unknown) {
 			haveAUT = true;
 		}
 
@@ -1000,7 +1000,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 			configArch = OSArchitecture.valueOf(archAttrValue);
 
 		OSArchitecture autArch = configArch == null ? target
-				.detectArchitecture(true, null) : configArch;
+				.detectArchitecture(null) : configArch;
 
 		// there is no -d32 on Windows
 		if (!autArch.equals(jvmArch)

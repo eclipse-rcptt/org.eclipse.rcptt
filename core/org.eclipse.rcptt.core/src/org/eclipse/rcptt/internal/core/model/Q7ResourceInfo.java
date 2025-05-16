@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -21,6 +23,7 @@ import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 import org.eclipse.rcptt.core.persistence.IPersistenceModel;
+import org.eclipse.rcptt.core.persistence.LeakDetector;
 import org.eclipse.rcptt.core.persistence.PersistenceManager;
 import org.eclipse.rcptt.core.persistence.plain.PlainTextPersistenceModel;
 import org.eclipse.rcptt.core.scenario.NamedElement;
@@ -32,6 +35,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 	private NamedElement element;
 	public long timestamp;
 	private final String plainStoreFormat;
+	private Runnable onClose = () -> {};
 
 	public Q7ResourceInfo(String storeFormat, URI uri) {
 		this.plainStoreFormat = storeFormat;
@@ -51,6 +55,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			timestamp = file.getModificationStamp();
 		}
 		URI uri = toURI(file);
+		onClose = LeakDetector.INSTANCE.register(this);
 		IPersistenceModel model = getPersistenceModel();
 
 		if (file != null && !file.exists()) {
@@ -59,21 +64,19 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			status.setStatusCode(Q7StatusCode.NotPressent);
 			throw new ModelException(status);
 		}
-		InputStream stream = PersistenceManager.getInstance().loadMetadata(model);
-
-		try {
-			if ((stream == null && file != null)
-					&& !model.isAllowEmptyMetadataContent()) {
-				stream = file.getContents();
-			}
-			if (stream != null) {
-				resource.load(stream, PersistenceManager.getOptions());
+		try (InputStream metadataStream = PersistenceManager.getInstance().loadMetadata(model)) {
+			if (metadataStream != null) {
+				resource.load(metadataStream, PersistenceManager.getOptions());
+			} else if (file != null && !model.isAllowEmptyMetadataContent()) {
+				try (InputStream is = file.getContents()) {
+					resource.load(is, PersistenceManager.getOptions());
+				}
 			}
 			model.updateMetadata();
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
-				throw new RuntimeException("Empty resource " + uri);
+				throw new ModelException(new Q7Status(0, "Empty resource " + uri));
 			}
 			for (EObject eObject : contents) {
 				if (eObject instanceof NamedElement) {
@@ -83,19 +86,18 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			if (element == null) {
 				throw new ModelException(new Q7Status(Q7Status.ERROR, "Illegal object type: " + contents.get(0).getClass().getName()));
 			}
-		} catch (Exception e) {
-			// Q7Plugin.log(e);
-			PersistenceManager.getInstance().remove(resource);
+		} catch (IOException | CoreException e) {
+			unload();
 			throw new ModelException(e, Q7Status.ERROR);
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (Throwable e) {
-
-				}
-			}
+		} catch (Throwable e) {
+			unload();
+			throw e;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return resource == null ? "null" : resource.getURI().toString();
 	}
 
 	public static URI toURI(IFile file) {
@@ -111,6 +113,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		PersistenceManager.getInstance().remove(resource);
 		element = null;
 		timestamp = 0;
+		onClose.run();
 	}
 
 	public NamedElement getNamedElement() {
