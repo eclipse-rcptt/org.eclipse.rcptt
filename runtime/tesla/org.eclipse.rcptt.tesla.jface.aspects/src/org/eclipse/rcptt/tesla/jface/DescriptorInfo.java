@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.jface;
 
-import java.lang.reflect.Field;
+import static org.eclipse.rcptt.util.ReflectionUtil.getField;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
@@ -115,18 +116,14 @@ public enum DescriptorInfo {
 			if (descriptor instanceof ExternalProgramImageDescriptor) {
 				if (isWindows) {
 					try {
-						Program p = ((ExternalProgramImageDescriptor) descriptor).program;
+						Program p = (Program) getField(descriptor, "program", true);
 	
-						Field extensionField = p.getClass().getDeclaredField("extension");
-						extensionField.setAccessible(true);
-						String extension = (String) extensionField.get(p);
+						String extension = (String) getField(p, "extension", true);
 						if (extension != null && !extension.isEmpty()) {
 							return extension;
 						}
 	
-						Field iconNameField = p.getClass().getDeclaredField("iconName");
-						iconNameField.setAccessible(true);
-						String iconName = (String) iconNameField.get(p);
+						String iconName = (String) getField(p, "iconName", true);
 						if (iconName != null && !iconName.isEmpty()) {
 							return iconName;
 						}
