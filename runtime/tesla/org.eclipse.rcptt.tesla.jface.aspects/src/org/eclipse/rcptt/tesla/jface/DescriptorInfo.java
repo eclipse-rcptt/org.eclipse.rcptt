@@ -25,23 +25,7 @@ import org.eclipse.swt.program.Program;
 import org.eclipse.ui.internal.misc.ExternalProgramImageDescriptor;
 import org.osgi.framework.Bundle;
 
-public enum DescriptorInfo {
-	URL_ADAPTER() {
-		@Override
-		String extract(ImageDescriptor descriptor) {
-			URL url = Adapters.adapt(descriptor, URL.class, false);
-			if (url != null) {
-				try {
-					return extractFromUri(url.toURI());
-				} catch (URISyntaxException e) {
-					JFaceAspectsActivator.log(e);
-					return null;
-				}
-			}
-			return null;
-		}
-		
-	},
+public enum DescriptorInfo {	
 	EXTERNAL_PROGRAM_ADAPTER() {
 		@Override
 		String extract(ImageDescriptor descriptor) {
@@ -50,6 +34,7 @@ public enum DescriptorInfo {
 		}
 		
 	},
+	
 	BUNDLE_URL() {
 		private final Pattern pattern = Pattern.compile("URLImageDescriptor\\(((bundleentry|bundleresource).*)\\)");
 
@@ -94,6 +79,23 @@ public enum DescriptorInfo {
 				return null;
 			}
 		}
+	},
+	
+	URL_ADAPTER() {
+		@Override
+		String extract(ImageDescriptor descriptor) {
+			URL url = Adapters.adapt(descriptor, URL.class, false);
+			if (url != null) {
+				try {
+					return extractFromUri(url.toURI());
+				} catch (URISyntaxException e) {
+					JFaceAspectsActivator.log(e);
+					return null;
+				}
+			}
+			return null;
+		}
+		
 	},
 
 	/**
