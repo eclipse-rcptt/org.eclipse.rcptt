@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.internal.launching.ext.ui.wizards;
 
 import static java.util.Collections.disjoint;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
@@ -26,7 +27,9 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
@@ -59,10 +62,12 @@ import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
+import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
+import org.eclipse.rcptt.ui.WidgetUtils;
 import org.eclipse.rcptt.ui.commons.SWTFactory;
 import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.swt.SWT;
@@ -114,10 +119,7 @@ public class NewAUTPage extends WizardPage {
 		if (!status.isOK() && !status.matches(IStatus.CANCEL) && logging) {
 			log(status);
 		}
-		shell.getDisplay().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
+		asyncExec(() -> {
 				if (status.isOK()) {
 					setErrorMessage(null);
 					setMessage(null);
@@ -131,9 +133,7 @@ public class NewAUTPage extends WizardPage {
 					setErrorMessage(null);
 					setPageComplete(false);
 				}
-			}
 		});
-
 	}
 
 	public void validate(boolean clean) {
@@ -154,6 +154,7 @@ public class NewAUTPage extends WizardPage {
 			runInDialog(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
+					SubMonitor sm = SubMonitor.convert(monitor, 2);
 
 					TargetPlatformManager.clearTargets();
 					IStatus status = checkLocationExists(location);
@@ -162,25 +163,35 @@ public class NewAUTPage extends WizardPage {
 						return;
 					}
 
+					ITargetPlatformHelper platform = null;
 					try {
-						final ITargetPlatformHelper platform = Q7TargetPlatformManager.createTargetPlatform(location, monitor);
-						if (platform.getStatus().matches(IStatus.CANCEL | IStatus.ERROR)) {
-							setStatus(platform.getStatus(), true);
-							platform.delete();
-						} else {
-							shell.getDisplay().asyncExec(new Runnable() {
-								public void run() {
-									info.setValue(platform);
-								}
-							});
-						}
+						MultiStatus multi = new MultiStatus(getClass(), 0, "Target platform resolution result");
+						platform = Q7TargetPlatformManager.createTargetPlatform(location, sm.split(1, SubMonitor.SUPPRESS_NONE));
+						throwIfError(platform.getStatus());
+						multi.add(platform.getStatus());
+						status = Q7LaunchDelegateUtils.validateForLaunch(platform, sm.split(1, SubMonitor.SUPPRESS_NONE));
+						throwIfError(platform.getStatus());
+						multi.add(status);
+						final ITargetPlatformHelper copy = platform;
+						asyncExec(() -> info.setValue(copy));
 					} catch (final CoreException e) {
+						if (platform != null) {
+							platform.delete();
+						}
 						setStatus(e.getStatus(), true);
+						asyncExec(() -> info.setValue(null));
 					}
+					done(monitor);
 				}
 			});
 		} else if (helper != null) {
 			validatePlatform();
+		}
+	}
+
+	protected static void throwIfError(IStatus status) throws CoreException {
+		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			throw new CoreException(status);
 		}
 	}
 
@@ -588,5 +599,9 @@ public class NewAUTPage extends WizardPage {
 	public void addAdvancedHandler(Runnable runnable) {
 		this.showAdvanced.setValue(Boolean.TRUE);
 		this.advancedHandler = runnable;
+	}
+	
+	private void asyncExec(Runnable runnable) {
+		WidgetUtils.asyncExec(getControl(), runnable);
 	}
 }

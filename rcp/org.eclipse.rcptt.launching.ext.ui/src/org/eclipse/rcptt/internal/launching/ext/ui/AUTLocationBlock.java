@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,9 +20,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.Launch;
 import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -29,6 +30,7 @@ import org.eclipse.pde.internal.ui.SWTFactory;
 import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -105,11 +107,20 @@ public class AUTLocationBlock {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						info = Q7TargetPlatformManager.getTarget(original, monitor);
-						assert info.getStatus().isOK();
+						SubMonitor sm = SubMonitor.convert(monitor, 2);
+						ITargetPlatformHelper temp = Q7TargetPlatformManager.getTarget(original, sm.split(1));
+						if (!temp.getStatus().matches(IStatus.ERROR|IStatus.CANCEL)) {
+							IStatus result = Q7LaunchDelegateUtils.validateForLaunch(temp, sm.split(1));
+							if (result.matches(IStatus.ERROR|IStatus.CANCEL)) {
+								temp.delete();
+								throw new CoreException(result);
+							}
+							info = temp;
+						}
 					} catch (CoreException e) {
 						setStatus(e.getStatus());
 					}
+					done(monitor);
 				}
 			});
 		}
@@ -211,11 +222,20 @@ public class AUTLocationBlock {
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				try {
-					info = Q7TargetPlatformManager.getTarget(original, monitor);
+					SubMonitor sm = SubMonitor.convert(monitor, 2);
+					ITargetPlatformHelper temp = Q7TargetPlatformManager.getTarget(original, sm.split(1));
+					if (!temp.getStatus().matches(IStatus.ERROR|IStatus.CANCEL)) {
+						IStatus result = Q7LaunchDelegateUtils.validateForLaunch(temp, sm.split(1));
+						if (result.matches(IStatus.ERROR|IStatus.CANCEL)) {
+							temp.delete();
+							throw new CoreException(result);
+						}
+						info = temp;
+					}
 				} catch (CoreException e) {
-					Activator.log(e);
+					setStatus(e.getStatus());
 				}
-
+				done(monitor);
 			}
 		});
 		locationField.setText(location);

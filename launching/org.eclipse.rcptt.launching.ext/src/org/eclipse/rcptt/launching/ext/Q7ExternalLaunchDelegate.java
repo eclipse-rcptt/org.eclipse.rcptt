@@ -238,7 +238,7 @@ public class Q7ExternalLaunchDelegate extends
 		Q7ExtLaunchingPlugin.getDefault().info(
 				Q7_LAUNCHING_AUT + configuration.getName()
 						+ ": Detected AUT architecture is "
-						+ architecture.name() + "." + detectMsg.toString());
+						+ architecture.name() + ". " + detectMsg.toString());
 
 		IVMInstall install = getVMInstall(configuration, target);
 

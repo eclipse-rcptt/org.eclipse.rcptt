@@ -63,11 +63,9 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.equinox.internal.simpleconfigurator.utils.SimpleConfiguratorUtils;
@@ -77,10 +75,6 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IFileArtifactRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
-import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
-import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -92,16 +86,13 @@ import org.eclipse.pde.internal.core.PDEState;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.core.target.P2TargetUtils;
 import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
-import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
-import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
-import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.StartLevelSupport;
 import org.eclipse.rcptt.launching.injection.Directory;
 import org.eclipse.rcptt.launching.injection.Entry;
@@ -385,63 +376,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	private IPluginModelBase weavingHook;
 
-	private IStatus validateBundles(IProgressMonitor monitor) {
-		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
-		ILaunchConfigurationWorkingCopy wc = null;
-		try {
-			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
-			StringBuilder message = new StringBuilder();
-			OSArchitecture architecture = detectArchitecture(message);
-			if (architecture == null || architecture == OSArchitecture.Unknown) {
-				return error(message.toString());
-			}
-			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, this)) {
-				return Status.error(String.format(
-						"No compatible JRE is configured. Architecture: %s, incompatible environments: %s",
-						architecture, getIncompatibleExecutionEnvironments()));
-			}
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
-
-		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
-				new HashSet<>(modelIndex.values())) {
-			@Override
-			protected IExecutionEnvironment[] getMatchingEnvironments()
-					throws CoreException {
-				IExecutionEnvironmentsManager manager = JavaRuntime
-						.getExecutionEnvironmentsManager();
-				IExecutionEnvironment[] envs = manager
-						.getExecutionEnvironments();
-				return envs;
-			}
-		};
-		try {
-			wc.delete();
-		} catch (CoreException e1) {
-			return e1.getStatus();
-		}
-		try {
-			StringBuilder b = new StringBuilder();
-			validation.run(sm.split(1));
-			Map<Object, Object[]> input = validation.getInput();
-			for (Map.Entry<Object, Object[]> e : input.entrySet()) {
-				Object value = e.getKey();
-				if (value instanceof ResolverError) {
-					b.append(value.toString()).append("\n");
-				}
-			}
-			if (b.length() > 0) {
-				return error("Bundle validation failed: " + b.toString());
-			}
-			done(monitor);
-		} catch (CoreException e) {
-			return e.getStatus();
-		} catch (OperationCanceledException e) {
-			return Status.CANCEL_STATUS;
-		}
-		return Status.OK_STATUS;
-	}
 
 	private Status error(String message) {
 		return new Status(IStatus.ERROR, PLUGIN_ID, message);
@@ -506,7 +440,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	public IStatus resolve(IProgressMonitor monitor) {
 		resetIndex();
 		ITargetDefinition target = getTarget();
-		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 4);
+		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 3);
 		try {
 			status.add(target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
@@ -517,7 +451,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			index();
 			filterHooks();
 			resolved = target.isResolved();
-			status.add(validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE)));
 			if (isBad(status))
 				return status;
 			if (status.isOK()) {
