@@ -183,15 +183,17 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return files.put(name, filePath.toFile());
 	}
 
-	public void dispose() {
+	public synchronized void dispose() {
 		if (disposed)
 			return;
 		removeAll();
 		disposed = true;
 	}
 
-	public InputStream read(String name) {
-		assert !disposed;
+	public synchronized InputStream read(String name) {
+		if (disposed) {
+			throw new IllegalStateException("Disposed");
+		}
 		File file = files.get(name);
 		if (file == null) {
 			return null;
@@ -262,7 +264,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		}
 	}
 
-	public void delete(String name) {
+	public synchronized void delete(String name) {
 		File file = files.get(name);
 		if (file != null && file.exists()) {
 			file.delete();
@@ -270,7 +272,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		files.remove(name);
 	}
 
-	public boolean restore(String name) {
+	public synchronized boolean restore(String name) {
 		File file = files.get(name);
 		if (file != null && file.exists()) {
 			file.delete();
