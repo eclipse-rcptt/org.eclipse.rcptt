@@ -205,7 +205,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				waitUntilExtracted(name);
 			}
 		} catch (IOException e) {
-			error("Can't extract " + name + " from " + element);
+			error("Can't extract " + name + " from " + element, e);
 		}
 		if (file.exists()) {
 			try {
