@@ -19,13 +19,13 @@ Excludes recording.
       %license
    </license>
 
+   <includes
+         id="org.eclipse.rcptt.module.nebula"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.rcptt.launching" version="2.6.0.qualifier"/>
    </requires>
-
-   <plugin
-         id="org.eclipse.rcptt.module.nebula.updates"
-         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.rcptt.module.testrail.updates"

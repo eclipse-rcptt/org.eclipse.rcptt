@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.tests.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -19,6 +18,9 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.rcptt.core.Scenarios;
+import org.eclipse.rcptt.core.model.IElementChangedListener;
+import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -26,6 +28,7 @@ import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +38,7 @@ public class WorkingCopyTest {
 	private static final IWorkspace WORKSPACE = ResourcesPlugin.getWorkspace();
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject(PRJ_NAME);
 	private IQ7Project q7project;
+	private static final int LEAK_SIZE = 100;
 	
 
 	@Rule
@@ -74,23 +78,82 @@ public class WorkingCopyTest {
 
 		copy.commitWorkingCopy(true, new NullProgressMonitor());
 		assertEquals("new test case name", testcase.getElementName());
-
 	}
 
-	public void _testWorkingCopyForNewResource() throws ModelException {
+	
+	@Test
+	public void queryDeletedResource() throws CoreException, InterruptedException {
 		IQ7Project prj = q7project;
-		ITestCase testcase = prj.getRootFolder().getTestCase("newTestCase.test");
-		assertTrue(!testcase.exists());
-		ITestCase copy = (ITestCase) testcase
-				.getWorkingCopy(new NullProgressMonitor());
-
-		copy.setElementName("new test case name");
-		copy.setTags("tag0");
-
-		assertEquals("new test case name", copy.getElementName());
-
-		copy.commitWorkingCopy(true, new NullProgressMonitor());
-		assertEquals("new test case name", testcase.getElementName());
-
+		for (int i = 0; i < LEAK_SIZE; i++) {
+			ITestCase testcase = prj.getRootFolder().createTestCase("mytestcase"+i,true, new NullProgressMonitor());
+			PROJECT.getFile(testcase.getName()).delete(true, null);
+			try {
+				testcase.getContexts(); // may cause leaks
+				Assert.fail();
+			} catch(ModelException e) {
+				// expected, as resource is deleted
+			}
+			System.gc();
+			NO_ERRORS.assertNoErrors();
+		}
 	}
+	
+	@Test
+	public void deleteWorkingCopyResource() throws CoreException {
+		for (int i = 0; i < LEAK_SIZE; i++) {
+			ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase" + i, true, new NullProgressMonitor());
+
+			ITestCase copy = (ITestCase) testcase
+					.getWorkingCopy(new NullProgressMonitor());
+			assertTrue(testcase.exists());
+			assertFalse(copy.hasUnsavedChanges());
+			PROJECT.getFile(testcase.getName()).delete(true, null);
+			System.gc();
+			NO_ERRORS.assertNoErrors();
+		}
+	}
+
+	@Test
+	public void deleteEditedResource() throws CoreException, InterruptedException {
+		IQ7Project prj = q7project;
+		IElementChangedListener listener = event -> {
+			for (IQ7NamedElement i : event.getDelta().getNamedElements()) {
+				try {
+					i.getDescription(); // causes element info revival
+				} catch (ModelException e) {
+					// Does not exist
+				}
+			}
+		};
+		RcpttCore.addElementChangedListener(listener);
+		try {
+			for (int i = 0; i < LEAK_SIZE; i++) {
+				ITestCase testcase = prj.getRootFolder().createTestCase("mytestcase"+i,true, new NullProgressMonitor());
+		
+				ITestCase copy = (ITestCase) testcase
+						.getWorkingCopy(new NullProgressMonitor());
+				assertTrue(testcase.exists());
+				assertFalse(copy.hasUnsavedChanges());
+				PROJECT.getFile(testcase.getName()).delete(true, null);
+				try {
+					testcase.getElementName();
+				} catch (ModelException e) {
+					// Does not exist
+				}
+				try {
+					copy.getElementName();
+				} catch (ModelException e) {
+					// Does not exist
+				}
+				copy.discardWorkingCopy();
+				System.gc();
+				NO_ERRORS.assertNoErrors();
+				assertFalse(testcase.exists());
+			}
+		} finally {
+			RcpttCore.removeElementChangedListener(listener);
+		}
+	}
+
+	
 }

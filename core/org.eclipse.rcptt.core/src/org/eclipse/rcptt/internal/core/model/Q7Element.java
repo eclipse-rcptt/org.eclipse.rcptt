@@ -42,7 +42,7 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 	}
 	
 	public final void open(IProgressMonitor progress) throws ModelException {
-		openWhenClosed(getElementInfo(), progress);		
+		openWhenClosed(getElementInfo(), progress);
 	}
 
 	protected abstract Q7ElementInfo createElementInfo();

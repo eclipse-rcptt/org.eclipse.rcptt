@@ -261,6 +261,15 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 			@Override
 			public Object run() throws CoreException {
 				try {
+					// getViewReferences() returns invalid results if all perspectives are closed
+					// @see https://github.com/eclipse-platform/eclipse.platform.ui/issues/2978
+					IViewReference[] viewReferences = page.getViewReferences();
+					for (IViewReference i: viewReferences) {
+						// some views do not belong to a perspective, and are not closed on perspective reset, consuming screen space
+						// close them in a resetting workbench context explicitly
+						// @see https://github.com/eclipse-platform/eclipse.platform.ui/issues/2976
+						page.hideView(i);
+					}
 					page.closeAllPerspectives(false, false);
 				} catch (Throwable e) {
 					RcpttPlugin.log(e);

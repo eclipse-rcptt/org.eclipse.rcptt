@@ -914,9 +914,12 @@ public class SWTModelMapper {
 				columnViewer, "editingSupport");
 		Object value = null;
 		if (es != null) {
-			value = TeslaSWTAccess.callMethod(EditingSupport.class, es,
+			if ((Boolean)TeslaSWTAccess.callMethod(EditingSupport.class, es,
+					"canEdit", new Class[] { Object.class }, ((Item) widget).getData())) {
+				value = TeslaSWTAccess.callMethod(EditingSupport.class, es,
 					"getValue", new Class[] { Object.class },
 					((Item) widget).getData());
+			}
 		}
 		return value;
 	}

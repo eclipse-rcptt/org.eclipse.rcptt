@@ -56,6 +56,7 @@ jobs:
         with:
           report_paths: '**/target/*-reports/*.xml'
           fail_on_failure: true
+          annotate_only: true
       - name: Archive Runner
         uses: actions/upload-artifact@v4
         with:
@@ -101,6 +102,7 @@ jobs:
         with:
           report_paths: '**/target/*-reports/*.xml'
           fail_on_failure: false
+          annotate_only: true
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
@@ -151,6 +153,7 @@ jobs:
         with:
           report_paths: '**/target/*-reports/*.xml'
           fail_on_failure: true
+          annotate_only: true
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
