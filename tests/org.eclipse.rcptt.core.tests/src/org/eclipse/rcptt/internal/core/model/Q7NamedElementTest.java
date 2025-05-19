@@ -10,20 +10,25 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Consumer;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.rcptt.core.model.ITestCase;
+import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
@@ -57,10 +62,46 @@ public class Q7NamedElementTest {
 		PROJECT.open(null);
 	}
 
+	@Test(timeout=100_000)
+	public void reopenIfClosed() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
+		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+		}
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		ITestCase testcase2 = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		CyclicBarrier barrier = new CyclicBarrier(2);
+		CompletableFuture<Void> closerTask = CompletableFuture.runAsync(() -> {
+			try {
+				barrier.await();
+				while(!Thread.interrupted()) {
+						testcase2.close();
+				}
+			} catch (ModelException | InterruptedException | BrokenBarrierException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		try {
+			barrier.await();
+			for (int i = 0; i < 100_000; i++) {
+				try {
+					assertFalse(closerTask.isDone());
+					assertNotNull(testcase.getNamedElement());
+					assertNotNull(testcase.getID());
+				} catch (Throwable e) {
+					throw new AssertionError("Failed on iteration " + i);
+				}
+			}
+		} finally {
+			closerTask.cancel(true);
+		}
+		closerTask.get();
+	}
+	
 	@Test
 	public void noResourceleaksID() {
 		noResourceleaks(testcase -> Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID()));
 	}
+
 	
 	@Test
 	public void noResourceleaksExists() {
