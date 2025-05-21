@@ -1657,18 +1657,20 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		monitor.beginTask("Setting bundle start levels", bundles.length);
 		for (TargetBundle bundle : bundles) {
 			BundleInfo bundleInfo = bundle.getBundleInfo();
-			monitor.subTask(bundleInfo.getLocation().toString());
-			BundleStart bundleLevel = levelMap.getOrDefault(bundleInfo.getSymbolicName(), BundleStart.DEFAULT);
-			bundleLevel = StartLevelSupport.getStartInfo(bundleInfo.getManifest(), bundleLevel);
-			monitor.split(1);
-			if (bundleLevel.isDefault()) {
-				continue;
-			}
+			String location = bundleInfo.getLocation().toString();
+			monitor.subTask(location);
+			
 			try {
+				BundleStart bundleLevel = levelMap.getOrDefault(bundleInfo.getSymbolicName(), BundleStart.DEFAULT);
+				bundleLevel = StartLevelSupport.getStartInfo(bundleInfo.getManifest(), bundleLevel);
+				monitor.split(1);
+				if (bundleLevel.isDefault()) {
+					continue;
+				}
 				bundleInfo.setStartLevel(bundleLevel.level);
 				bundleInfo.setMarkedAsStarted(bundleLevel.autoStart);
 			} catch (RuntimeException e) {
-				throw new IllegalStateException(format("Invalid run level descriptor for bundle %s : %s ", bundleInfo.getSymbolicName(), bundleLevel), e);
+				throw new IllegalStateException(format("Invalid run level descriptor for bundle %s, %s", bundleInfo.getSymbolicName(), location), e);
 			}
 		}
 		if (!stream(bundles).map(TargetBundle::getBundleInfo).map(BundleStart::fromBundle).anyMatch(not(BundleStart::isDefault))) {
