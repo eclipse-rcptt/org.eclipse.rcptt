@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.swt.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
@@ -42,8 +45,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.Version;
 
 import com.google.common.io.Closer;
 
@@ -297,7 +298,6 @@ public class UIJobCollectorTest {
 	
 	@Test(timeout = 60000)
 	public void waitForAllListeners() throws InterruptedException {
-		Assume.assumeTrue(FrameworkUtil.getBundle(Job.class).getVersion().compareTo(Version.parseVersion("3.15")) > 0);
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
@@ -322,10 +322,10 @@ public class UIJobCollectorTest {
 		}
 		busyLoop.cancel();
 		start.await();
-		Assert.assertEquals(Job.NONE, busyLoop.getState());
-		Assert.assertFalse(isEmpty(subject));
+		assertEquals(Job.NONE, busyLoop.getState());
+		assertFalse(isEmpty(subject));
 		stop.countDown();
-		join(subject, 0);
+		join(subject, 100_000);
 	}	
 	
 	private boolean shutdown(Job job, int timeoutInSeconds) throws InterruptedException {
@@ -587,7 +587,6 @@ public class UIJobCollectorTest {
 		long stop = System.currentTimeMillis() + timeout + schedulingTolerance;
 		while (System.currentTimeMillis() < stop) {
 			idle();
-			long moment = System.currentTimeMillis();
 			if (isEmpty(subject))
 				return;
 		}
