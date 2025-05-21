@@ -45,7 +45,7 @@ public class DeltaTests extends AbstractModelTestbase {
 		super.tearDownSuite();
 	}
 
-	public void testNewTestcaseAppear() throws ModelException {
+	public void testNewTestcaseAppear() throws ModelException, InterruptedException {
 		IQ7Project prj = getQ7Project(PRJ_NAME);
 		startDeltas();
 		prj.getRootFolder().createTestCase("mytestcase", true,

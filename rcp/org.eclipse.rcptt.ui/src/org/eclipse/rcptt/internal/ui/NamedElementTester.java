@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -34,6 +35,7 @@ public class NamedElementTester extends PropertyTester {
 
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
+		try {
 		if (CONTAINS_NAMED_ELEMENTS_PROP.equals(property)) {
 			ISelection selection = new StructuredSelection(receiver);
 			IResource[] resources = LaunchUtils.getContext(selection);
@@ -103,5 +105,10 @@ public class NamedElementTester extends PropertyTester {
 			return false;
 		}
 		return false;
+	} catch (InterruptedException e) {
+		OperationCanceledException result = new OperationCanceledException();
+		result.initCause(e);
+		throw result;
+	}
 	}
 }

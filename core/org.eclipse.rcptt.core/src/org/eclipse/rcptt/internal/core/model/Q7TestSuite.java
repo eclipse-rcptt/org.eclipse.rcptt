@@ -33,7 +33,7 @@ public class Q7TestSuite extends Q7NamedElement implements ITestSuite {
 	}
 
 	public TestSuite getTestSuite() throws ModelException {
-		return (TestSuite) getInfo().getNamedElement();
+		return (TestSuite) getNamedElement();
 	}
 
 	public TestSuiteItem[] getItems() throws ModelException {

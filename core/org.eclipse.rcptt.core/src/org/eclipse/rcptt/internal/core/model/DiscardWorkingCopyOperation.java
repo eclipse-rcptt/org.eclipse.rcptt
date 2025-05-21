@@ -26,7 +26,7 @@ public class DiscardWorkingCopyOperation extends Q7Operation {
 		this.indexing = indexing;
 	}
 
-	protected void executeOperation() throws ModelException {
+	protected void executeOperation() throws ModelException, InterruptedException {
 		Q7NamedElement workingCopy = getNamedElement();
 		ModelManager manager = ModelManager.getModelManager();
 		int useCount = manager.discardPerWorkingCopyInfo(workingCopy);

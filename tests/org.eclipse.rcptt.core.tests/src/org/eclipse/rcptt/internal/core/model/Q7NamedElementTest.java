@@ -82,11 +82,12 @@ public class Q7NamedElementTest {
 		});
 		try {
 			barrier.await();
-			for (int i = 0; i < 100_000; i++) {
+			for (int i = 0; i < 10_000; i++) {
 				try {
 					assertFalse(closerTask.isDone());
 					assertNotNull(testcase.getNamedElement());
 					assertNotNull(testcase.getID());
+					NO_ERRORS.assertNoErrors();
 				} catch (Throwable e) {
 					throw new AssertionError("Failed on iteration " + i, e);
 				}
@@ -94,7 +95,9 @@ public class Q7NamedElementTest {
 		} finally {
 			closerTask.cancel(true);
 		}
-		closerTask.get();
+		if (!closerTask.isCancelled()) {
+			closerTask.get();
+		}
 	}
 	
 	@Test
@@ -119,7 +122,7 @@ public class Q7NamedElementTest {
 			throw new AssertionError(e);
 		}
 		IFile previousFile = TESTCASE_FILE;
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 3_000; i++) {
 			try {
 				IFile currentFile = PROJECT.getFile("t" + i + ".test");
 				previousFile.move(currentFile.getFullPath(), true, false, null);

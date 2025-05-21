@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -90,14 +92,18 @@ public class PasteAction extends SelectionListenerAction {
 			super.copy(monitor, uiInfo);
 			// We need to collect all new copied named
 			// elements
-			for (IPath dest : destinationPath) {
-				IQ7Element element = RcpttCore.create(ResourcesPlugin
-						.getWorkspace().getRoot().findMember(dest));
-				if (element != null && element.exists()) {
-					NamedElementCollector collector = new NamedElementCollector();
-					element.accept(collector);
-					namedElements.addAll(collector.getElements());
+			try {
+				for (IPath dest : destinationPath) {
+					IQ7Element element = RcpttCore.create(ResourcesPlugin
+							.getWorkspace().getRoot().findMember(dest));
+					if (element != null && element.exists()) {
+						NamedElementCollector collector = new NamedElementCollector();
+						element.accept(collector);
+						namedElements.addAll(collector.getElements());
+					}
 				}
+			} catch (InterruptedException e) {
+				throw new CoreException(Status.CANCEL_STATUS);
 			}
 		}
 	}

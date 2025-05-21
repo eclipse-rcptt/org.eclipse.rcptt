@@ -14,5 +14,5 @@ public interface IQ7Model extends IQ7Element, IParent,
 		IOpenable {
 	IQ7Project getProject(String name);
 
-	IQ7Project[] getProjects() throws ModelException;
+	IQ7Project[] getProjects() throws ModelException, InterruptedException;
 }

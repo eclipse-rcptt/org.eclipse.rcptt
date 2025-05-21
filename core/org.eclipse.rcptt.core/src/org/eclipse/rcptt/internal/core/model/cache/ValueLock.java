@@ -1,0 +1,50 @@
+/********************************************************************************
+ * Copyright (c) 2025 Xored Software Inc and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Xored Software Inc - initial API and implementation
+ ********************************************************************************/
+package org.eclipse.rcptt.internal.core.model.cache;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+
+public final class ValueLock {
+	private final Set<Object> lockedKeys = new HashSet<>();
+
+	private void lock(Object key) throws InterruptedException {
+		long stop = System.currentTimeMillis() + 100_000;
+	    synchronized (lockedKeys) {
+	        while (!lockedKeys.add(key)) {
+	        	if (System.currentTimeMillis() > stop) {
+	        		throw new IllegalStateException("Timeout while locking " + key);
+	        	}
+	            lockedKeys.wait(100_000);
+	        }
+	    }
+	}
+
+	private void unlock(Object key) {
+	    synchronized (lockedKeys) {
+	        lockedKeys.remove(key);
+	        lockedKeys.notifyAll();
+	    }
+	}
+
+	public <V> V exclusively(Object key, Supplier<V> supplier) throws InterruptedException {
+	    try {
+	        lock(key);
+	        return supplier.get();
+	    } finally {
+	        unlock(key);
+	    }
+	}
+}

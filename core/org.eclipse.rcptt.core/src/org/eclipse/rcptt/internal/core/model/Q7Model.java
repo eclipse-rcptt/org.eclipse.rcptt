@@ -65,7 +65,7 @@ public class Q7Model extends Openable implements IQ7Model {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public IQ7Project[] getProjects() throws ModelException {
+	public IQ7Project[] getProjects() throws ModelException, InterruptedException {
 		final List list = getChildrenOfType(HandleType.Project);
 		return (IQ7Project[]) list.toArray(new IQ7Project[list.size()]);
 	}
@@ -123,8 +123,8 @@ public class Q7Model extends Openable implements IQ7Model {
 		return "";
 	}
 
-	public Object[] getForeignResources() throws ModelException {
-		return ((ModelInfo) getElementInfo()).getForeignResources();
+	public Object[] getForeignResources() throws ModelException, InterruptedException {
+		return openAndAccessInfo(info -> ((ModelInfo)info).getForeignResources(), null);
 	}
 
 	public IWorkspace getWorkspace() {

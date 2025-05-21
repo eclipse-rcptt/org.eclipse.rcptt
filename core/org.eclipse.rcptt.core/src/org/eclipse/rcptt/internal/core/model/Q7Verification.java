@@ -32,7 +32,7 @@ public class Q7Verification extends Q7NamedElement implements IVerification {
 	}
 
 	public VerificationType getType() throws ModelException {
-		NamedElement element = getInfo().getNamedElement();
+		NamedElement element = getNamedElement();
 		return VerificationTypeManager.getInstance().getTypeByVerification(
 				(Verification) element);
 	}

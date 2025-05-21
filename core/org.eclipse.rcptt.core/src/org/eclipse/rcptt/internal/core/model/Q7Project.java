@@ -65,8 +65,8 @@ public class Q7Project extends Openable implements IQ7Project {
 		return project;
 	}
 
-	public Object[] getForeignResources() throws ModelException {
-		return ((Q7ProjectInfo) getElementInfo()).getForeignResources(project);
+	public Object[] getForeignResources() throws ModelException, InterruptedException {
+		return openAndAccessInfo(info -> ((Q7ProjectInfo)info).getForeignResources(project), null);
 	}
 
 	protected boolean buildStructure(OpenableElementInfo info,
@@ -144,7 +144,7 @@ public class Q7Project extends Openable implements IQ7Project {
 		return project.getName();
 	}
 
-	public IQ7Folder[] getFolders() throws ModelException {
+	public IQ7Folder[] getFolders() throws ModelException, InterruptedException {
 		List<IQ7Element> result = getChildrenOfType(HandleType.Folder);
 		return result.toArray(new IQ7Folder[result.size()]);
 	}

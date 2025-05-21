@@ -12,8 +12,10 @@ package org.eclipse.rcptt.internal.core.model.cache;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,12 +25,11 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.core.model.IQ7Element;
-import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.model.ModelInfo;
-import org.eclipse.rcptt.internal.core.model.Openable;
 import org.eclipse.rcptt.internal.core.model.Q7ResourceInfo;
 import org.osgi.framework.FrameworkUtil;
 
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -62,14 +63,6 @@ public class ModelCache {
 						LOG.log(error(e));
 					}
 				}
-				IQ7Element key = notification.getKey();
-				if (key instanceof Openable) {
-					try {
-						((Openable) key).close();
-					} catch (ModelException e) {
-						LOG.log(error(e));
-					}
-				}
 			}
 
 		};
@@ -82,30 +75,42 @@ public class ModelCache {
 		openableCache  = CacheBuilder.newBuilder().weigher(weigher).maximumWeight(50_000_000).expireAfterAccess(10, TimeUnit.MINUTES).removalListener(removalListener).build();
 	}
 
+	private final ValueLock locks = new ValueLock();
 	/**
 	 * Returns the info for the element.
 	 */
-	public <T> T getInfo(IQ7Element element, Class<T> clazz, Supplier<T> factory) {
-		try {
-			return clazz.cast(this.openableCache.get(element, () -> factory.get()));
-		} catch (ExecutionException e) {
-			Throwable cause = e.getCause();
-			if (cause instanceof RuntimeException) {
-				throw (RuntimeException)cause;
+	public <T, V> V accessInfo(IQ7Element element, Class<T> clazz, Supplier<T> infoFactory, Function<T, V> infoToValue) throws InterruptedException {
+		return locks.exclusively(element, () -> {
+			try {
+				T info = clazz.cast(this.openableCache.get(element, () -> clazz.cast(infoFactory.get())));
+				return infoToValue.apply(info);
+			} catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				Throwables.throwIfUnchecked(cause);
+				throw new IllegalStateException(e);
 			}
-			throw new IllegalStateException(e);
-		}
+		});
 	}
 
 	/**
 	 * Returns the info for this element without disturbing the cache ordering.
 	 */
-	public Object peekAtInfo(IQ7Element element) {
-		return this.openableCache.getIfPresent(element);
+	public <T, V> Optional<V> peekInfo(IQ7Element element, Class<T> clazz, Function<T, V> infoToValue) {
+		try {
+			return locks.<Optional<V>>exclusively(element, () -> {
+				return Optional.ofNullable(this.openableCache.getIfPresent(element)).map(clazz::cast).map(infoToValue);
+			});
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return Optional.empty();
+		}
 	}
 
-	public void removeInfo(IQ7Element element) {
-		this.openableCache.invalidate(element);
+	public void removeInfo(IQ7Element element) throws InterruptedException {
+		locks.exclusively(element, () -> {
+			this.openableCache.invalidate(element);
+			return null;
+		});
 	}
 	
 	private IStatus error(Exception e) {

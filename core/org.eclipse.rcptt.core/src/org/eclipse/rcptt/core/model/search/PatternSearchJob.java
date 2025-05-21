@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
+import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.jobs.IJob;
 import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.index.Index;

@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 
 public class Q7FolderInfo extends OpenableElementInfo {
 	private Object[] foreignResources;
@@ -22,12 +23,15 @@ public class Q7FolderInfo extends OpenableElementInfo {
 		foreignResources = resources;
 	}
 
-	public Object[] getForeignResources(IResource resource) {
+	public Object[] getForeignResources(IResource resource) throws ModelException {
 		if (this.foreignResources == null) {
 			try {
 				this.foreignResources = Q7ProjectInfo
 						.computeFolderForeignResources((IContainer) resource);
 			} catch (ModelException e) {
+				if (e.getQ7Status().getStatusCode() != Q7StatusCode.NotPressent) {
+					throw e;
+				}
 				// root doesn't exist: consider package has no
 				this.foreignResources = NO_NON_Q7_RESOURCES;
 			}

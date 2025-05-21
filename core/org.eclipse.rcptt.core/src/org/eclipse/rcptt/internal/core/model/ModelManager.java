@@ -15,8 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.eclipse.core.resources.IFile;
@@ -46,6 +47,8 @@ import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDeltaBuilder;
 import org.eclipse.rcptt.internal.core.model.index.IndexManager;
 import org.eclipse.rcptt.internal.core.model.index.ProjectIndexerManager;
+
+import com.google.common.base.Throwables;
 
 public class ModelManager {
 	private static ModelManager instance;
@@ -98,36 +101,46 @@ public class ModelManager {
 		T get() throws ModelException;
 	}
 	
-	private class ExceptionWrapper extends RuntimeException {
-		private static final long serialVersionUID = -2525039584022289733L;
-		public ExceptionWrapper(Exception e) {
-			super(Objects.requireNonNull(e));
+	public <T,V> V accessInfo(IQ7Element element, Class<T> clazz, Supplier<T> factory, Function<T, V> infoToValue) throws InterruptedException {
+		return this.cache.<T, V>accessInfo(element, clazz, factory, infoToValue);
+	}
+
+	public <T,V> Optional<V> peekInfo(IQ7Element element, Class<T> clazz, Function<T, V> infoToValue) throws InterruptedException {
+		return this.cache.<T, V>peekInfo(element, clazz, infoToValue);
+	}
+
+	private static class PrivateException extends RuntimeException {
+		private static final long serialVersionUID = 8128191168800868905L;
+		public PrivateException(Exception e) {
+			super(e);
 		}
 	}
 	
-	public <T> T getInfo(IQ7Element element, Class<T> clazz, Supplier<T> factory) {
+	synchronized void removeInfoAndChildren(Q7Element element)
+			throws ModelException, InterruptedException {
 		try {
-			return this.cache.getInfo(element, clazz, factory);
-		} catch (ExceptionWrapper e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	synchronized Object removeInfoAndChildren(Q7Element element)
-			throws ModelException {
-		Object info = this.cache.peekAtInfo(element);
-		if (info != null) {
-			if (element instanceof IParent && info instanceof Q7ElementInfo) {
-				IQ7Element[] children = ((Q7ElementInfo) info).getChildren();
-				for (int i = 0, size = children.length; i < size; ++i) {
-					Q7Element child = (Q7Element) children[i];
-					child.close();
+			this.cache.peekInfo(element, Object.class, info -> {
+				try {
+					if (element instanceof IParent && info instanceof Q7ElementInfo) {
+						IQ7Element[] children = ((Q7ElementInfo) info).getChildren();
+						for (int i = 0, size = children.length; i < size; ++i) {
+							Q7Element child = (Q7Element) children[i];
+							child.close();
+						}
+					}
+				} catch (InterruptedException e) {
+					throw new PrivateException(e);
+				} catch (ModelException e) {
+					throw new PrivateException(e);
 				}
-			}
+				return null;
+			});
 			this.cache.removeInfo(element);
-			return info;
+		} catch (PrivateException e) {
+			Throwables.throwIfInstanceOf(e.getCause(), InterruptedException.class);
+			Throwables.throwIfInstanceOf(e.getCause(), ModelException.class);
+			throw new AssertionError(e);
 		}
-		return null;
 	}
 
 	private static IQ7Element create(IFile file, IQ7Project project) {
@@ -179,10 +192,6 @@ public class ModelManager {
 
 	public IndexManager getIndexManager() {
 		return indexManager;
-	}
-
-	Object peekAtInfo(IQ7Element element) {
-		return this.cache.peekAtInfo(element);
 	}
 
 	static class PerWorkingCopyInfo {
@@ -245,7 +254,7 @@ public class ModelManager {
 	}
 
 	int discardPerWorkingCopyInfo(Q7NamedElement workingCopy)
-			throws ModelException {
+			throws ModelException, InterruptedException {
 		// create the delta builder (this remembers the current content of the
 		// working copy)
 		// outside the perWorkingCopyInfos lock (see bug 50667)
@@ -303,7 +312,7 @@ public class ModelManager {
 	private static final IQ7NamedElement[] EMPTY_NAMED_ELEMENTS = new IQ7NamedElement[0];
 
 	public IQ7NamedElement[] findContextUsageInWorkingCopies(String contextId,
-			ISearchScope scope) throws ModelException {
+			ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -324,7 +333,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findVerificationUsageInWorkingCopies(
-			String verificationId, ISearchScope scope) throws ModelException {
+			String verificationId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -341,7 +350,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findTestCaseUsageInWorkingCopies(
-			String testCaseId, ISearchScope scope) throws ModelException {
+			String testCaseId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -358,7 +367,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findTestSuiteUsageInWorkingCopies(
-			String testSuiteId, ISearchScope scope) throws ModelException {
+			String testSuiteId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())

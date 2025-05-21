@@ -640,7 +640,7 @@ public abstract class AbstractModelTestbase extends SuiteOfTestCases {
 	}
 
 	public void ensureCorrectPositioning(IParent container, IQ7Element sibling,
-			IQ7Element positioned) throws ModelException {
+			IQ7Element positioned) throws ModelException, InterruptedException {
 		IQ7Element[] children = container.getChildren();
 		if (sibling != null) {
 			// find the sibling

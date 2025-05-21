@@ -34,7 +34,7 @@ public class Q7TestCase extends Q7NamedElement implements ITestCase {
 	}
 
 	protected Scenario getScenario() throws ModelException {
-		return (Scenario) getInfo().getNamedElement();
+		return   (Scenario) getNamedElement();
 	}
 
 	public EObject getContent() throws ModelException {

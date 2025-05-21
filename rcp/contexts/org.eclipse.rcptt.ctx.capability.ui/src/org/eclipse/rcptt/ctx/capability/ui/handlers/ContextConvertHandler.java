@@ -71,7 +71,6 @@ public class ContextConvertHandler extends AbstractHandler {
 			if (!writeAccessChecker.makeResourceWritable(folder)) {
 				return null;
 			}
-			folder.open(new NullProgressMonitor());
 			final IContext context = folder.getContext(element.getName());
 
 			final NewCapabilityContextDialog dialog = new NewCapabilityContextDialog(shell, folder.getQ7Project());

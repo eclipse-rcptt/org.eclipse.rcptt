@@ -83,7 +83,7 @@ public class TestsRunner {
 		auts = new AUTsManager(conf, caller.tpc);
 	}
 
-	public Q7ReportIterator findAndRunTests() throws CoreException, AutLaunchFail {
+	public Q7ReportIterator findAndRunTests() throws CoreException, AutLaunchFail, InterruptedException {
 		System.out.println("Looking for tests...");
 
 		TestSuite[] tests;
@@ -115,7 +115,7 @@ public class TestsRunner {
 		return false;
 	}
 
-	private TestSuite[] findScenarios() throws CoreException {
+	private TestSuite[] findScenarios() throws CoreException, InterruptedException {
 		final List<TestSuite> tests = new ArrayList<TestSuite>();
 		final List<String> testNamePatterns = buildTestNamePatterns(conf.toTest);
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -149,12 +149,7 @@ public class TestsRunner {
 			} else {
 				collector = new TestSuiteElementCollector(conf.suites, true);
 			}
-			try {
-				q7Projet.accept(collector);
-			} catch (ModelException e) {
-				System.out.println(String.format("ERROR: %s", e.getMessage()));
-				continue;
-			}
+			q7Projet.accept(collector);
 			IWorkspaceFinder finder = WorkspaceFinder.getInstance();
 			for (IQ7NamedElement element : collector.getElements()) {
 				if (!(element instanceof ITestCase)) {

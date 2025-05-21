@@ -52,7 +52,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 				// }
 				// }
 
-				workingCopy.getInfo().save();
+				workingCopy.writeWorkingCopy(info -> info.save());
 			}
 
 			setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
@@ -89,8 +89,12 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 		if (!cu.isWorkingCopy()) {
 			return new Q7Status(0, "Is not a working copy");
 		}
-		if (cu.hasResourceChanged() && !this.force) {
-			return new Q7Status(0, "Update conflict");
+		try {
+			if (cu.hasResourceChanged() && !this.force) {
+				return new Q7Status(0, "Update conflict");
+			}
+		} catch (ModelException e) {
+			return e.getQ7Status();
 		}
 		return Q7Status.OK;
 	}

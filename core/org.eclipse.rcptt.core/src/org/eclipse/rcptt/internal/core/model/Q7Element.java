@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.rcptt.core.model.IOpenable;
 import org.eclipse.rcptt.core.model.IQ7Element;
-import org.eclipse.rcptt.core.model.IQ7ElementVisitor;
 import org.eclipse.rcptt.core.model.IQ7Model;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -34,26 +33,11 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		this.parent = parent;
 	}
 
-	public Q7ElementInfo getElementInfo() {
-		ModelManager manager = ModelManager.getModelManager();
-		return manager.getInfo(this, Q7ElementInfo.class, () -> {
-			return createElementInfo();
-		});
-	}
-	
-	public final void open(IProgressMonitor progress) throws ModelException {
-		openWhenClosed(getElementInfo(), progress);
-	}
-
 	protected abstract Q7ElementInfo createElementInfo();
 
 	protected boolean isInWorkingCopyMode() {
 		return false;
 	}
-
-	protected abstract void generateInfos(Object info,
-			IProgressMonitor pm)
-			throws ModelException;
 
 	public IOpenable getOpenable() {
 		return this.getOpenableParent();
@@ -63,26 +47,8 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		return (IOpenable) this.parent;
 	}
 
-	protected final synchronized Q7ElementInfo openWhenClosed(Q7ElementInfo info,
-			IProgressMonitor monitor) throws ModelException {
-		generateInfos(info, monitor);
-		return info;
-	}
-
-	public void close() throws ModelException {
+	public void close() throws ModelException, InterruptedException {
 		ModelManager.getModelManager().removeInfoAndChildren(this);
-	}
-
-	public boolean exists() {
-		try {
-			open(null);
-			return true;
-		} catch (ModelException e) {
-			if (e.getStatus() instanceof Q7Status)
-				if (((Q7Status) e.getStatus()).getStatusCode() == Q7StatusCode.NotPressent)
-					return false;
-			throw new RuntimeException(e); 
-		}
 	}
 
 	public IQ7Element getAncestor(HandleType type) {
@@ -115,16 +81,6 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		return null;
 	}
 
-	public IQ7Element[] getChildren() throws ModelException {
-		return getChildren(null);
-	}
-
-	public IQ7Element[] getChildren(IProgressMonitor monitor)
-			throws ModelException {
-		open(monitor);
-		return getElementInfo().getChildren();
-	}
-
 	/**
 	 * @see IModelElement
 	 */
@@ -136,39 +92,13 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 		} while ((current = current.getParent()) != null);
 		return null;
 	}
-
-	protected List<IQ7Element> getChildrenOfType(HandleType type)
-			throws ModelException {
-		return getChildrenOfType(type, null);
+	
+	public final <V> V accessInfo(Function<Q7ElementInfo, V> infoTovalue) throws InterruptedException {
+		return ModelManager.getModelManager().accessInfo(this, Q7ElementInfo.class, this::createElementInfo, infoTovalue);
 	}
 
-	protected List<IQ7Element> getChildrenOfType(HandleType type,
-			IProgressMonitor monitor) throws ModelException {
-		IQ7Element[] children = getChildren(monitor);
-		int size = children.length;
-		List<IQ7Element> list = new ArrayList<IQ7Element>(size);
-		for (int i = 0; i < size; ++i) {
-			IQ7Element elt = children[i];
-			if (elt.getElementType().equals(type)) {
-				list.add(elt);
-			}
-		}
-		return list;
-	}
-
-	public boolean hasChildren() throws ModelException {
-		 Q7ElementInfo elementInfo = getElementInfo();
-		return elementInfo.getChildren().length > 0;
-	}
-
-	public void accept(IQ7ElementVisitor visitor) throws ModelException {
-		if (visitor.visit(this)) {
-			IQ7Element[] elements = getChildren();
-			for (int i = 0; i < elements.length; ++i) {
-				elements[i].accept(visitor);
-			}
-			visitor.endVisit(this);
-		}
+	public final <V> Optional<V> peekInfo(Function<Q7ElementInfo, V> infoTovalue) throws InterruptedException {
+		return ModelManager.getModelManager().peekInfo(this, Q7ElementInfo.class, infoTovalue);
 	}
 
 	public boolean equals(Object o) {
@@ -201,35 +131,35 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 	}
 
 	protected void toString(int tab, StringBuffer buffer) {
-		Object info = this.toStringInfo(tab, buffer);
-		if (tab == 0) {
-			this.toStringAncestors(buffer);
+		try {
+			if (!peekInfo(info -> {
+				this.toStringInfo(tab, buffer, info);
+				return true;
+			}).isPresent()) {
+				this.toStringInfo(tab, buffer, null);
+			}
+		} catch (InterruptedException e) {
+			OperationCanceledException result = new OperationCanceledException();
+			result.initCause(e);
+			throw result;
 		}
-		this.toStringChildren(tab, buffer, info);
 	}
 
-	public Object toStringInfo(int tab, StringBuffer buffer) {
-		Object info = ModelManager.getModelManager().peekAtInfo(this);
-		this.toStringInfo(tab, buffer, info, true/* show resolved info */);
-		return info;
-	}
-
-	protected void toStringInfo(int tab, StringBuffer buffer, Object info,
-			boolean showResolvedInfo) {
+	protected void toStringInfo(int tab, StringBuffer buffer, Object info) {
 		buffer.append(this.tabString(tab));
 		toStringName(buffer);
 		if (info == null) {
 			buffer.append(" (not open)"); //$NON-NLS-1$
 		}
+		this.toStringChildren(tab, buffer, info);
+
 	}
 
 	protected void toStringAncestors(StringBuffer buffer) {
 		Q7Element parentElement = (Q7Element) this.getParent();
 		if (parentElement != null && parentElement.getParent() != null) {
 			buffer.append(" [in "); //$NON-NLS-1$
-			parentElement.toStringInfo(0, buffer, NO_INFO, false); // don't show
-			// resolved
-			// info
+			parentElement.toStringInfo(0, buffer, NO_INFO);
 			parentElement.toStringAncestors(buffer);
 			buffer.append("]"); //$NON-NLS-1$
 		}
@@ -258,17 +188,13 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 
 	public String toDebugString() {
 		StringBuffer buffer = new StringBuffer();
-		this.toStringInfo(0, buffer, NO_INFO, true/* show resolved info */);
+		this.toStringInfo(0, buffer, NO_INFO);
 		return buffer.toString();
 	}
 
 	public String toStringWithAncestors() {
-		return toStringWithAncestors(true/* show resolved info */);
-	}
-
-	public String toStringWithAncestors(boolean showResolvedInfo) {
 		StringBuffer buffer = new StringBuffer();
-		this.toStringInfo(0, buffer, NO_INFO, showResolvedInfo);
+		this.toStringInfo(0, buffer, NO_INFO);
 		this.toStringAncestors(buffer);
 		return buffer.toString();
 	}

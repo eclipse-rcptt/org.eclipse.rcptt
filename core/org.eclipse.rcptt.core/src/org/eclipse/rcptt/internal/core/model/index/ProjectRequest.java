@@ -13,6 +13,7 @@ package org.eclipse.rcptt.internal.core.model.index;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.rcptt.core.model.IQ7Project;
+import org.eclipse.rcptt.core.model.ModelException;
 
 public class ProjectRequest extends IndexRequest {
 
@@ -32,7 +33,11 @@ public class ProjectRequest extends IndexRequest {
 	protected void run() throws CoreException {
 		IProjectIndexer.Internal indexer = getIndexer();
 		final NamedElementCollector elementCollector = new NamedElementCollector();
-		project.accept(elementCollector);
+		try {
+			project.accept(elementCollector);
+		} catch (ModelException | InterruptedException e) {
+			throw new IllegalStateException(e);
+		}
 		indexer.request(new NamedElementsRequest(indexer, project,
 				elementCollector.getElements(), true));
 	}

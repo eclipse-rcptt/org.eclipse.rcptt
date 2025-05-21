@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.core.model.search;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.rcptt.core.model.ModelException;
 
 public interface ISearchScope {
 	IPath[] getPaths();
