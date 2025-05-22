@@ -33,10 +33,13 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.rcptt.core.IQ7Extension;
@@ -75,9 +78,11 @@ import org.eclipse.rcptt.internal.core.model.Q7InternalVerification;
 import org.eclipse.rcptt.internal.core.model.Q7Model;
 import org.eclipse.rcptt.tesla.internal.core.TeslaCore;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
 public class RcpttCore {
+	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(RcpttCore.class));
 
 	public static final double SCENARIO_VERSION = 3.0;
 
@@ -537,9 +542,8 @@ public class RcpttCore {
 		if (context != null && context.length > 0) {
 			result = context[0];
 		} else {
-			RcpttPlugin.log("Failed to get context: " + contextId + " for element:"
-					+ element.getName(), null);
 			if (!ignoreErrors) {
+				LOG.log(new Status(IStatus.INFO, LOG.getBundle().getSymbolicName(), "Failed to get context: " + contextId + " for element:" + element.getName()));
 				UnresolvedContext ctx = ScenarioFactory.eINSTANCE
 						.createUnresolvedContext();
 				ctx.setName(contextId);
