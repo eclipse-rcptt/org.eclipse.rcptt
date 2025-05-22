@@ -17,39 +17,43 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+import com.google.common.base.Preconditions;
+
 public final class ValueLock {
 	private final Set<Object> lockedKeys = new HashSet<>();
 
-	private void lock(Object key) throws InterruptedException, TimeoutException {
-		long stop = System.currentTimeMillis() + 100_000;
+	private void lock(Object key, int timeout_ms) throws InterruptedException, TimeoutException {
+		Preconditions.checkArgument(timeout_ms >= 0);
+		long stop = System.currentTimeMillis() + timeout_ms;
 		boolean timeout = false;
-	    synchronized (lockedKeys) {
-	        while (!lockedKeys.add(key)) {
-	        	if (System.currentTimeMillis() > stop) {
-	        		timeout = true;
-	        		break;
-	        	}
-	            lockedKeys.wait(100_000);
-	        }
-	    }
-	    if (timeout) {
-	    	throw new TimeoutException("Timeout while locking " + key.getClass().getName());
-	    }
+		synchronized (lockedKeys) {
+			while (!lockedKeys.add(key)) {
+				long timeLeft = stop - System.currentTimeMillis();
+				if (timeLeft <= 0) {
+					timeout = true;
+					break;
+				}
+				lockedKeys.wait(timeLeft);
+			}
+		}
+		if (timeout) {
+			throw new TimeoutException("Timeout while locking " + key.getClass().getName());
+		}
 	}
 
 	private void unlock(Object key) {
-	    synchronized (lockedKeys) {
-	        lockedKeys.remove(key);
-	        lockedKeys.notifyAll();
-	    }
+		synchronized (lockedKeys) {
+			lockedKeys.remove(key);
+			lockedKeys.notifyAll();
+		}
 	}
 
-	public <V> V exclusively(Object key, Supplier<V> supplier) throws InterruptedException, TimeoutException {
-	    try {
-	        lock(key);
-	        return supplier.get();
-	    } finally {
-	        unlock(key);
-	    }
+	public <V> V exclusively(Object key, int timeout_ms,  Supplier<V> supplier) throws InterruptedException, TimeoutException {
+		lock(key, timeout_ms);
+		try {
+			return supplier.get();
+		} finally {
+			unlock(key);
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 
 public class ModelCache {
+	private static final int TIMEOUT_MS = 100_000;
 	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(ModelCache.class));
 	public static final int DEFAULT_PROJECT_SIZE = 5; // average 25552 bytes
 	// public static final int DEFAULT_ROOT_SIZE = 50; // average 2590 bytes per
@@ -82,7 +83,7 @@ public class ModelCache {
 	 */
 	public <T, V> V accessInfo(IQ7Element element, Class<T> clazz, Supplier<T> infoFactory, Function<T, V> infoToValue) throws InterruptedException {
 		try {
-			return locks.exclusively(element, () -> {
+			return locks.exclusively(element, TIMEOUT_MS, () -> {
 				try {
 					T info = clazz.cast(this.openableCache.get(element, () -> clazz.cast(infoFactory.get())));
 					return infoToValue.apply(info);
@@ -99,10 +100,11 @@ public class ModelCache {
 
 	/**
 	 * Returns the info for this element without disturbing the cache ordering.
+	 * @return Optional.empty() when cache is busy, has no matching key, or infoToValue returns null, wraps infoToValue result otherwise
 	 */
 	public <T, V> Optional<V> peekInfo(IQ7Element element, Class<T> clazz, Function<T, V> infoToValue) {
 		try {
-			return locks.<Optional<V>>exclusively(element, () -> {
+			return locks.<Optional<V>>exclusively(element, 10, () -> {
 				return Optional.ofNullable(this.openableCache.getIfPresent(element)).map(clazz::cast).map(infoToValue);
 			});
 		} catch (InterruptedException e) {
@@ -115,7 +117,7 @@ public class ModelCache {
 
 	public void removeInfo(IQ7Element element) throws InterruptedException {
 		try {
-			locks.exclusively(element, () -> {
+			locks.exclusively(element, TIMEOUT_MS, () -> {
 				this.openableCache.invalidate(element);
 				return null;
 			});
