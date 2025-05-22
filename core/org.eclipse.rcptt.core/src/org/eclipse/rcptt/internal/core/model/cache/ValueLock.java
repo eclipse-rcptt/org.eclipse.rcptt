@@ -20,15 +20,20 @@ import java.util.function.Supplier;
 public final class ValueLock {
 	private final Set<Object> lockedKeys = new HashSet<>();
 
-	private void lock(Object key) throws InterruptedException {
+	private void lock(Object key) throws InterruptedException, TimeoutException {
 		long stop = System.currentTimeMillis() + 100_000;
+		boolean timeout = false;
 	    synchronized (lockedKeys) {
 	        while (!lockedKeys.add(key)) {
 	        	if (System.currentTimeMillis() > stop) {
-	        		throw new IllegalStateException("Timeout while locking " + key);
+	        		timeout = true;
+	        		break;
 	        	}
 	            lockedKeys.wait(100_000);
 	        }
+	    }
+	    if (timeout) {
+	    	throw new TimeoutException("Timeout while locking " + key.getClass().getName());
 	    }
 	}
 
@@ -39,7 +44,7 @@ public final class ValueLock {
 	    }
 	}
 
-	public <V> V exclusively(Object key, Supplier<V> supplier) throws InterruptedException {
+	public <V> V exclusively(Object key, Supplier<V> supplier) throws InterruptedException, TimeoutException {
 	    try {
 	        lock(key);
 	        return supplier.get();
