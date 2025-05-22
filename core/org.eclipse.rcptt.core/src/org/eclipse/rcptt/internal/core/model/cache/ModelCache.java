@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -80,16 +81,20 @@ public class ModelCache {
 	 * Returns the info for the element.
 	 */
 	public <T, V> V accessInfo(IQ7Element element, Class<T> clazz, Supplier<T> infoFactory, Function<T, V> infoToValue) throws InterruptedException {
-		return locks.exclusively(element, () -> {
-			try {
-				T info = clazz.cast(this.openableCache.get(element, () -> clazz.cast(infoFactory.get())));
-				return infoToValue.apply(info);
-			} catch (ExecutionException e) {
-				Throwable cause = e.getCause();
-				Throwables.throwIfUnchecked(cause);
-				throw new IllegalStateException(e);
-			}
-		});
+		try {
+			return locks.exclusively(element, () -> {
+				try {
+					T info = clazz.cast(this.openableCache.get(element, () -> clazz.cast(infoFactory.get())));
+					return infoToValue.apply(info);
+				} catch (ExecutionException e) {
+					Throwable cause = e.getCause();
+					Throwables.throwIfUnchecked(cause);
+					throw new IllegalStateException(e);
+				}
+			});
+		} catch (TimeoutException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	/**
@@ -103,14 +108,20 @@ public class ModelCache {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			return Optional.empty();
+		} catch (TimeoutException e) {
+			return Optional.empty();
 		}
 	}
 
 	public void removeInfo(IQ7Element element) throws InterruptedException {
-		locks.exclusively(element, () -> {
-			this.openableCache.invalidate(element);
-			return null;
-		});
+		try {
+			locks.exclusively(element, () -> {
+				this.openableCache.invalidate(element);
+				return null;
+			});
+		} catch (TimeoutException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	private IStatus error(Exception e) {

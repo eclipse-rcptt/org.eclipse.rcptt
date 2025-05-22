@@ -94,11 +94,11 @@ public abstract class Q7Element extends PlatformObject implements IQ7Element {
 	}
 	
 	public final <V> V accessInfo(Function<Q7ElementInfo, V> infoTovalue) throws InterruptedException {
-		return ModelManager.getModelManager().accessInfo(this, Q7ElementInfo.class, this::createElementInfo, infoTovalue);
+		return ModelManager.getModelManager().accessInfo(this, infoTovalue);
 	}
 
 	public final <V> Optional<V> peekInfo(Function<Q7ElementInfo, V> infoTovalue) throws InterruptedException {
-		return ModelManager.getModelManager().peekInfo(this, Q7ElementInfo.class, infoTovalue);
+		return ModelManager.getModelManager().peekInfo(this, infoTovalue);
 	}
 
 	public boolean equals(Object o) {

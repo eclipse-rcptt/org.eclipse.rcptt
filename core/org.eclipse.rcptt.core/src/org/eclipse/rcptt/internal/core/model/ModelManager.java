@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -101,12 +100,12 @@ public class ModelManager {
 		T get() throws ModelException;
 	}
 	
-	public <T,V> V accessInfo(IQ7Element element, Class<T> clazz, Supplier<T> factory, Function<T, V> infoToValue) throws InterruptedException {
-		return this.cache.<T, V>accessInfo(element, clazz, factory, infoToValue);
+	public <V> V accessInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		return this.cache.<Q7ElementInfo, V>accessInfo(element, Q7ElementInfo.class, element::createElementInfo, infoToValue);
 	}
 
-	public <T,V> Optional<V> peekInfo(IQ7Element element, Class<T> clazz, Function<T, V> infoToValue) throws InterruptedException {
-		return this.cache.<T, V>peekInfo(element, clazz, infoToValue);
+	public <V> Optional<V> peekInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		return this.cache.<Q7ElementInfo, V>peekInfo(element, Q7ElementInfo.class, infoToValue);
 	}
 
 	private static class PrivateException extends RuntimeException {
