@@ -1662,7 +1662,13 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			
 			try {
 				BundleStart bundleLevel = levelMap.getOrDefault(bundleInfo.getSymbolicName(), BundleStart.DEFAULT);
-				bundleLevel = StartLevelSupport.getStartInfo(bundleInfo.getManifest(), bundleLevel);
+				String manifest = bundleInfo.getManifest();
+				if (manifest != null) {
+					// org.eclipse.m2e.pde.target.MavenSourceBundle does not call BundleInfo.setManifest() and can not use org.eclipse.pde.core.target.TargetBundle.initialize(File)
+					// this leads to null manifest
+					// we do not care about start level of source JARs, so we ignore their manifest
+					bundleLevel = StartLevelSupport.getStartInfo(manifest, bundleLevel);
+				}
 				monitor.split(1);
 				if (bundleLevel.isDefault()) {
 					continue;
