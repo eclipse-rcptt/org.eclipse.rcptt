@@ -51,6 +51,23 @@ public class TargetPlatformHelperTest {
 	public void after() throws IOException {
 		closer.close();
 	}
+	
+	/**
+	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160#issuecomment-2893733908
+	 */
+	@Test
+	public void mavenType() throws CoreException, IOException {
+		ITargetHandle handle = createTarget("maven.target");
+		ITargetDefinition definition = handle.getTargetDefinition();
+		TargetPlatformHelper subject = new TargetPlatformHelper(definition);
+		throwIfProblem(subject.resolve(null));
+		assertTrue(
+				subject.getModels().map(TargetPlatformHelper.Model::model).map(IPluginModelBase::getBundleDescription)
+						.map(BundleDescription::getSymbolicName).anyMatch(Predicate.isEqual("net.bytebuddy.byte-buddy")));
+		assertTrue(
+				subject.getModels().map(TargetPlatformHelper.Model::model).map(IPluginModelBase::getBundleDescription)
+						.map(BundleDescription::getSymbolicName).anyMatch(Predicate.isEqual("net.bytebuddy.byte-buddy.source")));
+	}
 
 	/**
 	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160
@@ -92,6 +109,7 @@ public class TargetPlatformHelperTest {
 		}
 		assertTrue(Files.exists(repo));
 		ITargetPlatformService service = P2Utils.getTargetService();
+		// @see https://github.com/eclipse-pde/eclipse.pde/issues/1789 ITargetPlatformService.newIULocation() requires non-API flags
 		int flags = IUBundleContainer.INCLUDE_REQUIRED |  IUBundleContainer.INCLUDE_CONFIGURE_PHASE;
 		ITargetLocation location = service.newIULocation(new String[] {"com.ibm.icu"}, new String[] {"0.0.0"}, new URI[] {URI.create("jar:" + repo.toUri() + "!/")}, flags);
 		ITargetDefinition definition = service.newTarget();
