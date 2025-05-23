@@ -16,6 +16,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
@@ -98,6 +102,20 @@ public class Q7NamedElementTest {
 		if (!closerTask.isCancelled()) {
 			closerTask.get();
 		}
+	}
+	
+	/**
+	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176#issuecomment-2904265630
+	 */
+	@Test(timeout=100_000)
+	public void doNotDeadlockIfResourceIsNotSynchronized() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
+		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+		}
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		FileTime time =FileTime.from(Instant.now().plusSeconds(3));
+		Files.setLastModifiedTime(Path.of(TESTCASE_FILE.getRawLocation().toOSString()), time);
+		assertNotNull(testcase.getNamedElement()); // should not deadlock or throw exceptions
 	}
 	
 	@Test

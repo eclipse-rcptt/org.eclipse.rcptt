@@ -71,22 +71,6 @@ public abstract class Q7NamedElement extends Openable implements
 				throw newNotPresentException();
 			}
 		}
-		if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
-
-			// refresh, only if this project is not building right now
-			if (!ModelManager.getModelManager().isProjectBuilding()
-					&& !indexing) {
-				try {
-					getResource().refreshLocal(IResource.DEPTH_INFINITE,
-							new NullProgressMonitor());
-				} catch (CoreException e) {
-					RcpttPlugin.log(e);
-				}
-			}
-			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
-				throw newNotPresentException();
-			}
-		}
 
 		Q7ResourceInfo resourceInfo = (Q7ResourceInfo) info;
 		IFile resource = (IFile) getResource();
@@ -303,6 +287,22 @@ public abstract class Q7NamedElement extends Openable implements
 	
 	public final <V> V accessResourceInfo(Function<Q7ResourceInfo, V> infoToValue) throws ModelException {
 		try {
+			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
+				// refresh, only if this project is not building right now
+				if (!ModelManager.getModelManager().isProjectBuilding()
+						&& !indexing) {
+					try {
+						getResource().refreshLocal(IResource.DEPTH_INFINITE,
+								new NullProgressMonitor());
+					} catch (CoreException e) {
+						RcpttPlugin.log(e);
+					}
+				}
+			}
+			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
+				throw newNotPresentException();
+			}
+
 			if (isInWorkingCopyMode()) {
 				PerWorkingCopyInfo info = getPerWorkingCopyInfo();
 				if (info != null) {
