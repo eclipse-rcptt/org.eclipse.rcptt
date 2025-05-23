@@ -1,10 +1,20 @@
 # RCP Testing Tool
 RCP Testing Tool automates GUI testing of Eclipse-based applications. RCPTT is fully aware of Eclipse Platform’s internals, hiding their complexity from end users and allowing QA engineers to create highly reliable UI tests at great pace.
 
+# Features
+- Rich IDE for test development
+- Record user actions
+- Record application state
+- Verify application state
+- Prevent races of test steps and background processes
+- CLI
+- Maven Plugin
+
+See details on the [website](https://eclipse.dev/rcptt/) and in the [documentation](https://eclipse.dev/rcptt/userguide/getstarted/)
+
 # How to Contribute
 - Report bugs via [GitHub issue tracker](https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues)
 - See [Contribution Guide](CONTRIBUTING.md) to provide fixes
-
 
 ## Weblinks
 * [Official Website](https://eclipse.dev/rcptt/)
