@@ -31,6 +31,8 @@ import org.eclipse.rcptt.core.scenario.NamedElement;
 import org.eclipse.rcptt.internal.core.Q7LazyResource;
 import org.eclipse.rcptt.internal.core.model.cache.ILRUCacheable;
 
+import com.google.common.base.Preconditions;
+
 public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable, Closeable {
 	private final Resource resource;
 	private NamedElement element;
@@ -39,13 +41,10 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 	private Runnable onClose = () -> {};
 
 	public Q7ResourceInfo(String storeFormat, URI uri) {
-		this.plainStoreFormat = storeFormat;
-		if (uri == null) {
-			resource = null;
-		} else {
-			resource = new Q7LazyResource(uri);
-			resource.setTrackingModification(true);
-		}
+		this.plainStoreFormat = Preconditions.checkNotNull(storeFormat);
+		Preconditions.checkNotNull(uri);
+		resource = new Q7LazyResource(uri);
+		resource.setTrackingModification(true);
 	}
 
 	public void load(IFile file) throws ModelException {
@@ -65,19 +64,22 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			status.setStatusCode(Q7StatusCode.NotPressent);
 			throw new ModelException(status);
 		}
+		boolean allowEmptyMetadataContent = model.isAllowEmptyMetadataContent();
 		try (InputStream metadataStream = PersistenceManager.getInstance().loadMetadata(model)) {
 			if (metadataStream != null) {
 				resource.load(metadataStream, PersistenceManager.getOptions());
-			} else if (file != null && !model.isAllowEmptyMetadataContent()) {
-				try (InputStream is = file.getContents()) {
-					resource.load(is, PersistenceManager.getOptions());
+			} else {
+				if (file != null && !allowEmptyMetadataContent) {
+					try (InputStream is = file.getContents()) {
+						resource.load(is, PersistenceManager.getOptions());
+					}
 				}
 			}
 			model.updateMetadata();
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
-				throw new ModelException(new Q7Status(0, "Empty resource " + uri));
+				throw new ModelException(new Q7Status(0, "Empty resource " + uri + ". Empty metadata is " + (allowEmptyMetadataContent ? "" : "not ") + "allowed. File: " + file));
 			}
 			for (EObject eObject : contents) {
 				if (eObject instanceof NamedElement) {

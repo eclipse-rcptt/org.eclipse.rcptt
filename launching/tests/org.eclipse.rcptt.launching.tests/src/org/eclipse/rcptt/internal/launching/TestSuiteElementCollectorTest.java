@@ -52,7 +52,7 @@ public class TestSuiteElementCollectorTest {
 			RcpttCore.create(project).accept(subject);
 			Assert.fail("Should throw on corrupted resource");
 		} catch (ModelException e) {
-			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
+			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test. Empty metadata is allowed. File: L/testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
 		}
 		
 	}
