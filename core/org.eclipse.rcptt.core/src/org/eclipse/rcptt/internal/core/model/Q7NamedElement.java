@@ -287,7 +287,7 @@ public abstract class Q7NamedElement extends Openable implements
 	
 	public final <V> V accessResourceInfo(Function<Q7ResourceInfo, V> infoToValue) throws ModelException {
 		try {
-			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
+			if (!getResource().getWorkspace().isTreeLocked()) {
 				// refresh, only if this project is not building right now
 				if (!ModelManager.getModelManager().isProjectBuilding()
 						&& !indexing) {
