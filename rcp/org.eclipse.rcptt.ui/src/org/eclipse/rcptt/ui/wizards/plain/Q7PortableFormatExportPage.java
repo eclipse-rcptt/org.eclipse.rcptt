@@ -94,7 +94,9 @@ public class Q7PortableFormatExportPage extends WizardPage implements
 				| SWT.H_SCROLL | SWT.V_SCROLL);
 		text.setCaret(null);
 		FontData dt = new FontData("monospace", 10, 0);
-		text.setFont(new Font(text.getDisplay(), dt));
+		Font font = new Font(text.getDisplay(), dt);
+		text.setFont(font);
+		text.addDisposeListener(ignored -> font.dispose());
 		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(text),
 				previewValue);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(text);

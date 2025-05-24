@@ -101,7 +101,7 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: false
+          fail_on_failure: true
           annotate_only: true
       - name: Archive results
         if: always()
