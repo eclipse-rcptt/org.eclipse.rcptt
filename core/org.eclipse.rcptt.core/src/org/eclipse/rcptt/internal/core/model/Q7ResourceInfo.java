@@ -50,6 +50,8 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		resource.setTrackingModification(true);
 	}
 
+	// FIXME:  This method ignores thread safety to reads file without scheduling
+	// JobManager.beginRule() deadlocks because of multi-threaded index implementation
 	public void load(IFile file) throws ModelException {
 		if (resource == null)
 			throw new NullPointerException("Resource info " + plainStoreFormat + " can't be associated with a file");
@@ -62,14 +64,14 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		IPersistenceModel model = getPersistenceModel();
 
 		if (file != null && !file.exists()) {
-			Q7Status status = new Q7Status(Q7Status.ERROR, "Element: " + file.getFullPath()
-					+ " doesn't exist");
-			status.setStatusCode(Q7StatusCode.NotPressent);
-			throw new ModelException(status);
+			throw newNotExistsException(file);
 		}
 		boolean allowEmptyMetadataContent = model.isAllowEmptyMetadataContent();
-		try (InputStream metadataStream =openMetadata(model, file)) {
-			resource.load(metadataStream, PersistenceManager.getOptions());
+		try (InputStream metadataStream = openMetadata(model, file)) {
+			if (metadataStream != null ) {
+				resource.load(metadataStream, PersistenceManager.getOptions());
+			}
+				
 			model.updateMetadata();
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
@@ -85,26 +87,44 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 				throw new ModelException(new Q7Status(Q7Status.ERROR, "Illegal object type: " + contents.get(0).getClass().getName()));
 			}
 		} catch (IOException | CoreException e) {
-			unload();
-			ModelException modelException = new ModelException(e, Q7Status.ERROR);
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(openMetadata(model, file), StandardCharsets.UTF_8))) {
-				char[] buffer = new char[3000];
-				int length = reader.read(buffer);
-				String content = null;
-				if (length >= 0) {
-					content = new String(buffer, 0, length);
+			try {
+				if (file != null && !file.exists()) {
+					throw newNotExistsException(file);
 				}
-				e.addSuppressed(new RuntimeException("File content:\n" + content + "...\n"));
-			} catch (IOException e1) {
-				e.addSuppressed(modelException);
-			} catch (CoreException e1) {
-				e.addSuppressed(e1);
+				ModelException modelException = new ModelException(e, Q7Status.ERROR);
+				String content = null;
+				try (InputStream is = openMetadata(model, file)) {
+					if (is != null) {
+						try (BufferedReader reader = new BufferedReader(new InputStreamReader(openMetadata(model, file), StandardCharsets.UTF_8))) {
+							char[] buffer = new char[3000];
+							int length = reader.read(buffer);
+							if (length >= 0) {
+								content = new String(buffer, 0, length);
+							}
+						}
+					}
+					modelException.addSuppressed(new RuntimeException("File content:\n" + content + "...\n"));
+				} catch (IOException e1) {
+					modelException.addSuppressed(modelException);
+				} catch (CoreException e1) {
+					modelException.addSuppressed(e1);
+				}
+				throw modelException;
+			} finally {
+				unload();
 			}
-			throw modelException;
 		} catch (Throwable e) {
 			unload();
 			throw e;
 		}
+	}
+
+	private ModelException newNotExistsException(IFile file) {
+		Q7Status status = new Q7Status(Q7Status.ERROR, "Element: " + file.getFullPath()
+				+ " doesn't exist");
+		status.setStatusCode(Q7StatusCode.NotPressent);
+		ModelException exception = new ModelException(status);
+		return exception;
 	}
 	
 	@Override

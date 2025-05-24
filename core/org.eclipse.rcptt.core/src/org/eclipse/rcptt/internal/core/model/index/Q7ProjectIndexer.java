@@ -147,6 +147,8 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 			}
 
 			RcpttPlugin.log(e);
+		} catch (Throwable e) {
+			RcpttPlugin.log(e);
 		} finally {
 			synchronized (indexingSet) {
 				indexingSet.remove(originalElement);
