@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -65,21 +68,13 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			throw new ModelException(status);
 		}
 		boolean allowEmptyMetadataContent = model.isAllowEmptyMetadataContent();
-		try (InputStream metadataStream = PersistenceManager.getInstance().loadMetadata(model)) {
-			if (metadataStream != null) {
-				resource.load(metadataStream, PersistenceManager.getOptions());
-			} else {
-				if (file != null && !allowEmptyMetadataContent) {
-					try (InputStream is = file.getContents()) {
-						resource.load(is, PersistenceManager.getOptions());
-					}
-				}
-			}
+		try (InputStream metadataStream =openMetadata(model, file)) {
+			resource.load(metadataStream, PersistenceManager.getOptions());
 			model.updateMetadata();
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
-				throw new ModelException(new Q7Status(0, "Empty resource " + uri + ". Empty metadata is " + (allowEmptyMetadataContent ? "" : "not ") + "allowed. File: " + file));
+				throw new ModelException(new Q7Status(0, "Empty resource " + uri + ". Empty metadata is " + (allowEmptyMetadataContent ? "" : "not ") + "allowed. File: " + file.getFullPath()));
 			}
 			for (EObject eObject : contents) {
 				if (eObject instanceof NamedElement) {
@@ -91,7 +86,21 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			}
 		} catch (IOException | CoreException e) {
 			unload();
-			throw new ModelException(e, Q7Status.ERROR);
+			ModelException modelException = new ModelException(e, Q7Status.ERROR);
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(openMetadata(model, file), StandardCharsets.UTF_8))) {
+				char[] buffer = new char[3000];
+				int length = reader.read(buffer);
+				String content = null;
+				if (length >= 0) {
+					content = new String(buffer, 0, length);
+				}
+				e.addSuppressed(new RuntimeException("File content:\n" + content + "...\n"));
+			} catch (IOException e1) {
+				e.addSuppressed(modelException);
+			} catch (CoreException e1) {
+				e.addSuppressed(e1);
+			}
+			throw modelException;
 		} catch (Throwable e) {
 			unload();
 			throw e;
@@ -174,5 +183,16 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 	@Override
 	public void close() {
 		unload();
+	}
+	
+	private InputStream openMetadata(IPersistenceModel model, IFile file) throws CoreException {
+		InputStream metadataStream = PersistenceManager.getInstance().loadMetadata(model);
+		if (metadataStream != null) {
+			return metadataStream;
+		}
+		if (file != null && !model.isAllowEmptyMetadataContent()) {
+			return file.getContents();
+		}
+		return null;
 	}
 }
