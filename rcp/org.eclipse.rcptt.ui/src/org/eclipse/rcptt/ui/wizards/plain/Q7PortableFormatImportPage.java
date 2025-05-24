@@ -174,7 +174,9 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 				| SWT.H_SCROLL | SWT.V_SCROLL);
 		text.setCaret(null);
 		FontData dt = new FontData("monospace", 10, 0);
-		text.setFont(new Font(text.getDisplay(), dt));
+		Font font = new Font(text.getDisplay(), dt);
+		text.setFont(font);
+		text.addDisposeListener(ignored -> font.dispose());
 		dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(text), previewValue);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(text);
 
@@ -262,53 +264,54 @@ public class Q7PortableFormatImportPage extends WizardPage implements
 			return;
 		}
 		// Validate content
-		Q7ResourceInfo info = new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, URI.createURI("__compare__"));
-		final IPersistenceModel model = PersistenceManager.getInstance()
-				.getModel(
-						StringUtils.getUtf8Bytes((String) previewValue
-								.getValue()), info.getResource());
-		if (model == null) {
-			isValid = false;
-			validate();
-			return;
-		}
-
-		isValid = false;
-		try {
-			info.load(null);
-			Scenario element = (Scenario) info.getNamedElement();
-			if (element == null) {
+		try (Q7ResourceInfo info = new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, URI.createURI("__compare__"))) {
+			final IPersistenceModel model = PersistenceManager.getInstance()
+					.getModel(
+							StringUtils.getUtf8Bytes((String) previewValue
+									.getValue()), info.getResource());
+			if (model == null) {
+				isValid = false;
 				validate();
 				return;
 			}
-			// if (((String) testcaseNameValue.getValue()).trim().isEmpty()) {
-			// Update testcase name
-			testcaseNameValue.setValue(element.getName());
-			// }
-
-			// Validate platform import of modified file
-
-			// update ecl from attachment, to override ecl stored by
-			// platform
-			InputStream ecl = model.read(PersistenceManager.ECL_CONTENT_ENTRY);
-			if (ecl == null) {
-				if (element.getTeslaContent() != null
-						|| element.getContent() != null) {
-					setErrorMessage("Specified content is not valid RCPTT testcase");
-					setPageComplete(false);
+	
+			isValid = false;
+			try {
+				info.load(null);
+				Scenario element = (Scenario) info.getNamedElement();
+				if (element == null) {
+					validate();
 					return;
 				}
+				// if (((String) testcaseNameValue.getValue()).trim().isEmpty()) {
+				// Update testcase name
+				testcaseNameValue.setValue(element.getName());
+				// }
+	
+				// Validate platform import of modified file
+	
+				// update ecl from attachment, to override ecl stored by
+				// platform
+				InputStream ecl = model.read(PersistenceManager.ECL_CONTENT_ENTRY);
+				if (ecl == null) {
+					if (element.getTeslaContent() != null
+							|| element.getContent() != null) {
+						setErrorMessage("Specified content is not valid RCPTT testcase");
+						setPageComplete(false);
+						return;
+					}
+				}
+				FileUtil.safeClose(ecl);
+	
+				model.dispose();
+				isValid = true;
+			} catch (ModelException e) {
+				// Don't log exceptions, because error message about
+				// invalid content will be shown in the header
+				// RcpttPlugin.log(e);
 			}
-			FileUtil.safeClose(ecl);
-
-			model.dispose();
-			isValid = true;
-		} catch (ModelException e) {
-			// Don't log exceptions, because error message about
-			// invalid content will be shown in the header
-			// RcpttPlugin.log(e);
+			validate();
 		}
-		validate();
 	}
 
 	private void validate() {
