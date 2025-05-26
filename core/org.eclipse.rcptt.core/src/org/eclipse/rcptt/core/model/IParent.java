@@ -12,7 +12,7 @@ package org.eclipse.rcptt.core.model;
 
 public interface IParent {
 
-	IQ7Element[] getChildren() throws ModelException;
+	IQ7Element[] getChildren() throws ModelException, InterruptedException;
 
-	boolean hasChildren() throws ModelException;
+	boolean hasChildren() throws ModelException, InterruptedException;
 }

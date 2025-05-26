@@ -11,7 +11,8 @@
 package org.eclipse.rcptt.internal.core.model;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -21,7 +22,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
@@ -29,6 +29,7 @@ import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.core.persistence.plain.IPlainConstants;
 import org.eclipse.rcptt.core.scenario.NamedElement;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.internal.core.model.ModelManager.PerWorkingCopyInfo;
 
 public abstract class Q7NamedElement extends Openable implements
 		IQ7NamedElement {
@@ -54,7 +55,7 @@ public abstract class Q7NamedElement extends Openable implements
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7ResourceInfo createElementInfo() {
 		return new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, Q7ResourceInfo.toURI(getResource()));
 	}
 
@@ -62,27 +63,11 @@ public abstract class Q7NamedElement extends Openable implements
 
 	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		// Check if not working copy
 		if (!isInWorkingCopyMode()) {
 			if (!underlyingResource.isAccessible()) {
-				throw newNotPresentException();
-			}
-		}
-		if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
-
-			// refresh, only if this project is not building right now
-			if (!ModelManager.getModelManager().isProjectBuilding()
-					&& !indexing) {
-				try {
-					getResource().refreshLocal(IResource.DEPTH_INFINITE,
-							new NullProgressMonitor());
-				} catch (CoreException e) {
-					RcpttPlugin.log(e);
-				}
-			}
-			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
 				throw newNotPresentException();
 			}
 		}
@@ -103,75 +88,53 @@ public abstract class Q7NamedElement extends Openable implements
 		return true;
 	}
 
-	@Override
-	protected void closing(Object info) throws ModelException {
-		if (info instanceof Q7ResourceInfo) {
-			((Q7ResourceInfo) info).unload();
-		}
-	}
-
 	public IPath getPath() {
 		return getParent().getPath().append(getName());
 	}
 
-	protected Q7ResourceInfo getInfo() throws ModelException {
-		Q7ResourceInfo info = null;
-		if (isWorkingCopy()) {
-			info = getPerWorkingCopyInfo().resourceInfo;
-		}
-		if (info == null) {
-			info = (Q7ResourceInfo) getElementInfo();
-		}
-		if (info == null || info.getNamedElement() == null) {
-			throw newNotPresentException();
-		}
-		return info;
-	}
-
 	public String getID() throws ModelException {
-		return getInfo().getNamedElement().getId();
+		return accessResourceInfo(info -> info.getNamedElement().getId());
 	}
 
 	public String getElementName() throws ModelException {
-		return getInfo().getNamedElement().getName();
+		return accessResourceInfo(info -> info.getNamedElement().getName());
 	}
 
 	public String getDescription() throws ModelException {
-		return getInfo().getNamedElement().getDescription();
+		return accessResourceInfo(info -> info.getNamedElement().getDescription());
 	}
 
 	public String getVersion() throws ModelException {
-		return getInfo().getNamedElement().getVersion();
+		return accessResourceInfo(info -> info.getNamedElement().getVersion());
 	}
 
 	public String getTags() throws ModelException {
-		return getInfo().getNamedElement().getTags();
+		return accessResourceInfo(info -> info.getNamedElement().getTags());
 	}
 
 	public NamedElement getMeta() throws ModelException {
-		return getInfo().getNamedElement();
+		return accessResourceInfo(info -> info.getNamedElement());
 	}
 
 	public boolean isWorkingCopy() {
 		return getPerWorkingCopyInfo() != null && workingCopyMode;
 	}
 
-	public ModelManager.PerWorkingCopyInfo getPerWorkingCopyInfo() {
+	private ModelManager.PerWorkingCopyInfo getPerWorkingCopyInfo() {
 		return ModelManager.getModelManager().getPerWorkingCopyInfo(this,
 				false, false);
 	}
 
-	public boolean hasResourceChanged() {
+	public boolean hasResourceChanged() throws ModelException {
 		if (!isWorkingCopy()) {
 			return false;
 		}
-		Object info = ModelManager.getModelManager().getInfo(this);
-		if (info == null) {
-			return false;
+		try {
+			return accessInfoIfOpened(info -> ((Q7ResourceInfo) info).timestamp != getResource()
+					.getModificationStamp()).orElse(false);
+		} catch (InterruptedException e) {
+			throw new ModelException(e, 0);
 		}
-
-		return ((Q7ResourceInfo) info).timestamp != getResource()
-				.getModificationStamp();
 	}
 
 	public IQ7NamedElement getIndexingWorkingCopy(IProgressMonitor monitor)
@@ -210,7 +173,10 @@ public abstract class Q7NamedElement extends Openable implements
 	protected abstract Q7NamedElement createWorkingCopy();
 
 	public void extractAllPersistence() throws ModelException {
-		getInfo().extractAllPersistence();
+		accessResourceInfo(info -> {	
+			info.extractAllPersistence();
+			return null;
+		});
 	}
 
 	public void commitWorkingCopy(boolean force, IProgressMonitor monitor)
@@ -235,62 +201,61 @@ public abstract class Q7NamedElement extends Openable implements
 		if (timeStamp == IResource.NULL_STAMP) {
 			throw new ModelException(new Q7Status(0, "Invalid Resource"));
 		}
-
-		getInfo().timestamp = timeStamp;
+		try {
+			accessInfoIfOpened(info -> {
+				((Q7ResourceInfo)info).timestamp = timeStamp;
+				return null;
+			});
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new ModelException(e, 0);
+		}
 	}
 
 	public NamedElement getNamedElement() throws ModelException {
-		return getInfo().getNamedElement();
+		return accessResourceInfo(info -> info.getNamedElement());
 	}
 
 	public NamedElement getModifiedNamedElement() throws ModelException {
-		if (getPerWorkingCopyInfo() != null) {
-			return getPerWorkingCopyInfo().resourceInfo.getNamedElement();
+		PerWorkingCopyInfo info = getPerWorkingCopyInfo();
+		if (info != null) {
+			return info.resourceInfo.getNamedElement();
 		}
-		return getInfo().getNamedElement();
+		return getNamedElement();
 	}
 
 	public IPersistenceModel getModifiedPersistenceModel()
 			throws ModelException {
-		if (getPerWorkingCopyInfo() != null) {
-			return getPerWorkingCopyInfo().resourceInfo.getPersistenceModel();
+		PerWorkingCopyInfo info = getPerWorkingCopyInfo();
+		if (info != null) {
+			return info.resourceInfo.getPersistenceModel();
 		}
-		return getInfo().getPersistenceModel();
+		return getPersistenceModel();
 	}
 
 	public IPersistenceModel getPersistenceModel() throws ModelException {
-		return getInfo().getModel();
+		return accessResourceInfo( info -> info.getModel());
 	}
 
 	// modifications
 	public void setDescription(String description) throws ModelException {
-		if (isWorkingCopy()) {
-			getInfo().getNamedElement().setDescription(description);
-		}
+		writeWorkingCopy(info -> info.getNamedElement().setDescription(description));
 	}
 
 	public void setElementName(String name) throws ModelException {
-		if (isWorkingCopy()) {
-			getInfo().getNamedElement().setName(name);
-		}
+		writeWorkingCopy(info -> info.getNamedElement().setName(name));
 	}
 
 	public void setID(String id) throws ModelException {
-		if (isWorkingCopy()) {
-			getInfo().getNamedElement().setId(id);
-		}
+		writeWorkingCopy(info -> info.getNamedElement().setId(id));
 	}
 
 	public void setVersion(String version) throws ModelException {
-		if (isWorkingCopy()) {
-			getInfo().getNamedElement().setVersion(version);
-		}
+		writeWorkingCopy(info -> info.getNamedElement().setVersion(version));
 	}
 
 	public void setTags(String tags) throws ModelException {
-		if (isWorkingCopy()) {
-			getInfo().getNamedElement().setTags(tags);
-		}
+		writeWorkingCopy(info -> info.getNamedElement().setTags(tags));
 	}
 
 	public boolean hasUnsavedChanges() throws ModelException {
@@ -300,19 +265,58 @@ public abstract class Q7NamedElement extends Openable implements
 			if (info != null)
 				return info.hasChanges();
 		}
-		ModelManager manager = ModelManager.getModelManager();
-		info = (Q7ResourceInfo) manager.getInfo(this);
-		if (info == null)
-			return false;
-		return info.hasChanges();
+		try {
+			return accessInfoIfOpened(info2 -> ((Q7ResourceInfo)info2).hasChanges()).orElse(false);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new ModelException(e, 0);
+		}
 	}
 	
-	@Override
-	public Object getElementInfo() throws ModelException {
-		if (isWorkingCopy()) {
-			return getPerWorkingCopyInfo().resourceInfo;
+	public final void writeWorkingCopy(Consumer<Q7ResourceInfo> write) {
+		if (!isInWorkingCopyMode()) {
+			throw new IllegalStateException("This is not a working copy");
 		}
-		return super.getElementInfo();
+		
+		PerWorkingCopyInfo info = getPerWorkingCopyInfo();
+		if (info == null) {
+			throw new IllegalStateException("Working copy is closed");
+		}
+		write.accept(info.resourceInfo);
+	}
+	
+	public final <V> V accessResourceInfo(Function<Q7ResourceInfo, V> infoToValue) throws ModelException {
+		try {
+			if (!getResource().getWorkspace().isTreeLocked()) {
+				// refresh, only if this project is not building right now
+				if (!ModelManager.getModelManager().isProjectBuilding()
+						&& !indexing) {
+					try {
+						getResource().refreshLocal(IResource.DEPTH_INFINITE,
+								new NullProgressMonitor());
+					} catch (CoreException e) {
+						RcpttPlugin.log(e);
+					}
+				}
+			}
+			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
+				throw newNotPresentException();
+			}
+
+			if (isInWorkingCopyMode()) {
+				PerWorkingCopyInfo info = getPerWorkingCopyInfo();
+				if (info != null) {
+					return infoToValue.apply(info.resourceInfo);
+				}
+			}
+			return openAndAccessInfo(info -> {
+				Q7ResourceInfo resource = (Q7ResourceInfo) info;
+				return infoToValue.apply(resource);
+			}, null);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new ModelException(e, 0);
+		}
 	}
 
 	@Override
@@ -331,7 +335,9 @@ public abstract class Q7NamedElement extends Openable implements
 
 	public void updatePersistenceModel(IPersistenceModel newModel)
 			throws ModelException {
-		getInfo().updatePersistenceModel(newModel);
+		writeWorkingCopy(info ->
+			info.updatePersistenceModel(newModel)
+		);
 	}
 
 	public void setIndexing(boolean indexing) {

@@ -28,7 +28,6 @@ public abstract class JobManager implements Runnable {
 
 	/* background processing */
 	protected Thread processingThread;
-	protected Job progressJob;
 
 	/*
 	 * counter indicating whether job execution is enabled or not, disabled if
@@ -345,31 +344,6 @@ public abstract class JobManager implements Runnable {
 		}
 	}
 
-	private final class ProgressJob extends Job {
-		ProgressJob(String name) {
-			super(name);
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			int awaitingJobsCount;
-			monitor.beginTask("Indexin Q7 resources...",
-					IProgressMonitor.UNKNOWN);
-			while (!monitor.isCanceled()
-					&& (awaitingJobsCount = awaitingJobsCount()) > 0) {
-				monitor.subTask(NLS.bind("Files to index ${0}",
-						Integer.toString(awaitingJobsCount)));
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-			monitor.done();
-			return Status.OK_STATUS;
-		}
-	}
-
 	/**
 	 * is used for delaying before processing new jobs, that could be canceled
 	 * by {@link #performConcurrentJob()} if called with
@@ -384,7 +358,6 @@ public abstract class JobManager implements Runnable {
 		long idlingStart = -1;
 		activateProcessing();
 		try {
-			this.progressJob = null;
 			while (this.processingThread != null) {
 				try {
 					IJob job;
@@ -397,7 +370,6 @@ public abstract class JobManager implements Runnable {
 						// must check for new job inside this sync block to
 						// avoid timing hole
 						if ((job = currentJob()) == null) {
-							hideProgress();
 							if (idlingStart < 0)
 								idlingStart = System.currentTimeMillis();
 							else
@@ -420,7 +392,6 @@ public abstract class JobManager implements Runnable {
 					}
 					try {
 						this.executing = true;
-						showProgress();
 						/* boolean status = */job.execute(null);
 						// if (status == FAILED) request(job);
 					} finally {
@@ -458,22 +429,6 @@ public abstract class JobManager implements Runnable {
 		}
 	}
 
-	private void showProgress() {
-		if (this.progressJob == null) {
-			this.progressJob = new ProgressJob("Indexing in progress...");
-			this.progressJob.setPriority(Job.LONG);
-			this.progressJob.setSystem(true);
-			this.progressJob.schedule();
-		}
-	}
-
-	private void hideProgress() {
-		if (this.progressJob != null) {
-			this.progressJob.cancel();
-			this.progressJob = null;
-		}
-	}
-
 	/**
 	 * Stop background processing, and wait until the current job is completed
 	 * before returning
@@ -498,11 +453,6 @@ public abstract class JobManager implements Runnable {
 				// in case processing thread is handling a job
 				// XXX wait not more than 1 minute
 				thread.join(60000);
-			}
-			Job job = this.progressJob;
-			if (job != null) {
-				job.cancel();
-				job.join();
 			}
 		} catch (InterruptedException e) {
 			// ignore

@@ -43,11 +43,7 @@ public class BecomeWorkingCopyOperation extends Q7Operation {
 			copyInfo.resourceInfo = (Q7ResourceInfo) workingCopy
 					.createElementInfo();
 			workingCopy.setIndexing(indexing);
-			Map<IQ7Element, Object> newElements = new HashMap<>();
-			workingCopy.generateInfos(copyInfo.resourceInfo, newElements, this.progressMonitor);
-			if (newElements.get(workingCopy) != copyInfo.resourceInfo) {
-				throw workingCopy.newNotPresentException();
-			}
+			workingCopy.generateInfos(copyInfo.resourceInfo, this.progressMonitor);
 			// workingCopy.extractAllPersistence();
 
 			if (workingCopy.getResource().isAccessible()) {

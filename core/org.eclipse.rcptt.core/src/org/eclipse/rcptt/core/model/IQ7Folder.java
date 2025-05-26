@@ -35,17 +35,17 @@ public interface IQ7Folder extends IOpenable, IParent, IQ7Element {
 
 	boolean isRootFolder();
 
-	ITestCase[] getTestCases() throws ModelException;
+	ITestCase[] getTestCases() throws ModelException, InterruptedException;
 
-	IContext[] getContexts() throws ModelException;
+	IContext[] getContexts() throws ModelException, InterruptedException;
 
-	ITestSuite[] getTestSuites() throws ModelException;
+	ITestSuite[] getTestSuites() throws ModelException, InterruptedException;
 
-	public Object[] getForeignResources() throws ModelException;
+	public Object[] getForeignResources() throws ModelException, InterruptedException;
 
-	boolean hasSubfolders() throws ModelException;
+	boolean hasSubfolders() throws ModelException, InterruptedException;
 
-	boolean containsQ7Resources() throws ModelException;
+	boolean containsQ7Resources() throws ModelException, InterruptedException;
 
 	ITestCase createTestCase(String name, boolean force, IProgressMonitor monitor)
 			throws ModelException;
