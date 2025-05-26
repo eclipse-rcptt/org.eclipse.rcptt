@@ -20,8 +20,9 @@ import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.internal.core.model.ModelManager;
+import org.eclipse.rcptt.core.model.Q7Status;
+import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
+import org.eclipse.rcptt.internal.core.model.Openable;
 import org.eclipse.rcptt.internal.core.model.Q7Element;
 import org.eclipse.rcptt.internal.core.model.Q7ElementInfo;
 import org.eclipse.rcptt.internal.core.model.Q7Model;
@@ -85,8 +86,9 @@ public class Q7ElementDeltaBuilder {
 	/**
 	 * Creates a q7 element comparator on a q7 element looking as deep as
 	 * necessary.
+	 * @throws InterruptedException 
 	 */
-	public Q7ElementDeltaBuilder(IQ7Element modelElement) {
+	public Q7ElementDeltaBuilder(IQ7Element modelElement) throws InterruptedException {
 		this.modelElement = modelElement;
 		this.initialize();
 		this.recordElementInfo(modelElement, (Q7Model) this.modelElement.getModel(), 0);
@@ -95,8 +97,9 @@ public class Q7ElementDeltaBuilder {
 	/**
 	 * Creates a q7 element comparator on a q7 element looking only 'maxDepth'
 	 * levels deep.
+	 * @throws InterruptedException 
 	 */
-	public Q7ElementDeltaBuilder(IQ7Element modelElement, int maxDepth) {
+	public Q7ElementDeltaBuilder(IQ7Element modelElement, int maxDepth) throws InterruptedException {
 		this.modelElement = modelElement;
 		this.maxDepth = maxDepth;
 		this.initialize();
@@ -125,7 +128,7 @@ public class Q7ElementDeltaBuilder {
 	 * Builds the q7 element deltas between the old content of the compilation
 	 * unit and its new content.
 	 */
-	public void buildDeltas() {
+	public void buildDeltas() throws InterruptedException {
 		this.delta = new Q7ElementDelta(modelElement);
 
 		// if building a delta on a compilation unit or below,
@@ -150,8 +153,9 @@ public class Q7ElementDeltaBuilder {
 
 	/**
 	 * Finds elements which have been added or changed.
+	 * @throws InterruptedException 
 	 */
-	private void findAdditions(IQ7Element newElement, int depth) {
+	private void findAdditions(IQ7Element newElement, int depth) throws InterruptedException {
 		Q7ElementInfo oldInfo = this.getElementInfo(newElement);
 		if (oldInfo == null && depth < this.maxDepth) {
 			this.delta.added(newElement);
@@ -166,13 +170,7 @@ public class Q7ElementDeltaBuilder {
 			return;
 		}
 
-		Q7ElementInfo newInfo = null;
-		try {
-			newInfo = (Q7ElementInfo) ((Q7Element) newElement).getElementInfo();
-		} catch (ModelException npe) {
-			RcpttPlugin.log(npe);
-			return;
-		}
+		Q7ElementInfo newInfo = leakInfo(newElement);
 
 		this.findContentChange(oldInfo, newInfo, newElement);
 
@@ -188,10 +186,22 @@ public class Q7ElementDeltaBuilder {
 		}
 	}
 
+	private Q7ElementInfo leakInfo(IQ7Element newElement) throws InterruptedException {
+		Q7ElementInfo newInfo;
+		try {
+			((Openable)newElement.getOpenable()).openAndAccessInfo(parentInfo -> {return null;}, null);
+			newInfo = ((Q7Element) newElement).accessInfo(info -> info);
+		} catch (ModelException e) {
+			throw new IllegalStateException(e);
+		}
+		return newInfo;
+	}
+
 	/**
 	 * Looks for changed positioning of elements.
+	 * @throws InterruptedException 
 	 */
-	private void findChangesInPositioning(IQ7Element element, int depth) {
+	private void findChangesInPositioning(IQ7Element element, int depth) throws InterruptedException {
 		if (depth >= this.maxDepth || this.added.contains(element)
 				|| this.removed.contains(element))
 			return;
@@ -201,14 +211,7 @@ public class Q7ElementDeltaBuilder {
 		}
 
 		if (element instanceof IParent) {
-			Q7ElementInfo info = null;
-			try {
-				info = (Q7ElementInfo) ((Q7Element) element).getElementInfo();
-			} catch (ModelException npe) {
-				RcpttPlugin.log(npe);
-				return;
-			}
-
+			Q7ElementInfo info = leakInfo(element);
 			IQ7Element[] children = info.getChildren();
 			if (children != null) {
 				int length = children.length;
@@ -325,14 +328,23 @@ public class Q7ElementDeltaBuilder {
 	 * Records this elements info, and attempts to record the info for the
 	 * children.
 	 */
-	private void recordElementInfo(IQ7Element element, Q7Model model, int depth) {
+	private void recordElementInfo(IQ7Element element, Q7Model model, int depth) throws InterruptedException {
 		if (depth >= this.maxDepth) {
 			return;
 		}
-		Q7ElementInfo info = (Q7ElementInfo) ModelManager.getModelManager().getInfo(
-				element);
-		if (info == null) // no longer in the model.
-			return;
+		Q7ElementInfo info;
+		try {
+			((Openable)element.getOpenable()).openAndAccessInfo(parentInfo -> {return null;}, null);
+			info = ((Q7Element) element).accessInfo(info1 -> info1);
+			assert info != null;
+		} catch (ModelException e1) {
+			if (e1.getStatus() instanceof Q7Status) {
+				if (((Q7Status) e1.getStatus()).getStatusCode() == Q7StatusCode.NotPressent) {
+					return;
+				}
+			}
+			throw new RuntimeException(e1); 
+		}
 		this.putElementInfo(element, info);
 
 		if (element instanceof IParent) {
@@ -347,16 +359,11 @@ public class Q7ElementDeltaBuilder {
 
 	/**
 	 * Fills the newPositions hashtable with the new position information
+	 * @throws InterruptedException 
 	 */
-	private void recordNewPositions(IQ7Element newElement, int depth) {
+	private void recordNewPositions(IQ7Element newElement, int depth) throws InterruptedException {
 		if (depth < this.maxDepth && newElement instanceof IParent) {
-			Q7ElementInfo info = null;
-			try {
-				info = (Q7ElementInfo) ((Q7Element) newElement).getElementInfo();
-			} catch (ModelException npe) {
-				RcpttPlugin.log(npe);
-				return;
-			}
+			Q7ElementInfo info = leakInfo(newElement);
 
 			IQ7Element[] children = info.getChildren();
 			if (children != null) {

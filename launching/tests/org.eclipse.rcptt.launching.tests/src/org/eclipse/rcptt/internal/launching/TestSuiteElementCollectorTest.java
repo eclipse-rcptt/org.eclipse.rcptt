@@ -40,7 +40,7 @@ public class TestSuiteElementCollectorTest {
 	
 
 	@Test
-	public void corruptedResourcesShouldProduceReadaleErrorMessage() throws CoreException, IOException {
+	public void corruptedResourcesShouldProduceReadaleErrorMessage() throws CoreException, IOException, InterruptedException {
 		TestSuiteElementCollector subject = new TestSuiteElementCollector(Arrays.asList("testsuite1"), false);
 		IProject project = importProject(fromPortableString("/resources/testSuiteReferencingCorruptedResource"), new IPath[] {
 				fromPortableString("corrupted.test"),
@@ -52,7 +52,7 @@ public class TestSuiteElementCollectorTest {
 			RcpttCore.create(project).accept(subject);
 			Assert.fail("Should throw on corrupted resource");
 		} catch (ModelException e) {
-			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
+			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test. Empty metadata is allowed. File: /testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
 		}
 		
 	}

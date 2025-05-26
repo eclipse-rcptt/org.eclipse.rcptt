@@ -16,6 +16,7 @@ import java.util.HashSet;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.rcptt.core.model.IElementChangedListener;
@@ -209,6 +210,10 @@ public class DeltaProcessingState implements IResourceChangeListener {
 		}
 		try {
 			getDeltaProcessor().resourceChanged(event);
+		} catch (InterruptedException e) {
+			OperationCanceledException result = new OperationCanceledException();
+			result.initCause(e);
+			throw result;
 		} finally {
 			// TODO (jerome) see 47631, may want to get rid of following so as
 			// to reuse delta processor ?
@@ -219,13 +224,13 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	}
 
-	public IQ7Project findProject(String name) {
+	public IQ7Project findProject(String name) throws InterruptedException {
 		if (getOldProjectNames().contains(name))
 			return ModelManager.getModelManager().getModel().getProject(name);
 		return null;
 	}
 
-	public synchronized HashSet<String> getOldProjectNames() {
+	public synchronized HashSet<String> getOldProjectNames() throws InterruptedException {
 		if (this.scriptProjectNamesCache == null) {
 			HashSet<String> result = new HashSet<String>();
 			IQ7Project[] projects;
