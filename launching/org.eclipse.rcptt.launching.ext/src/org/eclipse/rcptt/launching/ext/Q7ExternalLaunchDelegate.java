@@ -450,11 +450,12 @@ public class Q7ExternalLaunchDelegate extends
 		programArgs.add("-vm");
 		programArgs.add(install.getInstallLocation().toString());
 		
-		for (int archIndex = programArgs.indexOf("-arch"); archIndex >= 0;  archIndex = programArgs.indexOf("-arch")) {
-			// org.eclipse.pde.launching.AbstractPDELaunchConfiguration.getProgramArguments(ILaunchConfiguration) uses incorrect architecture from TargetPlatform.getOSArch()
-			programArgs.remove(archIndex);
-			programArgs.remove(archIndex);
-		}
+		// org.eclipse.pde.launching.AbstractPDELaunchConfiguration.getProgramArguments(ILaunchConfiguration) uses incorrect architecture from TargetPlatform.getOSArch()
+		removeKey(programArgs, "-arch");
+		// Development mode does not support restart 
+		// @see org.eclipse.ui.internal.Workbench.setRestartArguments(String)
+		// @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/177
+		removeKey(programArgs, "-dev");
 
 		info.programArgs = programArgs.toArray(new String[programArgs.size()]);
 		Q7ExtLaunchingPlugin.getDefault().info(
@@ -462,6 +463,13 @@ public class Q7ExternalLaunchDelegate extends
 						+ ": AUT command line arguments is set to: "
 						+ Arrays.toString(info.programArgs));
 		return info.programArgs;
+	}
+
+	private void removeKey(ArrayList<String> programArgs, String key) {
+		for (int archIndex = programArgs.indexOf(key); archIndex >= 0;  archIndex = programArgs.indexOf(key)) {
+			programArgs.remove(archIndex);
+			programArgs.remove(archIndex);
+		}
 	}
 
 	@Override
