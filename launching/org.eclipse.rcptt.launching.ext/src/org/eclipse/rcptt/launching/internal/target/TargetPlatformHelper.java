@@ -376,11 +376,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	private IPluginModelBase weavingHook;
 
-
-	private Status error(String message) {
-		return new Status(IStatus.ERROR, PLUGIN_ID, message);
-	}
-
 	public String[] getProducts() {
 		PDEExtensionRegistry reg = getRegistry();
 		Set<String> result = new TreeSet<String>();
@@ -1016,14 +1011,17 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		checkResolved();
 		String architecture = target.getArch();
 		if (architecture != null) {
+			// If target platform architecture is configured explicitly, do not perform the scan below
+			// https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160
 			return OSArchitecture.valueOf(architecture);
 		}
 		
 		String os = Platform.getOS();
 		// Find org.eclipse.equinox.launcher.cocoa.macosx.aarch64
 		// Skip org.eclipse.equinox.launcher.cocoa.macosx
-		Pattern prefix = Pattern.compile(("org.eclipse.equinox.launcher.[\\w\\d]+."+os+".").replace(".", "\\."));
-		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> removePrefix(name, prefix)).flatMap(Optional::stream).collect(Collectors.toSet());
+		// Skip org.eclipse.equinox.launcher.win32.win32.x86_64.nl1 - https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/178
+		Pattern archPattern = Pattern.compile(("org.eclipse.equinox.launcher.[\\w\\d]+."+os+".([^.]+)$").replace(".", "\\."));
+		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> getGroup(name, archPattern)).flatMap(Optional::stream).collect(Collectors.toSet());
 		if (launcherArchitectures.size() != 1) {
 			if (detectMsg != null) {
 				detectMsg.append("Multiple launcher architectures are found in target platform: " + Joiner.on(", ").join(launcherArchitectures));
@@ -1705,12 +1703,10 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return new Model(model, BundleStart.fromBundle(bundle.getBundleInfo()));
 	}
 	
-	private Optional<String> removePrefix(String input, Pattern prefix) {
+	private Optional<String> getGroup(String input, Pattern prefix) {
 		Matcher matcher = prefix.matcher(input);
 		if (matcher.find()) {
-			if (matcher.start() == 0) {
-				return Optional.of(input.substring(matcher.end()));
-			}
+			return Optional.of(matcher.group(1));
 		}
 		return Optional.empty();
 	}
