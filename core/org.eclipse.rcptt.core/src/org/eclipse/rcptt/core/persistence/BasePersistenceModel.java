@@ -205,7 +205,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				waitUntilExtracted(name);
 			}
 		} catch (IOException e) {
-			error("Can't extract " + name + " from " + element, e);
+			throw new IllegalStateException("Can't extract " + name + " from " + element, e);
 		}
 		if (file.exists()) {
 			try {
@@ -279,7 +279,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			try {
 				extractFile(name);
 			} catch (IOException e) {
-				error("Can't extract " + name + " from " + element);
+				throw new IllegalStateException("Can't extract " + name + " from " + element, e);
 			}
 			return file.exists();
 		}
@@ -393,7 +393,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				}
 			}
 		} catch (IOException e) {
-			error("Can't extract " + teslaContentEntry + " from " + element);
+			throw new IllegalStateException("Can't extract " + teslaContentEntry + " from " + element, e);
 		}
 		return result;
 	}
