@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.watson.core;singleton:=true
 Automatic-Module-Name: org.eclipse.rcptt.watson.core
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.7.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -23,7 +23,7 @@ Export-Package: org.eclipse.rcptt.sherlock.core,
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.eclipse.core.resources;x-installation:=greedy;resolution:=optional,
- org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.7.0,3.0.0)",
  org.eclipse.rcptt.ecl.core
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.sherlock.core.SherlockCore

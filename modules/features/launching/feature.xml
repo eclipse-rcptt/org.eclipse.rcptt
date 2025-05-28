@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.rcptt.modules.launching"
       label="All modules launching"
-      version="2.6.0.qualifier"
+      version="2.7.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -24,7 +24,7 @@ Excludes recording.
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.eclipse.rcptt.launching" version="2.6.0.qualifier"/>
+      <import feature="org.eclipse.rcptt.launching" version="2.7.0" match="compatible"/>
    </requires>
 
    <plugin

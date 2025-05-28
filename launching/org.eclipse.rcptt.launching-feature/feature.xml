@@ -12,7 +12,7 @@
 <feature
       id="org.eclipse.rcptt.launching"
       label="RCPTT launching components"
-      version="2.6.0.qualifier"
+      version="2.7.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -29,55 +29,55 @@
 
    <requires>
       <import plugin="com.google.guava"/>
-      <import feature="org.eclipse.rcptt.ecl.platform" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.updates" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.ecl.server" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.core" version="2.6.0.qualifier"/>
+      <import feature="org.eclipse.rcptt.ecl.platform" version="2.7.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.updates" version="2.7.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.server" version="2.7.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.core" version="2.7.0" match="compatible"/>
    </requires>
 
    <plugin
          id="org.eclipse.rcptt.launching"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.common"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.ext"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.remote"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.injection"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.util"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.p2utils"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.core.launching"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.launching.multiaut"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         version="2.6.0.qualifier"/>
+         version="2.7.0.qualifier"/>
 
    <plugin
          id="org.eclipse.osgi.compatibility.state"

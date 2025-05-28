@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.ecl.operations.tests
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.7.0.qualifier
 Bundle-Localization: plugin
 Require-Bundle: org.junit,
- org.eclipse.rcptt.ecl.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.7.0,3.0.0)",
  org.eclipse.equinox.common,
- org.eclipse.rcptt.ecl.operations;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.ecl.parser;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.ecl.parser.test;bundle-version="[2.6.0,3.0.0)"
+ org.eclipse.rcptt.ecl.operations;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.ecl.parser;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.ecl.parser.test;bundle-version="[2.7.0,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-9
 Bundle-Vendor: %pluginProvider

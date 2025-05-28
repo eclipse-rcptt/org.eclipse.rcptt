@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="RCPTT Runner" uid="org.eclipse.rcptt.runner.headless" id="org.eclipse.rcptt.runner.product" application="org.eclipse.rcptt.runner.headless" version="2.6.0.qualifier" type="features" includeLaunchers="false" autoIncludeRequirements="true">
+<product name="RCPTT Runner" uid="org.eclipse.rcptt.runner.headless" id="org.eclipse.rcptt.runner.product" application="org.eclipse.rcptt.runner.headless" version="2.7.0.qualifier" type="features" includeLaunchers="false" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>

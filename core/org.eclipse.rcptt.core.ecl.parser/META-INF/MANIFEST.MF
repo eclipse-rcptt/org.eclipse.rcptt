@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ECL Parser Tools for RCPTT
 Bundle-SymbolicName: org.eclipse.rcptt.core.ecl.parser;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.7.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.core.internal.ecl.parser.Q7EclParserPlugin
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore,
- org.eclipse.rcptt.ecl.core;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.ecl.doc;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.ecl.doc;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.7.0,3.0.0)",
  org.eclipse.core.resources,
- org.eclipse.rcptt.core.ecl.scanner;bundle-version="[2.6.0,3.0.0)"
+ org.eclipse.rcptt.core.ecl.scanner;bundle-version="[2.7.0,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-9
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.core.ecl.model,
