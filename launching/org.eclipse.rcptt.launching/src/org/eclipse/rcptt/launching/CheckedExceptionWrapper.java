@@ -12,6 +12,9 @@ package org.eclipse.rcptt.launching;
  *   Xored Software Inc - initial API and implementation
  ********************************************************************************/
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import com.google.common.base.Throwables;
 
 public final class CheckedExceptionWrapper extends RuntimeException {
@@ -25,7 +28,7 @@ public final class CheckedExceptionWrapper extends RuntimeException {
 		void run() throws Exception;
 	}
 	
-	public static Runnable encode(ThrowingRunnable throwing) {
+	public static Runnable wrap(ThrowingRunnable throwing) {
 		return () -> {
 			try {
 				throwing.run();
@@ -35,6 +38,37 @@ public final class CheckedExceptionWrapper extends RuntimeException {
 			} 
 		};
 	}
+	
+	public interface ThrowingConsumer<T> {
+		void accept(T e) throws Exception;
+	}
+	
+	public static <T> Consumer<T> wrap(ThrowingConsumer<T> throwing) {
+		return (t) -> {
+			try {
+				throwing.accept(t);
+			} catch (Exception e) {
+				Throwables.throwIfUnchecked(e);
+				throw new CheckedExceptionWrapper(e);
+			} 
+		};
+	}
+	
+	public interface ThrowingFunction<T, R> {
+		R apply(T t) throws Exception;
+	}
+	
+	public static <T, R> Function<T, R> wrap(ThrowingFunction<T, R> throwing) {
+		return (t) -> {
+			try {
+				return throwing.apply(t);
+			} catch (Exception e) {
+				Throwables.throwIfUnchecked(e);
+				throw new CheckedExceptionWrapper(e);
+			} 
+		};
+	}
+
 	
 	public <E extends Exception> void rethrow(Class<E> clazz) throws E {
 		Throwables.throwIfInstanceOf(getCause(), clazz);

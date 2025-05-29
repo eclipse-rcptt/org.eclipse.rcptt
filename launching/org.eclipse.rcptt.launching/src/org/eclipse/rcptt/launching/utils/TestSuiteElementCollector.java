@@ -43,6 +43,7 @@ public class TestSuiteElementCollector extends NamedElementCollector {
 		notFound.remove("*");
 	}
 
+	@Override
 	public boolean visit(IQ7Element element) {
 		try {
 			if (!(element instanceof ITestSuite suite)) {
@@ -61,10 +62,12 @@ public class TestSuiteElementCollector extends NamedElementCollector {
 		return true;
 	}
 
+	@Override
 	public boolean endVisit(IQ7Element element) {
 		return false;
 	}
 
+	@Override
 	public List<IQ7NamedElement> getElements() {
 		if (result == null) {
 			if (respectManualOrder) {
