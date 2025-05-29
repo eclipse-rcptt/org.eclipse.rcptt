@@ -8,13 +8,14 @@
  * Contributors:
  *     Xored Software Inc - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.eclipse.rcptt.internal.core.model.index;
+package org.eclipse.rcptt.launching.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ITestCase;
@@ -23,6 +24,8 @@ import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.scenario.TestSuiteItem;
 import org.eclipse.rcptt.core.utils.SortingUtils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.internal.core.model.index.NamedElementCollector;
+import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
 
 public class TestSuiteElementCollector extends NamedElementCollector {
 	private final List<IQ7NamedElement> manualyOrderedElements = new ArrayList<IQ7NamedElement>();
@@ -31,22 +34,29 @@ public class TestSuiteElementCollector extends NamedElementCollector {
 	private final boolean respectManualOrder;
 
 	private List<IQ7NamedElement> result;
+	private Set<String> notFound;
 
 	public TestSuiteElementCollector(List<String> names, boolean respectManualOrder) {
 		this.names = names;
 		this.respectManualOrder = respectManualOrder;
+		notFound = new HashSet<>(names);
+		notFound.remove("*");
 	}
 
 	public boolean visit(IQ7Element element) {
 		try {
-			if (element instanceof ITestSuite
-					&& (names.contains("*") || names
-							.contains(((IQ7NamedElement) element)
-									.getElementName()))) {
+			if (!(element instanceof ITestSuite suite)) {
+				return true;
+			}
+			String name = suite.getElementName();
+			if (names.contains("*") || names
+							.contains(name)) {
+				notFound.remove(name);
 				processSuite((ITestSuite) element);
 				return false;
 			}
 		} catch (ModelException e) {
+			throw new CheckedExceptionWrapper(e);
 		}
 		return true;
 	}
@@ -106,5 +116,9 @@ public class TestSuiteElementCollector extends NamedElementCollector {
 			RcpttPlugin.log("Failed to locate testsuite testcases:"
 					+ suite.getPath().toString(), e);
 		}
+	}
+
+	public Set<String> getAbsentSuites() {
+		return notFound;
 	}
 }
