@@ -95,7 +95,7 @@ public interface IPersistenceModel {
 
 	Resource getResource();
 
-	int size(String teslaContentEntry);
+	long size(String teslaContentEntry);
 
 	boolean isContentEntryRequired();
 
