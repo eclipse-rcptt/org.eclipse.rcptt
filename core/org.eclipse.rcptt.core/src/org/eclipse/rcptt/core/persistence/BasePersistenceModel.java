@@ -279,7 +279,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			try {
 				extractFile(name);
 			} catch (IOException e) {
-				error("Can't extract " + name + " from " + element);
+				error("Can't extract " + name + " from " + element, e);
 			}
 			return file.exists();
 		}
@@ -393,7 +393,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				}
 			}
 		} catch (IOException e) {
-			error("Can't extract " + teslaContentEntry + " from " + element);
+			error("Can't extract " + teslaContentEntry + " from " + element, e);
 		}
 		return result;
 	}
