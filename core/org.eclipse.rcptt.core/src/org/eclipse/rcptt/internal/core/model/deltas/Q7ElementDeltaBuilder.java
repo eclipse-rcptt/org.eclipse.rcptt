@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model.deltas;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -170,7 +171,12 @@ public class Q7ElementDeltaBuilder {
 			return;
 		}
 
-		Q7ElementInfo newInfo = leakInfo(newElement);
+		Q7ElementInfo newInfo;
+		try {
+			newInfo = leakInfo(newElement);
+		} catch (FileNotFoundException e) {
+			return;
+		}
 
 		this.findContentChange(oldInfo, newInfo, newElement);
 
@@ -186,12 +192,15 @@ public class Q7ElementDeltaBuilder {
 		}
 	}
 
-	private Q7ElementInfo leakInfo(IQ7Element newElement) throws InterruptedException {
+	private Q7ElementInfo leakInfo(IQ7Element newElement) throws InterruptedException, FileNotFoundException {
 		Q7ElementInfo newInfo;
 		try {
 			((Openable)newElement.getOpenable()).openAndAccessInfo(parentInfo -> {return null;}, null);
 			newInfo = ((Q7Element) newElement).accessInfo(info -> info);
 		} catch (ModelException e) {
+			if (e.getQ7Status().getStatusCode() == Q7StatusCode.NotPressent) {
+				throw new  FileNotFoundException();
+			}
 			throw new IllegalStateException(e);
 		}
 		return newInfo;
@@ -211,7 +220,12 @@ public class Q7ElementDeltaBuilder {
 		}
 
 		if (element instanceof IParent) {
-			Q7ElementInfo info = leakInfo(element);
+			Q7ElementInfo info;
+			try {
+				info = leakInfo(element);
+			} catch (FileNotFoundException e) {
+				return;
+			}
 			IQ7Element[] children = info.getChildren();
 			if (children != null) {
 				int length = children.length;
@@ -363,7 +377,12 @@ public class Q7ElementDeltaBuilder {
 	 */
 	private void recordNewPositions(IQ7Element newElement, int depth) throws InterruptedException {
 		if (depth < this.maxDepth && newElement instanceof IParent) {
-			Q7ElementInfo info = leakInfo(newElement);
+			Q7ElementInfo info;
+			try {
+				info = leakInfo(newElement);
+			} catch (FileNotFoundException e) {
+				return;
+			}
 
 			IQ7Element[] children = info.getChildren();
 			if (children != null) {
