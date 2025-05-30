@@ -390,17 +390,6 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		modified = false;
 	}
 
-	public long size(String teslaContentEntry) {
-		if (disposed) {
-			throw new IllegalStateException("Disposed");
-		}
-		File file = extractEntryIfNotYet(teslaContentEntry);
-		if (file.exists()) {
-			return file.length();
-		}
-		return 0;
-	}
-
 	public void rename(String oldName, String newName) {
 		try (InputStream read = read(oldName);
 			OutputStream store = store(newName)) {
