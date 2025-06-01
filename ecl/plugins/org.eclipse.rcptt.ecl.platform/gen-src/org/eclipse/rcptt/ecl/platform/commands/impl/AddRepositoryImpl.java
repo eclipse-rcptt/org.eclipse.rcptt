@@ -100,6 +100,7 @@ public class AddRepositoryImpl extends CommandImpl implements AddRepository {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getUri() {
 		return uri;
 	}
@@ -109,6 +110,7 @@ public class AddRepositoryImpl extends CommandImpl implements AddRepository {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setUri(String newUri) {
 		String oldUri = uri;
 		uri = newUri;
@@ -121,6 +123,7 @@ public class AddRepositoryImpl extends CommandImpl implements AddRepository {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -130,6 +133,7 @@ public class AddRepositoryImpl extends CommandImpl implements AddRepository {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setName(String newName) {
 		String oldName = name;
 		name = newName;
@@ -214,7 +218,7 @@ public class AddRepositoryImpl extends CommandImpl implements AddRepository {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (uri: ");
 		result.append(uri);
 		result.append(", name: ");
