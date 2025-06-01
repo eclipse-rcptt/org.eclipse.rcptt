@@ -65,7 +65,12 @@ public class InvokeAUTService implements ICommandService {
 		AutLaunch launch = aut.getActiveLaunch();
 		if (launch == null) {
 			// AUT is not launched. Let's launch it
-			launch = aut.launch(new NullProgressMonitor());
+			launch = aut.launch(new NullProgressMonitor() {
+				@Override
+				public boolean isCanceled() {
+					return !context.isAlive();
+				};
+			});
 		}
 
 		return Status.OK_STATUS;
