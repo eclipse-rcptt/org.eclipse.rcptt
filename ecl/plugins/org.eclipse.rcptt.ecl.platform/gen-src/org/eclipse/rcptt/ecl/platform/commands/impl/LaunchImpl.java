@@ -100,6 +100,7 @@ public class LaunchImpl extends CommandImpl implements Launch {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMode() {
 		return mode;
 	}
@@ -109,6 +110,7 @@ public class LaunchImpl extends CommandImpl implements Launch {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMode(String newMode) {
 		String oldMode = mode;
 		mode = newMode;
@@ -121,6 +123,7 @@ public class LaunchImpl extends CommandImpl implements Launch {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -130,6 +133,7 @@ public class LaunchImpl extends CommandImpl implements Launch {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setName(String newName) {
 		String oldName = name;
 		name = newName;
@@ -214,7 +218,7 @@ public class LaunchImpl extends CommandImpl implements Launch {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (mode: ");
 		result.append(mode);
 		result.append(", name: ");
