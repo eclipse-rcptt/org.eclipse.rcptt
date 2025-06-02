@@ -34,6 +34,7 @@ public class NamedElementCollector implements IQ7ElementVisitor {
 		filter = new HashSet<HandleType>(Arrays.asList(types));
 	}
 
+	@Override
 	public boolean visit(IQ7Element element) {
 		HandleType elementType = element.getElementType();
 		if (filter.contains(elementType)) {
@@ -43,6 +44,7 @@ public class NamedElementCollector implements IQ7ElementVisitor {
 		return true;
 	}
 
+	@Override
 	public boolean endVisit(IQ7Element element) {
 		return false;
 	}

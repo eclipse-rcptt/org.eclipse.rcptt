@@ -90,6 +90,7 @@ public class FindInWorkspaceImpl extends CommandImpl implements FindInWorkspace 
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -98,6 +99,7 @@ public class FindInWorkspaceImpl extends CommandImpl implements FindInWorkspace 
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -109,6 +111,7 @@ public class FindInWorkspaceImpl extends CommandImpl implements FindInWorkspace 
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isAll() {
 		return all;
 	}
@@ -117,6 +120,7 @@ public class FindInWorkspaceImpl extends CommandImpl implements FindInWorkspace 
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAll(boolean newAll) {
 		boolean oldAll = all;
 		all = newAll;
@@ -196,7 +200,7 @@ public class FindInWorkspaceImpl extends CommandImpl implements FindInWorkspace 
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (path: ");
 		result.append(path);
 		result.append(", all: ");

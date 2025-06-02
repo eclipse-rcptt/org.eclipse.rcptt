@@ -50,8 +50,9 @@ import org.eclipse.rcptt.core.workspace.WorkspaceFinder;
 import org.eclipse.rcptt.internal.core.model.Q7InternalContext;
 import org.eclipse.rcptt.internal.core.model.Q7TestCase;
 import org.eclipse.rcptt.internal.core.model.index.NamedElementCollector;
-import org.eclipse.rcptt.internal.core.model.index.TestSuiteElementCollector;
 import org.eclipse.rcptt.internal.launching.TestEngineManager;
+import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
+import org.eclipse.rcptt.launching.utils.TestSuiteElementCollector;
 import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
 import org.eclipse.rcptt.runner.HeadlessRunner;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
@@ -149,8 +150,22 @@ public class TestsRunner {
 			} else {
 				collector = new TestSuiteElementCollector(conf.suites, true);
 			}
-			q7Projet.accept(collector);
+			
+			try {
+				q7Projet.accept(collector);
+			} catch (CheckedExceptionWrapper e) {
+				e.rethrow(CoreException.class);
+				e.rethrow(InterruptedException.class);
+				e.rethrowUnchecked();
+				throw e;
+			}
 			IWorkspaceFinder finder = WorkspaceFinder.getInstance();
+			if (collector instanceof TestSuiteElementCollector ts) {
+				Set<String> absent = ts.getAbsentSuites();
+				if (!absent.isEmpty()) {
+					throw new CoreException(Status.error(String.format("Test suites %s were noot found", absent)));
+				}
+			}
 			for (IQ7NamedElement element : collector.getElements()) {
 				if (!(element instanceof ITestCase)) {
 					continue;

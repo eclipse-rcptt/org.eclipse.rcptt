@@ -42,7 +42,8 @@ public interface Log extends Command {
 	 * @return the value of the '<em>Message</em>' attribute.
 	 * @see #setMessage(String)
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getLog_Message()
-	 * @model annotation="http://www.eclipse.org/ecl/docs description='Writes an entry into Eclipse log'"
+	 * @model annotation="http://www.eclipse.org/ecl/input"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Writes an entry into Eclipse log'"
 	 * @generated
 	 */
 	String getMessage();
@@ -70,7 +71,7 @@ public interface Log extends Command {
 	 * @see #setSeverity(String)
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getLog_Severity()
 	 * @model default="info"
-	 *        annotation="http://www.eclipse.org/ecl/docs description='Log entry severity. Can be <code>info</code>, <code>warning</code>, <code>error</code>, <code>ok</code>, <code>cancel</code> in any letter case. Default value is <code>info</code>.'"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Log entry severity. Can be &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warning&lt;/code&gt;, &lt;code&gt;error&lt;/code&gt;, &lt;code&gt;ok&lt;/code&gt;, &lt;code&gt;cancel&lt;/code&gt; in any letter case. Default value is &lt;code&gt;info&lt;/code&gt;.'"
 	 * @generated
 	 */
 	String getSeverity();
@@ -98,7 +99,7 @@ public interface Log extends Command {
 	 * @see #setPlugin(String)
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getLog_Plugin()
 	 * @model default="org.eclipse.rcptt.ecl.platform"
-	 *        annotation="http://www.eclipse.org/ecl/docs description='ID of plugin adding log entry. Default value is <code>org.eclipse.rcptt.ecl.platform</code>'"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='ID of plugin adding log entry. Default value is &lt;code&gt;org.eclipse.rcptt.ecl.platform&lt;/code&gt;'"
 	 * @generated
 	 */
 	String getPlugin();

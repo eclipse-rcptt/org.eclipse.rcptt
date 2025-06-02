@@ -84,6 +84,9 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
+				if (file != null && !file.exists()) {
+					throw newNotExistsException(file);
+				}
 				throw new ModelException(new Q7Status(0, "Empty resource " + uri + ". Empty metadata is " + (allowEmptyMetadataContent ? "" : "not ") + "allowed. File: " + (file == null ? null : file.getFullPath())));
 			}
 			for (EObject eObject : contents) {

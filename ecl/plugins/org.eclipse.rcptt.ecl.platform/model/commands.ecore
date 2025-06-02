@@ -146,7 +146,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SubstituteVariables" eSuperTypes="../../org.eclipse.rcptt.ecl.core/model/ecl.ecore#//Command">
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
-      <details key="description" value="Recursively resolves and replaces all variable references in the given expression with their corresponding values. Allows the client to control whether references to undefined variables are reported as an error (i.e. an exception is thrown). See &lt;a href='http://www.xored.com/2013/09/03/how-to-pass-a-value-to-a-test-during-its-execution/'>How to pass a value to a test&lt;/a> for more information."/>
+      <details key="description" value="&lt;a href='http://https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.jdt.doc.user%2Freference%2Fpreferences%2Frun-debug%2Fref-string_substitution.htm'>Eclipse string substitution.&lt;/a> Recursively resolves and replaces all variable references in the given expression with their corresponding values. Allows the client to control whether references to undefined variables are reported as an error (i.e. an exception is thrown). Unavailable if AUT does not have org.eclipse.core.variables plug-in."/>
       <details key="returns" value="expression with variable references replaced with variable values"/>
       <details key="example" value="//writes prop val to AUT workspace log&#xA;log [substitute-variables &quot;${system_property:propertyName}&quot;] "/>
     </eAnnotations>
