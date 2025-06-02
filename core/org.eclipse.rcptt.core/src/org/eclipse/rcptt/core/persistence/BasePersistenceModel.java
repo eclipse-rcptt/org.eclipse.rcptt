@@ -192,7 +192,23 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		disposed = true;
 	}
 
-	public synchronized InputStream read(String name) {
+	public final synchronized InputStream read(String name) {
+		File file = extractEntryIfNotYet(name);
+		if (file == null) {
+			return null;
+		}
+		if (file.exists()) {
+			try {
+				return getInput(file);
+			} catch (FileNotFoundException e) {
+				RcpttPlugin.log(e);
+			}
+		}
+
+		return null;
+	}
+	
+	private File extractEntryIfNotYet(String name) {
 		if (disposed) {
 			throw new IllegalStateException("Disposed");
 		}
@@ -207,17 +223,9 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				waitUntilExtracted(name);
 			}
 		} catch (IOException e) {
-			error("Can't extract " + name + " from " + element, e);
+			throw new IllegalStateException("Can't extract " + name + " from " + element, e);
 		}
-		if (file.exists()) {
-			try {
-				return getInput(file);
-			} catch (FileNotFoundException e) {
-				RcpttPlugin.log(e);
-			}
-		}
-
-		return null;
+		return file;
 	}
 
 	private void waitUntilExtracted(String name) {
@@ -281,7 +289,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			try {
 				extractFile(name);
 			} catch (IOException e) {
-				error("Can't extract " + name + " from " + element, e);
+				throw new IllegalStateException("Can't extract " + name + " from " + element, e);
 			}
 			return file.exists();
 		}
@@ -382,22 +390,6 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 
 	public void setUnmodified() {
 		modified = false;
-	}
-
-	public int size(String teslaContentEntry) {
-		int result = 0;
-		try (InputStream stream = read(teslaContentEntry)) {
-			if (stream != null) {
-				try {
-					result = (int) min(Integer.MAX_VALUE, stream.skip(Long.MAX_VALUE));
-				} finally {
-					StreamUtil.closeSilently(stream);
-				}
-			}
-		} catch (IOException e) {
-			error("Can't extract " + teslaContentEntry + " from " + element, e);
-		}
-		return result;
 	}
 
 	public void rename(String oldName, String newName) {
