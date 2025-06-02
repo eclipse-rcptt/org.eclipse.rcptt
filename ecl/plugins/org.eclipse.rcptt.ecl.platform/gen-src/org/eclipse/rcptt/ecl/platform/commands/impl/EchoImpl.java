@@ -79,6 +79,7 @@ public class EchoImpl extends CommandImpl implements Echo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getStr() {
 		return str;
 	}
@@ -88,6 +89,7 @@ public class EchoImpl extends CommandImpl implements Echo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setStr(String newStr) {
 		String oldStr = str;
 		str = newStr;
@@ -162,7 +164,7 @@ public class EchoImpl extends CommandImpl implements Echo {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (str: ");
 		result.append(str);
 		result.append(')');

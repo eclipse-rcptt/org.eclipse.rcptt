@@ -79,6 +79,7 @@ public class ListPluginsImpl extends CommandImpl implements ListPlugins {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isIncludeDependencies() {
 		return includeDependencies;
 	}
@@ -88,6 +89,7 @@ public class ListPluginsImpl extends CommandImpl implements ListPlugins {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIncludeDependencies(boolean newIncludeDependencies) {
 		boolean oldIncludeDependencies = includeDependencies;
 		includeDependencies = newIncludeDependencies;
@@ -162,7 +164,7 @@ public class ListPluginsImpl extends CommandImpl implements ListPlugins {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (includeDependencies: ");
 		result.append(includeDependencies);
 		result.append(')');

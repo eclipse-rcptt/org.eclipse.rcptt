@@ -96,6 +96,7 @@ public class GetLogImpl extends CommandImpl implements GetLog {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<String> getLevels() {
 		if (levels == null) {
 			levels = new EDataTypeUniqueEList<String>(String.class, this, CommandsPackage.GET_LOG__LEVELS);
@@ -108,6 +109,7 @@ public class GetLogImpl extends CommandImpl implements GetLog {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLimit() {
 		return limit;
 	}
@@ -117,6 +119,7 @@ public class GetLogImpl extends CommandImpl implements GetLog {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLimit(int newLimit) {
 		int oldLimit = limit;
 		limit = newLimit;
@@ -203,7 +206,7 @@ public class GetLogImpl extends CommandImpl implements GetLog {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (levels: ");
 		result.append(levels);
 		result.append(", limit: ");
