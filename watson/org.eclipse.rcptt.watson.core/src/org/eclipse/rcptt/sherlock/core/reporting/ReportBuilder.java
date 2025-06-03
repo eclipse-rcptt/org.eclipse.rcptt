@@ -286,7 +286,9 @@ public class ReportBuilder implements IReportBuilder {
 
 	@Override
 	public INodeBuilder getCurrent() {
-		return currentNode;
+		synchronized (report) {
+			return currentNode;
+		}
 	}
 
 	public static long getTime() {
