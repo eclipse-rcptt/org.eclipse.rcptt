@@ -18,3 +18,7 @@ mvn clean verify -f releng/mirroring/pom.xml $OPTIONS || exit 100
 ./build_nodeps.sh $OPTIONS || exit $?
 
 ./build_runner.sh $OPTIONS || exit $?
+
+mvn clean install --file maven-plugin $OPTIONS || exit $?
+
+mvn clean verify --file maven-plugin/its $OPTIONS || exit $?

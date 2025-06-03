@@ -625,8 +625,8 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		ec.setData(context);
 		try {
 			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout(), monitor, null);
-			IStatus status = createInternalAutFailStatus(contextElement,result);
-			if (!result.isOK()) {
+			if (result.matches(IStatus.ERROR)) {
+				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
 			}
 		} catch (InterruptedException e) {
@@ -648,7 +648,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		command.setPhase(phase);
 		try {
 			final IStatus result = internalExecute(command, TeslaLimits.getContextRunnableTimeout(), monitor, null);
-			if (!result.isOK()) {
+			if (result.matches(IStatus.ERROR)) {
 				throw new CoreException(ExecAdvancedInfoUtil.askForAdvancedInfo(this, result));
 			}
 		} catch (InterruptedException e) {
