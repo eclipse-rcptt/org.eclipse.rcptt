@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: mockup_build
     container:
-      image: basilevs/ubuntu-rcptt:3.7.1 
+      image: basilevs/ubuntu-rcptt:3.7.2 
       env:
         DISPLAY: :1
     steps:
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     container:
-      image: basilevs/ubuntu-rcptt:3.7.1 
+      image: basilevs/ubuntu-rcptt:3.7.2 
       env:
         DISPLAY: :1
     steps:
@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     container:
-      image: basilevs/ubuntu-rcptt:3.7.1 
+      image: basilevs/ubuntu-rcptt:3.7.2 
       env:
         DISPLAY: :1
     steps:
