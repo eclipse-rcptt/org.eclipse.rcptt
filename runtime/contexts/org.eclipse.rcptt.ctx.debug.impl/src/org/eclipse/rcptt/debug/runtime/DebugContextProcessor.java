@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.debug.runtime;
 
+import static java.lang.Math.toIntExact;
+import static java.lang.System.currentTimeMillis;
+
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -224,6 +227,7 @@ public class DebugContextProcessor implements IContextProcessor {
 		if (!(ctx instanceof DebugContext)) {
 			return;
 		}
+		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
 		final UIJobCollector collector = new UIJobCollector();
 		Job.getJobManager().addJobChangeListener(collector);
 		try {
@@ -233,7 +237,7 @@ public class DebugContextProcessor implements IContextProcessor {
 					collector.enable();
 					return null;
 				}
-			});
+			}, toIntExact(stop - currentTimeMillis()), isCancelled);
 
 			final DebugContext context = (DebugContext) ctx;
 
@@ -263,8 +267,8 @@ public class DebugContextProcessor implements IContextProcessor {
 					collector.setNeedDisable();
 					return null;
 				}
-			});
-			collector.join(TeslaLimits.getContextJoinTimeout());
+			}, toIntExact(stop - currentTimeMillis()), isCancelled);
+			collector.join(TeslaLimits.getContextJoinTimeout(), isCancelled);
 			ContextHelper helper = new ContextHelper();
 			helper.setFrom(context);
 			helper.applyLaunches(context.getLaunches());

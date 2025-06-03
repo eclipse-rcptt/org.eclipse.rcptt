@@ -21,6 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
@@ -960,7 +961,7 @@ public class UIJobCollector implements IJobChangeListener {
 	 * @param timeout
 	 * @throws InterruptedException
 	 */
-	public void join(long timeout) throws InterruptedException {
+	public void join(long timeout, BooleanSupplier isCancelled) throws InterruptedException {
 		SWTTeslaActivator.debugLog("UIJobCollector is going to join");
 		long startTime = System.currentTimeMillis();
 		// Context ctx = ContextManagement.currentContext();
@@ -968,6 +969,9 @@ public class UIJobCollector implements IJobChangeListener {
 			long delta = System.currentTimeMillis() - startTime;
 			if (delta > timeout) {
 				break;
+			}
+			if (isCancelled.getAsBoolean()) {
+				return;
 			}
 			if (removeCanceledJobs()) {
 				if (isJoinEmpty()) {

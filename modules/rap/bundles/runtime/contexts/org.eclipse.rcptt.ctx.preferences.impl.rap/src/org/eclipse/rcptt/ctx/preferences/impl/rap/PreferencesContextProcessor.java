@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -57,7 +58,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 	private static final String[] EXCLUDE_SCOPE_LIST = new String[] {
 			DefaultScope.SCOPE, ConfigurationScope.SCOPE, SessionScope.SCOPE };
 
-	public void apply(final Context contextToApply) throws CoreException {
+	public void apply(final Context contextToApply, BooleanSupplier isCancelled) throws CoreException {
 		final UIJobCollector collector = new UIJobCollector();
 		Job.getJobManager().addJobChangeListener(collector);
 		SWTUIPlayer.disableMessageDialogs();

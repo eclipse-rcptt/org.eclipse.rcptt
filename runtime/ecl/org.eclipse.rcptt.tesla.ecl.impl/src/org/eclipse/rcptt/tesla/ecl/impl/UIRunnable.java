@@ -52,7 +52,6 @@ public abstract class UIRunnable<T> {
 		return exec(runnable, getTimeout(), () -> false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <T> T exec(final UIRunnable<T> runnable, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
 		final AtomicReference<RunningState> processed = new AtomicReference<RunningState>(RunningState.Starting);
 		CompletableFuture<T> result = new CompletableFuture<T>();
