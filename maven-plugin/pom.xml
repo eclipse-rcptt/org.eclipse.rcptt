@@ -54,7 +54,6 @@ documentation
   <modules>
     <module>rcptt-maven-plugin</module>
     <module>rcptt-maven-util</module>
-    <module>its</module>
   </modules>
   <build>
     <pluginManagement>
