@@ -63,6 +63,12 @@ jobs:
           if-no-files-found: error
           name: runner
           path: runner/product/target/products/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip
+      - name: Archive Maven Plugin
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: maven-plugin
+          path: /root/.m2/repository/org/eclipse/rcptt/rcptt-*/**
       - name: Archive IDE
         uses: actions/upload-artifact@v4
         with:
@@ -84,6 +90,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: runner
+      - name: Download Maven Plugin
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-plugin
+          path: /root/.m2/repository/org/eclipse/rcptt
       - name: Download IDE
         uses: actions/download-artifact@v4
         with:
