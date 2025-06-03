@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.parameters.impl.rap;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.ecl.core.CoreFactory;
@@ -33,8 +36,10 @@ public class ParametersContextProcessor implements IContextProcessor, IEclAwareP
 		throw new UnsupportedOperationException();
 	}
 
-	public void apply(Context context) throws CoreException {
-		apply(context, null);
+	@Override
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
+		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+				getClass().getName() + " is ECL-aware and must be passed a session object", null));
 	}
 
 	public Context create(EObject param) throws CoreException {
