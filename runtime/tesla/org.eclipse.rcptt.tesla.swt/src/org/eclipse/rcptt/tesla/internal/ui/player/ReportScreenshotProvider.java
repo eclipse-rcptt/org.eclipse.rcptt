@@ -86,30 +86,8 @@ public class ReportScreenshotProvider {
 			finalMessage = message + "(" + postFix + ")";
 		}
 
-		int minx = bounds.width, miny = bounds.height, maxx = 0, maxy = 0;
-
-		Rectangle rectangle = shell.getBounds();
-		rectangle.x -= 10;
-		rectangle.y -= 10;
-		rectangle.width += 20;
-		rectangle.height += 20;
-		Point displayPoint = new Point(rectangle.x, rectangle.y);
-		if (minx > displayPoint.x) {
-			minx = displayPoint.x;
-		}
-		if (miny > displayPoint.y) {
-			miny = displayPoint.y;
-		}
-
-		if (maxx < displayPoint.x + rectangle.width) {
-			maxx = displayPoint.x + rectangle.width;
-		}
-		if (maxy < displayPoint.y + rectangle.height) {
-			maxy = displayPoint.y + rectangle.height;
-		}
 		// }
-		byte[] shotData = screenCapturer.makeScreenShotData(display, minx,
-				miny, maxx - minx, maxy - miny, null, !onError);
+		byte[] shotData = screenCapturer.makeScreenShotData(shell, !onError);
 		if (shotData != null) {
 			INodeBuilder node = ReportManager.getCurrentReportNode();
 			// Clean out previous screenshots with same name.
