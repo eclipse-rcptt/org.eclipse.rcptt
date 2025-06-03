@@ -12,6 +12,10 @@ package org.eclipse.rcptt.tesla.ecl.impl;
 
 import static org.eclipse.rcptt.tesla.ecl.internal.impl.TeslaImplPlugin.PLUGIN_ID;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -50,9 +54,8 @@ public abstract class UIRunnable<T> {
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T exec(final UIRunnable<T> runnable, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
-		final Object[] result = new Object[1];
 		final AtomicReference<RunningState> processed = new AtomicReference<RunningState>(RunningState.Starting);
-		final Throwable[] exception = new Throwable[] { null };
+		CompletableFuture<T> result = new CompletableFuture<T>();
 		final UIJobCollector collector = new UIJobCollector();
 		long start = System.currentTimeMillis();
 		long stop = start + timeout_ms;
@@ -96,9 +99,9 @@ public abstract class UIRunnable<T> {
 				if (processed.compareAndSet(RunningState.Starting, RunningState.Execution)) {
 					debugProceed("Starting");
 					try {
-						result[0] = runnable.run();
+						result.complete(runnable.run());
 					} catch (Throwable e) {
-						exception[0] = e;
+						result.completeExceptionally(e);
 						// Do not collect anything on error
 						collector.setNeedDisable();
 						// collector.clean();
@@ -137,13 +140,8 @@ public abstract class UIRunnable<T> {
 
 				// Perform wakeup async
 				SWTUIPlayer.notifyUI(display);
-				Thread.sleep(1);// Just to wait min time.
-				if (exception[0] != null) {
-					if (exception[0] instanceof CoreException) {
-						throw (CoreException)exception[0];
-					}
-					throw new CoreException(createError(exception[0]));
-				}
+				
+				result.get(1, TimeUnit.MILLISECONDS);
 				long time = System.currentTimeMillis();
 				if (time > halfWay) {
 					if (processed.get().equals(RunningState.Starting)) {
@@ -170,30 +168,36 @@ public abstract class UIRunnable<T> {
 					throw new CoreException(status);
 				}
 			}
-			
-			for (;;) {
-				Q7WaitInfoRoot info = TeslaBridge.getCurrentWaitInfo(true);
-				if (collector.isEmpty(org.eclipse.rcptt.tesla.core.context.ContextManagement.currentContext(), info)) {
-					break;
-				}
-				if (isCancelled.getAsBoolean()) {
-					throw new CoreException(Status.CANCEL_STATUS); 
-				}
-				
-				if (System.currentTimeMillis() > stop) {
-					storeTimeoutInReport(display, collector);
-					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, IProcess.TIMEOUT_CODE, "Background jobs are running for too long", new RuntimeException()));
+			if (!result.isCompletedExceptionally()) {
+				for (;;) {
+					Q7WaitInfoRoot info = TeslaBridge.getCurrentWaitInfo(true);
+					if (collector.isEmpty(org.eclipse.rcptt.tesla.core.context.ContextManagement.currentContext(), info)) {
+						break;
+					}
+					if (isCancelled.getAsBoolean()) {
+						throw new CoreException(Status.CANCEL_STATUS); 
+					}
+					
+					if (System.currentTimeMillis() > stop) {
+						storeTimeoutInReport(display, collector);
+						throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, IProcess.TIMEOUT_CODE, "Background jobs are running for too long", new RuntimeException()));
+					}
+					Thread.sleep(1);
 				}
 			}
+			return (T) result.get(1, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (ExecutionException e) {
+			throw new CoreException(createError(e.getCause()));
+		} catch (TimeoutException e) {
+			throw new CoreException(createError(e));
 		} finally {
 			processed.set(RunningState.Done);
 			Job.getJobManager().removeJobChangeListener(collector);
 			TeslaEventManager.getManager().removeEventListener(listener);
 		}
-		return (T) result[0];
 	}
 
 	private static IStatus createError(final Throwable exception) {
