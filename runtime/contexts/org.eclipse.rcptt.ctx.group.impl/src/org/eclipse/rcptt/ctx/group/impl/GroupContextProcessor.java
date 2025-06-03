@@ -45,7 +45,8 @@ public class GroupContextProcessor implements IContextProcessor, IEclAwareProces
 
 	@Override
 	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
-		apply(context, isCancelled);
+		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+				getClass().getName() + " is ECL-aware and must be passed a session object", null));
 	}
 
 	@Override
