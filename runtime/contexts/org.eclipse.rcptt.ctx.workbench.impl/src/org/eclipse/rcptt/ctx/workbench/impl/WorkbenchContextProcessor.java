@@ -13,6 +13,7 @@ package org.eclipse.rcptt.ctx.workbench.impl;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -118,7 +119,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		}
 	};
 
-	public void apply(final Context context) throws CoreException {
+	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkbenchContext ctx = (WorkbenchContext) context;
 		final UIJobCollector collector = new UIJobCollector();
 		Job.getJobManager().addJobChangeListener(collector);
