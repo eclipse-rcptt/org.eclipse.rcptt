@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.parameters.impl;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.EList;
@@ -33,8 +35,8 @@ public class ParametersContextProcessor implements IContextProcessor, IEclAwareP
 		throw new UnsupportedOperationException();
 	}
 
-	public void apply(Context context) throws CoreException {
-		apply(context, null);
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
+		apply(context, isCancelled);
 	}
 
 	public Context create(EObject param) throws CoreException {

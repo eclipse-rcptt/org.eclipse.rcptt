@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
@@ -217,7 +218,8 @@ public class DebugContextProcessor implements IContextProcessor {
 		}
 	}
 
-	public void apply(final Context ctx) throws CoreException {
+	@Override
+	public void apply(final Context ctx, BooleanSupplier isCancelled) throws CoreException {
 
 		if (!(ctx instanceof DebugContext)) {
 			return;

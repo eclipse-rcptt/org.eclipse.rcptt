@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IContainer;
@@ -67,7 +68,7 @@ import org.eclipse.rcptt.workspace.WorkspaceFactory;
 
 public class WorkspaceContextProcessor implements IContextProcessor {
 
-	public void apply(final Context context) throws CoreException {
+	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkspaceContext wc = (WorkspaceContext) context;
 
 		// Smart cancel/close jobs with showed UI interactions.

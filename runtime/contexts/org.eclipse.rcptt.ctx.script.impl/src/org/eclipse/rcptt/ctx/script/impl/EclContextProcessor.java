@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.script.impl;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -110,7 +112,7 @@ public class EclContextProcessor implements IContextProcessor, IEclAwareProcesso
 	}
 
 	@Override
-	public void apply(Context context) throws CoreException {
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
 		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 				"EclContextProcessor is ECL-aware and must be passed a session object", null));
 	}

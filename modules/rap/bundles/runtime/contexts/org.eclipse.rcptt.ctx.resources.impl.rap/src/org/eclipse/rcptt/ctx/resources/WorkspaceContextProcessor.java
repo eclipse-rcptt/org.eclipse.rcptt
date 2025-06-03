@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -108,7 +109,8 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 		}
 	};
 
-	public void apply(final Context context) throws CoreException {
+	@Override
+	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkspaceContext wc = (WorkspaceContext) context;
 
 		// Smart cancel/close jobs with showed UI interactions.
