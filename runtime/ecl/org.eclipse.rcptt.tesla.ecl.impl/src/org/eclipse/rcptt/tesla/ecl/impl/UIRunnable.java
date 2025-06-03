@@ -139,8 +139,12 @@ public abstract class UIRunnable<T> {
 
 				// Perform wakeup async
 				SWTUIPlayer.notifyUI(display);
-				
-				result.get(1, TimeUnit.MILLISECONDS);
+				try {
+					result.get(100, TimeUnit.MILLISECONDS);
+					break;
+				} catch (TimeoutException e) {
+					// Continue to check for timeouts
+				}
 				long time = System.currentTimeMillis();
 				if (time > halfWay) {
 					if (processed.get().equals(RunningState.Starting)) {
