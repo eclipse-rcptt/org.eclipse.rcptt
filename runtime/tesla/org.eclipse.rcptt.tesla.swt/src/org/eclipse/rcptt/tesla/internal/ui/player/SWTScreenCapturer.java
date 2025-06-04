@@ -29,11 +29,12 @@ public class SWTScreenCapturer implements IScreenCapturer {
 	
 
 	private Image getImage(Control control) {
-		GC gc = new GC(control);
 		Display display = control.getDisplay();
 		Shell shell = control.getShell();
+		GC gc = new GC(shell);
 		try {
-			Image image = new Image(display, shell.getBounds());
+			Rectangle bounds = shell.getBounds();
+			Image image = new Image(display, bounds.width, bounds.height);
 			shell.print(gc);
 			if (shell != control) {
 				gc.setForeground(display.getSystemColor(SWT.COLOR_RED));
