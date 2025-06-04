@@ -11,10 +11,12 @@
 package org.eclipse.rcptt.debug.runtime;
 
 import static java.lang.Math.toIntExact;
+import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -38,6 +41,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.variables.VariablesPlugin;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.ILaunch;
@@ -81,6 +85,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class DebugContextProcessor implements IContextProcessor {
 
+	@Override
 	public boolean isApplied(final Context context) {
 		return context instanceof DebugContext;
 	}
@@ -246,7 +251,7 @@ public class DebugContextProcessor implements IContextProcessor {
 			}
 
 			if (context.isNoLaunches()) {
-				cleanLaunches(context.getLaunchExceptions());
+				cleanLaunches(context.getLaunchExceptions(), toIntExact(stop - currentTimeMillis()), isCancelled);
 			}
 			if (context.isNoLaunchShortcuts()) {
 				cleanLaunchShortcuts(context.getLaunchShortcutExceptions());
@@ -295,43 +300,76 @@ public class DebugContextProcessor implements IContextProcessor {
 		return new Status(IStatus.ERROR, Q7DebugRuntime.PLUGIN_ID, message);
 	}
 
-	private void cleanLaunches(final String exceptions) throws CoreException, InterruptedException {
+	private void cleanLaunches(final String exceptions, int timeout_ms, BooleanSupplier isCancelled) throws CoreException, InterruptedException {
 		final MultiStatus result = new MultiStatus(Q7DebugRuntime.PLUGIN_ID, 0, "Failed to remove launches", null);
 		Thread t = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				Patterns patterns = new Patterns();
 				patterns.setFromCommaSeparated(exceptions);
 				final ILaunchManager launches = DebugPlugin.getDefault().getLaunchManager();
-				for (final ILaunch launch : launches.getLaunches()) {
-					String name = "";
-					if (launch.getLaunchConfiguration() != null) {
-						name = launch.getLaunchConfiguration().getName();
-						if (patterns.matches(name))
-							continue;
-					}
-					try {
-						for (int i = 0; i < 3; i++) {
+				try {
+					long start = currentTimeMillis();
+					ArrayList<ILaunch> toTerminate = Arrays.stream(launches.getLaunches()).filter(launch -> !patterns.matches(name(launch))).collect(Collectors.toCollection(ArrayList::new));
+					while (!Thread.interrupted()) {
+						for (final ILaunch launch : toTerminate.toArray(new ILaunch[0])) {
 							if (launch.isTerminated()) {
-								break;
+								launches.removeLaunch(launch);
+								toTerminate.remove(launch);
+								continue;
 							}
 							try {
 								launch.terminate();
-							} catch (Exception e) {
-								result.add(new Status(Status.ERROR, Q7DebugRuntime.PLUGIN_ID,
-										"Failed to terminate " + name, e));
+							} catch (DebugException e) { // terminate() has a hardcoded timeout of 5 seconds, which is not enough
+								if (Thread.interrupted()) {
+									return;
+								}
+								result.add(warning(format("Failed to terminate %s in %d ms", name(launch), currentTimeMillis() - start), e));
 							}
 						}
-					} finally {
-						launches.removeLaunch(launch);
 					}
+					
+					toTerminate.stream().filter(l -> !l.isTerminated()).map(DebugContextProcessor::name).forEach(name -> {
+						result.add(error(format("Failed to terminate %s", name), new RuntimeException()));
+					});
+				} catch (Exception e) {
+					result.add(error("Termination failed", e));
 				}
 			}
 		}, "Debug Context: Clean launches");
 		t.start();
-		t.join(TeslaLimits.getContextJoinTimeout());
+		long stop = currentTimeMillis() + timeout_ms;
+		try {
+			while (stop > currentTimeMillis()) {
+				if (isCancelled.getAsBoolean()) {
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
+				t.join(100);
+			}
+		} finally {
+			t.interrupt();
+		}
+		t.join();
 		if (!result.isOK()) {
 			throw new CoreException(result);
 		}
+	}
+
+	private  static String name(final ILaunch launch) {
+		if (launch.getLaunchConfiguration() == null) {
+			return "";
+		}
+		return launch.getLaunchConfiguration().getName();
+	}
+
+	private Status error(String message, Exception e) {
+		return new Status(Status.ERROR, Q7DebugRuntime.PLUGIN_ID,
+				message, e);
+	}
+
+	private Status warning(String message, Exception e) {
+		return new Status(Status.WARNING, Q7DebugRuntime.PLUGIN_ID,
+				message, e);
 	}
 
 	static class Patterns {
@@ -376,6 +414,7 @@ public class DebugContextProcessor implements IContextProcessor {
 	private void cleanLaunchShortcuts(final String exceptions) throws CoreException {
 		final Exception[] resultE = new Exception[] { null };
 		Thread t = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				Patterns exceptPatterns = new Patterns();
 				exceptPatterns.setFromCommaSeparated(exceptions);
@@ -413,6 +452,7 @@ public class DebugContextProcessor implements IContextProcessor {
 	private void cleanBreakPoints() throws CoreException {
 		final Exception[] resultE = new Exception[] { null };
 		Thread t = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				final IBreakpointManager breakpoints = DebugPlugin.getDefault().getBreakpointManager();
 				try {
@@ -434,6 +474,7 @@ public class DebugContextProcessor implements IContextProcessor {
 		}
 	}
 
+	@Override
 	public Context create(EObject param) throws CoreException {
 		return UIRunnable.exec(new UIRunnable<DebugContext>() {
 			@Override
