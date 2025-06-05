@@ -1,0 +1,79 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.debug
+Debug-NoBreakpoints: true
+Debug-NoLaunchShortcuts: false
+Debug-NoLaunches: true
+Element-Name: addLaunch
+Element-Type: context
+Element-Version: 2.0
+Id: _sT-XUEFxEfCDPvc9NMBknA
+Runtime-Version: 2.6.0.qualifier
+Save-Time: 6/4/25, 10:30 PM
+
+------=_New_configuration.debug.launchconfiguration-d7e22da7-db24-3baf-b8ec-17253769c3a3
+Content-Type: text/launchconfiguration
+Entry-Name: New_configuration.debug.launchconfiguration
+
+<?xml version="1.0" encoding="UTF-8"?>
+<org.eclipse.rcptt.ctx.debug:LaunchConfiguration xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.eclipse.rcptt.ctx.debug="http://eclipse.org/rcptt/ctx/debug" xmlns:org.eclipse.rcptt.ecl.core="http://www.eclipse.org/ecl/core.ecore" name="New_configuration" typeId="org.eclipse.jdt.launching.remoteJavaApplication">
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.ALLOW_TERMINATE">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:MapValue" name="org.eclipse.jdt.launching.CONNECT_MAP">
+    <entries xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="hostname">
+      <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="localhost"/>
+    </entries>
+    <entries xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="port">
+      <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="8000"/>
+    </entries>
+    <entries xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="timeout">
+      <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="20000"/>
+    </entries>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.PROJECT_ATTR">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value=""/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.VM_CONNECTOR_ID">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.jdt.launching.socketAttachConnector"/>
+  </attributes>
+</org.eclipse.rcptt.ctx.debug:LaunchConfiguration>
+
+------=_New_configuration.debug.launchconfiguration-d7e22da7-db24-3baf-b8ec-17253769c3a3--
+------=_debug.launchtypes-7159add4-14d7-36f5-abc2-a36dec1fc18e
+Content-Type: q7/binary
+Entry-Name: debug.launchtypes
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAAB9UstuGzEMvOcrjL13
+TUmkKBlxAr0ItGgvRQr06toLx4VfSJxH/75cN4/20j3srqSZ4XDEy+vn3XbyONzdbw77eWd66CbDfnlY
+bfbrefftRj6E7vrq4vJwt+6H5XZzvB/6u+XxdOqXp+d+Nfx4WM8+Lx72y9ubX8dh8rzbzN7E7Cim8vv7
+me7Pu9vT6TibTp+envrDbt2r5PT7l4+vkP9UeKO+no/UM2aqmOkZ0032i90w774Ou8NpmHxaPC4m6Xjc
+bpaLk7rpJpvVvPu7xs/Vqd+enWur/d2ZNrL+Je0WaxUNkQAbMlRIJkGCP0/FiAGR7J+lgbdvAP/yL+JE
+vHk5yMpANIQcYvHuDLKRsyUSwVgMlBYKZPFOWCQEX62+i7WQyYyqyNiqRBRIKqAblZUjWoOjcJGsNJRm
+2IWmQLYtZqFYmi0GnVEjPsVCI7M4iygZGkZWkyMplJpNzOrLRSiEYEJC44vT0uSqaWo+A5AN2ZsCsTjP
+bBBcbVxVwrGUKM1mkVgxGfaq8I5PqDJnvNdFY2mZbY5qX12n7NmNPQYN1lsTKpBpFGwzQFTenUgim0YC
+qs+iWnoh2oCVpHvMXrwU4GpcMKRcV9AEUg/VasyGoKZo0VaNnlGbdNGR1JaaYkJN6kOSXhQTEVeurgKT
+B6c5mVhKcm0MI6cGJpegKalu9CGPzpuuohr2wUXS+AitoGWrd0HRM5VgdAB0CAgg1iJgmwUH0Lzk5jQl
+cShY6ssggYJJ5w5TQ+sh2G56dfEbUEsHCCRAj/k+AgAAsgMAAFBLAQIUABQACAgIAAAAIQAkQI/5PgIA
+ALIDAAAIAAkAAAAAAAAAAAAAAAAAAAAuY29udGVudFVUBQABAAAAAFBLBQYAAAAAAQABAD8AAAB9AgAA
+AAA=
+------=_debug.launchtypes-7159add4-14d7-36f5-abc2-a36dec1fc18e--
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae
+Content-Type: text/breakpoints
+Entry-Name: debug.breakpoints
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"/>
+
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae--
+------=_debug.launches-be8ac185-ac72-3f40-ae87-94751ee91eea
+Content-Type: text/launch
+Entry-Name: debug.launches
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"/>
+
+------=_debug.launches-be8ac185-ac72-3f40-ae87-94751ee91eea--
