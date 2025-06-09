@@ -36,3 +36,5 @@ RUN apt-get update \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*
+
+CMD ["jshell"]
