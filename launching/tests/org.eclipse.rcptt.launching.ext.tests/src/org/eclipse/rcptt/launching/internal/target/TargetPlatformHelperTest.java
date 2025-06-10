@@ -102,7 +102,7 @@ public class TargetPlatformHelperTest {
 		assertTrue(coreTarget.toString(), Files.isDirectory(coreTarget));
 		@SuppressWarnings("resource")
 		FileSystem fileSystem = coreTarget.getFileSystem();
-		PathMatcher matcher = fileSystem.getPathMatcher("glob:core-repository-*-SNAPSHOT.zip");
+		PathMatcher matcher = fileSystem.getPathMatcher("glob:core-repository-*.zip");
 		Path repo;
 		try (Stream<Path> stream = Files.find(coreTarget, 1, (path, ignored) -> matcher.matches(coreTarget.relativize(path)))) {
 			repo = stream.findFirst().get();
