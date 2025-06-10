@@ -183,7 +183,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void get_version_from_pom() {
-    return sh_with_return("mvn -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
+    return sh_with_return("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
   }
 
   private void get_version() {
