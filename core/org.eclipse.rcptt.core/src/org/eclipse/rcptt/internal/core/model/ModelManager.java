@@ -76,19 +76,21 @@ public class ModelManager {
 		return instance;
 	}
 
-	public void startup() {
-		this.cache = new ModelCache(50_000_000);
-
-		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(this.deltaState,
-				IResourceChangeEvent.PRE_BUILD
-						| IResourceChangeEvent.POST_BUILD
-						| IResourceChangeEvent.POST_CHANGE
-						| IResourceChangeEvent.PRE_DELETE
-						| IResourceChangeEvent.PRE_CLOSE);
-		RcpttCore.getInstance();
-		getIndexManager().reset();
-		ProjectIndexerManager.startIndexing();
+	private synchronized void init() {
+		if (this.cache == null) {
+			this.cache = new ModelCache(50_000_000);
+	
+			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			workspace.addResourceChangeListener(this.deltaState,
+					IResourceChangeEvent.PRE_BUILD
+							| IResourceChangeEvent.POST_BUILD
+							| IResourceChangeEvent.POST_CHANGE
+							| IResourceChangeEvent.PRE_DELETE
+							| IResourceChangeEvent.PRE_CLOSE);
+			RcpttCore.getInstance();
+			getIndexManager().reset();
+			ProjectIndexerManager.startIndexing();
+		}
 	}
 
 	public void shutdown() {
@@ -101,10 +103,16 @@ public class ModelManager {
 	}
 	
 	public <V> V accessInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		init();
 		return this.cache.<Q7ElementInfo, V>accessInfo(element, Q7ElementInfo.class, element::createElementInfo, infoToValue);
 	}
 
 	public <V> Optional<V> peekInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		synchronized (this) {
+			if (cache == null) {
+				return Optional.empty();
+			}
+		}
 		return this.cache.<Q7ElementInfo, V>peekInfo(element, Q7ElementInfo.class, infoToValue);
 	}
 
@@ -117,6 +125,11 @@ public class ModelManager {
 	
 	synchronized void removeInfoAndChildren(Q7Element element)
 			throws ModelException, InterruptedException {
+		synchronized (this) {
+			if (cache == null) {
+				return;
+			}
+		}
 		try {
 			this.cache.peekInfo(element, Object.class, info -> {
 				try {
