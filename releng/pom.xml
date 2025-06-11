@@ -229,6 +229,7 @@
                   </goals>
               </execution>
           </executions>
+          <configuration><skip>true</skip></configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -340,6 +341,11 @@
               <defaultP2Metadata>false</defaultP2Metadata>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>org.eclipse.dash</groupId>
+            <artifactId>license-tool-plugin</artifactId>
+            <configuration><skip>false</skip></configuration>
+        </plugin>
         </plugins>
       </build>
     </profile>
