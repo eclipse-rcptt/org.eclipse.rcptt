@@ -63,8 +63,10 @@ public class ModelManager {
 	private Set<IProject> buildingProjects = new HashSet<IProject>();
 
 	public ModelManager() {
-		if (Platform.isRunning())
+		RcpttCore.getInstance();
+		if (Platform.isRunning()) {
 			this.indexManager = new IndexManager();
+		}
 	}
 
 	public synchronized static ModelManager getModelManager() {
@@ -72,23 +74,6 @@ public class ModelManager {
 			instance = new ModelManager();
 		}
 		return instance;
-	}
-
-	private synchronized void init() {
-		if (this.cache == null) {
-			this.cache = new ModelCache(50_000_000);
-	
-			final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			workspace.addResourceChangeListener(this.deltaState,
-					IResourceChangeEvent.PRE_BUILD
-							| IResourceChangeEvent.POST_BUILD
-							| IResourceChangeEvent.POST_CHANGE
-							| IResourceChangeEvent.PRE_DELETE
-							| IResourceChangeEvent.PRE_CLOSE);
-			RcpttCore.getInstance();
-			getIndexManager().reset();
-			ProjectIndexerManager.startIndexing();
-		}
 	}
 
 	public void shutdown() {
@@ -101,7 +86,20 @@ public class ModelManager {
 	}
 	
 	public <V> V accessInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
-		init();
+		synchronized (this) {
+			if (this.cache == null) {
+				this.cache = new ModelCache(50_000_000);
+				final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+				workspace.addResourceChangeListener(this.deltaState,
+						IResourceChangeEvent.PRE_BUILD
+								| IResourceChangeEvent.POST_BUILD
+								| IResourceChangeEvent.POST_CHANGE
+								| IResourceChangeEvent.PRE_DELETE
+								| IResourceChangeEvent.PRE_CLOSE);
+				getIndexManager().reset();
+				ProjectIndexerManager.startIndexing();
+			}
+		}
 		return this.cache.<Q7ElementInfo, V>accessInfo(element, Q7ElementInfo.class, element::createElementInfo, infoToValue);
 	}
 
