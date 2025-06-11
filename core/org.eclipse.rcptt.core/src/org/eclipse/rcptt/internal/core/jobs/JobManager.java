@@ -43,7 +43,7 @@ public abstract class JobManager implements Runnable {
 	/**
 	 * Invoked exactly once, in background, before starting processing any job
 	 */
-	public void activateProcessing() {
+	private void activateProcessing() {
 		this.activated = true;
 	}
 
@@ -181,6 +181,7 @@ public abstract class JobManager implements Runnable {
 
 	public boolean performConcurrentJob(IJob searchJob, int waitingPolicy,
 			IProgressMonitor progress, long timeout) {
+		activateProcessing();
 
 		searchJob.ensureReadyToRun();
 
@@ -277,16 +278,20 @@ public abstract class JobManager implements Runnable {
 	public abstract String processName();
 
 	private static final class WaitJob implements IJob {
+		@Override
 		public boolean belongsTo(String jobFamily) {
 			return false;
 		}
 
+		@Override
 		public void cancel() {
 		}
 
+		@Override
 		public void ensureReadyToRun() {
 		}
 
+		@Override
 		public boolean execute(IProgressMonitor progress) {
 			return false;
 		}
@@ -354,6 +359,7 @@ public abstract class JobManager implements Runnable {
 	/**
 	 * Infinite loop performing resource indexing
 	 */
+	@Override
 	public void run() {
 		long idlingStart = -1;
 		activateProcessing();
