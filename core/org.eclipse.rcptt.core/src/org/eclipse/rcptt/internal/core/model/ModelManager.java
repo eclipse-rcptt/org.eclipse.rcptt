@@ -47,8 +47,6 @@ import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDeltaBuilder;
 import org.eclipse.rcptt.internal.core.model.index.IndexManager;
 import org.eclipse.rcptt.internal.core.model.index.ProjectIndexerManager;
 
-import com.google.common.base.Throwables;
-
 public class ModelManager {
 	private static ModelManager instance;
 	private ModelCache cache;// = new ModelCache();
@@ -149,8 +147,13 @@ public class ModelManager {
 			});
 			this.cache.removeInfo(element);
 		} catch (PrivateException e) {
-			Throwables.throwIfInstanceOf(e.getCause(), InterruptedException.class);
-			Throwables.throwIfInstanceOf(e.getCause(), ModelException.class);
+			Throwable cause = e.getCause();
+			if (cause instanceof InterruptedException) {
+				throw (InterruptedException)cause;
+			}
+			if (cause instanceof ModelException) {
+				throw (ModelException)cause;
+			}
 			throw new AssertionError(e);
 		}
 	}
