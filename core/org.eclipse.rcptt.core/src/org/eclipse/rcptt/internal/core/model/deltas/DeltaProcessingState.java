@@ -192,6 +192,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 		}
 	}
 
+	@Override
 	public void resourceChanged(final IResourceChangeEvent event) {
 		for (int i = 0; i < this.preResourceChangeListenerCount; i++) {
 			// wrap callbacks with Safe runnable for subsequent listeners to be
@@ -199,10 +200,12 @@ public class DeltaProcessingState implements IResourceChangeListener {
 			final IResourceChangeListener listener = this.preResourceChangeListeners[i];
 			if ((this.preResourceChangeEventMasks[i] & event.getType()) != 0)
 				SafeRunner.run(new ISafeRunnable() {
+					@Override
 					public void handleException(Throwable exception) {
 						exception.printStackTrace();
 					}
 
+					@Override
 					public void run() throws Exception {
 						listener.resourceChanged(event);
 					}

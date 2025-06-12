@@ -11,6 +11,8 @@
 package org.eclipse.rcptt.core.tests.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -30,7 +32,6 @@ import org.eclipse.rcptt.core.model.IQ7Folder;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ITestCase;
-import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7ElementChangedEvent;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
@@ -77,7 +78,7 @@ public class DeltaTests {
 	}
 
 	@Test
-	public void testNewTestcaseAppear() throws ModelException, InterruptedException {
+	public void testNewTestcaseAppear() throws InterruptedException, CoreException {
 		IQ7Project prj = q7project;
 		startDeltas();
 		prj.getRootFolder().createTestCase("mytestcase", true,
@@ -90,7 +91,7 @@ public class DeltaTests {
 	}
 
 	@Test
-	public void testNewFolderAppear() throws ModelException {
+	public void testNewFolderAppear() throws CoreException {
 		IQ7Project prj = q7project;
 		startDeltas();
 		prj.createFolder(new Path("newfolder"));
@@ -106,7 +107,7 @@ public class DeltaTests {
 		IQ7NamedElement element = folder.createContext("group", CONTEXT_TYPE, false, null);
 		startDeltas();
 		element.getResource().delete(true, new NullProgressMonitor());
-		TestCase.assertTrue(!element.exists());
+		assertFalse(element.exists());
 		assertDeltas("Assert delta", "ModelMembersq[*]: {CHILDREN}\n"
 				+ "\tcontexts[*]: {CHILDREN}\n" + "\t\tgroup.ctx[-]: {}");
 		stopDeltas();
@@ -142,8 +143,10 @@ public class DeltaTests {
 	/**
 	 * Starts listening to element deltas, and queues them in fgDeltas.
 	 */
-	public void startDeltas() {
+	public void startDeltas() throws CoreException {
 		org.eclipse.rcptt.core.tests.model.AbstractModelTestbase.waitForAutoBuild();
+		q7project.exists(); // start model manager resource listeners
+		ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
 		ModelManager.getModelManager().getIndexManager().waitUntilReady(new NullProgressMonitor());
 		clearDeltas();
 		RcpttCore.addElementChangedListener(this.deltaListener);
