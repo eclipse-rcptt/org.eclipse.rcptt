@@ -11,13 +11,6 @@
 		<groupId>org.eclipse.rcptt</groupId>
 		<version>2.7.0-SNAPSHOT</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>p2.osgi.bundle</groupId>
-			<artifactId>org.eclipse.equinox.weaving.hook</artifactId>
-			<version>${hookVersion}</version>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -46,7 +39,22 @@
 					<showEclipseLog>true</showEclipseLog>
 				</configuration>
 			</plugin>
-		</plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>org.eclipse.equinox.weaving.hook</id>
+                <versionRange>[${hookVersion},${hookVersion}]</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
+    </plugins>
 	</build>
 	<profiles>
 		<profile>
@@ -92,13 +100,14 @@
 		<profile>
 			<id>runtime4x</id>
 			<properties>
-				<hookVersion>1.2.200.v20180827-1235</hookVersion>
+				<hookVersion>1.4.0.v20240213-1357</hookVersion>
 			</properties>
 			<modules>
 				<module>org.eclipse.rcptt.tesla.jface.aspects.test</module>
 				<module>org.eclipse.rcptt.tesla.swt.aspects.test</module>
 				<module>org.eclipse.rcptt.tesla.swt.test</module>
 				<module>org.eclipse.rcptt.watson.test</module>
+				<module>org.eclipse.rcptt.contexts.test</module>
 			</modules>
 		</profile>
 	</profiles>

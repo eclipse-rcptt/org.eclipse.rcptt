@@ -55,12 +55,6 @@ public class RcpttPlugin extends Plugin {
 		plugin = this;
 
 		NetworkUtils.initTimeouts();
-		try {
-			ModelManager.getModelManager().startup();
-		} catch (Throwable e) {
-			// yeah, we're going to ignore even ClassNoDefFound exceptions
-			log("Couldn't start model manager", e);
-		}
 	}
 
 	/*

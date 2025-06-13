@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.JunitLaunchConfig">
+    <booleanAttribute key="append.args" value="true"/>
+    <booleanAttribute key="askclear" value="false"/>
+    <booleanAttribute key="automaticAdd" value="true"/>
+    <booleanAttribute key="automaticIncludeRequirements" value="true"/>
+    <booleanAttribute key="automaticValidate" value="true"/>
+    <stringAttribute key="bootstrap" value=""/>
+    <stringAttribute key="checked" value="[NONE]"/>
+    <booleanAttribute key="clearConfig" value="true"/>
+    <booleanAttribute key="clearws" value="true"/>
+    <booleanAttribute key="clearwslog" value="false"/>
+    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/pde-junit"/>
+    <booleanAttribute key="default" value="false"/>
+    <setAttribute key="deselected_workspace_bundles">
+        <setEntry value="clipping_reproducer"/>
+        <setEntry value="com.example.bug"/>
+        <setEntry value="com.xored.q7.quality.mockups.issues"/>
+        <setEntry value="com.xored.q7.quality.mockups.platform"/>
+        <setEntry value="com.xored.q7.quality.mockups.swt"/>
+        <setEntry value="com.xored.q7.quality.mockups.ui"/>
+        <setEntry value="org.eclipse.rcptt"/>
+        <setEntry value="org.eclipse.rcptt.cli.common"/>
+        <setEntry value="org.eclipse.rcptt.core"/>
+        <setEntry value="org.eclipse.rcptt.core.builder"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.core"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.debug"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.formatter"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.formatter.test"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.highlighter"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.parser"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.parser.test"/>
+        <setEntry value="org.eclipse.rcptt.core.ecl.scanner"/>
+        <setEntry value="org.eclipse.rcptt.core.launching"/>
+        <setEntry value="org.eclipse.rcptt.core.scenario"/>
+        <setEntry value="org.eclipse.rcptt.core.search"/>
+        <setEntry value="org.eclipse.rcptt.core.search.test"/>
+        <setEntry value="org.eclipse.rcptt.core.swt"/>
+        <setEntry value="org.eclipse.rcptt.core.tests"/>
+        <setEntry value="org.eclipse.rcptt.ctx.capability"/>
+        <setEntry value="org.eclipse.rcptt.ctx.capability.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.debug"/>
+        <setEntry value="org.eclipse.rcptt.ctx.debug.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.debug.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.extensions"/>
+        <setEntry value="org.eclipse.rcptt.ctx.filesystem"/>
+        <setEntry value="org.eclipse.rcptt.ctx.filesystem.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.filesystem.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.group"/>
+        <setEntry value="org.eclipse.rcptt.ctx.group.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.group.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.parameters"/>
+        <setEntry value="org.eclipse.rcptt.ctx.parameters.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.parameters.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.preferences"/>
+        <setEntry value="org.eclipse.rcptt.ctx.preferences.aspects"/>
+        <setEntry value="org.eclipse.rcptt.ctx.preferences.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.preferences.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.resources"/>
+        <setEntry value="org.eclipse.rcptt.ctx.resources.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.resources.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.script"/>
+        <setEntry value="org.eclipse.rcptt.ctx.script.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.script.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.super"/>
+        <setEntry value="org.eclipse.rcptt.ctx.super.ui"/>
+        <setEntry value="org.eclipse.rcptt.ctx.workbench"/>
+        <setEntry value="org.eclipse.rcptt.ctx.workbench.aspect"/>
+        <setEntry value="org.eclipse.rcptt.ctx.workbench.impl"/>
+        <setEntry value="org.eclipse.rcptt.ctx.workbench.ui"/>
+        <setEntry value="org.eclipse.rcptt.dev.ui"/>
+        <setEntry value="org.eclipse.rcptt.ecl.client.tcp"/>
+        <setEntry value="org.eclipse.rcptt.ecl.client.tcp.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.core"/>
+        <setEntry value="org.eclipse.rcptt.ecl.core.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.data"/>
+        <setEntry value="org.eclipse.rcptt.ecl.data.apache.poi"/>
+        <setEntry value="org.eclipse.rcptt.ecl.data.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.debug.core"/>
+        <setEntry value="org.eclipse.rcptt.ecl.debug.runtime"/>
+        <setEntry value="org.eclipse.rcptt.ecl.debug.ui"/>
+        <setEntry value="org.eclipse.rcptt.ecl.dispatch"/>
+        <setEntry value="org.eclipse.rcptt.ecl.doc"/>
+        <setEntry value="org.eclipse.rcptt.ecl.doc.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.filesystem"/>
+        <setEntry value="org.eclipse.rcptt.ecl.interop"/>
+        <setEntry value="org.eclipse.rcptt.ecl.operations"/>
+        <setEntry value="org.eclipse.rcptt.ecl.operations.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.parser"/>
+        <setEntry value="org.eclipse.rcptt.ecl.parser.test"/>
+        <setEntry value="org.eclipse.rcptt.ecl.perf"/>
+        <setEntry value="org.eclipse.rcptt.ecl.perf.tests"/>
+        <setEntry value="org.eclipse.rcptt.ecl.platform"/>
+        <setEntry value="org.eclipse.rcptt.ecl.platform.ui"/>
+        <setEntry value="org.eclipse.rcptt.ecl.popup"/>
+        <setEntry value="org.eclipse.rcptt.ecl.popup.ui"/>
+        <setEntry value="org.eclipse.rcptt.ecl.server.tcp"/>
+        <setEntry value="org.eclipse.rcptt.ecl.server.tcp.ui"/>
+        <setEntry value="org.eclipse.rcptt.ecl.shell"/>
+        <setEntry value="org.eclipse.rcptt.ecl.telnet.server"/>
+        <setEntry value="org.eclipse.rcptt.ecl.telnet.server.ui"/>
+        <setEntry value="org.eclipse.rcptt.expandbar"/>
+        <setEntry value="org.eclipse.rcptt.expandbar.ide"/>
+        <setEntry value="org.eclipse.rcptt.expandbar.runtime"/>
+        <setEntry value="org.eclipse.rcptt.forms.impl"/>
+        <setEntry value="org.eclipse.rcptt.help"/>
+        <setEntry value="org.eclipse.rcptt.launching"/>
+        <setEntry value="org.eclipse.rcptt.launching.common"/>
+        <setEntry value="org.eclipse.rcptt.launching.configuration"/>
+        <setEntry value="org.eclipse.rcptt.launching.ext"/>
+        <setEntry value="org.eclipse.rcptt.launching.ext.tests"/>
+        <setEntry value="org.eclipse.rcptt.launching.ext.ui"/>
+        <setEntry value="org.eclipse.rcptt.launching.injection"/>
+        <setEntry value="org.eclipse.rcptt.launching.multiaut"/>
+        <setEntry value="org.eclipse.rcptt.launching.multiaut.ui"/>
+        <setEntry value="org.eclipse.rcptt.launching.p2utils"/>
+        <setEntry value="org.eclipse.rcptt.launching.rap"/>
+        <setEntry value="org.eclipse.rcptt.launching.rap.ui"/>
+        <setEntry value="org.eclipse.rcptt.launching.remote"/>
+        <setEntry value="org.eclipse.rcptt.launching.remote.ui"/>
+        <setEntry value="org.eclipse.rcptt.launching.tests"/>
+        <setEntry value="org.eclipse.rcptt.logging"/>
+        <setEntry value="org.eclipse.rcptt.module.nebula.updates"/>
+        <setEntry value="org.eclipse.rcptt.platform"/>
+        <setEntry value="org.eclipse.rcptt.reporting"/>
+        <setEntry value="org.eclipse.rcptt.reporting.html"/>
+        <setEntry value="org.eclipse.rcptt.reporting.html.tests"/>
+        <setEntry value="org.eclipse.rcptt.reporting.util"/>
+        <setEntry value="org.eclipse.rcptt.resources"/>
+        <setEntry value="org.eclipse.rcptt.resources.impl"/>
+        <setEntry value="org.eclipse.rcptt.resources.ui"/>
+        <setEntry value="org.eclipse.rcptt.runner"/>
+        <setEntry value="org.eclipse.rcptt.runtime.ui"/>
+        <setEntry value="org.eclipse.rcptt.search"/>
+        <setEntry value="org.eclipse.rcptt.tesla.canvas"/>
+        <setEntry value="org.eclipse.rcptt.tesla.chart"/>
+        <setEntry value="org.eclipse.rcptt.tesla.core"/>
+        <setEntry value="org.eclipse.rcptt.tesla.core.am"/>
+        <setEntry value="org.eclipse.rcptt.tesla.core.context"/>
+        <setEntry value="org.eclipse.rcptt.tesla.ecl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.ecl.impl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.gef"/>
+        <setEntry value="org.eclipse.rcptt.tesla.gef.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jdt"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jdt.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.aspects.test"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.databinding"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.databinding.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.databinding.observable.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.fragment"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.text"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.text.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jface.text.reconciler.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.jobs.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.ecl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.ecl.impl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.impl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.properties.view"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.draw2d"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.forms"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.gef"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.gmf"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.jface"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.jface.text"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.swt"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.workbench"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.workbench.texteditor"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.canvas"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.core"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.core.ecl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.draw2d"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.gef"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.jface.text"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.nebula"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.nebula.ecl"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.swt"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.workbench.texteditor"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt.aspects.test"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt.e4x"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt.fragment"/>
+        <setEntry value="org.eclipse.rcptt.tesla.swt.test"/>
+        <setEntry value="org.eclipse.rcptt.tesla.ui.ide"/>
+        <setEntry value="org.eclipse.rcptt.tesla.ui.ide.aspects"/>
+        <setEntry value="org.eclipse.rcptt.tesla.variables"/>
+        <setEntry value="org.eclipse.rcptt.tesla.workbench.aspects.e4x"/>
+        <setEntry value="org.eclipse.rcptt.tesla.workbench.texteditor"/>
+        <setEntry value="org.eclipse.rcptt.tesla.workbench.texteditor.aspects"/>
+        <setEntry value="org.eclipse.rcptt.testing.ecl"/>
+        <setEntry value="org.eclipse.rcptt.ui"/>
+        <setEntry value="org.eclipse.rcptt.ui.activities"/>
+        <setEntry value="org.eclipse.rcptt.ui.report"/>
+        <setEntry value="org.eclipse.rcptt.updates.aspectj.e44x"/>
+        <setEntry value="org.eclipse.rcptt.updates.extra"/>
+        <setEntry value="org.eclipse.rcptt.updates.kepler"/>
+        <setEntry value="org.eclipse.rcptt.updates.runtime.e4x"/>
+        <setEntry value="org.eclipse.rcptt.util"/>
+        <setEntry value="org.eclipse.rcptt.util.resources"/>
+        <setEntry value="org.eclipse.rcptt.util.swt"/>
+        <setEntry value="org.eclipse.rcptt.verifications"/>
+        <setEntry value="org.eclipse.rcptt.verifications.log"/>
+        <setEntry value="org.eclipse.rcptt.verifications.log.impl"/>
+        <setEntry value="org.eclipse.rcptt.verifications.log.ui"/>
+        <setEntry value="org.eclipse.rcptt.verifications.resources"/>
+        <setEntry value="org.eclipse.rcptt.verifications.resources.impl"/>
+        <setEntry value="org.eclipse.rcptt.verifications.resources.ui"/>
+        <setEntry value="org.eclipse.rcptt.verifications.text"/>
+        <setEntry value="org.eclipse.rcptt.verifications.text.impl"/>
+        <setEntry value="org.eclipse.rcptt.verifications.text.ui"/>
+        <setEntry value="org.eclipse.rcptt.verifications.time"/>
+        <setEntry value="org.eclipse.rcptt.verifications.time.impl"/>
+        <setEntry value="org.eclipse.rcptt.verifications.time.ui"/>
+        <setEntry value="org.eclipse.rcptt.verifications.tree"/>
+        <setEntry value="org.eclipse.rcptt.verifications.tree.impl"/>
+        <setEntry value="org.eclipse.rcptt.verifications.tree.test"/>
+        <setEntry value="org.eclipse.rcptt.verifications.tree.ui"/>
+        <setEntry value="org.eclipse.rcptt.watson.aspects.jobs"/>
+        <setEntry value="org.eclipse.rcptt.watson.aspects.swt"/>
+        <setEntry value="org.eclipse.rcptt.watson.core"/>
+        <setEntry value="org.eclipse.rcptt.watson.jface"/>
+        <setEntry value="org.eclipse.rcptt.watson.jobs"/>
+        <setEntry value="org.eclipse.rcptt.watson.test"/>
+        <setEntry value="org.eclipse.rcptt.watson.ui"/>
+    </setAttribute>
+    <booleanAttribute key="includeOptional" value="false"/>
+    <stringAttribute key="location" value="${workspace_loc}/../junit-workspace"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/org.eclipse.rcptt.contexts.test"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="4"/>
+    </listAttribute>
+    <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value="=org.eclipse.rcptt.contexts.test"/>
+    <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+    <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
+    <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.rcptt.contexts.test"/>
+    <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.eclipse.swt.graphics.Resource.reportNonDisposed=true&#10;-Dosgi.framework.extensions=org.eclipse.equinox.weaving.hook&#10;--add-opens java.base/java.lang=ALL-UNNAMED"/>
+    <stringAttribute key="pde.version" value="3.3"/>
+    <stringAttribute key="product" value="org.eclipse.platform.ide"/>
+    <booleanAttribute key="run_in_ui_thread" value="true"/>
+    <setAttribute key="selected_target_bundles">
+        <setEntry value="org.eclipse.equinox.weaving.aspectj@1:true"/>
+        <setEntry value="org.eclipse.equinox.weaving.hook@default:false"/>
+        <setEntry value="org.eclipse.swt.cocoa.macosx.aarch64@default:false"/>
+    </setAttribute>
+    <setAttribute key="selected_workspace_bundles">
+        <setEntry value="org.eclipse.rcptt.contexts.test@default:default"/>
+    </setAttribute>
+    <booleanAttribute key="show_selected_only" value="false"/>
+    <booleanAttribute key="tracing" value="false"/>
+    <booleanAttribute key="useCustomFeatures" value="false"/>
+    <booleanAttribute key="useDefaultConfig" value="true"/>
+    <booleanAttribute key="useDefaultConfigArea" value="false"/>
+    <booleanAttribute key="useProduct" value="true"/>
+</launchConfiguration>

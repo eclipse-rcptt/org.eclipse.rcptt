@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.jobs;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 
-public abstract class JobManager implements Runnable {
+public abstract class JobManager {
 
 	/* queue of jobs to execute */
 	protected IJob[] awaitingJobs = new IJob[10];
@@ -27,7 +26,15 @@ public abstract class JobManager implements Runnable {
 	protected boolean executing = false;
 
 	/* background processing */
-	protected Thread processingThread;
+	protected final Thread processingThread = new Thread(this::run, this.processName());
+	{
+		this.processingThread.setDaemon(true);
+		// less prioritary by default, priority is raised if clients are
+		// actively waiting on it
+		this.processingThread.setPriority(Thread.NORM_PRIORITY - 1);
+	}
+	
+	private final AtomicReference<Throwable> error = new AtomicReference<>();
 
 	/*
 	 * counter indicating whether job execution is enabled or not, disabled if
@@ -35,25 +42,15 @@ public abstract class JobManager implements Runnable {
 	 */
 	private int enableCount = 1;
 
-	/* flag indicating that the activation has completed */
-	public boolean activated = false;
-
 	private int awaitingClients = 0;
-
-	/**
-	 * Invoked exactly once, in background, before starting processing any job
-	 */
-	public void activateProcessing() {
-		this.activated = true;
-	}
 
 	/**
 	 * Answer the amount of awaiting jobs.
 	 */
-	public synchronized int awaitingJobsCount() {
+	private synchronized int awaitingJobsCount() {
 		// pretend busy in case concurrent job attempts performing before
 		// activated
-		return this.activated ? this.jobEnd - this.jobStart + 1 : 1;
+		return processingThread.isAlive() ? this.jobEnd - this.jobStart + 1 : 1;
 	}
 
 	/**
@@ -74,8 +71,9 @@ public abstract class JobManager implements Runnable {
 	/**
 	 * Remove the index from cache for a given project. Passing null as a job
 	 * family discards them all.
+	 * @throws InterruptedException 
 	 */
-	public void discardJobs(String jobFamily) {
+	public void discardJobs(String jobFamily) throws InterruptedException {
 		try {
 			IJob currentJob;
 			// cancel current job if it belongs to the given family
@@ -88,11 +86,9 @@ public abstract class JobManager implements Runnable {
 				currentJob.cancel();
 
 				// wait until current active job has finished
-				while (this.processingThread != null && this.executing) {
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						// ignore
+				synchronized (this) {
+					while (this.processingThread.isAlive() && this.executing) {
+						this.wait(50);
 					}
 				}
 			}
@@ -184,6 +180,7 @@ public abstract class JobManager implements Runnable {
 
 		searchJob.ensureReadyToRun();
 
+		start();
 		int concurrentJobWork = 100;
 		if (progress != null)
 			progress.beginTask("", concurrentJobWork); //$NON-NLS-1$
@@ -221,7 +218,7 @@ public abstract class JobManager implements Runnable {
 					}
 				}
 				Thread t = this.processingThread;
-				int originalPriority = t == null ? -1 : t.getPriority();
+				int originalPriority = t.isAlive() ? t.getPriority() : -1;
 				try {
 					if (t != null)
 						t.setPriority(Thread.currentThread().getPriority());
@@ -246,16 +243,15 @@ public abstract class JobManager implements Runnable {
 							}
 							previousJob = currentJob;
 						}
-						try {
-							Thread.sleep(50);
-						} catch (InterruptedException e) {
-							// ignore
-						}
+						Thread.sleep(50);
 					}
 					if (timeout != -1
 							&& (System.currentTimeMillis() - start) > timeout) {
 						return false;
 					}
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new OperationCanceledException();
 				} finally {
 					synchronized (this) {
 						this.awaitingClients--;
@@ -277,16 +273,20 @@ public abstract class JobManager implements Runnable {
 	public abstract String processName();
 
 	private static final class WaitJob implements IJob {
+		@Override
 		public boolean belongsTo(String jobFamily) {
 			return false;
 		}
 
+		@Override
 		public void cancel() {
 		}
 
+		@Override
 		public void ensureReadyToRun() {
 		}
 
+		@Override
 		public boolean execute(IProgressMonitor progress) {
 			return false;
 		}
@@ -330,16 +330,15 @@ public abstract class JobManager implements Runnable {
 	/**
 	 * Flush current state
 	 */
-	public synchronized void reset() {
-		if (this.processingThread != null) {
-			discardJobs(null); // discard all jobs
-		} else {
-			/* initiate background processing */
-			this.processingThread = new Thread(this, this.processName());
-			this.processingThread.setDaemon(true);
-			// less prioritary by default, priority is raised if clients are
-			// actively waiting on it
-			this.processingThread.setPriority(Thread.NORM_PRIORITY - 1);
+	public synchronized void reset() throws InterruptedException {
+		discardJobs(null); // discard all jobs
+		error.set(null);
+		start();
+	}
+
+	private synchronized void start() {
+		/* initiate background processing */
+		if (!this.processingThread.isAlive()) {
 			this.processingThread.start();
 		}
 	}
@@ -354,12 +353,10 @@ public abstract class JobManager implements Runnable {
 	/**
 	 * Infinite loop performing resource indexing
 	 */
-	public void run() {
+	private void run() {
 		long idlingStart = -1;
-		activateProcessing();
 		try {
 			while (this.processingThread != null) {
-				try {
 					IJob job;
 					synchronized (this) {
 						// handle shutdown case when notifyAll came before the
@@ -391,11 +388,16 @@ public abstract class JobManager implements Runnable {
 						continue;
 					}
 					try {
-						this.executing = true;
+						synchronized (this) {
+							this.executing = true;
+						}
 						/* boolean status = */job.execute(null);
 						// if (status == FAILED) request(job);
 					} finally {
-						this.executing = false;
+						synchronized (this) {
+							this.executing = false;
+							this.notifyAll();
+						}
 						moveToNextJob();
 						boolean waitAC = false;
 						synchronized (JobManager.this) {
@@ -404,58 +406,9 @@ public abstract class JobManager implements Runnable {
 						if (waitAC)
 							Thread.sleep(50);
 					}
-				} catch (InterruptedException e) { // background indexing was
-					// interrupted
-				}
 			}
-		} catch (RuntimeException e) {
-			if (this.processingThread != null) { // if not shutting down
-				// keep job manager alive
-				this.discardJobs(null);
-				this.processingThread = null;
-				this.reset(); // this will fork a new thread with no waiting
-				// jobs, some indexes will be inconsistent
-			}
-			throw e;
-		} catch (Error e) {
-			if (this.processingThread != null && !(e instanceof ThreadDeath)) {
-				// keep job manager alive
-				this.discardJobs(null);
-				this.processingThread = null;
-				this.reset(); // this will fork a new thread with no waiting
-				// jobs, some indexes will be inconsistent
-			}
-			throw e;
-		}
-	}
-
-	/**
-	 * Stop background processing, and wait until the current job is completed
-	 * before returning
-	 */
-	public void shutdown() {
-
-		disable();
-		discardJobs(null); // will wait until current executing job has
-		// completed
-		Thread thread = this.processingThread;
-		try {
-			if (thread != null) { // see
-				// http://bugs.eclipse.org/bugs/show_bug.cgi
-				// ?id=31858
-				synchronized (this) {
-					this.processingThread = null; // mark the job manager as
-					// shutting down so that the
-					// thread will stop by
-					// itself
-					this.notifyAll(); // ensure its awake so it can be shutdown
-				}
-				// in case processing thread is handling a job
-				// XXX wait not more than 1 minute
-				thread.join(60000);
-			}
-		} catch (InterruptedException e) {
-			// ignore
+		} catch (Throwable e) {
+			error.compareAndSet(null, e);
 		}
 	}
 
