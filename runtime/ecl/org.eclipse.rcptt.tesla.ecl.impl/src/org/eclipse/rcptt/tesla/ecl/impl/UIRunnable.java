@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2020 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -49,7 +50,8 @@ public abstract class UIRunnable<T> {
 	}
 
 	public static <T> T exec(final UIRunnable<T> runnable) throws CoreException {
-		return exec(runnable, getTimeout(), () -> false);
+		AtomicBoolean cancelled = new AtomicBoolean(false);
+		return exec(runnable, getTimeout(), cancelled::get);
 	}
 	
 	public static <T> T exec(final UIRunnable<T> runnable, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
@@ -60,11 +62,19 @@ public abstract class UIRunnable<T> {
 		long stop = start + timeout_ms;
 		long halfWay = start + (timeout_ms / 2);
 		final Display display = PlatformUI.getWorkbench().getDisplay();
+		if (Display.getCurrent() != null) {
+			throw new IllegalStateException("Can't run in UI thread");
+		}
 		Job.getJobManager().addJobChangeListener(collector);
 		collector.enable();
 		final ITeslaEventListener listener = new ITeslaEventListener() {
+			@Override
 			public synchronized boolean doProcessing(
 					org.eclipse.rcptt.tesla.core.context.ContextManagement.Context currentContext) {
+				if (isCancelled.getAsBoolean()) {
+					result.completeExceptionally(new CoreException(Status.CANCEL_STATUS));
+					return false;
+				}
 				boolean tick = processed.get().equals(RunningState.Starting) || processed.get().equals(RunningState.Execution);
 				Q7WaitInfoRoot info = TeslaBridge.getCurrentWaitInfo(tick);
 				
@@ -122,6 +132,7 @@ public abstract class UIRunnable<T> {
 				return false;
 			}
 
+			@Override
 			public void hasEvent(HasEventKind kind, String run) {
 			}
 		};
@@ -151,6 +162,7 @@ public abstract class UIRunnable<T> {
 						// try to close all modal dialogs and clean job
 						// processor
 						display.asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								dialogCloseStatus[0] = Utils.closeDialogs();
 							}
@@ -193,6 +205,12 @@ public abstract class UIRunnable<T> {
 			Thread.currentThread().interrupt();
 			throw new CoreException(Status.CANCEL_STATUS);
 		} catch (ExecutionException e) {
+			if (e.getCause() instanceof RuntimeException ) {
+				throw (RuntimeException)e.getCause();
+			}
+			if (e.getCause() instanceof CoreException ) {
+				throw (CoreException)e.getCause();
+			}
 			throw new CoreException(createError(e.getCause()));
 		} catch (TimeoutException e) {
 			throw new CoreException(createError(e));
@@ -216,6 +234,7 @@ public abstract class UIRunnable<T> {
 		final ReportBuilder currentBuilder = ReportManager.getBuilder();
 		final boolean infoCollected[] = { false };
 		display.asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				TeslaQClient client = TeslaBridge.getClient();
 				if (client != null) {
