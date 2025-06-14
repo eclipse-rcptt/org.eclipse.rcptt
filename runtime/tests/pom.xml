@@ -1,16 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2009, 2019 Xored Software Inc and others. All rights reserved. 
+<!-- Copyright (c) 2009, 2019 Xored Software Inc and others. All rights
+reserved. 
 	This program and the accompanying materials are made available under the 
 	terms of the Eclipse Public License v2.0 which accompanies this distribution, 
 	and is available at https://www.eclipse.org/legal/epl-v20.html Contributors: 
-	Xored Software Inc - initial API and implementation and/or initial documentation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	Xored Software Inc - initial API and implementation and/or initial
+documentation -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>rcptt.runtime</artifactId>
+		<artifactId>ide</artifactId>
 		<groupId>org.eclipse.rcptt</groupId>
 		<version>2.6.0-SNAPSHOT</version>
+		<relativePath>../../releng/ide/pom.xml</relativePath>
 	</parent>
+	<artifactId>rcptt.runtime.tests</artifactId>
+	<packaging>pom</packaging>
+
+	<properties>
+		<hookVersion>1.4.0.v20240213-1357</hookVersion>
+	</properties>
+	<modules>
+		<module>org.eclipse.rcptt.tesla.jface.aspects.test</module>
+		<module>org.eclipse.rcptt.tesla.swt.aspects.test</module>
+		<module>org.eclipse.rcptt.tesla.swt.test</module>
+		<module>org.eclipse.rcptt.watson.test</module>
+		<module>org.eclipse.rcptt.contexts.test</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>ajdt43</id>
+			<layout>p2</layout>
+			<url>${ajdt43repository}</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -20,7 +47,10 @@
 				<configuration>
 					<useUIHarness>true</useUIHarness>
 					<useUIThread>true</useUIThread>
-					<argLine>-Daj.weaving.verbose=true -Dorg.aspectj.weaver.showWeaveInfo=true -Dorg.aspectj.osgi.verbose=true --add-opens java.base/java.lang=ALL-UNNAMED --add-modules=ALL-SYSTEM</argLine>
+					<argLine>-Daj.weaving.verbose=true
+						-Dorg.aspectj.weaver.showWeaveInfo=true
+						-Dorg.aspectj.osgi.verbose=true --add-opens
+						java.base/java.lang=ALL-UNNAMED --add-modules=ALL-SYSTEM</argLine>
 					<appArgLine>-debug ${basedir}/debug.options</appArgLine>
 					<frameworkExtensions>
 						<frameworkExtension>
@@ -39,22 +69,22 @@
 					<showEclipseLog>true</showEclipseLog>
 				</configuration>
 			</plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <dependency-resolution>
-            <extraRequirements>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>org.eclipse.equinox.weaving.hook</id>
-                <versionRange>[${hookVersion},${hookVersion}]</versionRange>
-              </requirement>
-            </extraRequirements>
-          </dependency-resolution>
-        </configuration>
-      </plugin>
-    </plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.equinox.weaving.hook</id>
+								<versionRange>[${hookVersion},${hookVersion}]</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 	<profiles>
 		<profile>
@@ -78,39 +108,5 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<id>aarch64</id>
-			<activation>
-				<os>
-					<arch>aarch64</arch>
-				</os>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>tycho-surefire-plugin</artifactId>
-						<groupId>org.eclipse.tycho</groupId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>runtime4x</id>
-			<properties>
-				<hookVersion>1.4.0.v20240213-1357</hookVersion>
-			</properties>
-			<modules>
-				<module>org.eclipse.rcptt.tesla.jface.aspects.test</module>
-				<module>org.eclipse.rcptt.tesla.swt.aspects.test</module>
-				<module>org.eclipse.rcptt.tesla.swt.test</module>
-				<module>org.eclipse.rcptt.watson.test</module>
-				<module>org.eclipse.rcptt.contexts.test</module>
-			</modules>
-		</profile>
 	</profiles>
-	<artifactId>rcptt.runtime.tests</artifactId>
-	<packaging>pom</packaging>
 </project>
