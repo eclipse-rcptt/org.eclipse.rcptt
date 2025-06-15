@@ -11,6 +11,10 @@
 		<groupId>org.eclipse.rcptt</groupId>
 		<version>2.6.0-SNAPSHOT</version>
 	</parent>
+	<artifactId>rcptt.runtime.tests</artifactId>
+	<packaging>pom</packaging>
+	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -79,29 +83,12 @@
 			</build>
 		</profile>
 		<profile>
-			<id>aarch64</id>
+			<id>noaarch64</id>
 			<activation>
 				<os>
-					<arch>aarch64</arch>
+					<arch>!aarch64</arch>
 				</os>
 			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>tycho-surefire-plugin</artifactId>
-						<groupId>org.eclipse.tycho</groupId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>runtime4x</id>
-			<properties>
-				<hookVersion>1.4.0.v20240213-1357</hookVersion>
-			</properties>
 			<modules>
 				<module>org.eclipse.rcptt.tesla.jface.aspects.test</module>
 				<module>org.eclipse.rcptt.tesla.swt.aspects.test</module>
@@ -111,6 +98,4 @@
 			</modules>
 		</profile>
 	</profiles>
-	<artifactId>rcptt.runtime.tests</artifactId>
-	<packaging>pom</packaging>
 </project>
