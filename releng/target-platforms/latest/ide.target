@@ -33,6 +33,7 @@
 <unit id="org.jsoup" version="0.0.0"/>
 <unit id="slf4j.api" version="0.0.0"/>
 <unit id="org.apache.commons.commons-fileupload2-core" version="0.0.0"/>
+<unit id="org.eclipse.m2e.pde.feature.feature.group" version="0.0.0"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.aspectj.runtime" version="0.0.0"/>
