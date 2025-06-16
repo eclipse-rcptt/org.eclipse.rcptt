@@ -66,7 +66,7 @@ public class Q7NamedElementTest {
 		PROJECT.open(null);
 	}
 
-	@Test(timeout=100_000)
+	@Test(timeout=20_000)
 	public void reopenIfClosed() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
@@ -78,7 +78,8 @@ public class Q7NamedElementTest {
 			try {
 				barrier.await();
 				while(!Thread.interrupted()) {
-						testcase2.close();
+					Thread.yield();
+					testcase2.close();
 				}
 			} catch (ModelException | InterruptedException | BrokenBarrierException e) {
 				throw new RuntimeException(e);

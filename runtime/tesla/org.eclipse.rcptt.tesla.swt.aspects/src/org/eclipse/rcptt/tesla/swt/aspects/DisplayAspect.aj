@@ -86,22 +86,17 @@ public aspect DisplayAspect {
 					boolean result = TeslaEventManager.getManager()
 							.doProcessing(currentContext);
 					if (!result) {
-						try {
-							Thread.sleep(10);
-						} catch (InterruptedException e) {
-						}
+						Thread.sleep(10);
+						return false;
 					}
 				}
-
 				return false;
-			} catch (Throwable e) {
-				if (!(e instanceof InterruptedException)) {
-					SWTAspectActivator.log(e);
-				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return true;
 			} finally {
 				ContextManagement.exitContext();
 			}
-			return false;
 		}
 		return proceed(display);
 	}

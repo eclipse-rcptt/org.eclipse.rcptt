@@ -13,4 +13,5 @@ Require-Bundle: org.junit,
  org.eclipse.rcptt.tesla.swt.aspects,
  org.eclipse.debug.core,
  org.eclipse.core.externaltools,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.eclipse.rcptt.tesla.ecl.impl
