@@ -6,7 +6,7 @@ Bundle-Version: 2.7.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-9
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: 
  org.eclipse.rcptt.ctx.internal.superc
 Require-Bundle: org.eclipse.core.runtime,

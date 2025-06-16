@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.core;bundle-version="[2.7.0,3.0.0)",
  org.eclipse.rcptt.ecl.parser;bundle-version="[2.7.0,3.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-9
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.ecl.popup
 Automatic-Module-Name: org.eclipse.rcptt.ecl.popup
