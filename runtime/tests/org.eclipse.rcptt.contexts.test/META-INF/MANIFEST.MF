@@ -14,4 +14,6 @@ Require-Bundle: org.junit,
  org.eclipse.debug.core,
  org.eclipse.core.externaltools,
  org.eclipse.swt,
- org.eclipse.rcptt.tesla.ecl.impl
+ org.eclipse.rcptt.tesla.ecl.impl,
+ org.eclipse.rcptt.ctx.workbench.impl,
+ org.eclipse.rcptt.reporting
