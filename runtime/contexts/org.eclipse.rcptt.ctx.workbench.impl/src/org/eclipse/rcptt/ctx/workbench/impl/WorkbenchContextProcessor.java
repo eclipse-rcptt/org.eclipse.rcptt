@@ -180,6 +180,14 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 				}
 			}, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 			collector.join(TeslaLimits.getContextJoinTimeout(), isCancelled);
+		} catch (CoreException e) {
+			if (e.getStatus().matches(IStatus.CANCEL)) {
+				throw e;
+			}
+			CoreException ee = new CoreException(RcpttPlugin
+					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));
+			RcpttPlugin.log(e);
+			throw ee;			
 		} catch (Exception e) {
 			CoreException ee = new CoreException(RcpttPlugin
 					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));

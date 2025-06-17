@@ -31,8 +31,10 @@ import org.eclipse.rcptt.core.ContextTypeManager;
 import org.eclipse.rcptt.debug.DebugContext;
 import org.eclipse.rcptt.ecl.runtime.EclRuntime;
 import org.eclipse.rcptt.ecl.runtime.ISession;
+import org.eclipse.rcptt.reporting.core.ReportManager;
 import org.eclipse.swt.widgets.Display;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class DebugContextProcessorTest {
@@ -44,6 +46,11 @@ public class DebugContextProcessorTest {
 	@After
 	public void after() throws CoreException {
 		session.close();
+	}
+	
+	@Before
+	public void before() {
+		ReportManager.createReport("", null);
 	}
 	
 	@Test
@@ -122,6 +129,7 @@ public class DebugContextProcessorTest {
 					throw new AssertionError("Timeout");
 				}
 				if (!display.readAndDispatch()) {
+					CompletableFuture.runAsync(() -> display.wake());
 					display.sleep(); // Dangerous, may deadlock, but without this, UIRunnable is never executed
 				}
 			}
