@@ -100,6 +100,7 @@ public class UIJobCollectorTest {
 		rescheduling.setPriority(Job.INTERACTIVE);
 		sleepingJob.setPriority(Job.INTERACTIVE);
 		oscillatingJob.setPriority(Job.INTERACTIVE);
+		busyLoop.setPriority(Job.INTERACTIVE);
 	}
 
 	@Before
@@ -182,7 +183,7 @@ public class UIJobCollectorTest {
 		UIJobCollector subject = new UIJobCollector(parameters);
 		prepare(subject);
 		Job job = busyLoop;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			final int attempt = i;
 			Assert.assertTrue(shutdown(job, 10000));
 			join(subject, 10000);
@@ -219,7 +220,7 @@ public class UIJobCollectorTest {
 			completedOnce.await();
 			Thread.sleep(schedulingTolerance);
 			boolean result = isEmpty(subject);
-			Assert.assertFalse("Should not step immediately", result);
+			Assert.assertFalse("Should wait for a rescheduled job to complete, but failed on attempt " + i, result);
 			Assert.assertNotEquals(Job.NONE, job.getState());
 			debug("End of attempt " + i);
 			job.removeJobChangeListener(jobListener);
