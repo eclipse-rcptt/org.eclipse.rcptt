@@ -966,6 +966,9 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 				return result;
 			});
 		} catch (CoreException e) {
+			if (e.getStatus().matches(IStatus.CANCEL)) {
+				throw e;
+			}
 			throw new CoreException(new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
 					"Failed to execute " + command, e));
 		}
