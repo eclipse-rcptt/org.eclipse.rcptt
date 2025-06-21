@@ -68,9 +68,13 @@ import com.google.common.collect.Lists;
 public class Q7LaunchDelegateUtils {
 	
 	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor) {
-		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 2);
+		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 3);
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
+			IStatus status = target.resolve(sm.split(1));
+			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+				return status;
+			}
 			wc = Q7LaunchingUtil.createLaunchConfiguration(target);
 			StringBuilder message = new StringBuilder();
 			OSArchitecture architecture = target.detectArchitecture(message);
