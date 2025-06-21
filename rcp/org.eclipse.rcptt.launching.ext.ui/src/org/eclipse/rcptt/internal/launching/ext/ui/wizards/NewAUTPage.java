@@ -152,6 +152,7 @@ public class NewAUTPage extends WizardPage {
 				info.setValue(null);
 			}
 			runInDialog(new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					SubMonitor sm = SubMonitor.convert(monitor, 2);
@@ -185,7 +186,21 @@ public class NewAUTPage extends WizardPage {
 				}
 			});
 		} else if (helper != null) {
-			validatePlatform();
+			IStatus[] status = new IStatus[1];
+			runInDialog(new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					status[0] = helper.resolve(monitor);
+				}
+			});
+			if (status[0].matches(IStatus.CANCEL)) {
+				return;
+			} else if (status[0].matches(IStatus.ERROR)) {
+				setStatus(status[0], true);
+			} else {
+				validatePlatform();
+			}
 		}
 	}
 
@@ -315,6 +330,7 @@ public class NewAUTPage extends WizardPage {
 						shell, 500);
 				try {
 					dialog.run(true, true, new IRunnableWithProgress() {
+						@Override
 						public void run(IProgressMonitor monitor)
 								throws InvocationTargetException,
 								InterruptedException {
@@ -339,6 +355,7 @@ public class NewAUTPage extends WizardPage {
 		return myJob;
 	}
 
+	@Override
 	public void createControl(Composite sparent) {
 		initializeDialogUnits(sparent);
 		this.shell = sparent.getShell();
@@ -354,6 +371,7 @@ public class NewAUTPage extends WizardPage {
 		createControlWarning(parent);
 
 		IChangeListener validatePlatformListener = new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				validatePlatform();
 			}
@@ -379,6 +397,7 @@ public class NewAUTPage extends WizardPage {
 		// On change sets page complete = false
 		ISWTObservableValue<?> locationModifyObservable = WidgetProperties.text(SWT.Modify).observe(locationField);
 		locationModifyObservable.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				setPageComplete(false);
 			}
@@ -388,6 +407,7 @@ public class NewAUTPage extends WizardPage {
 				locationValue);
 		// ... and runs validation after delay
 		locationValue.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				validate(true);
 			}
@@ -420,6 +440,7 @@ public class NewAUTPage extends WizardPage {
 		// On change sets page complete = false
 		ISWTObservableValue<?> nameModifyObservable = WidgetProperties.text(SWT.Modify).observe(nameField);
 		nameModifyObservable.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				setPageComplete(false);
 			}
@@ -429,6 +450,7 @@ public class NewAUTPage extends WizardPage {
 				nameValue);
 		// ... and runs validation after delay
 		nameValue.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				validatePlatform();
 			}
@@ -453,6 +475,7 @@ public class NewAUTPage extends WizardPage {
 
 		ISWTObservableValue<?> archLinkObservable = WidgetProperties.visible().observe(archLink);
 		archLinkObservable.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				// Hides container as well (like "display: none")
 				GridData data = (GridData) archLink.getLayoutData();
@@ -498,6 +521,7 @@ public class NewAUTPage extends WizardPage {
 
 		ISWTObservableValue<?> warningObservable = WidgetProperties.text().observe(warning);
 		warningObservable.addChangeListener(new IChangeListener() {
+			@Override
 			public void handleChange(ChangeEvent event) {
 				// Corrects size of the label
 				parent.layout(false);
@@ -553,6 +577,7 @@ public class NewAUTPage extends WizardPage {
 				shell, 500);
 		try {
 			dialog.run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
