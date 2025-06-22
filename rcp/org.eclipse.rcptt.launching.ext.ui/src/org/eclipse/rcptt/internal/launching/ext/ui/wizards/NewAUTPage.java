@@ -12,12 +12,14 @@ package org.eclipse.rcptt.internal.launching.ext.ui.wizards;
 
 import static java.util.Collections.disjoint;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
+import static org.eclipse.core.runtime.Status.error;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -27,10 +29,8 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
@@ -52,16 +52,15 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
-import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.ui.Activator;
-import org.eclipse.rcptt.internal.launching.ext.ui.SyncProgressMonitor;
 import org.eclipse.rcptt.internal.launching.ext.ui.TimeTriggeredProgressMonitorDialog;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
+import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
@@ -82,7 +81,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.progress.UIJob;
 
 @SuppressWarnings("restriction")
 public class NewAUTPage extends WizardPage {
@@ -99,12 +97,19 @@ public class NewAUTPage extends WizardPage {
 	private WritableValue<Boolean> autolaunchValue = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
 	private WritableValue<String> autolaunchLabel = new WritableValue<String>("Launch AUT", String.class);
 
-	private String JobFamily = "";
-	private OSArchitecture architecture;
-	private IVMInstall jvmInstall;
-	private OSArchitecture jvmArch;
 	private String currentName = null;
 	private Runnable advancedHandler;
+	private record State(String location, ITargetPlatformHelper target) {}
+	private final UpdateJob<State> updateJob = new UpdateJob<NewAUTPage.State>("Validating AUT") {
+		{
+			setUser(false);
+		}
+		@Override
+		protected void run(State input, IProgressMonitor monitor) {
+			setStatus(NewAUTPage.this.cancel("Validating..."), false);
+			setStatus(validate(input,monitor));
+		}
+	};
 
 	protected NewAUTPage(String pageName, String title,
 			ImageDescriptor titleImage) {
@@ -120,87 +125,79 @@ public class NewAUTPage extends WizardPage {
 			log(status);
 		}
 		asyncExec(() -> {
-				if (status.isOK()) {
+				if (status.matches(IStatus.CANCEL)) {
+					setMessage(status.getMessage());
 					setErrorMessage(null);
-					setMessage(null);
-					setPageComplete(true);
+					setPageComplete(false);
 				} else if (status.matches(IStatus.ERROR)) {
 					setMessage(null);
 					setErrorMessage(status.getMessage());
 					setPageComplete(false);
+				} else if (status.isOK()) {
+					setMessage(null);
+					setErrorMessage(null);
+					setPageComplete(true);
 				} else {
 					setMessage(status.getMessage());
 					setErrorMessage(null);
-					setPageComplete(false);
+					setPageComplete(true);
 				}
 		});
 	}
 
-	public void validate(boolean clean) {
-		final String location = (String) locationValue.getValue();
-		if (location.trim().length() == 0) {
-			setStatus(new Status(IStatus.CANCEL, Q7ExtLaunchingPlugin.PLUGIN_ID,
-					"Please specify your Eclipse application installation directory."));
-			return;
+	private State getState() {
+		return new State(locationValue.getValue(), (ITargetPlatformHelper) info.getValue());
+	}
+	
+	private IStatus cancel(String message) {
+		return new Status(IStatus.CANCEL, getClass(), message);
+	}
+	
+	private IStatus validate(State state, IProgressMonitor monitor) {
+		final String location = state.location;
+		if (location == null || location.trim().length() == 0) {
+			return cancel("Please specify your Eclipse application installation directory.");
 		}
 
-		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
+		ITargetPlatformHelper helper = state.target();
+		SubMonitor sm = SubMonitor.convert(monitor, 2);
 
-		if (clean) {
-			if (helper != null) {
+		try {
+			if (helper == null) {
+				TargetPlatformManager.clearTargets();
+				IStatus status = checkLocationExists(location);
+				if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+					return status;
+				}
+	
+				ITargetPlatformHelper platform = null;
+				platform = Q7TargetPlatformManager.createTargetPlatform(location, sm.split(1, SubMonitor.SUPPRESS_NONE));
+				status = platform.getStatus();
+				if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+					platform.delete();
+					return status;
+				}
+				helper = platform;
+			}
+			IStatus status = validatePlatform(helper, sm.split(1, SubMonitor.SUPPRESS_NONE));
+			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				helper.delete();
-				info.setValue(null);
+				return status;
 			}
-			runInDialog(new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					SubMonitor sm = SubMonitor.convert(monitor, 2);
-
-					TargetPlatformManager.clearTargets();
-					IStatus status = checkLocationExists(location);
-					if (!status.isOK()) {
-						setStatus(status, false);
-						return;
-					}
-
-					ITargetPlatformHelper platform = null;
-					try {
-						MultiStatus multi = new MultiStatus(getClass(), 0, "Target platform resolution result");
-						platform = Q7TargetPlatformManager.createTargetPlatform(location, sm.split(1, SubMonitor.SUPPRESS_NONE));
-						throwIfError(platform.getStatus());
-						multi.add(platform.getStatus());
-						status = Q7LaunchDelegateUtils.validateForLaunch(platform, sm.split(1, SubMonitor.SUPPRESS_NONE));
-						throwIfError(platform.getStatus());
-						multi.add(status);
-						final ITargetPlatformHelper copy = platform;
-						asyncExec(() -> info.setValue(copy));
-					} catch (final CoreException e) {
-						if (platform != null) {
-							platform.delete();
-						}
-						setStatus(e.getStatus(), true);
-						asyncExec(() -> info.setValue(null));
-					}
-					done(monitor);
-				}
-			});
-		} else if (helper != null) {
-			IStatus[] status = new IStatus[1];
-			runInDialog(new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					status[0] = helper.resolve(monitor);
-				}
-			});
-			if (status[0].matches(IStatus.CANCEL)) {
-				return;
-			} else if (status[0].matches(IStatus.ERROR)) {
-				setStatus(status[0], true);
-			} else {
-				validatePlatform();
-			}
+			setValue(helper, info);
+			return Status.OK_STATUS;
+		} catch (CoreException e) {
+			return e.getStatus();
+		} finally {
+			done(monitor);
+		}
+	}
+	
+	private void clean() {
+		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
+		info.setValue(null);
+		if (helper != null) {
+			helper.delete();
 		}
 	}
 
@@ -224,67 +221,60 @@ public class NewAUTPage extends WizardPage {
 		setStatus(new Status(IStatus.ERROR, PLUGIN_ID, message));
 	}
 
-	private void validatePlatform() {
-		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
+	private IStatus validatePlatform(ITargetPlatformHelper helper, IProgressMonitor monitor) {
 		if (helper == null) {
-			setError("Please specify correct Application installation directory...");
-			return;
-		}
-		setStatus(helper.getStatus());
-
-		if (((String) nameValue.getValue()).trim().length() == 0) {
-			String defaultProduct = helper.getDefaultProduct();
-			if (defaultProduct != null) {
-				nameValue.setValue(helper.getDefaultProduct());
-				int i = 2;
-				while (!validateAUTName()) {
-					nameValue.setValue(helper.getDefaultProduct()
-							+ Integer.toString(i));
-					i++;
-				}
-			}
+			return cancel("Please specify correct Application installation directory...");
 		}
 
-		architecture = helper.detectArchitecture(new StringBuilder());
+		OSArchitecture architecture = helper.detectArchitecture(new StringBuilder());
 		if (OSArchitecture.Unknown.equals(architecture)) {
-			setError("Unable to detect AUT's architecture.");
-			return;
+			return Status.error("Unable to detect AUT's architecture.");
 		}
 		boolean haveArch = false;
 		try {
-			haveArch = findJVM();
+			haveArch = findJVM(helper).isPresent();
 		} catch (CoreException e1) {
-			// no special actions, error message will be set by lines below
-			Q7UIPlugin.log(e1);
+			return e1.getStatus();
 		}
-
-		architectureError.setValue(!haveArch);
+		setValue(!haveArch, architectureError);
 
 		if (!haveArch) {
-			setError("The selected AUT requires " + architecture + " Java VM which cannot be found.");
-			return;
+			return error("The selected AUT requires " + architecture + " Java VM which cannot be found.");
 		}
-
-		if (validateAUTName()) {
-			setPageComplete(true);
-		}
+		
+		return Q7LaunchDelegateUtils.validateForLaunch(helper, monitor);
 	}
 
-	private boolean findJVM() throws CoreException {		
-		VmInstallMetaData result = VmInstallMetaData.all().filter(m -> isCompatible(m)).findFirst().orElse(null);
-		if (result == null)
-			return false;
-		jvmInstall = result.install;
-		jvmArch = result.arch;
-		return true;
+	private Optional<VmInstallMetaData> findJVM(ITargetPlatformHelper helper) throws CoreException {
+		StringBuilder message = new StringBuilder();
+		OSArchitecture arch = helper.detectArchitecture(message);
+		if (OSArchitecture.Unknown.equals(arch)) {
+			throw new CoreException(Status.error("Unable to detect AUT's architecture: " + message.toString()));
+		}
+
+		return VmInstallMetaData.all().filter(m -> m.arch.equals(arch)).filter(m -> isCompatible(helper, m)).findFirst();
 	}
 
-	private boolean isCompatible(VmInstallMetaData m) {
-		ITargetPlatformHelper helper = (ITargetPlatformHelper) info.getValue();
-		return m.arch.equals(architecture) && disjoint(m.compatibleEnvironments, helper.getIncompatibleExecutionEnvironments());
+	private boolean isCompatible(ITargetPlatformHelper helper,  VmInstallMetaData m) {
+		return disjoint(m.compatibleEnvironments, helper.getIncompatibleExecutionEnvironments());
 	}
 	
 	private boolean validateAUTName() {
+		if (((String) nameValue.getValue()).trim().length() == 0) {
+			ITargetPlatformHelper helper = info.getValue();
+			if (helper != null) {
+				String defaultProduct = helper.getDefaultProduct();
+				if (defaultProduct != null) {
+					nameValue.setValue(helper.getDefaultProduct());
+					int i = 2;
+					while (!validateAUTName()) {
+						nameValue.setValue(helper.getDefaultProduct()
+								+ Integer.toString(i));
+						i++;
+					}
+				}
+			}
+		}
 		String name = ((String) nameValue.getValue()).trim();
 		if (name.length() == 0) {
 			setError("The name of Application Under Test (AUT) can not be empty.");
@@ -321,40 +311,6 @@ public class NewAUTPage extends WizardPage {
 		return true;
 	}
 
-	private Job runInDialog(final IRunnableWithProgress run) {
-		Job.getJobManager().cancel(JobFamily);
-		Job myJob = new UIJob("Validate install location") {
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				final TimeTriggeredProgressMonitorDialog dialog = new TimeTriggeredProgressMonitorDialog(
-						shell, 500);
-				try {
-					dialog.run(true, true, new IRunnableWithProgress() {
-						@Override
-						public void run(IProgressMonitor monitor)
-								throws InvocationTargetException,
-								InterruptedException {
-							run.run(new SyncProgressMonitor(monitor, dialog
-									.getShell().getDisplay()));
-						}
-					});
-				} catch (InvocationTargetException e) {
-					Activator.log(e);
-				} catch (InterruptedException e) {
-					Activator.log(e);
-				}
-				return Status.OK_STATUS;
-			}
-
-			@Override
-			public boolean belongsTo(Object family) {
-				return JobFamily.equals(family);
-			}
-		};
-		myJob.schedule();
-		return myJob;
-	}
-
 	@Override
 	public void createControl(Composite sparent) {
 		initializeDialogUnits(sparent);
@@ -373,13 +329,17 @@ public class NewAUTPage extends WizardPage {
 		IChangeListener validatePlatformListener = new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {
-				validatePlatform();
+				validateAUTName();
+				updateJob.update(getState());
 			}
 		};
 		info.addChangeListener(validatePlatformListener);
 
 		setControl(parent);
-		validate(info.getValue() == null);
+		if (info.getValue() == null) {
+			clean();
+		}
+		updateJob.update(getState());
 		Dialog.applyDialogFont(parent);
 	}
 
@@ -409,7 +369,8 @@ public class NewAUTPage extends WizardPage {
 		locationValue.addChangeListener(new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {
-				validate(true);
+				clean();
+				updateJob.update(getState());
 			}
 		});
 
@@ -452,7 +413,7 @@ public class NewAUTPage extends WizardPage {
 		nameValue.addChangeListener(new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {
-				validatePlatform();
+				validateAUTName();
 			}
 		});
 	}
@@ -468,7 +429,7 @@ public class NewAUTPage extends WizardPage {
 						.createPreferenceDialogOn(shell, JREsPreferencePage.ID,
 								new String[] { JREsPreferencePage.ID }, null);
 				if (dialog.open() == PreferenceDialog.OK) {
-					validatePlatform();
+					updateJob.update(getState());
 				}
 			}
 		});
@@ -552,20 +513,39 @@ public class NewAUTPage extends WizardPage {
 		return (String) locationValue.getValue();
 	}
 
-	public IVMInstall getJVMInstall() {
-		return jvmInstall;
+	public IVMInstall getJVMInstall() throws CoreException {
+		try {
+			return Optional.ofNullable(info.getValue()).flatMap(CheckedExceptionWrapper.wrap(this::findJVM)).map(m -> m.install).orElse(null);
+		} catch(CheckedExceptionWrapper e) {
+			e.rethrow(CoreException.class);
+			throw e;
+		}
 	}
 
-	public OSArchitecture getJVMArch() {
-		return jvmArch;
+	public OSArchitecture getJVMArch() throws CoreException {
+		try {
+			return Optional.ofNullable(info.getValue()).flatMap(CheckedExceptionWrapper.wrap(this::findJVM)).map(m -> m.arch).orElse(null);
+		} catch(CheckedExceptionWrapper e) {
+			e.rethrow(CoreException.class);
+			throw e;
+		}
 	}
 
 	public Boolean isLaunchNeeded() {
 		return (Boolean) autolaunchValue.getValue();
 	}
 
-	public OSArchitecture getArchitecture() {
-		return architecture;
+	public OSArchitecture getArchitecture() throws CoreException {
+		StringBuilder message = new StringBuilder();
+		ITargetPlatformHelper helper = info.getValue();
+		if (helper == null) {
+			throw new CoreException(error("AUT is not configured yet"));
+		}
+		OSArchitecture arch = helper.detectArchitecture(message);
+		if (OSArchitecture.Unknown.equals(arch)) {
+			throw new CoreException(error("Unable to detect AUT's architecture: " + message.toString()));
+		}
+		return arch;
 	}
 
 	public void initializeExisting(String configName, String autLocation, final ILaunchConfiguration configuration) {
@@ -619,6 +599,12 @@ public class NewAUTPage extends WizardPage {
 		} else {
 			autolaunchLabel.setValue("Launch AUT");
 		}
+	}
+	
+	private <T> void setValue(T value, WritableValue<T> destination) {
+		destination.getRealm().exec(() -> {
+			destination.setValue(value);
+		});
 	}
 
 	public void addAdvancedHandler(Runnable runnable) {
