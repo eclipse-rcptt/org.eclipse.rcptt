@@ -11,15 +11,20 @@
 package org.eclipse.rcptt.internal.launching.ext.ui.wizards;
 
 import static java.util.Collections.disjoint;
+import static java.util.function.Predicate.isEqual;
+import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
-import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -27,8 +32,10 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.variables.IStringVariableManager;
@@ -55,7 +62,6 @@ import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.ui.Activator;
 import org.eclipse.rcptt.internal.launching.ext.ui.TimeTriggeredProgressMonitorDialog;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchState;
@@ -85,6 +91,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 @SuppressWarnings("restriction")
 public class NewAUTPage extends WizardPage {
 	private static final int FIELD_TIMEOUT = 500;
+	private static final ILog LOG = Platform.getLog(NewAUTPage.class);
 	private DataBindingContext dbc = new DataBindingContext();
 	private Shell shell;
 
@@ -99,14 +106,22 @@ public class NewAUTPage extends WizardPage {
 
 	private String currentName = null;
 	private Runnable advancedHandler;
-	private record State(String location, ITargetPlatformHelper target) {}
+	private record State(String location, ITargetPlatformHelper target, String name) {}
 	private final UpdateJob<State> updateJob = new UpdateJob<NewAUTPage.State>("Validating AUT") {
 		{
-			setUser(false);
+			setUser(true);
+		}
+		
+		@Override
+		public boolean shouldSchedule() {
+			if (super.shouldSchedule()) {
+				setStatus(NewAUTPage.this.cancel("Validating..."), false);
+				return true;
+			}
+			return false;
 		}
 		@Override
 		protected void run(State input, IProgressMonitor monitor) {
-			setStatus(NewAUTPage.this.cancel("Validating..."), false);
 			setStatus(validate(input,monitor));
 		}
 	};
@@ -146,7 +161,7 @@ public class NewAUTPage extends WizardPage {
 	}
 
 	private State getState() {
-		return new State(locationValue.getValue(), (ITargetPlatformHelper) info.getValue());
+		return new State(locationValue.getValue(), (ITargetPlatformHelper) info.getValue(), nameValue.getValue());
 	}
 	
 	private IStatus cancel(String message) {
@@ -185,7 +200,7 @@ public class NewAUTPage extends WizardPage {
 				return status;
 			}
 			setValue(helper, info);
-			return Status.OK_STATUS;
+			return validateAUTName(state.name, helper.getDefaultProduct());
 		} catch (CoreException e) {
 			return e.getStatus();
 		} finally {
@@ -217,13 +232,14 @@ public class NewAUTPage extends WizardPage {
 		}
 	}
 
-	private void setError(String message) {
-		setStatus(new Status(IStatus.ERROR, PLUGIN_ID, message));
-	}
-
 	private IStatus validatePlatform(ITargetPlatformHelper helper, IProgressMonitor monitor) {
 		if (helper == null) {
 			return cancel("Please specify correct Application installation directory...");
+		}
+		SubMonitor sm = SubMonitor.convert(monitor, 2);
+		IStatus status = helper.resolve(sm.split(1, SubMonitor.SUPPRESS_NONE));
+		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			return status;
 		}
 
 		OSArchitecture architecture = helper.detectArchitecture(new StringBuilder());
@@ -242,7 +258,11 @@ public class NewAUTPage extends WizardPage {
 			return error("The selected AUT requires " + architecture + " Java VM which cannot be found.");
 		}
 		
-		return Q7LaunchDelegateUtils.validateForLaunch(helper, monitor);
+		try {
+			return Q7LaunchDelegateUtils.validateForLaunch(helper, sm.split(1, SubMonitor.SUPPRESS_NONE));
+		} finally {
+			done(monitor);
+		}
 	}
 
 	private Optional<VmInstallMetaData> findJVM(ITargetPlatformHelper helper) throws CoreException {
@@ -259,56 +279,53 @@ public class NewAUTPage extends WizardPage {
 		return disjoint(m.compatibleEnvironments, helper.getIncompatibleExecutionEnvironments());
 	}
 	
-	private boolean validateAUTName() {
-		if (((String) nameValue.getValue()).trim().length() == 0) {
-			ITargetPlatformHelper helper = info.getValue();
-			if (helper != null) {
-				String defaultProduct = helper.getDefaultProduct();
-				if (defaultProduct != null) {
-					nameValue.setValue(helper.getDefaultProduct());
-					int i = 2;
-					while (!validateAUTName()) {
-						nameValue.setValue(helper.getDefaultProduct()
-								+ Integer.toString(i));
-						i++;
-					}
+	private String computeUniqueName(String prefix) throws CoreException {
+		Set<String> existingNames = existingNames();
+		int i = 2;
+		String name = prefix;
+		while(existingNames.contains(name)) {
+			name = prefix + Integer.toString(i++);
+		}
+		return name;
+	}
+
+	private Set<String> existingNames() throws CoreException {
+		ILaunchManager launchManager = DebugPlugin.getDefault()
+				.getLaunchManager();
+		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(Q7LaunchingUtil.EXTERNAL_LAUNCH_TYPE);
+		Set<String> existingNames = Arrays.stream(launchManager.getLaunchConfigurations(type)).map(ILaunchConfiguration::getName).filter(not(isEqual(currentName))).collect(Collectors.toSet());
+		return existingNames;
+	}
+	
+	private IStatus validateAUTName(String name, String defaultName) {
+		if (name.trim().length() == 0) {
+			if (defaultName != null) {
+				try {
+					name = computeUniqueName(defaultName);
+					setValue(name, nameValue);
+				} catch (CoreException e) {
+					LOG.log(e.getStatus());
 				}
 			}
 		}
-		String name = ((String) nameValue.getValue()).trim();
 		if (name.length() == 0) {
-			setError("The name of Application Under Test (AUT) can not be empty.");
-			return false;
+			return error("The name of Application Under Test (AUT) can not be empty.");
 		}
 		for (char c : name.toCharArray()) {
 			if (FileUtil.isInvalidFileNameChar(c)) {
-				setError("Symbol \"" + c
-						+ "\" is not acceptable in AUT name.");
-				return false;
+				return error("Symbol \"" + c + "\" is not acceptable in an AUT name.");
 			}
-		}
-		if (currentName != null && currentName.equals(name)) {
-			return true;
 		}
 		try {
-			ILaunchManager launchManager = DebugPlugin.getDefault()
-					.getLaunchManager();
-			ILaunchConfigurationType type = launchManager
-					.getLaunchConfigurationType(Q7LaunchingUtil.EXTERNAL_LAUNCH_TYPE);
-			ILaunchConfiguration[] configurations = launchManager
-					.getLaunchConfigurations(type);
-			for (ILaunchConfiguration iLaunchConfiguration : configurations) {
-				if (name.equals(iLaunchConfiguration.getName())) {
-					setError(MessageFormat
-							.format("Application {0} already exists. Please specify a different name.",
-									name));
-					return false;
-				}
+			if (existingNames().contains(name)) {
+				return error(MessageFormat
+						.format("Application {0} already exists. Please specify a different name.",
+								name));
 			}
-		} catch (Throwable e) {
-			Q7UIPlugin.log(e);
+		} catch (CoreException e) {
+			return e.getStatus();
 		}
-		return true;
+		return Status.OK_STATUS;
 	}
 
 	@Override
@@ -329,7 +346,6 @@ public class NewAUTPage extends WizardPage {
 		IChangeListener validatePlatformListener = new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {
-				validateAUTName();
 				updateJob.update(getState());
 			}
 		};
@@ -413,7 +429,7 @@ public class NewAUTPage extends WizardPage {
 		nameValue.addChangeListener(new IChangeListener() {
 			@Override
 			public void handleChange(ChangeEvent event) {
-				validateAUTName();
+				updateJob.update(getState());
 			}
 		});
 	}
