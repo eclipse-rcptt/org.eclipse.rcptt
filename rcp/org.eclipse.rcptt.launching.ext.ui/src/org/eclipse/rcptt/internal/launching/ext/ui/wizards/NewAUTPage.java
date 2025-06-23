@@ -356,6 +356,7 @@ public class NewAUTPage extends WizardPage {
 			clean();
 		}
 		updateJob.update(getState());
+		parent.addDisposeListener(ignored -> updateJob.cancel());
 		Dialog.applyDialogFont(parent);
 	}
 
