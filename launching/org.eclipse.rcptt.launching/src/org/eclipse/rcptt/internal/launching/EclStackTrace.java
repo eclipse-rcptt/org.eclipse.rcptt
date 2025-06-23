@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,9 @@ public class EclStackTrace {
 			status = (ExecutionStatus) status.getCause();
 		}
 		IStatus cause = status.getCause();
+		if (cause == null) {
+			cause = status;
+		}
 		return fromScriptStatus(cause);
 	}
 
@@ -43,6 +46,9 @@ public class EclStackTrace {
 			status = ((ScriptErrorStatus) status).getCause();
 		}
 		Collections.reverse(trace);
+		if (status == null) {
+			status = trace.remove(0);
+		}
 
 		return new EclStackTrace(status, trace.toArray(new ScriptErrorStatus[trace.size()]));
 	}
