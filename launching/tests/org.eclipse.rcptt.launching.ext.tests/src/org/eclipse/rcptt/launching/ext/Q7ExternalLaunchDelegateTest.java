@@ -166,6 +166,17 @@ public class Q7ExternalLaunchDelegateTest {
 		assertNoErrorsInOutput();
 	}
 	
+	@Test
+	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
+		Path installDir = expandAut();
+		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		assertPluginIsInstalled(launch, "org.eclipse.rcptt.runtime.ui");
+		int mark = consoleCapture.getOutput().length();
+		launch.shutdown();
+		String output = consoleCapture.getOutput().substring(mark);
+		assertTrue(output, output.contains("Workbench is about to shut down"));
+	}
+	
 	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
 		Command command = parse(
 				"invoke-static -pluginId \"org.eclipse.ui.workbench\" -className \"org.eclipse.ui.internal.ConfigurationInfo\" -methodName \"getSystemSummary\"");
