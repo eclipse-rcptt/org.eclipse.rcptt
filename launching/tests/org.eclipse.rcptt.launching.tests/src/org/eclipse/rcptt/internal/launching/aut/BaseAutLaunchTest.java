@@ -14,6 +14,7 @@ package org.eclipse.rcptt.internal.launching.aut;
 
 import static org.eclipse.rcptt.ecl.core.util.Statuses.hasCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -204,11 +205,12 @@ public class BaseAutLaunchTest {
 		}
 	}
 	
-	@Test(timeout=200000)
-	public void terminateOnShutdownTimeout() throws CoreException, InterruptedException {
+	@Test(timeout=1000)
+	public void terminateOnConnectionTimeout() throws CoreException, InterruptedException, IOException {
 		Mockito.when(launch.canTerminate()).thenReturn(true);
 		BaseAutLaunch subject = createSubject();
-		subject.gracefulShutdown(1);
+		when(context.connect(any(), anyInt())).thenThrow(new IOException());
+		subject.shutdown();
 		verify(launch).terminate();
 	}
 	

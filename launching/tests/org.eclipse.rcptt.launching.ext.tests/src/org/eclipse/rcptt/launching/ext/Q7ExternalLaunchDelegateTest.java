@@ -171,8 +171,10 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
 		assertPluginIsInstalled(launch, "org.eclipse.rcptt.runtime.ui");
+		assertPluginIsInstalled(launch, "org.eclipse.rcptt.tesla.ecl.impl");
 		int mark = consoleCapture.getOutput().length();
 		launch.shutdown();
+		Thread.sleep(1000); // Wait for last output
 		String output = consoleCapture.getOutput().substring(mark);
 		assertTrue(output, output.contains("Workbench is about to shut down"));
 	}
