@@ -168,7 +168,6 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 	
 
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/200")
 	@Test
 	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
