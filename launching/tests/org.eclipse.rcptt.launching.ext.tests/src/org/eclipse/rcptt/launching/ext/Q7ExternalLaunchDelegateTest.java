@@ -58,6 +58,7 @@ import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -166,6 +167,8 @@ public class Q7ExternalLaunchDelegateTest {
 		assertNoErrorsInOutput();
 	}
 	
+
+	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/200")
 	@Test
 	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
