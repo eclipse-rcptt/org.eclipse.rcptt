@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -60,13 +59,11 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.plugin.TargetPlatform;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.launching.PDEMessages;
-import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.pde.launching.IPDELauncherConstants;
@@ -81,7 +78,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
 import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
@@ -196,10 +192,16 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+		ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				sm.split(1));
 		if (target == null) {
-			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			target = Q7TargetPlatformManager.getTarget(configuration, sm.split(1));
+			if (target == null) {
+				throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			}
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, target);
+			wc.doSave();
 		}
 		
 
@@ -212,7 +214,7 @@ public class Q7ExternalLaunchDelegate extends
 				"Target platform initialization failed  for "
 						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.resolve(sm.split(98)));
+		error.add(target.resolve(sm.split(97)));
 
 		if (!error.isOK()) {
 			Q7ExtLaunchingPlugin.log(error);
