@@ -189,13 +189,19 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+		ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				sm.split(1));
 		if (target == null) {
 			if (sm.isCanceled()) {
 				return false;
 			}
-			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			target = Q7TargetPlatformManager.getTarget(configuration, sm.split(1));
+			if (target == null) {
+				throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			}
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, target);
+			wc.doSave();
 		}
 		
 
@@ -207,7 +213,7 @@ public class Q7ExternalLaunchDelegate extends
 				"Target platform initialization failed  for "
 						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.resolve(sm.split(98)));
+		error.add(target.resolve(sm.split(97)));
 
 		if (!error.isOK() && !error.matches(IStatus.CANCEL)) {
 			Q7ExtLaunchingPlugin.log(error);
