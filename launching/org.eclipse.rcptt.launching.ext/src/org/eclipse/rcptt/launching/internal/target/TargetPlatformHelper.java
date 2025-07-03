@@ -63,6 +63,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
@@ -452,6 +453,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				return Status.OK_STATUS;
 			}
 			return status;
+		} catch (OperationCanceledException e) {
+			return Status.CANCEL_STATUS;
 		} catch (Exception e) {
 			target.isResolved();
 			status.add(Status.error("Failed to resolve  target definition", e));
@@ -1673,6 +1676,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				}
 				bundleInfo.setStartLevel(bundleLevel.level);
 				bundleInfo.setMarkedAsStarted(bundleLevel.autoStart);
+			} catch (OperationCanceledException e) {
+				throw e;
 			} catch (RuntimeException e) {
 				throw new IllegalStateException(format("Invalid run level descriptor for bundle %s, %s", bundleInfo.getSymbolicName(), location), e);
 			}
