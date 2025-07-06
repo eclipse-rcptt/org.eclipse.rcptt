@@ -361,6 +361,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       def classifiers = PLATFORMS
       def types = PLATFORMS.collect { "zip" }
       def files = PLATFORMS.collect { "`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${it}.zip`" }
+      mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
       mvn("deploy:deploy-file \
         -Dversion=$version \
         -Durl=https://repo.eclipse.org/content/repositories/rcptt-$repo/ \
