@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -153,6 +154,12 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 		return super.saveBeforeLaunch(configuration, mode, monitor);
+	}
+	
+	@Override
+	protected IProject[] getBuildOrder(ILaunchConfiguration configuration, String mode) throws CoreException {
+		// Do not let PDE scan workspace for plug-ins projects and resolve Target Platform
+		return new IProject[0];
 	}
 
 	@Override
