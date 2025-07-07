@@ -3,16 +3,16 @@ Bundle-ManifestVersion: 2
 Automatic-Module-Name: org.eclipse.rcptt.launching.ext
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.launching.ext;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.1.qualifier
 Bundle-Activator: org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core,
- org.eclipse.rcptt.launching;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.launching;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.launching;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.launching;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.6.1,3.0.0)",
  org.eclipse.pde.core;bundle-version="3.19.0",
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.metadata,
@@ -21,20 +21,20 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.pde.build,
  org.eclipse.jdt.launching,
  org.eclipse.pde.launching;bundle-version="[3.10.100,3.13.400)",
- org.eclipse.rcptt.launching.injection;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.launching.injection;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.6.1,3.0.0)",
  org.eclipse.jdt.core,
  org.eclipse.equinox.simpleconfigurator,
  com.google.guava;bundle-version="21.0.0",
- org.eclipse.rcptt.launching.common;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.launching.common;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.6.1,3.0.0)",
  org.eclipse.equinox.p2.artifact.repository,
  org.eclipse.equinox.p2.touchpoint.eclipse,
  org.eclipse.equinox.p2.engine,
- org.eclipse.rcptt.launching.p2utils;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.launching.p2utils;bundle-version="[2.6.1,3.0.0)",
  org.eclipse.core.variables,
  org.eclipse.core.commands,
- org.eclipse.rcptt.core.launching;bundle-version="[2.6.0,3.0.0)",
+ org.eclipse.rcptt.core.launching;bundle-version="[2.6.1,3.0.0)",
  org.apache.felix.scr,
  org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-17

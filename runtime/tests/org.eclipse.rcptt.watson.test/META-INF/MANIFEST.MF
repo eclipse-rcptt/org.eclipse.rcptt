@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Reporting tests
 Bundle-SymbolicName: org.eclipse.rcptt.watson.test
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.1.qualifier
 Automatic-Module-Name: org.eclipse.rcptt.watson.test
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit,

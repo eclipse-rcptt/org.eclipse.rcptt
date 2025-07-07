@@ -12,7 +12,7 @@
 <feature
       id="org.eclipse.rcptt.runner.headless"
       label="%featureName"
-      version="2.6.0.qualifier"
+      version="2.6.1.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.rcptt.runner"
       license-feature="org.eclipse.license"
@@ -32,22 +32,22 @@
 
    <includes
          id="org.eclipse.rcptt.runner.integration"
-         version="2.6.0.qualifier"/>
+         version="2.6.1.qualifier"/>
 
    <includes
          id="org.eclipse.rcptt.modules.launching"
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.eclipse.rcptt.tesla.ecl" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.ecl.server" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.watson" version="2.6.0" match="compatible"/>
-      <import feature="org.eclipse.rcptt.ecl.platform" version="2.6.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.tesla.ecl" version="2.6.1" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.server" version="2.6.1" match="compatible"/>
+      <import feature="org.eclipse.rcptt.watson" version="2.6.1" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.platform" version="2.6.1" match="compatible"/>
    </requires>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         version="2.6.0.qualifier"/>
+         version="2.6.1.qualifier"/>
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator"
@@ -67,7 +67,7 @@
 
    <plugin
          id="org.eclipse.rcptt.runner"
-         version="2.6.0.qualifier"/>
+         version="2.6.1.qualifier"/>
 
    <plugin
          id="org.eclipse.jdt.apt.core"
