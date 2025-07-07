@@ -406,7 +406,9 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.ui.internal.Workbench$42", // Workbench Auto-Save Job
 			"org.eclipse.debug.internal.ui.views.console.ProcessConsole$InputReadJob",
 			"org.eclipse.rcptt.ecl.internal.debug.runtime.ServerSession",
-			"org.eclipse.ui.internal.Workbench$40" ))); // Workbench Auto-Save Job
+			"org.eclipse.ui.internal.Workbench$40", // Workbench Auto-Save Job
+			"org.eclipse.jface.text.reconciler.AbstractReconciler$BackgroundThread" // Since 2025-09
+			))); 
 
 	public static JobStatus detectJobStatus(Job job) {
 		JobStatus status = null;
