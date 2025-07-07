@@ -32,6 +32,7 @@ mvn $GOAL -f releng/pom.xml -P update-version $OPTIONS -B || exit 100
 
 echo "================== Updating Maven Plugin =================="
 mvn $GOAL -f maven-plugin/pom.xml $OPTIONS -B || exit 101
+mvn $GOAL -f maven-plugin/its/pom.xml $OPTIONS -B || exit 108
 
 echo "================== Updating Maven Script =================="
 mvn versions:set -f clean-pom.xml -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 102
