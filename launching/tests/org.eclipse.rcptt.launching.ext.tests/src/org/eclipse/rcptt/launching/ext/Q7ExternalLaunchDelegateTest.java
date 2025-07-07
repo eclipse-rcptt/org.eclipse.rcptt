@@ -13,6 +13,7 @@ package org.eclipse.rcptt.launching.ext;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -30,6 +31,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -37,7 +39,10 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -56,6 +61,7 @@ import org.eclipse.rcptt.launching.ext.tests.DownloadCache.Request;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -164,6 +170,44 @@ public class Q7ExternalLaunchDelegateTest {
 		}
 		launch.ping();
 		assertNoErrorsInOutput();
+	}
+	
+
+	@Test
+	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
+		Path installDir = expandAut();
+		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		assertPluginIsInstalled(launch, "org.eclipse.rcptt.runtime.ui");
+		assertPluginIsInstalled(launch, "org.eclipse.rcptt.tesla.ecl.impl");
+		int mark = consoleCapture.getOutput().length();
+		launch.shutdown();
+		Thread.sleep(1000); // Wait for last output
+		String output = consoleCapture.getOutput().substring(mark);
+		assertTrue(output, output.contains("Workbench is about to shut down"));
+	}
+	
+	@Test
+	public void autLaunchIsNotNull() throws InterruptedException, CoreException, IOException {
+		Path installDir = expandAut();
+		Aut aut = createAut(installDir, List.of("-consoleLog"));
+		int cancelCount =  0;
+		for (int i = 1; i < 100_000; i*=2) {
+			try {
+				IProgressMonitor monitor = new ExpiringProgressMonitor(i);
+				AutLaunch launch = aut.launch(monitor);
+				assertNotNull("Failed with delay " + i ,launch);
+				launch.terminate(); // Should not throw NPE
+				break; // AUT is already launched, nothing to cancel
+			} catch (CoreException e) {
+				if (!e.getStatus().matches(IStatus.CANCEL)) {
+					throw e;
+				}
+				cancelCount++;
+			} catch (OperationCanceledException e) {
+				cancelCount++;
+			}
+		}
+		Assert.assertNotEquals(0, cancelCount);
 	}
 	
 	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
@@ -357,5 +401,16 @@ public class Q7ExternalLaunchDelegateTest {
 	
 	private void assertActive(String bundleId, String systemInformation) {
 		assertContains(bundleId+" [^\\n]+ \\[Active\\]", systemInformation);
+	}
+	
+	private static class ExpiringProgressMonitor extends NullProgressMonitor {
+		private final AtomicInteger checksLeft;
+		public ExpiringProgressMonitor(int maximumCheckCount) {
+			checksLeft = new AtomicInteger(maximumCheckCount);
+		}
+		@Override
+		public boolean isCanceled() {
+			return super.isCanceled() || checksLeft.getAndDecrement() <= 0;
+		}
 	}
 }

@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -60,13 +59,11 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.plugin.TargetPlatform;
 import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.launching.PDEMessages;
-import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.pde.launching.IPDELauncherConstants;
@@ -81,7 +78,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
 import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
@@ -104,8 +100,6 @@ import com.google.common.collect.Multimaps;
 public class Q7ExternalLaunchDelegate extends
 		EclipseApplicationLaunchConfiguration {
 
-	private static final String ATTR_D32 = "-d32";
-
 	private static final String Q7_LAUNCHING_AUT = "RCPTT: Launching AUT: ";
 
 	private static final String SECURE_STORAGE_FILE_NAME = "secure_storage";
@@ -124,15 +118,14 @@ public class Q7ExternalLaunchDelegate extends
 			super.launch(configuration, mode, launch, subm.split(1000));
 			waiter.wait(subm.split(1000), TeslaLimits.getAUTStartupTimeout() / 1000);
 		} catch (CoreException e) {
-			Q7ExtLaunchingPlugin.getDefault().log(
-					"RCPTT: Failed to Launch AUT: " + configuration.getName()
-							+ " cause " + e.getMessage(),
-					e);
-			waiter.handle(e);
-			// no need to throw exception in case of cancel
 			if (!e.getStatus().matches(IStatus.CANCEL)) {
-				throw e;
+				Q7ExtLaunchingPlugin.getDefault().log(
+						"RCPTT: Failed to Launch AUT: " + configuration.getName()
+								+ " cause " + e.getMessage(),
+						e);
 			}
+			waiter.handle(e);
+			throw e;
 		} catch (OperationCanceledException e) {
 			throw new CoreException(Status.CANCEL_STATUS);
 		} catch (RuntimeException e) {
@@ -196,10 +189,19 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+		ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				sm.split(1));
 		if (target == null) {
-			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			if (sm.isCanceled()) {
+				return false;
+			}
+			target = Q7TargetPlatformManager.getTarget(configuration, sm.split(1));
+			if (target == null) {
+				throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			}
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, target);
+			wc.doSave();
 		}
 		
 
@@ -207,25 +209,23 @@ public class Q7ExternalLaunchDelegate extends
 			return false;
 		}
 
-		info.target = target;
 		final MultiStatus error = new MultiStatus(Q7ExtLaunchingPlugin.PLUGIN_ID, 0,
 				"Target platform initialization failed  for "
 						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.resolve(sm.split(98)));
+		error.add(target.resolve(sm.split(97)));
 
-		if (!error.isOK()) {
+		if (!error.isOK() && !error.matches(IStatus.CANCEL)) {
 			Q7ExtLaunchingPlugin.log(error);
 		}
 
-		if (error.matches(IStatus.ERROR)) {
+		if (error.matches(IStatus.ERROR | IStatus.CANCEL)) {
 			if (monitor.isCanceled()) {
-				removeTargetPlatform(configuration);
 				return false;
 			}
-			removeTargetPlatform(configuration);
 			throw new CoreException(error);
 		}
+		info.target = target;
 
 		boolean jvmFound = false;
 
@@ -570,10 +570,7 @@ public class Q7ExternalLaunchDelegate extends
 	protected void preLaunchCheck(final ILaunchConfiguration configuration,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		SubMonitor subm = SubMonitor.convert(monitor, 100);
-		super.preLaunchCheck(configuration, launch, subm.newChild(50));
-		if (monitor.isCanceled()) {
-			return;
-		}
+		super.preLaunchCheck(configuration, launch, subm.split(50));
 
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;

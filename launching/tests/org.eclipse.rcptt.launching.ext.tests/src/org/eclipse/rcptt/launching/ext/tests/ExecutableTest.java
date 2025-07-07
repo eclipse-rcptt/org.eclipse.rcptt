@@ -15,9 +15,11 @@ import java.util.Arrays;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.rcptt.core.ecl.core.model.ExecutionPhase;
+import org.eclipse.rcptt.core.ecl.core.model.GetReport;
 import org.eclipse.rcptt.core.launching.events.AutEvent;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -25,6 +27,7 @@ import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.core.Script;
+import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.Q7InternalTestCase;
@@ -40,7 +43,15 @@ import org.eclipse.rcptt.launching.AutLaunchListener;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.IExecutable;
 import org.eclipse.rcptt.launching.TestCaseDebugger;
+import org.eclipse.rcptt.launching.utils.TestSuiteUtils;
+import org.eclipse.rcptt.reporting.Q7Info;
+import org.eclipse.rcptt.reporting.ReportingFactory;
+import org.eclipse.rcptt.reporting.core.IQ7ReportConstants;
+import org.eclipse.rcptt.reporting.core.ReportHelper;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.LoggingCategory;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -189,20 +200,29 @@ public class ExecutableTest {
 			public Object execute(Command command, long timeout, IProgressMonitor monitor)
 					throws CoreException,
 					InterruptedException {
-				// TODO Auto-generated method stub
+				if (command instanceof GetReport) {
+					Report report = ReportFactory.eINSTANCE.createReport();
+					Node root = ReportFactory.eINSTANCE.createNode();
+					root.setName("Element ID");
+					report.setRoot(root);
+					Q7Info q7info = ReportingFactory.eINSTANCE.createQ7Info();
+					q7info.setId("some_id");
+					root.getProperties().put(IQ7ReportConstants.ROOT, q7info);
+					root.setEndTime(root.getStartTime() + 100);
+					root.setDuration(root.getEndTime() - root.getStartTime());
+					return report;
+				}
 				return null;
 			}
 
 			@Override
 			public Object execute(Command command, long timeout) throws CoreException, InterruptedException {
-				// TODO Auto-generated method stub
-				return null;
+				return execute(command, timeout, new NullProgressMonitor());
 			}
 
 			@Override
 			public Object execute(Command command) throws CoreException, InterruptedException {
-				// TODO Auto-generated method stub
-				return null;
+				return execute(command, 10);
 			}
 
 			@Override
@@ -282,9 +302,13 @@ public class ExecutableTest {
 			}
 			Q7LaunchManager.getInstance().stop(Status.OK_STATUS);
 			IStatus result = session.getResultStatus();
+			if (result.getException() != null) {
+				throw new AssertionError(result.getException());
+			}
 			Assert.assertTrue(result.toString(), result.isOK());
 		} catch (Throwable e) {
 			Q7LaunchManager.getInstance().stop(RcpttPlugin.createStatus(e));
+			throw e;
 		}
 	}
 

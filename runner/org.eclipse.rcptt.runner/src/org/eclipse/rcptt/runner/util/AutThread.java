@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -366,7 +367,12 @@ public class AutThread extends Thread {
 	public void shutdown() throws CoreException, InterruptedException {
 		if (launch != null) {
 			System.out.printf("Initiating shutdown. AUT is currently %s\n", launch.getLaunch().isTerminated() ? "terminated" : "running");
-			launch.gracefulShutdown(conf.shutdownTimeout);
+			try {
+				launch.gracefulShutdown(conf.shutdownTimeout);
+			} catch (TimeoutException e) {
+				launch.terminate();
+				System.out.printf("Failed to gracefully shutdown AUT in " + conf.shutdownTimeout + "ms. Terminating.");
+			}
 			launch = null;
 		}
 	}

@@ -357,9 +357,24 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   private void maven_deploy(String version) {
     withBuildContainer() {
-      mvn('-Dtycho.mode=maven -f runner/product org.eclipse.tycho:tycho-versions-plugin::set-version -DnewVersion=' + version)
+      def repo = version.endsWith("-SNAPSHOT") ? "snapshots" : "releases"
+      def classifiers = PLATFORMS
+      def types = PLATFORMS.collect { "zip" }
+      def files = PLATFORMS.collect { "`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${it}.zip`" }
       mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
-      mvn('-f releng/runner/pom.xml clean deploy')
+      mvn("deploy:deploy-file \
+        -Dversion=$version \
+        -Durl=https://repo.eclipse.org/content/repositories/rcptt-$repo/ \
+        -DgroupId=org.eclipse.rcptt.runner \
+        -DrepositoryId=repo.eclipse.org \
+        -DgeneratePom=true \
+        -DartifactId=rcptt.runner \
+        -Dfile=${files[0]} \
+        -Dclassifier=${classifiers[0]} \
+        \"-Dfiles=${files[1..-1].join(",")}\" \
+        -Dclassifiers=${classifiers[1..-1].join(",")} \
+        -Dtypes=${types[1..-1].join(",")} \
+        ")
       mvn('-f maven-plugin/pom.xml clean deploy')
     }
   }
