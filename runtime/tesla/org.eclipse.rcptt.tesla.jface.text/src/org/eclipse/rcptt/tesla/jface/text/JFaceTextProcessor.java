@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -37,7 +38,6 @@ import org.eclipse.rcptt.tesla.core.protocol.raw.Element;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Response;
 import org.eclipse.rcptt.tesla.core.protocol.raw.ResponseStatus;
 import org.eclipse.rcptt.tesla.internal.core.AbstractTeslaClient;
-import org.eclipse.rcptt.tesla.internal.core.TeslaCore;
 import org.eclipse.rcptt.tesla.internal.core.processing.ElementGenerator;
 import org.eclipse.rcptt.tesla.internal.core.processing.ITeslaCommandProcessor;
 import org.eclipse.rcptt.tesla.internal.ui.player.PlayerWrapUtils;
@@ -154,51 +154,55 @@ public class JFaceTextProcessor implements ITeslaCommandProcessor {
 		List<AbstractReconciler> reconcilers = TextReconcilerManager
 				.getInstance().getReconcilers();
 		for (AbstractReconciler reconciler : reconcilers) {
-			try {
-				boolean needWait = false;
-				Field threadField = AbstractReconciler.class
-						.getDeclaredField("fThread");
-				threadField.setAccessible(true);
-				Thread threadObject = (Thread) threadField.get(reconciler);
-				if (threadObject != null) {
-					State state = threadObject.getState();
-					if (!(state.equals(State.BLOCKED)
-							|| state.equals(State.WAITING)
-							|| state.equals(State.TIMED_WAITING) || state
-									.equals(State.TERMINATED))) {
-						// Reconciler are in execution of some action phase
-						Q7WaitUtils.updateInfo("reconciler.thread", reconciler.getClass().getName(), info);
+			boolean needWait = false;
+			
+			Thread thread = null;
+			
+			Object object = TeslaSWTAccess.getField(Object.class, reconciler, "fThread");
+			if (object instanceof Thread t) {
+				thread = t;
+			} else if (object instanceof Job job) {
+				thread = job.getThread();
+			}
+			if (thread != null) {
+				State state = thread.getState();
+				if (!(state.equals(State.BLOCKED)
+						|| state.equals(State.WAITING)
+						|| state.equals(State.TIMED_WAITING) || state
+								.equals(State.TERMINATED))) {
+					// Reconciler are in execution of some action phase
+					Q7WaitUtils.updateInfo("reconciler.thread", reconciler.getClass().getName(), info);
+					needWait = true;
+				}
+			}
+			if (!needWait && object != null) {
+				try {
+					Field field = object.getClass().getDeclaredField("fIsDirty");
+					field.setAccessible(true);
+					boolean fDirty = field.getBoolean(object);
+	
+					field = object.getClass().getDeclaredField("fCanceled");
+					field.setAccessible(true);
+					boolean fCanceled = field.getBoolean(object);
+					if (fDirty && !fCanceled) {
+						Q7WaitUtils.updateInfo("reconciler.thread.dirty", reconciler.getClass().getName(), info);
 						needWait = true;
-					} else {
-						Field field = threadObject.getClass().getDeclaredField(
-								"fIsDirty");
-						field.setAccessible(true);
-						boolean fDirty = field.getBoolean(threadObject);
-
-						field = threadObject.getClass().getDeclaredField(
-								"fCanceled");
-						field.setAccessible(true);
-						boolean fCanceled = field.getBoolean(threadObject);
-						if (fDirty && !fCanceled) {
-							Q7WaitUtils.updateInfo("reconciler.thread.dirty", reconciler.getClass().getName(), info);
-							needWait = true;
-						}
 					}
+				} catch (NoSuchFieldException | IllegalAccessException e) {
+					throw new IllegalStateException(e);
 				}
-				if (needWait) {
-					Long firstTime = reconcilerTimeours.get(reconciler);
-					if (firstTime == null) {
-						reconcilerTimeours.put(reconciler, Long.valueOf(System.currentTimeMillis()));
-					} else if (System.currentTimeMillis() - firstTime.longValue() > TeslaLimits
-							.getReconcilerTimeout()) {
-						Q7WaitUtils.updateInfo("reconciler.thread.skip", reconciler.getClass().getName(), info);
-						// Ignore if timeout
-						return true;
-					}
-					return false;
+			}
+			if (needWait) {
+				Long firstTime = reconcilerTimeours.get(reconciler);
+				if (firstTime == null) {
+					reconcilerTimeours.put(reconciler, Long.valueOf(System.currentTimeMillis()));
+				} else if (System.currentTimeMillis() - firstTime.longValue() > TeslaLimits
+						.getReconcilerTimeout()) {
+					Q7WaitUtils.updateInfo("reconciler.thread.skip", reconciler.getClass().getName(), info);
+					// Ignore if timeout
+					return true;
 				}
-			} catch (Throwable e) {
-				TeslaCore.log(e);
+				return false;
 			}
 		}
 
