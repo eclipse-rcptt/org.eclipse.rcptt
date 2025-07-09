@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -52,8 +52,13 @@ public class WorkspaceContextMaker extends DefaultContextMaker {
 	@Override
 	public void makeExecutable(Context context, IQ7NamedElement source)
 			throws ModelException {
-		maker.makeSelfSufficientData((WorkspaceData) context,
-				source.getModifiedPersistenceModel(), source);
+		IQ7NamedElement copy = source.getIndexingWorkingCopy(null);
+		try {
+			maker.makeSelfSufficientData((WorkspaceData) context,
+					copy.getModifiedPersistenceModel(), source);
+		} finally {
+			copy.discardWorkingCopy();
+		}
 	}
 
 	@Override
