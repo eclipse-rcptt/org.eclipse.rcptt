@@ -65,7 +65,7 @@
               <arg>-nosplash</arg>
               <arg>-consoleLog</arg>
               <arg>-debug</arg>
-	      <arg>${basedir}/debug.options</arg>
+              <arg>${basedir}/debug.options</arg>
             </args>
 		<vmArgs>
 			<!--vmArg>-javaagent:${project.build.directory}/dependency/byteman.jar=boot:${project.build.directory}/dependency/byteman.jar,script:${basedir}/trace.btm</vmArg>
@@ -75,6 +75,7 @@
 			<vmArg>-Xmx1G</vmArg>
 			<vmArg>-Xlog:gc</vmArg>
 			<vmArg>-Dmockup_repository=${mockup_repository}</vmArg>
+			<vmArg>-Dorg.eclipse.rcptt.deprecate.save_time=false</vmArg>
 			<!-- "Not supported in OpenJDK" <vmArg>-XX:+UnlockCommercialFeatures</vmArg>
 			<vmArg>-XX:+FlightRecorder</vmArg>
 			<vmArg>-XX:StartFlightRecording=name=aut,delay=60s,filename=aut.jfr,dumponexit=true</vmArg>-->
