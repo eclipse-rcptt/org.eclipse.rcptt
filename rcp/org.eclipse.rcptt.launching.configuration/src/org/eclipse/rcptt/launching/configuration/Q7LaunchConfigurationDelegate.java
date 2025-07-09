@@ -22,12 +22,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -35,18 +33,14 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.target.ITargetLocation;
-import org.eclipse.pde.core.target.TargetBundle;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
-import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchMonitor;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformInitializer;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
@@ -55,11 +49,13 @@ import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
+import org.osgi.framework.BundleException;
+
+import com.google.common.collect.Maps;
 
 public class Q7LaunchConfigurationDelegate extends
 		EclipseApplicationLaunchConfiguration {
 	private static final String SECURE_STORAGE_FILE_NAME = "secure_storage";
-	private static final ILog LOG = Platform.getLog(Q7LaunchConfigurationDelegate.class);
 
 	// private Map<String, Object> fAllBundles;
 	// private Map<Object, String> fModels;
@@ -129,14 +125,7 @@ public class Q7LaunchConfigurationDelegate extends
 		LaunchInfoCache.CachedInfo info = LaunchInfoCache.getInfo(configuration);
 
 		String targetName = configuration.getName() + " with RCPTT";
-		ITargetPlatformHelper helper = Q7TargetPlatformManager
-				.getHelper(targetName);
-
-		// try to load existing configuration
-		if (helper == null) {
-			helper = TargetPlatformManager.findTarget(targetName,
-					sm.split(1), false);
-		}
+		ITargetPlatformHelper helper = Q7TargetPlatformManager.findTarget(configuration, sm.split(1));
 		
 		if (helper != null) {
 			IStatus status = helper.resolve(sm.split(1));
@@ -177,7 +166,9 @@ public class Q7LaunchConfigurationDelegate extends
 				warnings.add(status);
 			}
 			helper.save();
-			Q7TargetPlatformManager.setHelper(targetName, helper);
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			Q7TargetPlatformManager.setHelper(wc, helper);
+			configuration = wc.doSave();
 		}
 		if (helper != null) {
 			info.target = helper;
@@ -225,10 +216,10 @@ public class Q7LaunchConfigurationDelegate extends
 			File config = new File(getConfigDir(configuration), "config.ini");
 			OriginalOrderProperties props = new OriginalOrderProperties();
 
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(config));
-			props.load(in);
-			in.close();
+			try (BufferedInputStream in = new BufferedInputStream(
+					new FileInputStream(config))) {
+				props.load(in);
+			}
 
 			String targetPlatformProfilePath = ((ITargetPlatformHelper) info.target)
 					.getTargetPlatformProfilePath();
@@ -240,10 +231,13 @@ public class Q7LaunchConfigurationDelegate extends
 					.computeOSGiBundles(Q7ExternalLaunchDelegate
 							.getBundlesToLaunch(info).latestVersionsOnly));
 
-			BufferedOutputStream out = new BufferedOutputStream(
-					new FileOutputStream(config));
-			props.store(out, "Configuration File");
-			out.close();
+			try (BufferedOutputStream out = new BufferedOutputStream(
+					new FileOutputStream(config))) {
+				props.store(out, "Configuration File");
+			}
+			// Workaround for https://github.com/eclipse-oomph/oomph/issues/152
+			// Create a configured directory so that Oomph can ensure it is writable and use it and not fall back to default 
+			new File(config.getParent(), ".p2").mkdirs();
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -274,29 +268,27 @@ public class Q7LaunchConfigurationDelegate extends
 
 		for (Entry<IPluginModelBase, String> entry : Q7LaunchDelegateUtils
 				.getEclipseApplicationModels(this).entrySet()) {
-			collector.addInstallationBundle(entry.getKey(),
-					BundleStart.fromModelString(entry.getValue()));
+			try {
+				collector.addInstallationBundle(entry.getKey(),
+						BundleStart.fromModelString(entry.getValue()));
+			} catch (BundleException | IOException e) {
+				throw new CoreException(Status.error("Failed to process " + entry.getKey().getInstallLocation(), e));
+			}
 		}
-		ITargetLocation[] locations = target.getTarget().getTargetLocations();
-		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), locations.length);
+		SubMonitor locationsMonitor = SubMonitor.convert(sm.split(1), target.size());
 		
-		for (ITargetLocation extra : locations) {
-			if (!Q7ExternalLaunchDelegate.isQ7BundleContainer(extra)) {
-				locationsMonitor.split(1);
-				continue;
-			}
-			TargetBundle[] bundles = extra.getBundles();
-			SubMonitor bundleMonitor = SubMonitor.convert(locationsMonitor.split(1), bundles.length);
-			for (TargetBundle bundle : bundles) {
-				collector.addExtraBundle(bundle, bundleMonitor.split(1));
-			}
-		}
+		target.getModels().forEach(m -> {
+			locationsMonitor.subTask(m.model().getPluginBase().getName());
+			collector.addPluginBundle(m.model(), m.startLevel());
+			locationsMonitor.split(1);
+		});
 
 		Q7ExternalLaunchDelegate.BundlesToLaunch bundles = collector.getResult();
 
+		Q7ExternalLaunchDelegate.removeUnresolved(bundles);
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundles);
 
-		Q7LaunchDelegateUtils.setDelegateFields(this, bundles.fModels, bundles.fAllBundles);
+		Q7LaunchDelegateUtils.setDelegateFields(this, bundles.fModels, Maps.transformValues(bundles.fAllBundles.asMap(), ArrayList::new));
 		monitor.done();
 	}
 }

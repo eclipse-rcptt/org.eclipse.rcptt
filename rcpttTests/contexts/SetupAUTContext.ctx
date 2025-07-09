@@ -5,8 +5,8 @@ Element-Name: SetupAUTContext
 Element-Type: context
 Element-Version: 2.0
 Id: _ZQYygK2sEeCqBbDEJWufvQ
-Runtime-Version: 2.5.5.202404041628
-Save-Time: 7/22/24, 6:30 PM
+Runtime-Version: 2.6.0.202504052346
+Save-Time: 4/6/25, 2:43 PM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -44,8 +44,19 @@ proc waitForTaskToComplete {
 		}
 	}
 }
-invoke-AUT selfQ7 -args "-nosplash" -vmargs "-Xmx512m"
 
+get-view Applications | get-tree | get-items | foreach -do {
+	if -condition [ get-property caption -raw  | eq "selfQ7"] -else {
+	   try -command {
+	       trace [get-property caption -raw]
+	       click
+	       get-menu -path Stop | click
+       } -catch {}
+ 	}
+ }
+
+
+invoke-AUT selfQ7 -args "-nosplash" -vmargs "-Xmx512m"
 loop [val count 0] {
 	if [$count | lt 10] {
 		if [get-view Applications | get-tree | get-item selfQ7 | has-property "image.decorations[0].path"] {

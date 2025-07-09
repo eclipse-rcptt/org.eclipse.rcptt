@@ -40,6 +40,9 @@ public class ForeachService implements ICommandService {
 
 		EList<EObject> objects = foreach.getInput();
 		for (int i = 0, size = objects.size(); i < size; i++) {
+			if (!context.isAlive()) {
+				throw new CoreException(Status.CANCEL_STATUS);
+			}
 			EObject o = objects.get(i);
 			ISession session = context.getSession();
 			IPipe in = null;

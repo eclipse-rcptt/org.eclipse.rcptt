@@ -26,7 +26,7 @@ import org.eclipse.emf.common.util.EList;
  * </ul>
  *
  * @see org.eclipse.rcptt.ecl.core.CorePackage#getGlobal()
- * @model annotation="http://www.eclipse.org/ecl/docs description='Creates a new global variable declaration.' returns='An internal object, describing a variable' example='// declaring an empty list:\n\nglobal [val myList [list]]\n\n\n\n// filling the list with all New/... menu items:\n\nrepeat [val index] -times [get-elements-count] -command {\n\nlet [val oldlist [$myList]] [val itemName [get-item-property [$index] \"getText()\"]] {\n\n// check if the item is not separator or Other...\n\nif [and [$itemName | not-eq \"\"][$itemName | not-eq \"&amp;Other.*\"]] {\n\nglobal [val myList [appendToList [$oldlist] [$itemName]]] -override\n\n}\n\n}\n\n}'"
+ * @model annotation="http://www.eclipse.org/ecl/docs description='Creates a new global variable declaration.' returns='An internal object, describing a variable' example='// declaring an empty list:\n\nglobal [val myList [list]]\n\n\n\n// filling the list with all New/... menu items:\n\nrepeat [val index] -times [get-elements-count] -command {\n\nlet [val oldlist [$myList]] [val itemName [get-item-property [$index] \"getText()\"]] {\n\n// check if the item is not separator or Other...\n\nif [and [$itemName | not-eq \"\"][$itemName | not-eq \"&amp;Other.*\"]] {\n\nglobal [val myList [append [$oldlist] [$itemName]]] -override\n\n}\n\n}\n\n}'"
  * @generated
  */
 public interface Global extends Command {

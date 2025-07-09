@@ -15,7 +15,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
-      image: basilevs/ubuntu-rcptt:3.7.1
+      image: basilevs/ubuntu-rcptt:3.7.3
       imagePullPolicy: Always
       tty: true
       resources:
@@ -26,6 +26,8 @@ class Build implements Serializable {
           memory: "4Gi"
           cpu: "1"
       env:
+      - name: "HOME"
+        value: "/tmp"
       - name: "MAVEN_OPTS"
         value: "-Duser.home=/home/jenkins"
       - name: "XDG_CONFIG_HOME"
@@ -146,19 +148,20 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   void _build(Boolean sign) {
     withBuildContainer() {
-      this.script.sh "mvn --version"
+			sh "env"
+      mvn "--version"
       def mvn = { pom ->
-          this.script.sh "mvn clean verify --threads=1.0C -Dtycho.localArtifacts=ignore -Dmaven.repo.local=${getWorkspace()}/m2 -B -e ${sign ? "-P sign" : ""} -f ${pom}" 
+          this.mvn "clean ${sign ? "--activate-profiles sign" : ""} --file ${pom}"
       }
       this.script.xvnc() {
-        mvn "releng/mirroring/pom.xml"
-        mvn "releng/core/pom.xml"
-        mvn "releng/runtime/pom.xml -P runtime4x"
-        mvn "releng/ide/pom.xml"
-        mvn "releng/rap/pom.xml -P core"
-        mvn "releng/rap/pom.xml -P ide"
-        mvn "releng/rcptt/pom.xml"
-        mvn "releng/runner/pom.xml"
+        mvn "releng/mirroring/pom.xml verify"
+        mvn "releng/core/pom.xml verify"
+        mvn "releng/runtime/pom.xml -P runtime4x verify"
+        mvn "releng/ide/pom.xml verify"
+        mvn "releng/rap/pom.xml -P core verify"
+        mvn "releng/rap/pom.xml -P ide verify"
+        mvn "releng/rcptt/pom.xml verify"
+        mvn "releng/runner/pom.xml verify"
         mvn "maven-plugin/pom.xml install"
       }
       this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
@@ -168,7 +171,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   void archive() {
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary"
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
   }
 
   private void sh_with_return(String command) {
@@ -180,7 +183,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void get_version_from_pom() {
-    return sh_with_return("mvn -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
+    return sh_with_return("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
   }
 
   private void get_version() {
@@ -198,7 +201,6 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
-      this.script.junit "rcpttTests/target/*-reports/*.xml"
     }
   }
 
@@ -212,7 +214,6 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
-      this.script.junit "mockups/rcpttTests/target/*-reports/*.xml"
     }
   }
 
@@ -224,15 +225,19 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void _run_tests(String runner, String dir, String args) {
-    this.script.xvnc() {
-      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
-          -Dci-maven-version=2.6.0-SNAPSHOT \
-          -DexplicitRunner=`readlink -f ${runner}` \
-          ${args}"
+		try {
+	    this.script.xvnc() {
+	      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
+	          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+	          -Dci-maven-version=2.6.0-SNAPSHOT \
+	          -DexplicitRunner=`readlink -f ${runner}` \
+	          ${args}"
+	    }
+	    this.script.sh "test -f ${dir}/target/results/tests.html"
+    } finally {
+	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
+      this.script.junit "${dir}/target/*-reports/*.xml"
     }
-    this.script.sh "test -f ${dir}/target/results/tests.html"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
   }
 
   void post_build_actions() {
@@ -352,9 +357,24 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   private void maven_deploy(String version) {
     withBuildContainer() {
-      mvn('-Dtycho.mode=maven -f runner/product org.eclipse.tycho:tycho-versions-plugin::set-version -DnewVersion=' + version)
+      def repo = version.endsWith("-SNAPSHOT") ? "snapshots" : "releases"
+      def classifiers = PLATFORMS
+      def types = PLATFORMS.collect { "zip" }
+      def files = PLATFORMS.collect { "`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${it}.zip`" }
       mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
-      mvn('-f releng/runner/pom.xml clean deploy')
+      mvn("deploy:deploy-file \
+        -Dversion=$version \
+        -Durl=https://repo.eclipse.org/content/repositories/rcptt-$repo/ \
+        -DgroupId=org.eclipse.rcptt.runner \
+        -DrepositoryId=repo.eclipse.org \
+        -DgeneratePom=true \
+        -DartifactId=rcptt.runner \
+        -Dfile=${files[0]} \
+        -Dclassifier=${classifiers[0]} \
+        \"-Dfiles=${files[1..-1].join(",")}\" \
+        -Dclassifiers=${classifiers[1..-1].join(",")} \
+        -Dtypes=${types[1..-1].join(",")} \
+        ")
       mvn('-f maven-plugin/pom.xml clean deploy')
     }
   }
@@ -364,7 +384,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -e -B " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
   } 
 
 }

@@ -13,7 +13,7 @@ package org.eclipse.rcptt.ecl.doc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
@@ -55,14 +55,8 @@ public class GenerateDocApp implements IApplication {
 			return printErrUsageAndGetExitCode("Cannot write to output location");
 		}
 
-		OutputStreamWriter writer;
 		FileOutputStream out = new FileOutputStream(outputFile);
-		try {
-			writer = new OutputStreamWriter(out, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// fall back to default encoding then
-			writer = new OutputStreamWriter(out);
-		}
+		OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 
 		EclDocWriter w = new EclDocWriter(writer);
 		new EclDocAllCommandsWriter().write(w);

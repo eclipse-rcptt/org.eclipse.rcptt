@@ -19,6 +19,7 @@ import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -190,6 +191,7 @@ public class PrepareExecutionWrapper extends Executable {
 			if (!id.equals(reportId)) {
 				throw new CoreException(createStatus("Expected item id: " + id + ", actual report id: " + reportId));
 			}
+			ReportHelper.appendLog(resultReport.getRoot(), LoggingCategory.NORMAL, getLog());
 		} catch (CoreException e) {
 			resultReport = generateReport(e.getStatus());
 		}
@@ -278,7 +280,10 @@ public class PrepareExecutionWrapper extends Executable {
 				resultReport = getReport();
 				Node root = resultReport.getRoot();
 				Q7Info rootInfo = ReportHelper.getInfo(root);
-				assert rootInfo.getResult() == null;
+				if (rootInfo.getResult() != null) {
+					MultiStatus result = new MultiStatus(getClass(), 0, new IStatus[]{status,  ProcessStatusConverter.toIStatus(rootInfo.getResult()), Status.error( "Report contains a spurious result")}, "Report contains a spurious result", new AssertionError());
+					return result;
+				}
 				rootInfo.setResult(ProcessStatusConverter.toProcessStatus(status));
 				closeAllNodes(root.getStartTime() + getTime(), root);
 				if (status.isOK() && SimpleSeverity.create(rootInfo) != SimpleSeverity.OK) {

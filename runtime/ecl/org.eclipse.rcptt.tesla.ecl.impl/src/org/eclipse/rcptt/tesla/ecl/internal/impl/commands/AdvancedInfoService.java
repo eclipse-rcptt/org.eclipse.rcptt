@@ -47,7 +47,7 @@ public class AdvancedInfoService implements ICommandService {
 									}
 									try {
 										TeslaBridge.makeScreenshot(true,
-												"Timeout during execution");
+												"Capturing debug information");
 										final AdvancedInformation info = TeslaBridge
 												.getClient()
 												.getAdvancedInformation(null);

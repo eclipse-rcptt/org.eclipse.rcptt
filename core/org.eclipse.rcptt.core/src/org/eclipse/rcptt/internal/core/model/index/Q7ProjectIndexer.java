@@ -111,6 +111,7 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 
 	public void indexNamedElement(Index index, IQ7NamedElement element) {
 		IQ7NamedElement originalElement = element;
+		final IIndexDocument document = new IndexDocument(element, index);
 		try {
 			synchronized (indexingSet) {
 				while (indexingSet.contains(originalElement)) {
@@ -131,7 +132,6 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 				return;
 			}
 			element = element.getIndexingWorkingCopy(new NullProgressMonitor());
-			final IIndexDocument document = new IndexDocument(element, index);
 			long stamp = element.getResource().getModificationStamp();
 			index.remove(document.getContainerRelativePath());
 			document.updateModificationStamp(stamp);
@@ -141,11 +141,14 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 				Q7StatusCode code = ((Q7Status) e.getStatus()).getStatusCode();
 				if (code.equals(Q7StatusCode.NotPressent)
 						|| code.equals(Q7StatusCode.NotOpen)) {
+					index.remove(document.getContainerRelativePath());
 					// Ignore not existing or not opened resource exceptions
 					return;
 				}
 			}
 
+			RcpttPlugin.log(e);
+		} catch (Throwable e) {
 			RcpttPlugin.log(e);
 		} finally {
 			synchronized (indexingSet) {

@@ -33,9 +33,7 @@ public interface IQ7Element extends IAdaptable {
 
 	IPath getPath();
 
-	boolean isStructureKnown() throws ModelException;
-
-	void accept(IQ7ElementVisitor visitor) throws ModelException;
+	void accept(IQ7ElementVisitor visitor) throws ModelException, InterruptedException;
 
 	IQ7Model getModel();
 

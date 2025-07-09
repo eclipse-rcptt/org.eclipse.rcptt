@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -51,7 +52,6 @@ import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.ui.IStartup;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
@@ -102,7 +102,7 @@ public class ResourceLaunchConfigurationMigration implements IStartup {
 			Writer writer = new StringWriter();
 			LaunchConfigurationMigration.write(document, writer);
 			resource.setContents(new ByteArrayInputStream(writer.toString()
-					.getBytes(Charsets.UTF_8)), 0, null);
+					.getBytes(StandardCharsets.UTF_8)), 0, null);
 		}
 	}
 

@@ -14,7 +14,7 @@ Content-Type: text/properties
 Entry-Name: .parameters.context
 
 #Wed Oct 29 16:29:05 NOVT 2014
-message=Symbol "/" is not acceptable in AUT name.
+message=Symbol "/" is not acceptable in an AUT name.
 symbol=/
 
 ------=_.parameters.context-2e023de5-3294-36a9-ac1d-6701f05a40ee--

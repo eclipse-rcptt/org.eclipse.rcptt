@@ -21,6 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
@@ -121,6 +122,7 @@ public class UIJobCollector implements IJobChangeListener {
 //		private boolean checkForTimeout = true;
 		private boolean blocked = false;
 		private long runningTime = System.currentTimeMillis();
+		private Thread lastThread = null;
 
 		JobInfo(Job job) {
 			this.job = job;
@@ -138,6 +140,9 @@ public class UIJobCollector implements IJobChangeListener {
 		}
 
 		synchronized void done(boolean reschedule) {
+			// Job's thread field is already null, but there is a good chance this listener is running in it's thread
+			// This is needed to handle pre-2022 AUTs, where listeners were not serialized
+			lastThread = Thread.currentThread();
 			if (reschedule) {
 				// Job will be rescheduled
 				rescheduleCounter += 1;
@@ -153,12 +158,25 @@ public class UIJobCollector implements IJobChangeListener {
 				if (Job.SLEEPING == job.getState()) {
 					return delay >= 0 && delay <= parameters.delayToWaitFor(); 
 				}
-				return true;
+				return !isDone();
 			case REQUIRED:
-				return true;
+				return !isDone();
 			default:
 				return false;
 			}
+		}
+		
+		private synchronized boolean isDone() {
+			if (job.getState() != Job.NONE) {
+				return false;
+			}
+			Thread thread = lastThread;
+			if (thread == null) {
+				return true;
+			}
+			// TeslaSWTAccess.waitListeners() does not work in 2022-09 and older https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/65
+			Context context = ContextManagement.makeContext(thread.getStackTrace());
+			return !context.containsClass("org.eclipse.core.internal.jobs.JobListeners");
 		}
 
 		synchronized void scheduled(long delay) {
@@ -175,9 +193,9 @@ public class UIJobCollector implements IJobChangeListener {
 			case Job.WAITING: state = "WAITING"; break;
 			default: state = "NONE"; break;
 			}
-			return String.format("%s (%s), %s, status: %8s, is active: %b, delay: %d, blocked for %d, running for %d",
+			return String.format("%s (%s), %s, status: %8s, is active: %b, delay: %d, blocked for %d, running for %d, thread: %s",
 					job.getClass().getName(), job.getName(), state, status, isActive(), startingTime - System.currentTimeMillis(),
-					blocked ? System.currentTimeMillis() - blockedTime : 0,  blocked ? 0 : System.currentTimeMillis() - runningTime);
+					blocked ? System.currentTimeMillis() - blockedTime : 0,  blocked ? 0 : System.currentTimeMillis() - runningTime, lastThread);
 		}
 
 		public void blocked(boolean isBlocked) {
@@ -239,22 +257,32 @@ public class UIJobCollector implements IJobChangeListener {
 			setPriority(Job.INTERACTIVE);
 			setSystem(true);
 		}
+		
 		protected org.eclipse.core.runtime.IStatus run(org.eclipse.core.runtime.IProgressMonitor monitor) {
 			while (!monitor.isCanceled()) {
 				List<Job> doneJobs;
 				synchronized (jobs) {
 					doneJobs = jobs.keySet().stream().filter(j -> j.getState() == Job.NONE).collect(Collectors.toList());
 				}
-				if (doneJobs.isEmpty()) {
-					break;
-				}
+				boolean found = false;
 				for (Job job: doneJobs) {
 					TeslaSWTAccess.waitListeners(job);
 					if (job.getState() == Job.NONE) {
-						JobInfo info = jobs.remove(job);
-						event("gone", info);
+						JobInfo info = jobs.get(job);
+						if (info != null) {
+							if (info.isActive()) {
+								continue;
+							}
+							jobs.remove(job, info);
+							event("gone", info);
+							found = true;
+						}
 					}
 				}
+				if (!found) {
+					break;
+				}
+				
 			}
 			return Status.OK_STATUS;
 		};
@@ -262,7 +290,7 @@ public class UIJobCollector implements IJobChangeListener {
 			return family == FAMILY;
 		};
 	};
-
+	
 	private JobInfo getOrCreateJobInfo(Job job) {
 		if (job.belongsTo(FAMILY)) {
 			throw new AssertionError("Can't work with an internal job");
@@ -367,6 +395,7 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.ui.dialogs.FilteredItemsSelectionDialog$RefreshProgressMessageJob",
 			"org.eclipse.ui.internal.progress.AnimationManager$1",
 			"org.eclipse.ui.internal.progress.ProgressManager$6",
+			"org.eclipse.ui.internal.progress.ProgressManager$2",
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$1", // Since Oxygen
 			"org.eclipse.ui.internal.progress.TaskBarProgressManager$2", // Before Oxygen
 			"org.eclipse.rcptt.ecl.internal.core.Session$1",
@@ -377,7 +406,9 @@ public class UIJobCollector implements IJobChangeListener {
 			"org.eclipse.ui.internal.Workbench$42", // Workbench Auto-Save Job
 			"org.eclipse.debug.internal.ui.views.console.ProcessConsole$InputReadJob",
 			"org.eclipse.rcptt.ecl.internal.debug.runtime.ServerSession",
-			"org.eclipse.ui.internal.Workbench$40" ))); // Workbench Auto-Save Job
+			"org.eclipse.ui.internal.Workbench$40", // Workbench Auto-Save Job
+			"org.eclipse.jface.text.reconciler.AbstractReconciler$BackgroundThread" // Since 2025-09
+			))); 
 
 	public static JobStatus detectJobStatus(Job job) {
 		JobStatus status = null;
@@ -932,7 +963,7 @@ public class UIJobCollector implements IJobChangeListener {
 	 * @param timeout
 	 * @throws InterruptedException
 	 */
-	public void join(long timeout) throws InterruptedException {
+	public void join(long timeout, BooleanSupplier isCancelled) throws InterruptedException {
 		SWTTeslaActivator.debugLog("UIJobCollector is going to join");
 		long startTime = System.currentTimeMillis();
 		// Context ctx = ContextManagement.currentContext();
@@ -940,6 +971,9 @@ public class UIJobCollector implements IJobChangeListener {
 			long delta = System.currentTimeMillis() - startTime;
 			if (delta > timeout) {
 				break;
+			}
+			if (isCancelled.getAsBoolean()) {
+				return;
 			}
 			if (removeCanceledJobs()) {
 				if (isJoinEmpty()) {
@@ -1031,7 +1065,7 @@ public class UIJobCollector implements IJobChangeListener {
 			return;
 		}
 		if (shouldDebug(job.job)) {
-			debug(String.format("event: %11s: %s", message, job));
+			debug(String.format("event: %11s: %s, size: %d", message, job, jobs.size()));
 		}
 	}
 	

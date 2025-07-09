@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.maven.util;
 
-import org.eclipse.rcptt.maven.util.Coords;
-
 /**
  * AUT specific data.
  */
@@ -55,6 +53,11 @@ public class AutCoords extends Coords {
 	public String getVm() {
 		return vm;
 	}
+	
+	/**
+	 * @parameter
+	 */
+	public String executionEnvironment;
 
 	public void setVm(String vm) {
 		this.vm = vm;

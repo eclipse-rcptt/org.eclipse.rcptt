@@ -12,7 +12,6 @@ package org.eclipse.rcptt.core.persistence.plain;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -99,9 +98,7 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 
 	@Override
 	protected synchronized void doExtractAll(InputStream contents) throws IOException {
-		PlainReader reader = null;
-		try {
-			reader = new PlainReader(contents);
+		try (PlainReader reader = new PlainReader(contents)) {
 			Map<String, String> header = reader.readHeader();
 			if (header != null) {
 				String version = header.get(IPlainConstants.ATTR_FORMAT_VERSION);
@@ -113,21 +110,9 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						}
 						File file = files.get(entry.name);
 						if (file != null && !file.exists()) {
-							OutputStream outputStream = internalStore(entry.name);
-							try {
-								byte[] data = null;
-								if (entry.getContent() instanceof String) {
-									data = ((String) entry.getContent()).getBytes(ENCODING);
-								} else if (entry.getContent() instanceof byte[]) {
-									data = (byte[]) entry.getContent();
-								}
-								if (data != null) {
-									FileUtil.copy(new ByteArrayInputStream(data), outputStream);
-								} else {
-									throw new IOException("Wrong Plain file format");
-								}
-							} finally {
-								outputStream.close();
+							try (OutputStream outputStream = internalStore(entry.name);
+								InputStream data = entry.getContent()) {
+								FileUtil.copy(data, outputStream);
 							}
 						}
 					}
@@ -137,18 +122,12 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 			}
 		} catch (Exception e) {
 			RcpttPlugin.log(e);
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
 		}
 	}
 
 	@Override
 	protected void doExtractFile(String fName, InputStream contents) throws IOException {
-		PlainReader reader = null;
-		try {
-			reader = new PlainReader(contents);
+		try (PlainReader reader = new PlainReader(contents)) {
 			Map<String, String> header = reader.readHeader();
 			if (header != null) {
 				String version = header.get(IPlainConstants.ATTR_FORMAT_VERSION);
@@ -159,47 +138,24 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 							break;
 						}
 						if (fName.equals(entry.name)) {
-							OutputStream outputStream = internalStore(fName);
-							byte[] data = null;
-							if (entry.getContent() instanceof String) {
-								data = ((String) entry.getContent()).getBytes(ENCODING);
-							} else if (entry.getContent() instanceof byte[]) {
-								data = (byte[]) entry.getContent();
+							try (OutputStream outputStream = internalStore(entry.name);
+									InputStream data = entry.getContent()) {
+									FileUtil.copy(data, outputStream);
 							}
-							if (data != null) {
-								FileUtil.copy(new ByteArrayInputStream(data), outputStream);
-							} else {
-								outputStream.close();
-								delete(fName);
-								throw new IOException("Wrong Plain file format");
-							}
-							outputStream.close();
+							break;
 						}
+						
 					}
 				} else {
-					throw new Exception("Q7 plain format version is unsupported.");
+					throw new PlainFormatException("Q7 plain format version is unsupported.");
 				}
-			}
-		} catch (PlainFormatException e) {
-			IFile file = element != null ? Q7Utils.getLocation(element) : null;
-			if (file != null) {
-				e.setFileName(file.getLocation().toString());
-			}
-			RcpttPlugin.log(e);
-		} catch (Exception e) {
-			RcpttPlugin.log(e);
-		} finally {
-			if (reader != null) {
-				reader.close();
 			}
 		}
 	}
 
 	@Override
-	protected synchronized void doReadIndex(InputStream contents) {
-		PlainReader reader = null;
-		try {
-			reader = new PlainReader(contents);
+	protected synchronized void doReadIndex(InputStream contents) throws IOException {
+		try (PlainReader reader = new PlainReader(contents)) {
 			Map<String, String> header = reader.readHeader();
 			if (header != null) {
 				String version = header.get(IPlainConstants.ATTR_FORMAT_VERSION);
@@ -213,23 +169,15 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						putFileItem(entry.name, filePath);
 					}
 				} else {
-					throw new Exception("Q7 plain format version is unsupported.");
+					throw new PlainFormatException("Q7 plain format version is unsupported.");
 				}
-			}
-		} catch (Exception e) {
-			RcpttPlugin.log(e);
-		} finally {
-			if (reader != null) {
-				reader.close();
 			}
 		}
 	}
 
 	@Override
 	protected synchronized void doStoreTo(File file) throws FileNotFoundException, IOException {
-		PlainWriter writer = null;
-		try {
-			writer = new PlainWriter(new BufferedOutputStream(new FileOutputStream(file)), plainStoreFormat);
+		try (PlainWriter writer = new PlainWriter(new BufferedOutputStream(new FileOutputStream(file)), plainStoreFormat)) {
 			Map<String, String> saveAttrs = new HashMap<String, String>();
 			if (masterAttributes != null) {
 				saveAttrs.putAll(masterAttributes);
@@ -259,8 +207,7 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 			for (String fName : ordered) {
 				File value = files.get(fName);
 				if (value.exists()) {
-					InputStream in = getInput(value);
-					try {
+					try (InputStream in = getInput(value)) {
 						Map<String, String> attrs = new HashMap<String, String>();
 						String storeAsText = null;
 						IPlainTextPersistenceExtension[] extensions = PlainTextPersistenceExtensionManager.getInstance()
@@ -293,13 +240,9 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 								writer.writeNode(fName, attrs, content);
 							}
 						}
-					} finally {
-						FileUtil.safeClose(in);
 					}
 				}
 			}
-		} finally {
-			writer.close();
 		}
 	}
 
@@ -470,14 +413,11 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 			}
 		}
 
-		InputStream contents = getContentsStream();
-		if (contents == null) {
-			return;
-		}
-		try {
-			PlainReader reader = null;
-			try {
-				reader = new PlainReader(contents);
+		try (InputStream contents = getContentsStream()) {
+			if (contents == null) {
+				return;
+			}
+			try (PlainReader reader = new PlainReader(contents)) {
 				Map<String, String> header = reader.readHeader();
 				if (header != null) {
 					String version = header.get(IPlainConstants.ATTR_FORMAT_VERSION);
@@ -538,29 +478,21 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 				}
 			} catch (Exception e) {
 				RcpttPlugin.log(e);
-			} finally {
-				if (reader != null) {
-					reader.close();
-				}
 			}
-		} finally {
-			try {
-				contents.close();
-			} catch (IOException e) {
-			}
+		} catch (IOException e1) {
+			throw new IllegalStateException(e1);
 		}
 		element.setModified(false);
 	}
 
 	private void processTestSuiteAttrs(Map<String, String> header, EObject eObject) throws IOException {
 		TestSuite sc = (TestSuite) eObject;
-		InputStream items = read(TESTCASE_ITEMS);
+		try (InputStream items = read(TESTCASE_ITEMS)) {
 
-		sc.setManuallyOrdered(
+			sc.setManuallyOrdered(
 				header.containsKey(ATTR_MANUALY_ORDERED) && header.get(ATTR_MANUALY_ORDERED).equalsIgnoreCase("true"));
 
-		if (items != null) {
-			try {
+			if (items != null) {
 				BufferedReader stream = new BufferedReader(new InputStreamReader(items));
 				while (true) {
 					String line = stream.readLine();
@@ -577,8 +509,6 @@ public class PlainTextPersistenceModel extends BasePersistenceModel implements I
 						}
 					}
 				}
-			} finally {
-				items.close();
 			}
 		}
 	}

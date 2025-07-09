@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: http://jira4.xored.com/browse/QS-1435
 Id: _dXS98Y3OEeGPGed2vA-uTQ
-Runtime-Version: 1.5.3.201409120955
-Save-Time: 9/16/14 10:58 AM
+Runtime-Version: 2.6.0.qualifier
+Save-Time: 6/27/25, 12:24 AM
 Tags: AUTConfiguration, selfAUT, Create
 Testcase-Type: ecl
 
@@ -54,6 +54,7 @@ with [get-window "New Application Under Test"] {
     get-editbox -after [get-label "Location:"] | key-type Space -times 2
     get-editbox -after [get-label "Location:"] | key-type BackSpace -times 2
     get-editbox -after [get-label "Name:"] | set-text AUT1
+    set-q7-option jobHangTimeout 120000
     get-button Finish | click
 }
 get-view Applications | get-button "New..." | click

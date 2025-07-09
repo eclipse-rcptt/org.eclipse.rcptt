@@ -79,6 +79,7 @@ public class SortByImpl extends CommandImpl implements SortBy {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getField() {
 		return field;
 	}
@@ -88,6 +89,7 @@ public class SortByImpl extends CommandImpl implements SortBy {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setField(String newField) {
 		String oldField = field;
 		field = newField;
@@ -162,7 +164,7 @@ public class SortByImpl extends CommandImpl implements SortBy {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (field: ");
 		result.append(field);
 		result.append(')');

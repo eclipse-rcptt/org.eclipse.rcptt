@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime UI IDE Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.ui.ide.aspects.rap;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.7.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)"
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.7.0,3.0.0)",
+ org.eclipse.rcptt.watson.core;bundle-version="[2.7.0,3.0.0)"
 onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.ui.ide

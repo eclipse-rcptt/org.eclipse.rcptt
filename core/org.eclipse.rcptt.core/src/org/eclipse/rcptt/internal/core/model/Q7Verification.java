@@ -32,7 +32,7 @@ public class Q7Verification extends Q7NamedElement implements IVerification {
 	}
 
 	public VerificationType getType() throws ModelException {
-		NamedElement element = getInfo().getNamedElement();
+		NamedElement element = getNamedElement();
 		return VerificationTypeManager.getInstance().getTypeByVerification(
 				(Verification) element);
 	}
@@ -43,7 +43,7 @@ public class Q7Verification extends Q7NamedElement implements IVerification {
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7ResourceInfo createElementInfo() {
 		return new Q7ResourceInfo(IPlainConstants.PLAIN_VERIFICATION, Q7ResourceInfo.toURI(getResource()));
 	}
 

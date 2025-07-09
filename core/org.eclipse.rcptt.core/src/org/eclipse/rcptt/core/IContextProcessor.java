@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.ecore.EObject;
 
@@ -26,10 +28,11 @@ public interface IContextProcessor {
 	 * Apply context
 	 * 
 	 * @param context
+	 * @param isCancelled TODO
 	 * @return
 	 * @throws CoreException
 	 */
-	public void apply(Context context) throws CoreException;
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException;
 
 	/**
 	 * Create context from the current environment

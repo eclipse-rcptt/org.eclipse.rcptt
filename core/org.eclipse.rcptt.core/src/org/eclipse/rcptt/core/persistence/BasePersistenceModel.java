@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence;
 
+import static java.lang.Math.min;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -25,19 +27,30 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.rcptt.core.workspace.Q7Utils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.rcptt.util.StreamUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 public abstract class BasePersistenceModel implements IPersistenceModel {
+	private static final Bundle BUNDLE = FrameworkUtil.getBundle(BasePersistenceModel.class);
+	private static final ILog LOG = Platform.getLog(BUNDLE);
 
 	protected final Map<String, File> files = new HashMap<String, File>();
+	
 
 	protected abstract void doExtractAll(InputStream contents)
 			throws IOException;
@@ -45,7 +58,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 	protected abstract void doExtractFile(String fName, InputStream contents)
 			throws IOException;
 
-	protected abstract void doReadIndex(InputStream contents);
+	protected abstract void doReadIndex(InputStream contents) throws IOException;
 
 	protected abstract void doStoreTo(File file) throws FileNotFoundException,
 			IOException;
@@ -90,8 +103,14 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		try {
 			readIndex();
 		} catch (CoreException e) {
-			RcpttPlugin.log(e);
+			LOG.log(toMultiStatus("Failed to read " + Q7Utils.getLocation(element) , e));
+		} catch (IOException e) {
+			error("Failed to read " + Q7Utils.getLocation(element) , e);
 		}
+	}
+
+	private MultiStatus toMultiStatus(String message, CoreException e) {
+		return new MultiStatus(BUNDLE.getSymbolicName(), 0, new IStatus[] {e.getStatus()}, message, e);
 	}
 
 	public Resource getResource() {
@@ -103,7 +122,9 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		try {
 			readIndex();
 		} catch (CoreException e) {
-			RcpttPlugin.log(e);
+			LOG.log(toMultiStatus("Failed to write " + Q7Utils.getLocation(element) , e));
+		} catch (IOException e) {
+			error("Failed to write " + Q7Utils.getLocation(element) , e);
 		}
 	}
 
@@ -120,19 +141,13 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return files.keySet().toArray(new String[files.size()]);
 	}
 
-	private void readIndex() throws CoreException {
+	private void readIndex() throws CoreException, IOException {
 		assert !disposed;
-		InputStream contents = getContentsStream();
-		if (contents == null) {
-			return;
-		}
-		try {
-			doReadIndex(contents);
-		} finally {
-			try {
-				contents.close();
-			} catch (IOException e) {
+		try (InputStream contents = getContentsStream()) {
+			if (contents == null) {
+				return;
 			}
+			doReadIndex(contents);
 		}
 	}
 
@@ -157,10 +172,11 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			contents = new BufferedInputStream(input);
 		} catch (CoreException e) {
 			// Ignore file not found exception
-			if (e.getStatus().getCode() != 271) {
-				RcpttPlugin.log(e);
+			int code = e.getStatus().getCode();
+			if (code == EFS.ERROR_NOT_EXISTS) {
+				return null;
 			}
-			return null;
+			throw new IllegalStateException(e);
 		}
 		return contents;
 	}
@@ -169,23 +185,17 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return files.put(name, filePath.toFile());
 	}
 
-	public void dispose() {
+	public synchronized void dispose() {
 		if (disposed)
 			return;
 		removeAll();
 		disposed = true;
 	}
 
-	public InputStream read(String name) {
-		assert !disposed;
-		File file = files.get(name);
+	public final synchronized InputStream read(String name) {
+		File file = extractEntryIfNotYet(name);
 		if (file == null) {
 			return null;
-		}
-		waitUntilExtracted(name);
-		if (!file.exists()) {
-			extractFile(name);
-			waitUntilExtracted(name);
 		}
 		if (file.exists()) {
 			try {
@@ -196,6 +206,26 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		}
 
 		return null;
+	}
+	
+	private File extractEntryIfNotYet(String name) {
+		if (disposed) {
+			throw new IllegalStateException("Disposed");
+		}
+		File file = files.get(name);
+		if (file == null) {
+			return null;
+		}
+		waitUntilExtracted(name);
+		try {
+			if (!file.exists()) {
+				extractFile(name);
+				waitUntilExtracted(name);
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException("Can't extract " + name + " from " + element, e);
+		}
+		return file;
 	}
 
 	private void waitUntilExtracted(String name) {
@@ -215,7 +245,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		return new BufferedInputStream(new FileInputStream(file));
 	}
 
-	private void extractFile(String fName) {
+	private void extractFile(String fName) throws IOException {
 		initialize();
 		InputStream contents = null;
 		try {
@@ -230,8 +260,6 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				return;
 			}
 			doExtractFile(fName, contents);
-		} catch (Throwable e1) {
-			RcpttPlugin.log(e1);
 		} finally {
 			synchronized (extractions) {
 				extractions.remove(fName);
@@ -246,7 +274,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		}
 	}
 
-	public void delete(String name) {
+	public synchronized void delete(String name) {
 		File file = files.get(name);
 		if (file != null && file.exists()) {
 			file.delete();
@@ -254,11 +282,15 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		files.remove(name);
 	}
 
-	public boolean restore(String name) {
+	public synchronized boolean restore(String name) {
 		File file = files.get(name);
 		if (file != null && file.exists()) {
 			file.delete();
-			extractFile(name);
+			try {
+				extractFile(name);
+			} catch (IOException e) {
+				throw new IllegalStateException("Can't extract " + name + " from " + element, e);
+			}
 			return file.exists();
 		}
 		return false;
@@ -334,12 +366,12 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		removeAll();
 		String[] names = originalModel.getNames();
 		for (String name : names) {
-			InputStream inputStream = originalModel.read(name);
+			try (InputStream inputStream = originalModel.read(name);
 			OutputStream outputStream = store(name);
-			try {
+					) {
 				FileUtil.copy(inputStream, outputStream);
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new IllegalStateException(e);
 			}
 		}
 
@@ -360,36 +392,24 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		modified = false;
 	}
 
-	public int size(String teslaContentEntry) {
-		InputStream stream = read(teslaContentEntry);
-		int result = 0;
-		if (stream != null) {
-			try {
-
-				byte[] buffer = new byte[4096];
-				int len = 0;
-				while ((len = stream.read(buffer)) > 0) {
-					result += len;
-				}
-			} catch (IOException e) {
-				result = 0;
-			} finally {
-				StreamUtil.closeSilently(stream);
-			}
-		}
-		return result;
-	}
-
 	public void rename(String oldName, String newName) {
-		InputStream read = read(oldName);
-		if (read != null) {
-			OutputStream store = store(newName);
-			try {
-				FileUtil.copy(read, store);
-				delete(oldName);
-			} catch (IOException e) {
-				RcpttPlugin.log(e);
+		try (InputStream read = read(oldName);
+			OutputStream store = store(newName)) {
+			if (read != null) {
+					FileUtil.copy(read, store);
+					delete(oldName);
 			}
+		} catch (IOException e ) {
+			throw new IllegalStateException(e);
 		}
 	}
+	
+	void error(String message, Exception e) {
+		LOG.log(new Status(IStatus.ERROR, BUNDLE.getSymbolicName(), 0, message, e));
+	}
+	
+	void error(String message) {
+		error(message, null);
+	}
+	
 }

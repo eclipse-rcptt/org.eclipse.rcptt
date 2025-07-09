@@ -15,7 +15,6 @@ import static org.eclipse.rcptt.launching.p2utils.Q7P2UtilsActivator.PLUGIN_ID;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +55,9 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.pde.core.target.ITargetPlatformService;
 import org.eclipse.pde.internal.core.PDECore;
 import org.eclipse.rcptt.launching.injection.UpdateSite;
-import org.eclipse.rcptt.util.FileUtil;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 
 @SuppressWarnings("restriction")
 public class P2Utils {
@@ -72,32 +73,17 @@ public class P2Utils {
 	public static ITargetPlatformService getTargetService() {
 		Class<ITargetPlatformService> serviceClass = ITargetPlatformService.class;
 
-		return getPDECoreService(serviceClass, serviceClass.getName());
+		return getPDECoreService(serviceClass);
 	}
 
-	private static <T> T getPDECoreService(Class<T> serviceClass, String serviceName) {
-		PDECore pdeCore = PDECore.getDefault();
+	private static <T> T getPDECoreService(Class<T> serviceClass) {
+		BundleContext context = FrameworkUtil.getBundle(P2Utils.class).getBundleContext();
+		ServiceReference<T> reference = context.getServiceReference(serviceClass);
 		try {
-			Method strMethod = pdeCore.getClass().getMethod("acquireService", String.class);
-			if (strMethod != null) {
-				return (T) strMethod.invoke(pdeCore, serviceName);
-			}
-
-		} catch (Throwable ex) {
-			// Q7P2UtilsActivator.log(new Status(Status.ERROR, Q7P2UtilsActivator.PLUGIN_ID,
-			// ex.getMessage(), ex));
+			return context.getService(reference);
+		} finally {
+			context.ungetService(reference);
 		}
-		try {
-			Method classMethod = pdeCore.getClass().getMethod("acquireService", Class.class);
-
-			if (classMethod != null) {
-				return (T) classMethod.invoke(pdeCore, serviceClass);
-			}
-		} catch (Throwable ex) {
-			// Q7P2UtilsActivator.log(new Status(Status.ERROR, Q7P2UtilsActivator.PLUGIN_ID,
-			// ex.getMessage(), ex));
-		}
-		return null;
 	}
 
 	/**
@@ -111,7 +97,7 @@ public class P2Utils {
 	}
 
 	public static IProvisioningAgent getProvisioningAgent() {
-		return getPDECoreService(IProvisioningAgent.class, IProvisioningAgent.SERVICE_NAME);
+		return getPDECoreService(IProvisioningAgent.class);
 	}
 
 	/**
@@ -245,11 +231,9 @@ public class P2Utils {
 		 * Validate file consistency check if this is valid zip archive if it is jar
 		 */
 		if (file.getName().toLowerCase().endsWith(".jar")) {
-			BufferedInputStream stream = null;
-			ZipInputStream zin = null;
-			try {
-				stream = new BufferedInputStream(new FileInputStream(file));
-				zin = new ZipInputStream(stream);
+			try (
+				BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
+				ZipInputStream zin = new ZipInputStream(stream)) {
 				Set<String> names = new HashSet<String>();
 				while (true) {
 					ZipEntry entry = zin.getNextEntry();
@@ -263,9 +247,6 @@ public class P2Utils {
 				}
 			} catch (Throwable e) {
 				return new Status(IStatus.ERROR, PLUGIN_ID, "Failed to check " + file, e);
-			} finally {
-				FileUtil.safeClose(zin);
-				FileUtil.safeClose(stream);
 			}
 		}
 		return Status.OK_STATUS;

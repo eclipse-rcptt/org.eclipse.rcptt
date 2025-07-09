@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.ui.editors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
@@ -20,6 +21,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.IQ7ProjectMetadata;
+import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.search.AllProjectScope;
 import org.eclipse.rcptt.core.model.search.ISearchScope;
 import org.eclipse.rcptt.core.model.search.Q7SearchCore;

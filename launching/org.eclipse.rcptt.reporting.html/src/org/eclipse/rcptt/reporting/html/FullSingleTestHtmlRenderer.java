@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.ecl.core.EclException;
+import org.eclipse.rcptt.ecl.core.EclString;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
 import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.Q7Info;
@@ -234,6 +235,10 @@ public class FullSingleTestHtmlRenderer {
 			renderAdvanced((AdvancedInformation) eObject);
 		} else if (eObject == null) {
 			writer.println("Event contains no data. This indicates a premature AUT termination.");
+		} else if (eObject instanceof EclString) {
+			writer.println("<pre>");
+			writer.println(escape(((EclString) eObject).getValue()));
+			writer.println("</pre>");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}

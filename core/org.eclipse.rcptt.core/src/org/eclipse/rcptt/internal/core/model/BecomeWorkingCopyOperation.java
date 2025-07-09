@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -40,8 +43,7 @@ public class BecomeWorkingCopyOperation extends Q7Operation {
 			copyInfo.resourceInfo = (Q7ResourceInfo) workingCopy
 					.createElementInfo();
 			workingCopy.setIndexing(indexing);
-			workingCopy.openWhenClosed(copyInfo.resourceInfo,
-					this.progressMonitor);
+			workingCopy.generateInfos(copyInfo.resourceInfo, this.progressMonitor);
 			// workingCopy.extractAllPersistence();
 
 			if (workingCopy.getResource().isAccessible()) {
@@ -63,6 +65,9 @@ public class BecomeWorkingCopyOperation extends Q7Operation {
 
 			this.resultElements = new IQ7Element[] { workingCopy };
 		} catch (ModelException e) {
+			workingCopy.discardWorkingCopy();
+			throw e;
+		} catch (Throwable e) { 
 			workingCopy.discardWorkingCopy();
 			throw e;
 		} finally {

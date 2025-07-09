@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _NggzMHM6EeGsLtfm1BUmHg
-Runtime-Version: 2.2.0.qualifier
-Save-Time: 5/1/16 1:18 AM
+Runtime-Version: 2.6.0.202506230024
+Save-Time: 6/23/25, 6:28 PM
 Tags: feature/debug, selfAUT
 Testcase-Type: ecl
 
@@ -41,9 +41,11 @@ with [get-editor CreateJavaProject | get-section Script | get-text-viewer] {
 	set-caret-pos 2 1
 	key-type "M1+M2+b"
 }
+set-q7-option -key jobTreatAsSleepingTimeout -value 1000
 get-view "Test Explorer" | get-tree | select "MyProject/CreateJavaProject" | get-menu "Debug As/.* Test Cases" | click
-// exec-with-options -disableJobWaiting -command {
-wait 200
+try -times 100 -delay 1000 -command {
+	get-view Debug
+}
 with [get-view Debug] {
 	get-tree | get-item "CreateJavaProject \\[RCPTT Test Suite\\]/CreateJavaProject/ECL Thread/get-window \\(CreateJa" +
 		"vaProject: 2\\)" | get-property caption | equals "get-window (CreateJavaProject: 2)" | verify-true
@@ -83,5 +85,10 @@ try -times 10 -delay 2000 -command {
 	get-aut selfQ7 | eval {
 		get-advanced-info
 	} | report-append
+	get-view "Execution View" | get-button "Details..." | click
+    get-window "Execution details" | get-editbox | get-property text -raw | report-append
+    get-window "Execution details" | get-editbox | take-screenshot
 }
+
+
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

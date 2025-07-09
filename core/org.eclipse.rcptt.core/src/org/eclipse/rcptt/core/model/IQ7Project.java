@@ -26,13 +26,13 @@ public interface IQ7Project extends IQ7Element, IParent {
 
 	IQ7Folder getFolder(IPath path);
 
-	Object[] getForeignResources() throws ModelException;
+	Object[] getForeignResources() throws ModelException, InterruptedException;
 
 	public IQ7Project[] getReferences();
 
 	IQ7NamedElement[] findNamedElement(String id) throws ModelException;
 
-	IQ7Folder[] getFolders() throws ModelException;
+	IQ7Folder[] getFolders() throws ModelException, InterruptedException;
 
 	IQ7Folder getRootFolder();
 

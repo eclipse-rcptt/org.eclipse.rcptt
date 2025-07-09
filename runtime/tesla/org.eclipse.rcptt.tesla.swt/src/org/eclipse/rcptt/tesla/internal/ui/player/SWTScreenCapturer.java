@@ -18,75 +18,71 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class SWTScreenCapturer implements IScreenCapturer {
 
 	public SWTScreenCapturer() {
 	}
+	
 
-	public byte[] makeScreenShotData(Display display, int x, int y, int width,
-			int height, Rectangle arect, boolean scale_640_480) {
-		GC gc = new GC(display);
-		Rectangle bounds = display.getBounds();
-		if (x < 0) {
-			x = 0;
+	private Image getImage(Control control) {
+		Display display = control.getDisplay();
+		Shell shell = control.getShell();
+		GC gc = new GC(shell);
+		try {
+			Rectangle bounds = shell.getBounds();
+			Image image = new Image(display, bounds.width, bounds.height);
+			shell.print(gc);
+			if (shell != control) {
+				gc.setForeground(display.getSystemColor(SWT.COLOR_RED));
+				Rectangle arect =  display.map(control.getParent(), shell, control.getBounds());
+				gc.drawRectangle(arect.x, arect.y, arect.width, arect.height);
+			}
+			gc.copyArea(image, 0, 0);
+			return image;
+		} finally {
+			gc.dispose();
 		}
-		if (y < 0) {
-			y = 0;
-		}
-		if (x + width > bounds.width) {
-			width = bounds.width - x;
-		}
-		if (y + height > bounds.height) {
-			height = bounds.height - y;
-		}
-		if (width <= 0) {
-			width = bounds.width;
-			x = 0;
-		}
-		if (height <= 0) {
-			y = 0;
-			height = bounds.height;
-		}
+	}
 
-		Image image = new Image(display, width, height);
-		gc.copyArea(image, x, y);
-		gc.dispose();
-
-		// BufferedImage bufferedImage = robot
-		// .createScreenCapture(new java.awt.Rectangle(x, y, width,
-		// height));
-		if (arect != null) {
-			GC imgGC = new GC(image);
-
-			imgGC.setForeground(display.getSystemColor(SWT.COLOR_RED));
-			imgGC.drawRectangle(arect.x - x, arect.y - y, arect.width - 1,
-					arect.height - 1);
-			imgGC.dispose();
-		}
+	public byte[] makeScreenShotData(Control control,  boolean scale_640_480) {
+		Image image = getImage(control);
 		if (scale_640_480) {
+			int width = image.getBounds().width;
+			int height = image.getBounds().height;
 			double ra = Math.max((double) (width / 640.0),
 					(double) (height / 480.0));
 			
 			int rx = (int)(width / ra);
 			int ry = (int)(height / ra);
 
-			Image newImage = new Image(display, rx, ry);
-			gc = new GC(newImage);
-			gc.setAntialias(SWT.ON);
-			gc.setInterpolation(SWT.HIGH);
-			gc.drawImage(image, 0, 0, width, height, 0, 0, rx, ry);
-			gc.dispose();
-			image.dispose();
+			Image newImage = new Image(control.getDisplay(), rx, ry);
+			try {
+				GC gc = new GC(newImage);
+				try {
+					gc.setAntialias(SWT.ON);
+					gc.setInterpolation(SWT.HIGH);
+					gc.drawImage(image, 0, 0, width, height, 0, 0, rx, ry);
+				} finally {
+					gc.dispose();
+				}
+			} finally {
+				image.dispose();
+			}
 			image = newImage;
 		}
 
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ImageLoader imageLoader = new ImageLoader();
-		imageLoader.data = new ImageData[] { image.getImageData() };
-		imageLoader.save(bout, SWT.IMAGE_PNG);
-		image.dispose();
+		try {
+			imageLoader.data = new ImageData[] { image.getImageData() };
+			imageLoader.save(bout, SWT.IMAGE_PNG);
+		} finally {
+			image.dispose();
+		}
 		return bout.toByteArray();
 	}
 }

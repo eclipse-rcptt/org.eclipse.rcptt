@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.aut;
 
+import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin.PLUGIN_ID;
 
 import java.io.IOException;
@@ -439,12 +441,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			setState(AutLaunchState.RESTART);
 			ILaunchConfiguration launchConfiguration = launch.getLaunchConfiguration();
-			final ILaunchConfigurationWorkingCopy copy;
-			if (launchConfiguration.isWorkingCopy()) {
-				copy = ((ILaunchConfigurationWorkingCopy) launchConfiguration).getOriginal().getWorkingCopy();
-			} else {
-				copy = launchConfiguration.getWorkingCopy();
-			}
+			final ILaunchConfigurationWorkingCopy copy = launchConfiguration.getWorkingCopy();
 			LaunchInfoCache.copyCache(launchConfiguration, copy);
 			LaunchInfoCache.remove(launchConfiguration);
 			// To disable clear area during restart
@@ -464,7 +461,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			copy.setAttribute(IPDELauncherConstants.CONFIG_CLEAR_AREA, configClearArea);
 			copy.setAttribute(IQ7Launch.ATTR_AUT_ID, "");
 			copy.doSave();
-			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch, copy);
+			BaseAutManager.INSTANCE.handleRestart(BaseAutLaunch.this, oldLaunch, launch);
 		} catch (Exception e) {
 			terminated(e);
 			Q7LaunchingPlugin.log(e);
@@ -629,8 +626,8 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		ec.setData(context);
 		try {
 			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout(), monitor, null);
-			IStatus status = createInternalAutFailStatus(contextElement,result);
-			if (!result.isOK()) {
+			if (result.matches(IStatus.ERROR)) {
+				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
 			}
 		} catch (InterruptedException e) {
@@ -652,7 +649,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		command.setPhase(phase);
 		try {
 			final IStatus result = internalExecute(command, TeslaLimits.getContextRunnableTimeout(), monitor, null);
-			if (!result.isOK()) {
+			if (result.matches(IStatus.ERROR)) {
 				throw new CoreException(ExecAdvancedInfoUtil.askForAdvancedInfo(this, result));
 			}
 		} catch (InterruptedException e) {
@@ -850,35 +847,33 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 	@Override
 	public void shutdown() {
 		try {
-			ShutdownAut shutdownCmd = TeslaFactory.eINSTANCE.createShutdownAut();
-			execute(shutdownCmd);
+			gracefulShutdown(300);
 		} catch (Exception e) {
-			Q7LaunchingPlugin.log("Shutdown failed", e);
+			Q7LaunchingPlugin.log("Graceful shutdown failed, terminating", e);
 		}
 		terminate();
 	}
 
-	public void gracefulShutdown(int timeoutSeconds) throws CoreException, InterruptedException {
-		long stop = System.currentTimeMillis() + timeoutSeconds * 1000;
-		try {
-			ShutdownAut shutdownCmd = TeslaFactory.eINSTANCE.createShutdownAut();
-			unsafeExecute(shutdownCmd, stop - System.currentTimeMillis(), new NullProgressMonitor());
-		} catch (Exception e) {
-			if (!TestSuiteUtils.isConnectionProblem(e)) {
-				throw new CoreException(
-						new Status(IStatus.ERROR, Q7LaunchingPlugin.PLUGIN_ID, "Error during graceful shutdown", e));
+	public void gracefulShutdown(int timeoutSeconds) throws CoreException, TimeoutException, InterruptedException {
+		long stop = currentTimeMillis() + timeoutSeconds * 1000;
+		ShutdownAut shutdownCmd = TeslaFactory.eINSTANCE.createShutdownAut();
+		for (;;) {
+			if (launch.isTerminated()) {
+				return;
 			}
-		} finally {
+			if (stop < currentTimeMillis() + 100) {
+				unsafeExecute(shutdownCmd, 100, new NullProgressMonitor()); // Give exception a chance to propagate, it was suppressed until timeout 
+				throw new TimeoutException("Timeout after " + timeoutSeconds + " seconds");
+			}
 			try {
-				while (stop > System.currentTimeMillis()) {
-					if (launch.isTerminated()) {
-						return;
-					}
-					Thread.sleep(1000);
+				unsafeExecute(shutdownCmd, stop - currentTimeMillis(), new NullProgressMonitor());
+			} catch (CoreException e) {
+				if (!TestSuiteUtils.isConnectionProblem(e)) {
+					throw new CoreException(
+							new Status(IStatus.ERROR, Q7LaunchingPlugin.PLUGIN_ID, "Error during graceful shutdown", e));
 				}
-			} finally {
-				terminate();
 			}
+			Thread.sleep(100);
 		}
 	}
 
@@ -970,6 +965,9 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 				return result;
 			});
 		} catch (CoreException e) {
+			if (e.getStatus().matches(IStatus.CANCEL)) {
+				throw e;
+			}
 			throw new CoreException(new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
 					"Failed to execute " + command, e));
 		}
@@ -1074,7 +1072,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			return context.connect(getHost(), getEclPort());
 		} catch (Exception e) {
-			String message = "Couldn't open ECL session";
+			String message = format("Couldn't open ECL session for %s:%d", getHost(), getEclPort());
 			if (launch.isTerminated()) {
 				message = "AUT is terminated";
 			}

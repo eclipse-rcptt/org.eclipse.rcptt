@@ -23,9 +23,7 @@ import org.eclipse.rcptt.core.scenario.Context;
 import org.eclipse.rcptt.ctx.preferences.ui.PreferencesContextEditor;
 import org.eclipse.rcptt.internal.preferences.PrefUtils;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.preferences.PrefNode;
 import org.eclipse.rcptt.preferences.PreferencesContext;
-import org.eclipse.rcptt.preferences.PreferencesFactory;
 import org.eclipse.rcptt.ui.editors.IQ7Editor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -98,12 +96,7 @@ public class AddWizardPreferencesPage extends WizardPage implements Listener {
 			}
 			prefs = service.readPreferences(new ByteArrayInputStream(text
 					.getBytes()));
-			PrefNode prefNode = PrefUtils.convertPreferences(prefs);
-			PreferencesContext context = PreferencesFactory.eINSTANCE
-					.createPreferencesContext();
-			if (prefNode != null) {
-				context.getContent().addAll(prefNode.getChilds());
-			}
+			PreferencesContext context = PrefUtils.toContext(prefs);
 			((PreferencesContextEditor) contextEditor).addContext(context);
 			// contextEditor.copyContentFrom(context, new
 			// NullProgressMonitor());
