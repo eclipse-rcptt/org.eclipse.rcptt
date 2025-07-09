@@ -90,6 +90,7 @@ public class UIJobCollectorTest {
 	});
 	
 	private final Job rescheduling = new Job("rescheduling") {
+		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			rescheduling.schedule(10000);
 			return Status.OK_STATUS;
@@ -219,7 +220,7 @@ public class UIJobCollectorTest {
 			completedOnce.await();
 			Thread.sleep(schedulingTolerance);
 			boolean result = isEmpty(subject);
-			Assert.assertFalse("Should not step immediately", result);
+			Assert.assertFalse("Should not step immediately. Iteration " + i, result);
 			Assert.assertNotEquals(Job.NONE, job.getState());
 			debug("End of attempt " + i);
 			job.removeJobChangeListener(jobListener);
@@ -305,17 +306,19 @@ public class UIJobCollectorTest {
 		prepare(subject);
 		CountDownLatch start = new CountDownLatch(1);
 		CountDownLatch stop = new CountDownLatch(1);
-		addListener(busyLoop, new JobChangeAdapter() {public void done(IJobChangeEvent event) {
-			try {
-				System.out.println("Job is cancelled");
-				start.countDown();
-				stop.await();
-				System.out.println("Job is done");
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new AssertionError(e);
-			}
-		};});
+		addListener(busyLoop, new JobChangeAdapter() {
+				@Override
+			public void done(IJobChangeEvent event) {
+				try {
+					System.out.println("Job is cancelled");
+					start.countDown();
+					stop.await();
+					System.out.println("Job is done");
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new AssertionError(e);
+				}
+			};});
 		busyLoop.schedule();
 		while (busyLoop.getState() != Job.RUNNING) {
 			Thread.yield();
