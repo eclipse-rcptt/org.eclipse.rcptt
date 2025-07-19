@@ -88,7 +88,7 @@ public class ModelManager {
 	public <V> V accessInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
 		synchronized (this) {
 			if (this.cache == null) {
-				this.cache = new ModelCache(50_000_000);
+				this.cache = new ModelCache(Long.parseLong(System.getProperty("org.eclipse.rcptt.cache_size", "50000000")));
 				final IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				workspace.addResourceChangeListener(this.deltaState,
 						IResourceChangeEvent.PRE_BUILD
