@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
+import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.core.persistence.plain.IPlainConstants;
 import org.eclipse.rcptt.core.scenario.NamedElement;
@@ -300,7 +301,10 @@ public abstract class Q7NamedElement extends Openable implements
 				}
 			}
 			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
-				throw newNotPresentException();
+				Q7Status status = new Q7Status(Q7Status.ERROR, "Resource: " + getResource()
+					+ " is locked and can not be synchronized. Wait for indexing and build to complete and try a again.");
+				status.setStatusCode(Q7StatusCode.NotPressent);
+				throw new ModelException(status);
 			}
 
 			if (isInWorkingCopyMode()) {
