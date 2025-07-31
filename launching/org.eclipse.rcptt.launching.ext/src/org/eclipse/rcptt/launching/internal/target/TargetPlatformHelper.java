@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1009,6 +1010,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return iniFile.getAbsolutePath();
 	}
 
+	private static final Set<String> VALID_ARCHITECTURES = stream(OSArchitecture.values()).map(OSArchitecture::name).collect(Collectors.toUnmodifiableSet());
 	public OSArchitecture detectArchitecture(
 			StringBuilder detectMsg) {
 		checkResolved();
@@ -1023,8 +1025,15 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		// Find org.eclipse.equinox.launcher.cocoa.macosx.aarch64
 		// Skip org.eclipse.equinox.launcher.cocoa.macosx
 		// Skip org.eclipse.equinox.launcher.win32.win32.x86_64.nl1 - https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/178
+		// org.eclipse.equinox.launcher.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.x86_64.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.x86_64.nl_ru_4.23.0.v20230221055001.jar
 		Pattern archPattern = Pattern.compile(("org.eclipse.equinox.launcher.[\\w\\d]+."+os+".([^.]+)$").replace(".", "\\."));
-		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> getGroup(name, archPattern)).flatMap(Optional::stream).collect(Collectors.toSet());
+		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> getGroup(name, archPattern)).flatMap(Optional::stream).collect(Collectors.toCollection(HashSet::new));
+		launcherArchitectures.retainAll(VALID_ARCHITECTURES);
 		if (launcherArchitectures.size() != 1) {
 			if (detectMsg != null) {
 				detectMsg.append("Multiple launcher architectures are found in target platform: " + Joiner.on(", ").join(launcherArchitectures));

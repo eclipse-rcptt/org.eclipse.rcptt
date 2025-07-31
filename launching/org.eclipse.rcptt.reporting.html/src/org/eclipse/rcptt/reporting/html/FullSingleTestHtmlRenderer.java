@@ -271,12 +271,12 @@ public class FullSingleTestHtmlRenderer {
 			for (StackTraceEntry trace : threads) {
 				if (trace.getThreadClass().equals(
 						"org.eclipse.core.internal.jobs.Worker")
-						&& trace.getStackTrace().size() == 4) {
+						&& trace.getStackTrace().size() <= 5) {
 					// Skip Worker threads sleep state
 					continue;
 				}
 				renderHeader(5, trace.getThreadName(), "");
-				writer.println("class=" + trace.getThreadClass());
+				writer.append("class=").append(trace.getThreadClass()).println("<br>");
 				EList<String> list = trace.getStackTrace();
 				for (int i = 0; i < list.size(); i++) {
 					writer.append(Integer.toString(list.size() - i - 1))
