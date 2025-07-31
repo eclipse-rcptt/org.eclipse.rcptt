@@ -220,6 +220,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 		return super.executeCommand(command, mapper);
 	}
 
+	@Override
 	protected Response handleClick(final Click command) {
 		final SWTUIElement element = getMapper().get(command.getElement());
 		if (element instanceof NebulaPartUIElement) {
@@ -330,6 +331,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 	@Override
 	protected CellEditorSupport createCellEditorSupport() {
 		return new CellEditorSupport(this) {
+			@Override
 			protected Response handleActivateCellEditor(final ActivateCellEditor command) {
 				Element element = command.getElement();
 				if (!element.getKind().equals(NebulaElementKinds.GRID))
@@ -339,20 +341,22 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 				final Grid grid = (Grid) PlayerWrapUtils.unwrapWidget(uiElement);
 				final ColumnViewer viewer = TeslaSWTAccess.getThis(ColumnViewer.class,
 						grid, SWT.MouseDown);
-
-				getPlayer().exec("Activate editor in Nebula Grid", new Runnable() {
-					public void run() {
-						Object item = ((IStructuredSelection) viewer.getSelection())
-								.getFirstElement();
-
-						if (item != null)
-							viewer.editElement(item, command.getColumn());
-					}
-				});
-
+				if (viewer != null) {
+					getPlayer().exec("Activate editor in Nebula Grid", new Runnable() {
+						@Override
+						public void run() {
+							Object item = ((IStructuredSelection) viewer.getSelection())
+									.getFirstElement();
+	
+							if (item != null)
+								viewer.editElement(item, command.getColumn());
+						}
+					});
+				}
 				return factory.createBooleanResponse();
 			}
 
+			@Override
 			protected Response handleCancelCellEditor(final CancelCellEditor command) {
 				Element element = command.getElement();
 				if (!element.getKind().equals(NebulaElementKinds.GRID))
@@ -364,6 +368,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 						grid, SWT.MouseDown);
 
 				getPlayer().exec("Cancel editing in Nebula Grid", new Runnable() {
+					@Override
 					public void run() {
 						viewer.cancelEditing();
 					}
@@ -379,6 +384,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 					return super.handleApplyCellEditor(command);
 
 				getPlayer().exec("Apply editing in Nebula Grid", new Runnable() {
+					@Override
 					public void run() {
 						CellEditor editor = TeslaCellEditorManager.getInstance()
 								.getLastActivatedByAnyMethod();
@@ -443,6 +449,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 		return okResponse();
 	}
 
+	@Override
 	protected Response handleCheckItem(CheckItem command) {
 		final SWTUIElement element = getMapper().get(command.getElement());
 		final BooleanResponse response = factory.createBooleanResponse();
@@ -495,6 +502,7 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 		this.client = client;
 	}
 
+	@Override
 	public org.eclipse.rcptt.tesla.core.ui.Widget mapExtraValues(SWTUIElement element,
 			org.eclipse.rcptt.tesla.core.ui.Widget result) {
 		return mapWidget(element, result);

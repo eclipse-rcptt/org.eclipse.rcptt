@@ -79,6 +79,7 @@ public class RemoveRepositoryImpl extends CommandImpl implements RemoveRepositor
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getUri() {
 		return uri;
 	}
@@ -88,6 +89,7 @@ public class RemoveRepositoryImpl extends CommandImpl implements RemoveRepositor
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setUri(String newUri) {
 		String oldUri = uri;
 		uri = newUri;
@@ -162,7 +164,7 @@ public class RemoveRepositoryImpl extends CommandImpl implements RemoveRepositor
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (uri: ");
 		result.append(uri);
 		result.append(')');

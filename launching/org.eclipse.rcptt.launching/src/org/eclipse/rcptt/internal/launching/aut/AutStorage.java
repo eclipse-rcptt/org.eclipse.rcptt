@@ -18,8 +18,9 @@ import java.util.Map;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-
 import org.eclipse.rcptt.launching.Aut;
+
+import com.google.common.base.MoreObjects;
 
 /**
  * Thread-safe AUT storage with quick access by name and launch configuration
@@ -59,14 +60,22 @@ public class AutStorage {
 	}
 
 	public synchronized BaseAut getByLaunch(ILaunchConfiguration config) {
-		return byConfig.get(shell(config));
-	}
-
-	private ILaunchConfiguration shell(ILaunchConfiguration config) {
-		if (config instanceof ILaunchConfigurationWorkingCopy) {
-			config = ((ILaunchConfigurationWorkingCopy) config).getOriginal();
+		BaseAut result = byConfig.get(config);
+		if (result != null) {
+			return result;
+		}		
+		if (config instanceof ILaunchConfigurationWorkingCopy wc) {
+			if (wc.getParent() != null) {
+				result = getByLaunch(wc.getParent());
+			}
+			if (result != null) {
+				return result;
+			}		
+			if (wc.getOriginal() != null) {
+				result = getByLaunch(wc.getOriginal());
+			}
 		}
-		return config;
+		return result;
 	}
 
 	private List<BaseAut> auts = new ArrayList<BaseAut>();

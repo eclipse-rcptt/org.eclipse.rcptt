@@ -1,14 +1,13 @@
 --- RCPTT testcase ---
 Format-Version: 1.0
-Q7-vendor: www.xored.com/q7
 Contexts: _ymiyse5IEeCU6db9MgIBkA,_1DeDkPVYEeCsI4NSS6tu2Q
 Element-Name: FilterSearchTestCaseByName
 Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _nFTwgPVhEeCsI4NSS6tu2Q
-Q7-Runtime-Version: 1.5.0.201406131029
-Save-Time: 6/13/14 7:04 PM
+Runtime-Version: 2.6.0.qualifier
+Save-Time: 7/6/25, 4:48 AM
 Tags: SearchReplace, TestCase
 Testcase-Type: ecl
 
@@ -37,6 +36,7 @@ TEST STEPS
 Content-Type: text/ecl
 Entry-Name: .content
 
+set-q7-option jobScheduleDelayedMaxtime  20000
 get-view "Test Explorer" | get-editbox | set-text est
 with [get-view "Test Explorer" | get-tree] {
     get-property itemCount | equals 2 | verify-true

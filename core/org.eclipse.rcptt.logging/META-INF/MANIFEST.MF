@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT runtime logging
 Bundle-SymbolicName: org.eclipse.rcptt.logging
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.1.qualifier
 Bundle-Activator: org.eclipse.rcptt.logging.Q7LoggingPlugin
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: 
  org.eclipse.core.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.logging
 Automatic-Module-Name: org.eclipse.rcptt.logging

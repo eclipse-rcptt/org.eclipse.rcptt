@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.internal.target;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.function.Predicate.not;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
+import static org.osgi.framework.Version.valueOf;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,23 +29,33 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -50,12 +64,10 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.equinox.internal.simpleconfigurator.utils.SimpleConfiguratorUtils;
@@ -65,11 +77,6 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IFileArtifactRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
-import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
-import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -81,17 +88,14 @@ import org.eclipse.pde.internal.core.PDEState;
 import org.eclipse.pde.internal.core.target.IUBundleContainer;
 import org.eclipse.pde.internal.core.target.P2TargetUtils;
 import org.eclipse.pde.internal.core.target.ProfileBundleContainer;
-import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
-import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
+import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
-import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
+import org.eclipse.rcptt.launching.ext.StartLevelSupport;
 import org.eclipse.rcptt.launching.injection.Directory;
 import org.eclipse.rcptt.launching.injection.Entry;
 import org.eclipse.rcptt.launching.injection.InjectionConfiguration;
@@ -100,12 +104,13 @@ import org.eclipse.rcptt.launching.internal.target.Q7Target.AutInstall;
 import org.eclipse.rcptt.launching.p2utils.P2Utils;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
-import org.eclipse.rcptt.util.FileUtil;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
-import com.google.common.base.Objects;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Files;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 @SuppressWarnings("restriction")
 public class TargetPlatformHelper implements ITargetPlatformHelper {
@@ -120,10 +125,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private static final String OSGI_BUNDLES = "osgi.bundles";
 	public static final String SIMPLECONFIGURATOR = "org.eclipse.equinox.simpleconfigurator"; //$NON-NLS-1$
 	private static final String SC_BUNDLES_PATH = "configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"; //$NON-NLS-1$
-	private IStatus status = Status.OK_STATUS;
+	private MultiStatus status;
 	private final ITargetDefinition target;
 	private final ArrayList<ITargetLocation> extra = new ArrayList<ITargetLocation>();
-	private IPluginModelBase[] models;
 	private PDEExtensionRegistry registry;
 
 	private Q7Target q7target = new Q7Target();
@@ -131,6 +135,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	public TargetPlatformHelper(ITargetDefinition target) {
 		Preconditions.checkNotNull(target);
 		this.target = target;
+		resetIndex();
 		initialize();
 	}
 
@@ -146,17 +151,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return install.userArea;
 	}
 
-	@Deprecated
-	/** Use getStatus().isOK() instead */
-	public boolean isValid() {
-		return getStatus().isOK();
-	}
-
+	private boolean resolved = false;
 	public boolean isResolved() {
-		if (target != null) {
-			return target.isResolved();
-		}
-		return false;
+		return resolved;
 	}
 
 	public boolean isInstanceContainerValid() {
@@ -170,21 +167,25 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		return status;
 	}
-
-	@Deprecated
-	public String getErrorMessage() {
-		return getNonMultiStatusMessage(getStatus());
+	
+	
+	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
+	static {
+		var oi = OBJECTWEB_INCOMPATIBILITY;
+		oi.put(valueOf("9.6.0"), "JavaSE-23");
+		oi.put(valueOf("9.7.0"), "JavaSE-24");
+		oi.put(valueOf("9.7.1"), "JavaSE-25");
+		oi.put(valueOf("9.8.0"), "JavaSE-26");
+	}
+	
+	public Set<String> getIncompatibleExecutionEnvironments() {
+		checkResolved();
+		return modelIndex.get("org.objectweb.asm").stream().map(base -> base.getPluginBase().getVersion())
+				.map(Version::parseVersion).map(OBJECTWEB_INCOMPATIBILITY::get).filter(java.util.Objects::nonNull)
+				.collect(Collectors.toSet());
 	}
 
-	public String getWarningMessage() {
-		if (target != null) {
-			IStatus bundleStatus = getBundleWarningStatus();
-			return getNonMultiStatusMessage(bundleStatus);
-		}
-		return null;
-	}
-
-	public IStatus getBundleStatus() {
+	private IStatus getBundleStatus() {
 		ITargetLocation[] containers = getBundleContainers();
 		if (containers != null) {
 			// Check if the containers have any resolution problems
@@ -215,7 +216,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 					if (uri != null) {
 						File file = new File(uri);
 						if (!file.exists()) {
-							reportUnexistingFile(info);
+							// Skip problem of nonexistent file.
+							result.add(Status.warning("Skip nonexistent bundle: " + info.getSymbolicName()
+											+ ", then resolve configuration."));
 							continue;
 						}
 					}
@@ -233,77 +236,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return Status.OK_STATUS;
 	}
 
-	private void reportUnexistingFile(BundleInfo info) {
-		// Skip problem of nonexistent file.
-		Q7LaunchingPlugin.log(Q7LaunchingPlugin.createStatus(IStatus.WARNING,
-				"Skip nonexistent bundle: " + info.getSymbolicName()
-						+ ", then resolve configuration.",
-				null));
-	}
-
-	public IStatus getBundleWarningStatus() {
-		ITargetLocation[] containers = getBundleContainers();
-		if (containers != null) {
-			// Check if the containers have any resolution problems
-			MultiStatus result = new MultiStatus(
-					PDECore.PLUGIN_ID,
-					0,
-					org.eclipse.pde.internal.core.target.Messages.TargetDefinition_5,
-					null);
-
-			// Check if any of the included bundles have problems
-			// build status from bundle list
-			TargetBundle[] bundles = target.getBundles();
-			for (int i = 0; i < bundles.length; i++) {
-				TargetBundle bundle = bundles[i];
-				IStatus status = bundle.getStatus();
-				if (!status.isOK()) {
-					BundleInfo info = bundle.getBundleInfo();
-					URI uri = info.getLocation();
-					if (uri != null) {
-						File file = new File(uri);
-						if (!file.exists()) {
-							// Skip problem of nonexistent file.
-							IStatus st = new Status(IStatus.WARNING,
-									status.getPlugin(), status.getMessage(),
-									status.getException());
-							result.add(st);
-						}
-					}
-
-				}
-			}
-
-			if (result.isOK()) {
-				// Return generic ok status instead of problem multi-status with
-				// no children
-				return Status.OK_STATUS;
-			}
-			return result;
-		}
-		return Status.OK_STATUS;
-	}
-
-	private String getNonMultiStatusMessage(IStatus st) {
-		if (st != null && st.isMultiStatus()) {
-			StringBuilder buf = new StringBuilder();
-			IStatus[] children = st.getChildren();
-			for (IStatus iStatus : children) {
-				if (iStatus.isMultiStatus()) {
-					String msg = getNonMultiStatusMessage(iStatus);
-					if (msg != null) {
-						buf.append(msg).append('\n');
-					}
-				}
-				if (!iStatus.isOK()) {
-					buf.append(iStatus.getMessage()).append('\n');
-				}
-			}
-			return buf.toString();
-		}
-		return st == null ? "" : st.getMessage();
-	}
-
 	private void initialize() {
 		extra.clear();
 		q7target = new Q7Target();
@@ -315,12 +247,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				}
 				extra.add(iUBundleContainer);
 			}
-		}
-	}
-
-	public void setTargetName(String name) {
-		if (target != null) {
-			target.setName(name);
 		}
 	}
 
@@ -370,20 +296,9 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return target;
 	}
 
-	public void update() {
-		List<ITargetLocation> newContainers = new ArrayList<ITargetLocation>();
-		newContainers.addAll(Arrays.asList(target.getTargetLocations()));
-
-		if (extra != null) {
-			newContainers.addAll(extra);
-		}
-		target.setTargetLocations(newContainers
-				.toArray(new ITargetLocation[newContainers.size()]));
-		models = null;
-		registry = null;
-	}
-
 	private void addLocations(Collection<ITargetLocation> newLocations) throws CoreException {
+		resetIndex();
+		
 		List<ITargetLocation> newContainers = new ArrayList<ITargetLocation>();
 		newContainers.addAll(newLocations);
 		
@@ -401,70 +316,50 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		
 		target.setTargetLocations(newContainers
 				.toArray(new ITargetLocation[newContainers.size()]));
-		models = null;
-		registry = null;
-	}
-
-	private IPluginModelBase[] getTargetModels() {
-		calcModels();
-		return models;
 	}
 
 	@Override
 	public IPluginModelBase getWeavingHook() {
-		calcModels();
+		checkResolved();
 		return weavingHook;
 	}
 
-	private void calcModels() {
-		if (models == null) {
-			List<IPluginModelBase> bundles = sumBundles();
-			weavingHook = filterHooks(bundles);
-			models = bundles.toArray(new IPluginModelBase[0]);
+	private void computeModels(IProgressMonitor monitor) {
+		modelIndex.clear();
+		TargetBundle[] bundles = getTarget().getBundles();
+		URI[] locations = stream(bundles).map(TargetBundle::getBundleInfo).map(BundleInfo::getLocation).toArray(URI[]::new);
+		if (locations.length == 0) {
+			throw new IllegalStateException("Target definition can't be empty");
 		}
-	}
-
-	private List<IPluginModelBase> sumBundles() {
-		TargetBundle[] bundles = getTarget().getAllBundles();
-		if (bundles == null) {
-			return new ArrayList<IPluginModelBase>();
-		}
-		List<URI> uris = new ArrayList<URI>();
-		for (TargetBundle bundle : bundles) {
-			uris.add(bundle.getBundleInfo().getLocation());
-		}
-
-		PDEState state = new PDEState(uris.toArray(new URI[uris
-				.size()]), true, true, new NullProgressMonitor());
-		final List<IPluginModelBase> targetModels = new ArrayList<IPluginModelBase>(Arrays.asList(state
-				.getTargetModels()));
-
+		createModels(monitor, locations).forEach(m -> modelIndex.put(m.getPluginBase().getId(), m));
 		if (DEBUG_BUNDLES) {
 			final List<String> targetModelsLocations = new ArrayList<String>();
-			for (final IPluginModelBase model : targetModels) {
+			for (final IPluginModelBase model : modelIndex.values()) {
 				targetModelsLocations.add(model.getInstallLocation());
 			}
-			debug("Bundles: " + targetModelsLocations);
+			debug("Bundles:\n" + String.join("\n", targetModelsLocations));
 		}
 
-		return targetModels;
+		weavingHook = null;
 	}
 
-	private IPluginModelBase filterHooks(List<IPluginModelBase> models) {
-		List<IPluginModelBase> hooks = new ArrayList<IPluginModelBase>();
-		for (IPluginModelBase model : models) {
-			String name = model.getBundleDescription().getSymbolicName();
-			if (Objects.equal(name, AJConstants.HOOK)) {
-				hooks.add(model);
-			}
-		}
+	private Stream<IPluginModelBase> createModels(IProgressMonitor monitor, URI[] locations) {
+		PDEState state = new PDEState(locations, true, true, monitor);
+		return stream(state.getTargetModels());
+	}
+
+	private void filterHooks() {
+		weavingHook = null;
+		List<IPluginModelBase> hooks = modelIndex.values().stream()
+				.filter(model -> Objects.equals(model.getBundleDescription().getSymbolicName(), AJConstants.HOOK))
+				.collect(Collectors.toCollection(ArrayList::new));
 		switch (hooks.size()) {
 		case 0:
-			// no weaving hook
-			return null;
+			return;
 		case 1:
 			// one weaving hook, nothing to filter
-			return hooks.get(0);
+			weavingHook = hooks.get(0);
+			return;
 		default:
 			// find a hook with the latest version, remove other hooks
 			IPluginModelBase maxHook = hooks.get(0);
@@ -476,91 +371,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				}
 			}
 			hooks.remove(maxHook);
-			models.removeAll(hooks);
-			return maxHook;
+			modelIndex.values().removeAll(hooks);
+			weavingHook = maxHook;
 		}
 	}
 
 	private IPluginModelBase weavingHook;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private IStatus validateBundles(IProgressMonitor monitor) {
-		ILaunchConfigurationWorkingCopy wc;
-		try {
-			wc = Q7LaunchingUtil.createLaunchConfiguration(this);
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
-		StringBuilder message = new StringBuilder();
-		OSArchitecture architecture = detectArchitecture(true, message);
-		if (architecture == null || architecture == OSArchitecture.Unknown) {
-			return error(message.toString());
-		}
-		VmInstallMetaData jvm;
-		try {
-			jvm = JDTUtils.findVM(architecture);
-		} catch (CoreException e2) {
-			return e2.getStatus();
-		}
-		if (jvm == null) {
-			return error ("No JVM for architecture " + architecture + " is registered");
-		}
-		
-		wc.setAttribute(
-				IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-				String.format(
-						"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-						jvm.install.getVMInstallType().getId(),
-						jvm.install.getName()));
-		
-		LaunchValidationOperation validation = new LaunchValidationOperation(wc,
-				new HashSet(Arrays.asList(getTargetModels()))) {
-			@Override
-			protected IExecutionEnvironment[] getMatchingEnvironments()
-					throws CoreException {
-				IExecutionEnvironmentsManager manager = JavaRuntime
-						.getExecutionEnvironmentsManager();
-				IExecutionEnvironment[] envs = manager
-						.getExecutionEnvironments();
-				return envs;
-			}
-		};
-		try {
-			wc.delete();
-		} catch (CoreException e1) {
-			return e1.getStatus();
-		}
-		try {
-			StringBuilder b = new StringBuilder();
-			validation.run(monitor);
-			Map input = validation.getInput();
-			Set<Map.Entry> entrySet = input.entrySet();
-			for (Map.Entry e : entrySet) {
-				Object value = e.getKey();
-				if (value instanceof ResolverError) {
-					b.append(value.toString()).append("\n");
-				}
-			}
-			if (b.length() > 0) {
-				return error("Bundle validation failed: " + b.toString());
-			}
-		} catch (CoreException e) {
-			Q7ExtLaunchingPlugin.getDefault().log(e);
-			return status = e.getStatus();
-		} catch (OperationCanceledException e) {
-			return status = Status.CANCEL_STATUS;
-		}
-		return status = Status.OK_STATUS;
-	}
-
-	private Status error(String message) {
-		return new Status(IStatus.ERROR, PLUGIN_ID, message);
-	}
-
 	public String[] getProducts() {
-		if (!isValid()) {
-			return new String[0];
-		}
 		PDEExtensionRegistry reg = getRegistry();
 		Set<String> result = new TreeSet<String>();
 		IExtension[] extensions = reg.findExtensions("org.eclipse.core.runtime.products", false); //$NON-NLS-1$
@@ -578,12 +396,14 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return result.toArray(new String[result.size()]);
 	}
 
-	public String[] getApplications() {
-		if (!isValid()) {
-			return new String[0];
+	private void checkResolved() {
+		if (!isResolved()) {
+			throw new IllegalStateException("Unresolved");
 		}
-		PDEExtensionRegistry reg = getRegistry();
+	}
 
+	public String[] getApplications() {
+		PDEExtensionRegistry reg = getRegistry();
 		Set<String> result = new TreeSet<String>();
 		IExtension[] extensions = reg.findExtensions("org.eclipse.core.runtime.applications", false); //$NON-NLS-1$
 		for (int i = 0; i < extensions.length; i++) {
@@ -604,28 +424,71 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	private PDEExtensionRegistry getRegistry() {
+		checkResolved();
 		if (registry == null) {
-			registry = new PDEExtensionRegistry(getTargetModels());
+			if (modelIndex.isEmpty()) {
+				throw new IllegalStateException("Unresolved");
+			}
+			registry = new PDEExtensionRegistry(modelIndex.values().toArray(new IPluginModelBase[0]));
 		}
 		return registry;
 	}
 
 	public IStatus resolve(IProgressMonitor monitor) {
+		resetIndex();
 		ITargetDefinition target = getTarget();
-		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 2);
+		SubMonitor m = SubMonitor.convert(monitor, "Resolving " + getName(), 3);
 		try {
-			status = target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE));
-			if (!status.isOK())
+			status.add(target.resolve(m.split(1, SubMonitor.SUPPRESS_NONE)));
+			if (isBad(status))
 				return status;
-			status = validateBundles(m.split(1, SubMonitor.SUPPRESS_NONE));
-			if (!status.isOK())
+			computeModels(m.split(1, SubMonitor.SUPPRESS_NONE));
+			setStartLevels(m.split(1, SubMonitor.SUPPRESS_NONE));
+			status.add(getBundleStatus());
+			index();
+			filterHooks();
+			resolved = target.isResolved();
+			if (isBad(status))
 				return status;
-			return status = getBundleStatus();
+			if (status.isOK()) {
+				return Status.OK_STATUS;
+			}
+			return status;
+		} catch (OperationCanceledException e) {
+			return Status.CANCEL_STATUS;
+		} catch (Exception e) {
+			target.isResolved();
+			status.add(Status.error("Failed to resolve  target definition", e));
+			return status;
 		} finally {
-			m.done();
+			done(monitor);
 		}
 	}
+	
+	private final Multimap<String, IPluginModelBase> modelIndex = HashMultimap.create();
+	private final Multimap<String, TargetBundle> targetBundleIndex = HashMultimap.create();
+	
+	private void index() {
+		stream(target.getBundles()).forEach(bundle -> targetBundleIndex.put(bundle.getBundleInfo().getSymbolicName(), bundle));
+		targetBundleIndex.removeAll(null);
+	}
+	
+	private void resetIndex() {
+		status = new MultiStatus(TargetPlatformHelper.class, 0, "Target platform resolution result");
+		resolved = false;
+		modelIndex.clear();
+		targetBundleIndex.clear();
+		registry = null;
+	}
 
+	@Override
+	public Stream<Model> getModels() {
+		checkResolved();
+		// Iterating just over getTargetModels does not work - injections are missing
+		// This is caused by removal of alternative versions of non-singleton plugins in org.eclipse.pde.internal.core.PDEState.createTargetModels(BundleDescription[])
+		return modelIndex.values().stream().map(this::toModel);
+	}
+	
 	AutInstall getAutInstall() {
 		final Q7Target target = getQ7Target();
 		if (target == null) {
@@ -725,7 +588,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return product;
 	}
 
-	public ITargetLocation[] getBundleContainers() {
+	private ITargetLocation[] getBundleContainers() {
 		if (target == null) {
 			return new ITargetLocation[0];
 		}
@@ -771,7 +634,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return resolveStatus;
 		}
 		if (getWeavingHook() == null) {
-			return status = createError("No org.eclipse.weaving hook plugin");
+			status.add(createError("No org.eclipse.weaving hook plugin"));
+			return status;
 		}
 		try {
 			save();
@@ -911,7 +775,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 		return null;
 	}
-
+	
 	private List<File> getAppIniFiles() {
 		List<File> iniFiles = new ArrayList<File>();
 		if (getInstanceContainer() == null) {
@@ -950,52 +814,22 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	private String readProductFromIniFile(File eclipseIniFile) {
-		BufferedReader in = null;
-		if (eclipseIniFile.exists()) {
-			try {
-				in = new BufferedReader(new FileReader(eclipseIniFile));
-				String str;
-				while ((str = in.readLine()) != null) {
-					if (str.trim().equals("-product")) { //$NON-NLS-1$
-						String product = in.readLine();
-						if (product != null) {
-							return product.trim();
-						}
-					}
-				}
-			} catch (IOException e) {
-				Q7ExtLaunchingPlugin.getDefault().log(e);
-			} finally {
-				if (in != null)
-					try {
-						in.close();
-					} catch (IOException e) {
-						Q7ExtLaunchingPlugin.getDefault().log(e);
-					}
-			}
+		if (!eclipseIniFile.exists()) {
+			return null;
 		}
-		return null;
-	}
-
-	private String readLauncherLibraryFromIniFile(File eclipseIniFile) {
-		BufferedReader in = null;
-		try {
-			if (eclipseIniFile.exists()) {
-				in = new BufferedReader(new FileReader(eclipseIniFile));
-				String str;
-				while ((str = in.readLine()) != null) {
-					if (str.trim().equals("--launcher.library")) { //$NON-NLS-1$
-						String result = in.readLine();
-						if (result != null) {
-							return result.trim();
-						}
+		try (
+			BufferedReader in = new BufferedReader(new FileReader(eclipseIniFile))) {
+			String str;
+			while ((str = in.readLine()) != null) {
+				if (str.trim().equals("-product")) { //$NON-NLS-1$
+					String product = in.readLine();
+					if (product != null) {
+						return product.trim();
 					}
 				}
 			}
 		} catch (IOException e) {
 			Q7ExtLaunchingPlugin.getDefault().log(e);
-		} finally {
-			FileUtil.safeClose(in);
 		}
 		return null;
 	}
@@ -1010,8 +844,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 
 		List<String> result = new ArrayList<String>();
-		try {
-			for (String line : Files.readLines(eclipseIni, UTF_8)) {
+		try (Stream<String> lines = Files.lines(eclipseIni.toPath(), StandardCharsets.UTF_8)) {
+			for (String line : (Iterable<String>)lines::iterator) {
 				line = line.trim();
 				if (line.length() > 0 && line.charAt(0) != '#') {
 					result.add(line);
@@ -1030,20 +864,31 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				: lines.get(vmIndex);
 	}
 
-	public String getVmFromIniFile() {
+	public Optional<Path> getJavaHome() {
 		for (File iniFile : getAppIniFiles()) {
 			String result = getVmArg(iniFile);
 			if (result == null) {
 				continue;
 			}
-			Path iniPath = iniFile.toPath();
+			Path iniPath = iniFile.toPath().toAbsolutePath();
 			Path vmPath = Paths.get(result);
 			if (!vmPath.isAbsolute()) {
 				vmPath = iniPath.getParent().resolve(vmPath);
 			}
-			return vmPath.toString();
+			if (!Files.exists(vmPath)) {
+				continue;
+			}
+			
+			String dirName = vmPath.getParent().getFileName().toString();
+			if ("bin".equals(dirName) || "lib".equals(dirName) ) {
+				vmPath = vmPath.getParent().getParent();
+			} else if ("bin".equals(vmPath.getFileName().toString())) {
+				vmPath = vmPath.getParent();
+			}
+			
+			return Optional.of(vmPath);
 		}
-		return null;
+		return Optional.empty();
 	}
 
 	private Map<String, String> readEnvironmentFromIniFile(File eclipseIniFile) {
@@ -1165,48 +1010,48 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return iniFile.getAbsolutePath();
 	}
 
+	private static final Set<String> VALID_ARCHITECTURES = stream(OSArchitecture.values()).map(OSArchitecture::name).collect(Collectors.toUnmodifiableSet());
 	public OSArchitecture detectArchitecture(
-			boolean preferCurrentVmArchitecture, StringBuilder detectMsg) {
-
+			StringBuilder detectMsg) {
+		checkResolved();
+		String architecture = target.getArch();
+		if (architecture != null) {
+			// If target platform architecture is configured explicitly, do not perform the scan below
+			// https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/160
+			return OSArchitecture.valueOf(architecture);
+		}
+		
 		String os = Platform.getOS();
-		TargetBundle[] bundles = target.getAllBundles();
-		for (TargetBundle b : bundles) {
-			BundleInfo info = b.getBundleInfo();
-			String name = info.getSymbolicName();
-			if (name != null && name.startsWith("org.eclipse.equinox.launcher")) {
-				if (!name.contains(os)) {
-					continue;
-				}
-				URI location = info.getLocation();
-				if (location == null || location.getPath() == null) {
-					continue;
-				}
-					
-				if (name.contains("aarch64")) {
-					if (detectMsg != null) {
-						detectMsg.append("aarch64 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.aarch64;
-				} else if (name.contains("x86_64")) {
-					if (detectMsg != null) {
-						detectMsg.append("x86_64 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.x86_64;
-				} else if (name.contains("x86")) {
-					if (detectMsg != null) {
-						detectMsg.append("x86 arch is selected because AUT uses " + name);
-					}
-					return OSArchitecture.x86;
-					
-				}
+		// Find org.eclipse.equinox.launcher.cocoa.macosx.aarch64
+		// Skip org.eclipse.equinox.launcher.cocoa.macosx
+		// Skip org.eclipse.equinox.launcher.win32.win32.x86_64.nl1 - https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/178
+		// org.eclipse.equinox.launcher.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.x86_64.nl_ru_4.23.0.v20230221055001.jar
+		// org.eclipse.equinox.launcher.cocoa.macosx.x86_64.nl_ru_4.23.0.v20230221055001.jar
+		Pattern archPattern = Pattern.compile(("org.eclipse.equinox.launcher.[\\w\\d]+."+os+".([^.]+)$").replace(".", "\\."));
+		Set<String> launcherArchitectures = targetBundleIndex.keySet().stream().map(name -> getGroup(name, archPattern)).flatMap(Optional::stream).collect(Collectors.toCollection(HashSet::new));
+		launcherArchitectures.retainAll(VALID_ARCHITECTURES);
+		if (launcherArchitectures.size() != 1) {
+			if (detectMsg != null) {
+				detectMsg.append("Multiple launcher architectures are found in target platform: " + Joiner.on(", ").join(launcherArchitectures));
 			}
+			return OSArchitecture.Unknown;
+		}
+		
+		String name = launcherArchitectures.iterator().next();
+		OSArchitecture result = OSArchitecture.valueOf(name);
+		if (detectMsg != null) {
+			detectMsg.append(result).append(" arch detected");
 		}
 
-		return OSArchitecture.Unknown;
+		return result;
 	}
 
-	private Map<String, String> getRunlevelsFromSimpleConfigurator() {
-		Map<String, String> result = new HashMap<String, String>();
+	private Map<String, BundleStart> getRunlevelsFromSimpleConfigurator() throws IOException {
+		Map<String, BundleStart> result = new HashMap<>();
 		if (getTargetPlatformProfilePath() == null) {
 			return result;
 		}
@@ -1215,45 +1060,46 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		if (!infoFile.exists()) {
 			return result;
 		}
-		InputStream input = null;
-		try {
-			input = new FileInputStream(infoFile);
+		try (InputStream input = new FileInputStream(infoFile)) {
 			for (org.eclipse.equinox.internal.simpleconfigurator.utils.BundleInfo bi : (List<org.eclipse.equinox.internal.simpleconfigurator.utils.BundleInfo>) SimpleConfiguratorUtils
 					.readConfiguration(input, infoFile.toURI())) {
 				String name = bi.getSymbolicName();
 				if (name != null) {
-					result.put(name, String.format("%d:%b", bi.getStartLevel(), bi.isMarkedAsStarted()));
+					result.put(name, BundleStart
+							.fromBundle(new BundleInfo(bi.getLocation(), bi.getStartLevel(), bi.isMarkedAsStarted())));
 				}
 			}
-		} catch (Throwable e) {
-			FileUtil.safeClose(input);
 		}
 		return result;
 	}
 
-	public Map<String, String> getRunlevelsMap() {
-		Map<String, String> result = new HashMap<String, String>();
+	private Map<String, BundleStart> getRunlevelsMap() throws IOException {
+		Map<String, BundleStart> result = new HashMap<>();
 		String osgiBundles = getConfigIniProperty(OSGI_BUNDLES);
-		if (osgiBundles == null) {
-			return result;
-		}
-
-		if (osgiBundles.contains(SIMPLECONFIGURATOR)) {
-			return getRunlevelsFromSimpleConfigurator();
-		}
-
-		// AUT uses bundles specified in osgiBundlesProperty
-		StringTokenizer tokenizer = new StringTokenizer(osgiBundles, ","); //$NON-NLS-1$
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			int index = token.indexOf('@');
-			String id = index != -1 ? token.substring(0, index) : token;
-			String tk = token.substring(index + 1);
-			if (tk.indexOf(":") == -1) {
-				tk = tk + ":default";
+		if (osgiBundles != null) {
+			if (osgiBundles.contains(SIMPLECONFIGURATOR)) {
+				result.putAll(getRunlevelsFromSimpleConfigurator());
+			} else {
+				// AUT uses bundles specified in osgiBundlesProperty
+				StringTokenizer tokenizer = new StringTokenizer(osgiBundles, ","); //$NON-NLS-1$
+				while (tokenizer.hasMoreTokens()) {
+					String token = tokenizer.nextToken();
+					int index = token.indexOf('@');
+					if (index != -1) {
+						String id = token.substring(0, index);
+						String tk = token.substring(index + 1);
+						result.put(id, BundleStart.fromOsgiString(tk));
+					}
+				}
 			}
-			result.put(id, tk);
 		}
+
+		AutInstall install = getAutInstall();
+		
+		if (install != null) {
+			result.putAll(install.configIniBundles());
+		}
+
 		return result;
 	}
 
@@ -1281,7 +1127,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				if (bundles != null) {
 					for (TargetBundle iResolvedBundle : bundles) {
 						BundleInfo info = iResolvedBundle.getBundleInfo();
-						if (Objects.equal(info.getSymbolicName(), name)) {
+						if (Objects.equals(info.getSymbolicName(), name)) {
 							return new Version(info.getVersion());
 						}
 					}
@@ -1315,8 +1161,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	}
 
 	public String getEquinoxStartupPath(String packageName) {
-		IPluginModelBase[] targetModels = getTargetModels();
-		for (IPluginModelBase plugin : targetModels) {
+		checkResolved();
+		for (IPluginModelBase plugin : modelIndex.values()) {
 			if (plugin.getPluginBase().getId().equals(packageName)) {
 				String location = plugin.getInstallLocation();
 				if (new File(location).isFile()) {
@@ -1347,8 +1193,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 
 	@Override
 	public Map<String, org.eclipse.equinox.p2.metadata.Version> getVersions() throws CoreException {
-		if (!getStatus().isOK())
-			throw new CoreException(getStatus());
+		checkResolved();
 		return AUTInformation.getInformationMap(target);
 	}
 
@@ -1685,8 +1530,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(eclipseProduct));
+			try (FileInputStream is = new FileInputStream(eclipseProduct)) {
+				props.load(is);
 				String appId = props.getProperty(PRODUCT_SITE_ID);
 				if (appId == null || appId.trim().length() == 0)
 					appId = ECLIPSE;
@@ -1812,4 +1657,72 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			Q7ExtLaunchingPlugin.getDefault().info(message);
 		}
 	}
+	private void setStartLevels(SubMonitor monitor) throws IOException, BundleException {
+		Map<String, BundleStart> levelMap = getRunlevelsMap();
+		if (!target.isResolved()) {
+			throw new IllegalStateException("Target definition is unresolved");
+		}
+
+		TargetBundle[] bundles = target.getBundles();
+		monitor.beginTask("Setting bundle start levels", bundles.length);
+		for (TargetBundle bundle : bundles) {
+			BundleInfo bundleInfo = bundle.getBundleInfo();
+			String location = bundleInfo.getLocation().toString();
+			monitor.subTask(location);
+			
+			try {
+				BundleStart bundleLevel = levelMap.getOrDefault(bundleInfo.getSymbolicName(), BundleStart.DEFAULT);
+				String manifest = bundleInfo.getManifest();
+				if (manifest != null) {
+					// org.eclipse.m2e.pde.target.MavenSourceBundle does not call BundleInfo.setManifest() and can not use org.eclipse.pde.core.target.TargetBundle.initialize(File)
+					// this leads to null manifest
+					// we do not care about start level of source JARs, so we ignore their manifest
+					bundleLevel = StartLevelSupport.getStartInfo(manifest, bundleLevel);
+				}
+				monitor.split(1);
+				if (bundleLevel.isDefault()) {
+					continue;
+				}
+				bundleInfo.setStartLevel(bundleLevel.level);
+				bundleInfo.setMarkedAsStarted(bundleLevel.autoStart);
+			} catch (OperationCanceledException e) {
+				throw e;
+			} catch (RuntimeException e) {
+				throw new IllegalStateException(format("Invalid run level descriptor for bundle %s, %s", bundleInfo.getSymbolicName(), location), e);
+			}
+		}
+		if (!stream(bundles).map(TargetBundle::getBundleInfo).map(BundleStart::fromBundle).anyMatch(not(BundleStart::isDefault))) {
+			// this happens only if target platform has no bundles from org.eclipse.rcptt.launching.ext.StartLevelSupport.predefined
+			warning("No start levels are configured");
+		}
+		
+	}
+
+	private void warning(String message) {
+		status.add(Status.warning(message));
+	}
+	
+	private boolean isBad(IStatus status) {
+		return status.matches(IStatus.CANCEL | IStatus.ERROR);
+	}
+
+	@Override
+	public int size() {
+		checkResolved();
+		return targetBundleIndex.size();
+	}
+
+	private Model toModel(IPluginModelBase model) {
+		TargetBundle bundle = targetBundleIndex.get(model.getBundleDescription().getSymbolicName()).iterator().next();
+		return new Model(model, BundleStart.fromBundle(bundle.getBundleInfo()));
+	}
+	
+	private Optional<String> getGroup(String input, Pattern prefix) {
+		Matcher matcher = prefix.matcher(input);
+		if (matcher.find()) {
+			return Optional.of(matcher.group(1));
+		}
+		return Optional.empty();
+	}
+	
 }

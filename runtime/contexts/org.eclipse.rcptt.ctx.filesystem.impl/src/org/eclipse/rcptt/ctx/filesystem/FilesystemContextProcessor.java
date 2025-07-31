@@ -12,6 +12,7 @@ package org.eclipse.rcptt.ctx.filesystem;
 
 import java.io.File;
 import java.net.URL;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -77,7 +78,7 @@ public class FilesystemContextProcessor implements IContextProcessor {
 		throw new UnsupportedOperationException();
 	}
 
-	public void apply(Context context) throws CoreException {
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
 		FSUtils.apply((FilesystemContext) context, resolver);
 	}
 

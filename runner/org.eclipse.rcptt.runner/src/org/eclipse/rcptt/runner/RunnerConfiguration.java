@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.rcptt.internal.launching.TestEngineManager;
 import org.eclipse.rcptt.launching.injection.Directory;
@@ -69,8 +70,9 @@ public class RunnerConfiguration {
 
 		AutVMArgs("Comma separated list of arguments to pass to AUT Java VM",
 				"autVMArgs"), //
-		JavaVM("Java virtual machine to test on. Default: current VM", "autVM",
+		JavaVM("Java virtual machine to test on. Default: AUT.ini or current VM", "autVM",
 				"autJVM", "javaVM"), //
+		AutExecutionEnvironment("Preferred execution environment. Example: JavaSE-21. Default: AUT.ini or current VM", "autExecutionEnvironment"),
 		UpdateSite(
 				"Comma separated update site location and features required to be injected into AUT",
 				"injection:site", "site"), //
@@ -162,6 +164,7 @@ public class RunnerConfiguration {
 	public int shudownListenerPort = 0;
 
 	public String javaVM;
+	public String executionEnvironment;
 
 	public InjectionConfiguration config = null;
 
@@ -417,8 +420,16 @@ public class RunnerConfiguration {
 			case JavaVM:
 				javaVM = i.next();
 				if (!new File(javaVM).exists()) {
-					HeadlessRunnerPlugin.getDefault().info(
-							"ERROR: Invalid Java VM path: " + javaVM);
+					info("ERROR: Invalid Java VM path: " + javaVM);
+					return false;
+				}
+				break;
+			case AutExecutionEnvironment:
+				executionEnvironment = i.next();
+				if (JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(executionEnvironment) == null) {
+					List<String> available = Arrays.stream(JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments()).filter(e -> e.getDefaultVM() != null).map(e -> e.getId()).toList();
+					info(String.format( "ERROR: invalid executionEnvironemnt: %s, available environments: %s", executionEnvironment.split(arg), available));
+					return false;
 				}
 				break;
 			case UpdateSite:
@@ -590,6 +601,11 @@ public class RunnerConfiguration {
 				break;
 			}
 		}
+		
+		if (javaVM != null && executionEnvironment != null) {
+			info("ERROR: javaVM and executionEnvironment arguments are mutually exclusive. Remove one.");
+			return false;
+		}
 
 		return fillDefaults();
 	}
@@ -650,4 +666,7 @@ public class RunnerConfiguration {
 		return HeadlessRunnerPlugin.getDefault().getStateLocation().toFile();
 	}
 
+	private void info(String message) {
+		HeadlessRunnerPlugin.getDefault().info(message);
+	}
 }

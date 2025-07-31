@@ -16,12 +16,15 @@ import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.IExportedPreferences;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.rcptt.preferences.PrefData;
 import org.eclipse.rcptt.preferences.PrefNode;
+import org.eclipse.rcptt.preferences.PreferencesContext;
 import org.eclipse.rcptt.preferences.PreferencesFactory;
+import org.eclipse.rcptt.preferences.SettingsNode;
 import org.eclipse.rcptt.preferences.StringPrefData;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
@@ -29,6 +32,7 @@ import org.osgi.service.prefs.Preferences;
 public final class PrefUtils {
 	
 	private static final SubstitutionHelper helper = resolveHelper();
+	public static final String DIALOG_SETTINGS_NODE_NAME = "settings";
 
 	private PrefUtils() {
 	}
@@ -42,6 +46,25 @@ public final class PrefUtils {
 	public static PrefNode convertPreferences(Preferences preferences)
 			throws BackingStoreException {
 		return doConvertPreferences(preferences);
+	}
+	
+	public static PreferencesContext toContext(IExportedPreferences preferences) throws BackingStoreException {
+		PrefNode prefNode = PrefUtils.convertPreferences(preferences);
+		PreferencesContext context = PreferencesFactory.eINSTANCE
+				.createPreferencesContext();
+		if (prefNode != null) {
+			for (PrefNode i: new ArrayList<>(prefNode.getChilds())) {
+				if ("settings".equals(i.getName())) {
+					SettingsNode settings = PreferencesFactory.eINSTANCE
+							.createSettingsNode();
+					settings.getChilds().addAll(i.getChilds());
+					context.setSettings(settings);
+				} else {
+					context.getContent().add(i);
+				}
+			}
+		}
+		return context;
 	}
 
 	public static void encodePrefData(StringPrefData prefData) {

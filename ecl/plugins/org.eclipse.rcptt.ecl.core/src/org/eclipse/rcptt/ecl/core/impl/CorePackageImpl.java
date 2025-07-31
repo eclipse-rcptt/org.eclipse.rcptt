@@ -2340,7 +2340,7 @@ public class CorePackageImpl extends EPackageImpl implements CorePackage {
 		   new String[] {
 			   "description", "Creates a new global variable declaration.",
 			   "returns", "An internal object, describing a variable",
-			   "example", "// declaring an empty list:\n\nglobal [val myList [list]]\n\n\n\n// filling the list with all New/... menu items:\n\nrepeat [val index] -times [get-elements-count] -command {\n\nlet [val oldlist [$myList]] [val itemName [get-item-property [$index] \"getText()\"]] {\n\n// check if the item is not separator or Other...\n\nif [and [$itemName | not-eq \"\"][$itemName | not-eq \"&Other.*\"]] {\n\nglobal [val myList [appendToList [$oldlist] [$itemName]]] -override\n\n}\n\n}\n\n}"
+			   "example", "// declaring an empty list:\n\nglobal [val myList [list]]\n\n\n\n// filling the list with all New/... menu items:\n\nrepeat [val index] -times [get-elements-count] -command {\n\nlet [val oldlist [$myList]] [val itemName [get-item-property [$index] \"getText()\"]] {\n\n// check if the item is not separator or Other...\n\nif [and [$itemName | not-eq \"\"][$itemName | not-eq \"&Other.*\"]] {\n\nglobal [val myList [append [$oldlist] [$itemName]]] -override\n\n}\n\n}\n\n}"
 		   });
 		addAnnotation
 		  (getEClass,

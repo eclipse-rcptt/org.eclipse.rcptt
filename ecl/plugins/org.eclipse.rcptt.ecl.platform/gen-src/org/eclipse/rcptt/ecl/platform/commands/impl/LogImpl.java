@@ -121,6 +121,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMessage() {
 		return message;
 	}
@@ -130,6 +131,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMessage(String newMessage) {
 		String oldMessage = message;
 		message = newMessage;
@@ -142,6 +144,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getSeverity() {
 		return severity;
 	}
@@ -151,6 +154,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSeverity(String newSeverity) {
 		String oldSeverity = severity;
 		severity = newSeverity;
@@ -163,6 +167,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPlugin() {
 		return plugin;
 	}
@@ -172,6 +177,7 @@ public class LogImpl extends CommandImpl implements Log {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPlugin(String newPlugin) {
 		String oldPlugin = plugin;
 		plugin = newPlugin;
@@ -266,7 +272,7 @@ public class LogImpl extends CommandImpl implements Log {
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (message: ");
 		result.append(message);
 		result.append(", severity: ");

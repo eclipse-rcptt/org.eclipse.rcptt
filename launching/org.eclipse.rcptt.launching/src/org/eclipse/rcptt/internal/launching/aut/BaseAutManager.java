@@ -12,7 +12,6 @@ package org.eclipse.rcptt.internal.launching.aut;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener;
 import org.eclipse.debug.core.ILaunchesListener2;
@@ -99,7 +97,12 @@ public enum BaseAutManager implements AutManager, ILaunchConfigurationListener,
 	}
 
 	public BaseAut getByLaunch(ILaunchConfiguration config) {
-		return auts.getByLaunch(config);
+		BaseAut result = auts.getByLaunch(config);
+		if (result == null) {
+			launchConfigurationAdded(config);
+			return auts.getByLaunch(config);
+		}
+		return result;
 	}
 
 	public BaseAutLaunch getByLaunch(ILaunch launch) {
@@ -134,6 +137,7 @@ public enum BaseAutManager implements AutManager, ILaunchConfigurationListener,
 					for (AutListener listener : listeners) {
 						listener.launchRemoved(autLaunch);
 					}
+					autLaunch.shutdown();
 				}
 			}
 		}
@@ -363,7 +367,7 @@ public enum BaseAutManager implements AutManager, ILaunchConfigurationListener,
 			+ ".executors";
 
 	public void handleRestart(BaseAutLaunch aut, ILaunch oldLaunch,
-			ILaunch launch, ILaunchConfigurationWorkingCopy copy) {
+			ILaunch launch) {
 		launches.replaceLaunch(aut, launch, oldLaunch);
 	}
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.editors.ecl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -77,9 +80,6 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.rcptt.core.Scenarios;
 import org.eclipse.rcptt.core.ecl.parser.model.OccurrencesSettings;
 import org.eclipse.rcptt.core.internal.builder.Q7Builder;
@@ -146,6 +146,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartConstants;
@@ -165,10 +166,14 @@ import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
+import com.google.common.io.Closer;
+
 public class EclEditor extends AbstractDecoratedTextEditor implements
 		IElementChangedListener, IGotoMarker, INamedElementEditor, IPreferenceChangeListener {
+	public static final ILog LOG = Platform.getLog(EclEditor.class); 
 
 	public EclSourceViewer viewer;
+	private final Closer closer = Closer.create();
 
 	private IQ7NamedElement model;
 	private NamedElement element;
@@ -181,9 +186,17 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 	private final Object reconcilerLock = new Object();
 
 	private Annotation[] occurrencesAnnotations = null;
-	private MarkAllOccurencesJob occurrencesFinderJob = null;
-	private MarkAllOccurencesJobCanceler occurrencesFinderJobCanceler = null;
-	private ISelectionListener occurrencesPostSelectionListener = null;
+	private MarkAllOccurencesJob occurrencesFinderJob = new MarkAllOccurencesJob(this);
+	private MarkAllOccurencesJobCanceler occurrencesFinderJobCanceler = new MarkAllOccurencesJobCanceler();
+	private final ISelectionListener occurrencesPostSelectionListener = new ISelectionListener() {
+		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+			if ((part instanceof EclEditor) || (part instanceof ContextEditor)) {
+				if (selection instanceof ITextSelection) {
+					updateOccurrenceAnnotations((ITextSelection) selection);
+				}
+			}
+		}
+	};;
 
 	public void selectLine(int start, int length) {
 		// start = this.getViewer().getDocument().getLineOfOffset(start) + 1;
@@ -235,8 +248,7 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 
 	private void updateOccurrenceAnnotations(ITextSelection selection) {
 		OccurrencesSettings settings = ECLEditorPlugin.getMarkSettings();
-		if (occurrencesFinderJob != null)
-			occurrencesFinderJob.cancel();
+		occurrencesFinderJob.cancel();
 		if (!settings.enabled) {
 			removeOccurrenceAnnotations();
 			return;
@@ -250,69 +262,15 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 		if (document == null)
 			return;
 
-		occurrencesFinderJob = new MarkAllOccurencesJob(selection, this);
-		occurrencesFinderJob.run(new NullProgressMonitor());
+		occurrencesFinderJob.requestMark(selection);
 	}
 
 	private void installOccurrencesFinder() {
-		IDocument document = viewer.getDocument();
-		if (document != null) {
-			ISelectionProvider selectionProvider = getSelectionProvider();
-
-			if (selectionProvider != null) {
-				new ISelectionChangedListener() {
-					public void selectionChanged(SelectionChangedEvent event) {
-						updateOccurrenceAnnotations((ITextSelection) event.getSelection());
-					}
-				};
-				occurrencesPostSelectionListener = new ISelectionListener() {
-
-					public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-						if ((part instanceof EclEditor) || (part instanceof ContextEditor)) {
-							if (selection instanceof ITextSelection) {
-								updateOccurrenceAnnotations((ITextSelection) selection);
-							}
-						}
-					}
-				};
-
-				this.getEditorSite().getWorkbenchWindow().getSelectionService()
-						.addPostSelectionListener(occurrencesPostSelectionListener);
-				// selectionProvider.addSelectionChangedListener(occurrencesSelectionChangeListener);
-
-				if (occurrencesFinderJobCanceler == null) {
-					occurrencesFinderJobCanceler = new MarkAllOccurencesJobCanceler();
-					occurrencesFinderJobCanceler.install(this);
-				}
-			}
-		}
-	}
-
-	private void uninstallOccurrencesFinder() {
-		if (occurrencesFinderJob != null) {
-			occurrencesFinderJob.cancel();
-			occurrencesFinderJob = null;
-		}
-
-		if (occurrencesFinderJobCanceler != null) {
-			occurrencesFinderJobCanceler.uninstall(this);
-			occurrencesFinderJobCanceler = null;
-		}
-
-		if (viewer != null) {
-			IDocument document = viewer.getDocument();
-			if (document != null) {
-				ISelectionProvider selectionProvider = getSelectionProvider();
-
-				if (selectionProvider != null) {
-					// selectionProvider.removeSelectionChangedListener(occurrencesSelectionChangeListener);
-					this.getEditorSite().getWorkbenchWindow().getSelectionService()
-							.removePostSelectionListener(occurrencesPostSelectionListener);
-				}
-			}
-		}
-
-		removeOccurrenceAnnotations();
+		ISelectionService service = this.getEditorSite().getService(ISelectionService.class);
+		service.addPostSelectionListener(occurrencesPostSelectionListener);
+		closer.register(() -> service.removePostSelectionListener(occurrencesPostSelectionListener) );
+		occurrencesFinderJobCanceler.install(this);
+		closer.register(() -> occurrencesFinderJobCanceler.uninstall(this));
 	}
 
 	@Override
@@ -381,6 +339,7 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 		setDocumentProvider(createDocumentProvider());
 		setSourceViewerConfiguration(new EclSourceViewerConfiguration(this));
 		ECLEditorPlugin.getPreferences().addPreferenceChangeListener(this);
+		closer.register(() -> occurrencesFinderJob.cancel() );
 	}
 
 	protected EclDocumentProvider createDocumentProvider() {
@@ -412,20 +371,20 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 	}
 
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (IToggleBreakpointsTarget.class.isAssignableFrom(adapter) &&
 				model != null) {
-			return new EclLineBreakpointAdapter(getModel().getResource());
+			return adapter.cast(new EclLineBreakpointAdapter(getModel().getResource()));
 		}
 		if (IGotoMarker.class.isAssignableFrom(adapter)) {
-			return this;
+			return adapter.cast(this);
 		}
 		if (IResource.class.isAssignableFrom(adapter) &&
 				model != null) {
-			return model.getResource();
+			return adapter.cast(model.getResource());
 		}
 		if (ISourceViewer.class.isAssignableFrom(adapter)) {
-			return getSourceViewer();
+			return adapter.cast(getSourceViewer());
 		}
 
 		return super.getAdapter(adapter);
@@ -444,6 +403,7 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 			updateElement();
 
 			RcpttCore.addElementChangedListener(this);
+			closer.register(() -> RcpttCore.removeElementChangedListener(this));
 			setPartName(element.getName());
 			scheduleCheckReferences();
 
@@ -803,11 +763,17 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 		try {
 			discardWorkingCopy();
 		} catch (ModelException e) {
-			Q7UIPlugin.log(e);
+			LOG.log(e.getStatus());
+			throw new IllegalStateException(e);
+		} finally {
+			try {
+				closer.close();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			} finally {
+				super.dispose();
+			}
 		}
-		uninstallOccurrencesFinder();
-		super.dispose();
-		RcpttCore.removeElementChangedListener(this);
 	}
 
 	@Override
@@ -1389,11 +1355,11 @@ public class EclEditor extends AbstractDecoratedTextEditor implements
 				}
 			}
 		};
-		IObservableValue scriptContent = EMFObservables.observeValue(element,
+		IObservableValue<?> scriptContent = EMFObservables.observeValue(element,
 				ScenarioPackage.Literals.SCENARIO__CONTENT);
 		scriptContent.addChangeListener(scenarioContentListener);
 
-		IObservableValue teslaContent = EMFObservables.observeValue(element,
+		IObservableValue<?> teslaContent = EMFObservables.observeValue(element,
 				ScenarioPackage.Literals.SCENARIO__TESLA_CONTENT);
 		teslaContent.addChangeListener(scenarioContentListener);
 	}

@@ -18,12 +18,12 @@ documentation -->
 	<parent>
 		<groupId>org.eclipse.rcptt</groupId>
 		<artifactId>core</artifactId>
-		<version>2.6.0-SNAPSHOT</version>
+		<version>2.6.1-SNAPSHOT</version>
 		<relativePath>../core/pom.xml</relativePath>
 	</parent>
 
 	<properties>
-		<coreRepository>file:/${user.dir}/repository/core/target/repository</coreRepository>
+		<coreRepository>${buildUrl}/repository/core/target/repository</coreRepository>
 		<orbitRepository>
 			http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
 	</properties>
@@ -70,7 +70,7 @@ documentation -->
 							<complianceLevel>${ajJavaCompilance}</complianceLevel>
 							<aspectDirectory>src</aspectDirectory>
 							<Xlint>ignore</Xlint>
-							<Xreweavable>true</Xreweavable>
+							
 							<deprecation>true</deprecation>
 							<!--ajdtBuildDefFile>build-1-5.ajproperties</ajdtBuildDefFile-->
 						</configuration>

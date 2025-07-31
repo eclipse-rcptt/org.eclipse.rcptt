@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.rcptt.modules.launching"
+      label="All modules launching"
+      version="2.6.1.qualifier"
+      provider-name="%providerName">
+
+   <description>
+      Components necessary to launch all  RCPTT modules from a command line interfaces.
+Includes models and packaged runtime update sites.
+Excludes recording.
+   </description>
+
+   <copyright url="%copyrightURL">
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <includes
+         id="org.eclipse.rcptt.module.nebula"
+         version="0.0.0"/>
+
+   <requires>
+      <import feature="org.eclipse.rcptt.launching" version="2.6.1" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.rcptt.module.testrail.updates"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.rcptt.zephyr"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.rcptt.updates.external.dependencies.rap"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.rcptt.testrail"
+         version="0.0.0"/>
+
+</feature>

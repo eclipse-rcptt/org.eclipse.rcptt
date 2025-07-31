@@ -26,8 +26,6 @@ public interface IQ7NamedElement extends IQ7Element, IOpenable {
 
 	String getElementName() throws ModelException;
 
-	boolean isWorkingCopy();
-
 	IQ7NamedElement getWorkingCopy(IProgressMonitor monitor)
 			throws ModelException;
 	IQ7NamedElement getIndexingWorkingCopy(IProgressMonitor monitor)
@@ -39,7 +37,7 @@ public interface IQ7NamedElement extends IQ7Element, IOpenable {
 
 	IPersistenceModel getPersistenceModel() throws ModelException;
 
-	boolean hasResourceChanged();
+	boolean hasResourceChanged() throws ModelException;
 
 	boolean hasUnsavedChanges() throws ModelException;
 
@@ -60,4 +58,6 @@ public interface IQ7NamedElement extends IQ7Element, IOpenable {
 	void setID(String id) throws ModelException;
 
 	void setTags(String tags) throws ModelException;
+
+	boolean isWorkingCopy();
 }

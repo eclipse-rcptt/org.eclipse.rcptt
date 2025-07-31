@@ -401,22 +401,17 @@ public class PersistenceManager implements IPlainConstants {
 	public EObject loadTeslaContent(Q7LazyResource q7LazyResource, EObject self) {
 		IPersistenceModel model = getModel(q7LazyResource);
 		if (model != null) {
-			if (model.size(TESLA_CONTENT_ENTRY) == 0) {
-				return null;
-			}
-			InputStream stream = model.read(TESLA_CONTENT_ENTRY);
-			if (stream != null) {
-				try {
+			try (InputStream stream = model.read(TESLA_CONTENT_ENTRY)) {
+				if (stream != null) {
 					XMIResourceImpl res = new XMIResourceImpl();
 					res.load(stream, getOptions());
 					if (res.getContents().size() == 1) {
 						return res.getContents().get(0);
 					}
-
-				} catch (IOException e) {
-					RcpttPlugin.log(String.format("Error reading content for %s",
-							q7LazyResource.getURI()), e);
 				}
+			} catch (IOException e) {
+				RcpttPlugin.log(String.format("Error reading content for %s",
+						q7LazyResource.getURI()), e);
 			}
 		}
 		return null;
@@ -520,5 +515,14 @@ public class PersistenceManager implements IPlainConstants {
 			return model;
 		}
 		return null;
+	}
+
+	public int cachedSize(Resource res) {
+		IFile file = WorkspaceSynchronizer.getFile(res);
+		if (!file.exists() || !file.isSynchronized(IResource.DEPTH_INFINITE)) {
+			return 0;
+		}
+		File fs = file.getLocation().toFile();
+		return (int) Math.min(fs.length(), Integer.MAX_VALUE);
 	}
 }

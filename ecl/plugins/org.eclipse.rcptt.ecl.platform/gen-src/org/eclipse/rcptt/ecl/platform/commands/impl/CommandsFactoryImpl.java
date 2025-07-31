@@ -94,6 +94,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListPlugins createListPlugins() {
 		ListPluginsImpl listPlugins = new ListPluginsImpl();
 		return listPlugins;
@@ -104,6 +105,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListFeatures createListFeatures() {
 		ListFeaturesImpl listFeatures = new ListFeaturesImpl();
 		return listFeatures;
@@ -114,6 +116,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListRepositories createListRepositories() {
 		ListRepositoriesImpl listRepositories = new ListRepositoriesImpl();
 		return listRepositories;
@@ -124,6 +127,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public AddRepository createAddRepository() {
 		AddRepositoryImpl addRepository = new AddRepositoryImpl();
 		return addRepository;
@@ -134,6 +138,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public RemoveRepository createRemoveRepository() {
 		RemoveRepositoryImpl removeRepository = new RemoveRepositoryImpl();
 		return removeRepository;
@@ -144,6 +149,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public UpdateFeature createUpdateFeature() {
 		UpdateFeatureImpl updateFeature = new UpdateFeatureImpl();
 		return updateFeature;
@@ -154,6 +160,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public UpdateAll createUpdateAll() {
 		UpdateAllImpl updateAll = new UpdateAllImpl();
 		return updateAll;
@@ -164,6 +171,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public SortBy createSortBy() {
 		SortByImpl sortBy = new SortByImpl();
 		return sortBy;
@@ -174,6 +182,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListInstallUnits createListInstallUnits() {
 		ListInstallUnitsImpl listInstallUnits = new ListInstallUnitsImpl();
 		return listInstallUnits;
@@ -184,6 +193,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetLog createGetLog() {
 		GetLogImpl getLog = new GetLogImpl();
 		return getLog;
@@ -194,6 +204,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Log createLog() {
 		LogImpl log = new LogImpl();
 		return log;
@@ -204,6 +215,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Echo createEcho() {
 		EchoImpl echo = new EchoImpl();
 		return echo;
@@ -214,6 +226,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ClearLog createClearLog() {
 		ClearLogImpl clearLog = new ClearLogImpl();
 		return clearLog;
@@ -224,6 +237,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ListLaunchConfigurations createListLaunchConfigurations() {
 		ListLaunchConfigurationsImpl listLaunchConfigurations = new ListLaunchConfigurationsImpl();
 		return listLaunchConfigurations;
@@ -234,6 +248,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Launch createLaunch() {
 		LaunchImpl launch = new LaunchImpl();
 		return launch;
@@ -244,6 +259,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public SubstituteVariables createSubstituteVariables() {
 		SubstituteVariablesImpl substituteVariables = new SubstituteVariablesImpl();
 		return substituteVariables;
@@ -254,6 +270,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetWorkspaceLocation createGetWorkspaceLocation() {
 		GetWorkspaceLocationImpl getWorkspaceLocation = new GetWorkspaceLocationImpl();
 		return getWorkspaceLocation;
@@ -264,6 +281,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public FindInWorkspace createFindInWorkspace() {
 		FindInWorkspaceImpl findInWorkspace = new FindInWorkspaceImpl();
 		return findInWorkspace;
@@ -274,6 +292,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetStatusMessage createGetStatusMessage() {
 		GetStatusMessageImpl getStatusMessage = new GetStatusMessageImpl();
 		return getStatusMessage;
@@ -284,6 +303,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetStatusTrace createGetStatusTrace() {
 		GetStatusTraceImpl getStatusTrace = new GetStatusTraceImpl();
 		return getStatusTrace;
@@ -294,6 +314,7 @@ public class CommandsFactoryImpl extends EFactoryImpl implements CommandsFactory
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public CommandsPackage getCommandsPackage() {
 		return (CommandsPackage)getEPackage();
 	}

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.resources;
 
+import static java.lang.Math.toIntExact;
+import static java.lang.System.currentTimeMillis;
 import static org.eclipse.rcptt.resources.impl.WSRunnables.clearAllFileBuffers;
 import static org.eclipse.rcptt.resources.impl.WSRunnables.clearHistory;
 import static org.eclipse.rcptt.resources.impl.WSRunnables.clearOperationHistoryEntry;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IContainer;
@@ -67,9 +70,10 @@ import org.eclipse.rcptt.workspace.WorkspaceFactory;
 
 public class WorkspaceContextProcessor implements IContextProcessor {
 
-	public void apply(final Context context) throws CoreException {
+	@Override
+	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkspaceContext wc = (WorkspaceContext) context;
-
+		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
 		// Smart cancel/close jobs with showed UI interactions.
 		final UIJobCollector collector = new UIJobCollector();
 		Job.getJobManager().addJobChangeListener(collector);
@@ -82,10 +86,11 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 			ws.run(refreshWorkspace, null, IWorkspace.AVOID_UPDATE, null);
 
 			if (wc.isClearWorkspace()) {
-				clearWorkspace(wc);
+				clearWorkspace(wc, toIntExact(stop - currentTimeMillis()), isCancelled);
 			}
 
 			ws.run(new IWorkspaceRunnable() {
+				@Override
 				public void run(final IProgressMonitor monitor)
 						throws CoreException {
 					fit(wc.getLocation(), wc.getContent(), true);
@@ -101,8 +106,8 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 					collector.setNeedDisable();
 					return null;
 				}
-			});
-			collector.join(TeslaLimits.getContextJoinTimeout());
+			}, toIntExact(stop - currentTimeMillis()), isCancelled);
+			collector.join(TeslaLimits.getContextJoinTimeout(), isCancelled);
 		} catch (Exception e) {
 			CoreException ee = new CoreException(RcpttPlugin.createStatus(
 					"Failed to execute context: " + wc.getName() + " Cause: "
@@ -115,14 +120,15 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 		}
 	}
 
-	private void clearWorkspace(final WorkspaceContext wc) throws CoreException {
+	private void clearWorkspace(final WorkspaceContext wc, int timeout, BooleanSupplier isCancelled) throws CoreException {
 		final IWorkspace ws = ResourcesPlugin.getWorkspace();
+		long stop = currentTimeMillis() + timeout;
 		// close all editor with input to resource
-		UIRunnable.exec(closeEditorsWithResources);
-		UIRunnable.exec(clearAllFileBuffers);
-		UIRunnable.exec(clearHistory);
+		UIRunnable.exec(closeEditorsWithResources, toIntExact(stop - currentTimeMillis()), isCancelled);
+		UIRunnable.exec(clearAllFileBuffers, toIntExact(stop - currentTimeMillis()), isCancelled);
+		UIRunnable.exec(clearHistory, toIntExact(stop - currentTimeMillis()), isCancelled);
 
-		while (UIRunnable.exec(clearOperationHistoryEntry))
+		while (UIRunnable.exec(clearOperationHistoryEntry, toIntExact(stop - currentTimeMillis()), isCancelled))
 			;
 
 		final CoreException ee[] = { null };
@@ -131,6 +137,7 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 			public Object run() throws CoreException {
 				try {
 					ws.run(new IWorkspaceRunnable() {
+						@Override
 						public void run(final IProgressMonitor monitor)
 								throws CoreException {
 							removeWorkspaceFiles(wc);
@@ -141,7 +148,7 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 				}
 				return null;
 			}
-		});
+		}, toIntExact(stop - currentTimeMillis()), isCancelled);
 
 		if (ee[0] != null) {
 			throw ee[0];
@@ -284,6 +291,7 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 				+ "\" caused by:\n" + e.getMessage());
 	}
 
+	@Override
 	public boolean isApplied(final Context context) {
 		try {
 			final WorkspaceContext wc = (WorkspaceContext) context;

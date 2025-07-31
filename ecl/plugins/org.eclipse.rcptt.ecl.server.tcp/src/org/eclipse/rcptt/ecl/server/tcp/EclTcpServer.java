@@ -53,7 +53,6 @@ public class EclTcpServer extends Thread {
 					}
 				}
 			}
-			socket.close();
 		} catch (Exception e) {
 			log(CorePlugin.err("Failed to start ECL TCP server", e));
 		} finally {

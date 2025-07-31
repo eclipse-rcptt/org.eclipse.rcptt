@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.ecl.core.EclException;
+import org.eclipse.rcptt.ecl.core.EclString;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
 import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.Q7Info;
@@ -234,6 +235,10 @@ public class FullSingleTestHtmlRenderer {
 			renderAdvanced((AdvancedInformation) eObject);
 		} else if (eObject == null) {
 			writer.println("Event contains no data. This indicates a premature AUT termination.");
+		} else if (eObject instanceof EclString) {
+			writer.println("<pre>");
+			writer.println(escape(((EclString) eObject).getValue()));
+			writer.println("</pre>");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}
@@ -266,12 +271,12 @@ public class FullSingleTestHtmlRenderer {
 			for (StackTraceEntry trace : threads) {
 				if (trace.getThreadClass().equals(
 						"org.eclipse.core.internal.jobs.Worker")
-						&& trace.getStackTrace().size() == 4) {
+						&& trace.getStackTrace().size() <= 5) {
 					// Skip Worker threads sleep state
 					continue;
 				}
 				renderHeader(5, trace.getThreadName(), "");
-				writer.println("class=" + trace.getThreadClass());
+				writer.append("class=").append(trace.getThreadClass()).println("<br>");
 				EList<String> list = trace.getStackTrace();
 				for (int i = 0; i < list.size(); i++) {
 					writer.append(Integer.toString(list.size() - i - 1))

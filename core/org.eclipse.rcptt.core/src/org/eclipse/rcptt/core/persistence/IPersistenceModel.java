@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.core.persistence;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -39,6 +40,7 @@ public interface IPersistenceModel {
 
 	/**
 	 * Return attachment input stream
+	 * @throws IOException 
 	 */
 	InputStream read(String name);
 
@@ -92,8 +94,6 @@ public interface IPersistenceModel {
 	void setUnmodified();
 
 	Resource getResource();
-
-	int size(String teslaContentEntry);
 
 	boolean isContentEntryRequired();
 

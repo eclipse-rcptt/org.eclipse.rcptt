@@ -78,10 +78,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			String configName = this.configuration.getName();
 			String autLocation = this.configuration.getAttribute(
 					IQ7Launch.AUT_LOCATION, "");
-			String targetName = Q7TargetPlatformManager.getTargetPlatformName(this.configuration);
-
-			page.initializeExisting(configName, autLocation, targetName,
-					this.configuration);
+			page.initializeExisting(configName, autLocation, this.configuration);
 			page.addAdvancedHandler(new Runnable() {
 				public void run() {
 					Shell shell = PlatformUI.getWorkbench()
@@ -119,13 +116,6 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			return false;
 		}
 		try {
-			String targetName = Q7TargetPlatformManager
-					.getTargetPlatformName(page.getTargetName());
-
-			TargetPlatformManager.deleteTargetPlatform(targetName);
-
-			target.setTargetName(targetName);
-			target.save();
 
 			// Delete all files in configuration area.
 			File area = LaunchConfigurationHelper
@@ -139,6 +129,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			ILaunchConfigurationWorkingCopy workingCopy = configuration
 					.getWorkingCopy();
 			Q7LaunchingUtil.updateLaunchConfiguration(target, workingCopy);
+			target.save();
 
 			workingCopy.rename(page.getTargetName());
 			OSArchitecture autArch = page.getArchitecture();
@@ -173,22 +164,25 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 
 			IVMInstall install = page.getJVMInstall();
 			if (install != null) {
-				workingCopy
-						.setAttribute(
-								IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
-								String.format(
-										"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
-										install.getVMInstallType().getId(),
-										install.getName()));
+				if (workingCopy.getAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, (String)null) == null) {
+					workingCopy
+							.setAttribute(
+									IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
+									String.format(
+											"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
+											install.getVMInstallType().getId(),
+											install.getName()));
+				}
 			}
 
-			String programArgs = workingCopy
+			if (workingCopy
 					.getAttribute(
-							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
-							AUTLaunchArgumentsHelper
+							IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String)null) == null) {
+				String programArgs = workingCopy
+						.getAttribute(
+								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
+								AUTLaunchArgumentsHelper
 									.getInitialProgramArguments(autArch.name()));
-
-			if (programArgs.length() > 0) {
 				workingCopy
 						.setAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,

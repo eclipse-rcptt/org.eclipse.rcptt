@@ -2,23 +2,23 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.reporting;singleton:=true
-Bundle-Version: 2.6.0.qualifier
+Bundle-Version: 2.6.1.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-9
 Export-Package: org.eclipse.rcptt.reporting,
  org.eclipse.rcptt.reporting.core,
  org.eclipse.rcptt.reporting.impl,
  org.eclipse.rcptt.reporting.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.rcptt.watson.core;bundle-version="[2.6.0,3.0.0)";visibility:=reexport,
- org.eclipse.rcptt.ecl.core;bundle-version="[2.6.0,3.0.0)";visibility:=reexport,
+ org.eclipse.rcptt.watson.core;bundle-version="[2.6.1,3.0.0)";visibility:=reexport,
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.6.1,3.0.0)";visibility:=reexport,
  org.eclipse.emf.ecore.xmi,
- org.eclipse.rcptt.tesla.core;bundle-version="[2.6.0,3.0.0)",
- org.eclipse.rcptt.core;bundle-version="[2.6.0,3.0.0)";visibility:=reexport,
- org.eclipse.rcptt.util;bundle-version="[2.6.0,3.0.0)"
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.6.1,3.0.0)";visibility:=reexport,
+ org.eclipse.rcptt.util;bundle-version="[2.6.1,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.reporting.internal.Q7ReportingPlugin
 Automatic-Module-Name: org.eclipse.rcptt.reporting

@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.model;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 public interface IOpenable extends IQ7Element {
-	boolean isOpen();
-
-	public void close() throws ModelException;
-
-	public void open(IProgressMonitor progress) throws ModelException;
+	public void close() throws ModelException, InterruptedException;
 }

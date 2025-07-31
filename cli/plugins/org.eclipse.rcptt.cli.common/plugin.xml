@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<!--
+    Copyright (c) 2025 Xored Software Inc and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v2.0
+    which accompanies this distribution, and is available at
+    https://www.eclipse.org/legal/epl-v20.html
+     
+    Contributors:
+    	Xored Software Inc - initial API and implementation and/or initial documentation
+ -->
+
+<plugin>
+   <extension
+         point="org.eclipse.core.resources.filterMatchers">
+      <filterMatcher
+            argumentType="string"
+            class="org.eclipse.rcptt.cli.common.internal.DummyResourceFilter"
+            description="A dummy filter replacing org.eclipse.ui.ide to suppress warnings https://bugs.eclipse.org/bugs/show_bug.cgi?id=503369"
+            id="org.eclipse.ui.ide.multiFilter"
+            name="Dummy Multifilter"
+            ordering="first">
+      </filterMatcher>
+   </extension>
+</plugin>

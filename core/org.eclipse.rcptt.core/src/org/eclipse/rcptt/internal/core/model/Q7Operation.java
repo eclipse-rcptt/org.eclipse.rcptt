@@ -25,11 +25,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.IQ7Folder;
@@ -39,6 +40,7 @@ import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
+import org.osgi.framework.FrameworkUtil;
 
 @SuppressWarnings("rawtypes")
 public abstract class Q7Operation implements IWorkspaceRunnable,
@@ -374,8 +376,9 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 
 	/**
 	 * Performs the operation specific behavior. Subclasses must override.
+	 * @throws InterruptedException 
 	 */
-	protected abstract void executeOperation() throws ModelException;
+	protected abstract void executeOperation() throws ModelException, InterruptedException;
 
 	/*
 	 * Returns the index of the first registered action with the given id,
@@ -683,6 +686,8 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 			pushOperation(this);
 			try {
 				executeOperation();
+			} catch (InterruptedException e) {
+				throw new CoreException(error(e));
 			} finally {
 				if (this.isTopLevelOperation()) {
 					this.runPostActions();
@@ -733,10 +738,16 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 					} // else deltas are fired while processing the resource
 						// delta
 				}
+			} catch (InterruptedException e) {
+				throw new CoreException(error(e));
 			} finally {
 				popOperation();
 			}
 		}
+	}
+
+	private  final IStatus error(InterruptedException e) {
+		return new Status(IStatus.CANCEL, FrameworkUtil.getBundle(getClass()).getSymbolicName(), 0, "Interrupted", e);
 	}
 
 	/**

@@ -9,15 +9,12 @@
 	<parent>
 		<artifactId>rcptt.runtime</artifactId>
 		<groupId>org.eclipse.rcptt</groupId>
-		<version>2.6.0-SNAPSHOT</version>
+		<version>2.6.1-SNAPSHOT</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>p2.osgi.bundle</groupId>
-			<artifactId>org.eclipse.equinox.weaving.hook</artifactId>
-			<version>${hookVersion}</version>
-		</dependency>
-	</dependencies>
+	<artifactId>rcptt.runtime.tests</artifactId>
+	<packaging>pom</packaging>
+	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -46,7 +43,22 @@
 					<showEclipseLog>true</showEclipseLog>
 				</configuration>
 			</plugin>
-		</plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>org.eclipse.equinox.weaving.hook</id>
+                <versionRange>[${hookVersion},${hookVersion}]</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
+    </plugins>
 	</build>
 	<profiles>
 		<profile>
@@ -71,37 +83,19 @@
 			</build>
 		</profile>
 		<profile>
-			<id>aarch64</id>
+			<id>noaarch64</id>
 			<activation>
 				<os>
-					<arch>aarch64</arch>
+					<arch>!aarch64</arch>
 				</os>
 			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>tycho-surefire-plugin</artifactId>
-						<groupId>org.eclipse.tycho</groupId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>runtime4x</id>
-			<properties>
-				<hookVersion>1.2.200.v20180827-1235</hookVersion>
-			</properties>
 			<modules>
 				<module>org.eclipse.rcptt.tesla.jface.aspects.test</module>
 				<module>org.eclipse.rcptt.tesla.swt.aspects.test</module>
 				<module>org.eclipse.rcptt.tesla.swt.test</module>
 				<module>org.eclipse.rcptt.watson.test</module>
+				<module>org.eclipse.rcptt.contexts.test</module>
 			</modules>
 		</profile>
 	</profiles>
-	<artifactId>rcptt.runtime.tests</artifactId>
-	<packaging>pom</packaging>
 </project>

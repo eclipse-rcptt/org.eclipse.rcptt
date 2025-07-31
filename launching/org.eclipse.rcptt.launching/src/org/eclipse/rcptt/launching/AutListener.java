@@ -47,5 +47,29 @@ public interface AutListener {
 	 * @param launch
 	 */
 	void launchRemoved(AutLaunch launch);
+	
+	public class AutAdapter implements AutListener {
+
+		@Override
+		public void autAdded(Aut aut) {
+		}
+
+		@Override
+		public void autRemoved(Aut aut) {
+		}
+
+		@Override
+		public void autChanged(Aut aut) {
+		}
+
+		@Override
+		public void launchAdded(AutLaunch launch) {
+		}
+
+		@Override
+		public void launchRemoved(AutLaunch launch) {
+		}
+		
+	}
 
 }
