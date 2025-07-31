@@ -158,11 +158,19 @@ public class JFaceTextProcessor implements ITeslaCommandProcessor {
 			
 			Thread thread = null;
 			
-			Object object = TeslaSWTAccess.getField(Object.class, reconciler, "fThread");
-			if (object instanceof Thread t) {
+			Object worker = TeslaSWTAccess.getField(Object.class, reconciler, "fThread");
+			if (worker == null) {
+				worker = TeslaSWTAccess.getField(Object.class, reconciler, "fWorker");
+			}
+			if (worker == null) {
+				continue;
+			}
+			if (worker instanceof Thread t) {
 				thread = t;
-			} else if (object instanceof Job job) {
+			} else if (worker instanceof Job job) {
 				thread = job.getThread();
+			} else {
+				thread = TeslaSWTAccess.getField(Thread.class, worker, "fThread");
 			}
 			if (thread != null) {
 				State state = thread.getState();
@@ -175,15 +183,15 @@ public class JFaceTextProcessor implements ITeslaCommandProcessor {
 					needWait = true;
 				}
 			}
-			if (!needWait && object != null) {
+			if (!needWait && worker != null) {
 				try {
-					Field field = object.getClass().getDeclaredField("fIsDirty");
+					Field field = worker.getClass().getDeclaredField("fIsDirty");
 					field.setAccessible(true);
-					boolean fDirty = field.getBoolean(object);
+					boolean fDirty = field.getBoolean(worker);
 	
-					field = object.getClass().getDeclaredField("fCanceled");
+					field = worker.getClass().getDeclaredField("fCanceled");
 					field.setAccessible(true);
-					boolean fCanceled = field.getBoolean(object);
+					boolean fCanceled = field.getBoolean(worker);
 					if (fDirty && !fCanceled) {
 						Q7WaitUtils.updateInfo("reconciler.thread.dirty", reconciler.getClass().getName(), info);
 						needWait = true;
