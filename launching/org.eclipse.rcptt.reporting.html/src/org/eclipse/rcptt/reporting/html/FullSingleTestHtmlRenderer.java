@@ -271,7 +271,7 @@ public class FullSingleTestHtmlRenderer {
 			for (StackTraceEntry trace : threads) {
 				if (trace.getThreadClass().equals(
 						"org.eclipse.core.internal.jobs.Worker")
-						&& trace.getStackTrace().size() == 4) {
+						&& trace.getStackTrace().size() <= 5) {
 					// Skip Worker threads sleep state
 					continue;
 				}
