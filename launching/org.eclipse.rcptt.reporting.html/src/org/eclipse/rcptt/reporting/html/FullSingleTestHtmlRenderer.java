@@ -276,7 +276,7 @@ public class FullSingleTestHtmlRenderer {
 					continue;
 				}
 				renderHeader(5, trace.getThreadName(), "");
-				writer.println("class=" + trace.getThreadClass());
+				writer.append("class=").append(trace.getThreadClass()).println("<br>");
 				EList<String> list = trace.getStackTrace();
 				for (int i = 0; i < list.size(); i++) {
 					writer.append(Integer.toString(list.size() - i - 1))
