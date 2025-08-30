@@ -239,6 +239,8 @@ public class Q7ExternalLaunchDelegateTest {
 	@SuppressWarnings("resource")
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
+		commandLineArguments = new ArrayList<>(commandLineArguments);
+		commandLineArguments.add("-Dheadless.startup=true");
 		Aut aut = createAut(installDir, commandLineArguments);
 		AutLaunch launch = aut.launch(null);
 		closer.register(launch::terminate);
