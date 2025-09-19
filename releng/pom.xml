@@ -30,7 +30,7 @@
     <ajdt43repository>http://download.eclipse.org/tools/ajdt/431/dev/update/</ajdt43repository>
     <hookVersion>1.4.0.v20240213-1357</hookVersion>
     <signExcludeInnerJars>true</signExcludeInnerJars>
-    <eclipse-pde-repository>https://download.eclipse.org/staging/2025-09</eclipse-pde-repository>
+    <eclipse-pde-repository>https://download.eclipse.org/staging/2025-12</eclipse-pde-repository>
     <aspectj_version>1.14.0</aspectj_version>
     <aspectj_dep>1.9.7</aspectj_dep>
     <ajJavaSource>1.8</ajJavaSource>
