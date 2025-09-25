@@ -384,7 +384,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
   } 
 
 }
