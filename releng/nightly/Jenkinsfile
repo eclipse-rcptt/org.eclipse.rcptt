@@ -36,6 +36,7 @@ pipeline {
     stage('Start Build and Test') {
       steps {
         script {
+          build.mvn_args += " -Ddash.skip=true"
           build.build_and_test(true)
         }
       }
