@@ -695,7 +695,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			List<IInstallableUnit> unitsToInstall = new ArrayList<IInstallableUnit>();
 
 			// Query for all entries and then choose required.
-			IQuery<IInstallableUnit> finalQuery = P2Utils.createQuery(site);
+			IQuery<IInstallableUnit> finalQuery = P2Utils.createQuery(site.isAllUnits() ? Set.of() : site.getUnits() );
 
 			IQueryResult<IInstallableUnit> result = repository.query(finalQuery,
 					monitor);
