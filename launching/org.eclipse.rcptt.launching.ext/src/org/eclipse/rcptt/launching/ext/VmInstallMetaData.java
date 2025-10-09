@@ -47,21 +47,28 @@ public final class VmInstallMetaData {
 		this.compatibleEnvironments = Set.copyOf(environments);
 	}
 	
-	public static Optional<VmInstallMetaData> adapt(IVMInstall install) {
+	/** Converts a given install into a set of all supported architectures.
+	 * Old JVMs could switch between x86_64 and x86 execution modes with a flag.
+	 * This flag is no longer available, but we keep managing JVM architecture for historical reasons.
+	 *  **/
+	public static Stream<VmInstallMetaData> adapt(IVMInstall install) {
 		try {
 			OSArchitecture jvmArch = JDTUtils.detect(install);
 			if (OSArchitecture.Unknown.equals(jvmArch)) {
-				return Optional.empty();
+				return Stream.empty();
 			}
 			IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
 			Set<String> environments = Arrays.stream(manager.getExecutionEnvironments())
 					.filter(env -> Arrays.stream(env.getCompatibleVMs()).anyMatch(install::equals))
 					.map(IExecutionEnvironment::getId)
 					.collect(Collectors.toSet());
-			return Optional.of(new VmInstallMetaData(install, jvmArch, environments));
+			if (environments.isEmpty()) {
+				return Stream.empty();
+			}
+			return Stream.of(new VmInstallMetaData(install, jvmArch, environments));
 		} catch (CoreException e) {
 			RcpttPlugin.log(e);
-			return Optional.empty();
+			return Stream.empty();
 		}
 	}
 	
@@ -91,8 +98,8 @@ public final class VmInstallMetaData {
 		}
 	}
 
-	public static VmInstallMetaData register(Path location) throws CoreException {
+	public static Stream<VmInstallMetaData> register(Path location) throws CoreException {
 		IVMInstall install = JDTUtils.registerVM(location.toFile());
-		return adapt(install).orElseThrow();
+		return adapt(install);
 	}
 }

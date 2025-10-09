@@ -153,5 +153,8 @@ public interface ITargetPlatformHelper {
 
 	int size();
 	
-	public Set<String> getIncompatibleExecutionEnvironments();
+	/** @return empty string if compatible, explanation of incompatibility otherwise **/
+	String findCompatibilityProblems(Set<String> providedExecutionEnvironemnts);
+
+	String explainJvmRequirements();
 }

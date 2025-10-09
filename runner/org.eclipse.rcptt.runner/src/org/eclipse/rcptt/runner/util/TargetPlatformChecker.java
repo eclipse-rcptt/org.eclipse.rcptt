@@ -25,6 +25,7 @@ import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformInitializer;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformInitializer.Q7Info;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
+import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.injection.InjectionConfiguration;
 import org.eclipse.rcptt.launching.injection.InjectionFactory;
 import org.eclipse.rcptt.launching.injection.UpdateSite;
@@ -46,6 +47,7 @@ public class TargetPlatformChecker {
 
 
 	private ITargetPlatformHelper targetPlatform;
+	private JvmTargetCompatibility compatibility;
 
 	public ITargetPlatformHelper getTargetPlatform() {
 		return targetPlatform;
@@ -75,6 +77,7 @@ public class TargetPlatformChecker {
 
 	private void initializeTargetPlatform() throws CoreException {
 		targetPlatform = null;
+		compatibility  = null;
 		String location = PDELocationUtils.getProductLocation(conf.location).getAbsolutePath();
 		PrintStreamMonitor outMonitor = new PrintStreamMonitor(true);
 		if (conf.config != null) {
@@ -117,6 +120,11 @@ public class TargetPlatformChecker {
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID,
 					"Target platform doesn't contain RCPTT runtime injected..."));
 		}
+		compatibility = new JvmTargetCompatibility(targetPlatform);
+	}
+
+	public JvmTargetCompatibility getCompatibility() {
+		return compatibility;
 	}
 
 }
