@@ -31,6 +31,7 @@ echo "================= Updating All Components ================="
 mvn $GOAL -f releng/pom.xml -P update-version $OPTIONS -B || exit 100
 
 echo "================== Updating Maven Plugin =================="
+mvn clean install -f maven-plugin/pom.xml || exit 109 # Ensure that previous version is vailable to resolve deps for "its"
 mvn $GOAL -f maven-plugin/pom.xml $OPTIONS -B || exit 101
 mvn $GOAL -f maven-plugin/its/pom.xml $OPTIONS -B || exit 108
 
