@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ECL Formatter Tests
 Bundle-SymbolicName: org.eclipse.rcptt.core.ecl.formatter.test
-Bundle-Version: 2.7.0.qualifier
+Bundle-Version: 2.7.1.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit;bundle-version="4.8.2",

@@ -13,7 +13,7 @@
 <feature 
 	id="org.eclipse.rcptt.ecl.server.ui" 
 	label="ECL Server UI"
-	version="2.7.0.qualifier"
+	version="2.7.1.qualifier"
 	provider-name="%providerName">
 	
 	<description>
@@ -29,7 +29,7 @@
    </license>
 
     <requires>
-      <import feature="org.eclipse.rcptt.ecl.server" version="2.7.0" match="compatible"/>
+      <import feature="org.eclipse.rcptt.ecl.server" version="2.7.1" match="compatible"/>
     </requires>
     
 </feature>
