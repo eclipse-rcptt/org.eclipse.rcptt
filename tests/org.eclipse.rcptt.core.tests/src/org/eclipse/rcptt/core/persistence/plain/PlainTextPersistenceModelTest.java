@@ -11,23 +11,36 @@
 package org.eclipse.rcptt.core.persistence.plain;
 
 import static java.lang.System.currentTimeMillis;
+import static org.eclipse.core.runtime.Path.fromPortableString;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.rcptt.core.model.IQ7Element;
+import org.eclipse.rcptt.core.model.IQ7Folder;
+import org.eclipse.rcptt.core.model.IQ7Project;
+import org.eclipse.rcptt.core.model.ITestCase;
+import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.persistence.PersistenceManager;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
+import org.eclipse.rcptt.ecl.core.CoreFactory;
+import org.eclipse.rcptt.ecl.core.Script;
 import org.eclipse.rcptt.internal.core.Q7LazyResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,7 +58,7 @@ public class PlainTextPersistenceModelTest {
 	
 	@Test
 	public void deleteDescription() throws IOException, CoreException {
-		IFile file = createFile();
+		ITestCase file = createTestCase();
 		URI uri = toURI(file);
 		Scenario scenario = ScenarioFactory.eINSTANCE.createScenario();
 		scenario.setVersion(Double.toString(RcpttCore.SCENARIO_VERSION));
@@ -61,7 +74,7 @@ public class PlainTextPersistenceModelTest {
 	
 	@Test
 	public void returnNullWhenResourceDoesNotExist() throws IOException, CoreException {
-		IFile file = createFile();
+		ITestCase file = createTestCase();
 		URI uri = toURI(file);
 		Scenario scenario = ScenarioFactory.eINSTANCE.createScenario();
 		scenario.setVersion(Double.toString(RcpttCore.SCENARIO_VERSION));
@@ -73,7 +86,7 @@ public class PlainTextPersistenceModelTest {
 		
 		Job noise = Job.create("Delete/create", (ICoreRunnable) monitor -> {
 			while (!monitor.isCanceled()) {
-				file.delete(true, monitor);
+				file.getResource().delete(true, monitor);
 				saveLoad(scenario, uri);
 			}
 		});
@@ -88,6 +101,62 @@ public class PlainTextPersistenceModelTest {
 		}
 	}
 	
+	@Test
+	public void ensureNoCrosstalkBetweenDifferentFiles() throws IOException, CoreException {
+		IQ7Project project = createProject();
+		
+		Path folderPath = Path.forPosix("VeryLongDirectoryName".repeat(10)); // to defeat suffix-based id generation
+		IFolder folderResource = project.getProject().getFolder(Path.forPosix("1").append(folderPath));
+		create(folderResource);
+		IQ7Folder folder1 = (IQ7Folder) RcpttCore.create(folderResource);
+		folderResource = project.getProject().getFolder(Path.forPosix("2").append(folderPath));
+		create(folderResource);
+		IQ7Folder folder2 = (IQ7Folder) RcpttCore.create(folderResource);
+		
+		ITestCase test1 = folder1.createTestCase("test1", true, null), test2 = folder2.createTestCase("test1", true, null);
+		IResource[] resources = new IResource[] {test1.getResource(), test2.getResource()};
+		
+		Job noise = Job.create("Creating similar file", (ICoreRunnable) monitor -> {
+			while (!monitor.isCanceled()) {
+				createWithContent(test2, "script2");
+				test2.getResource().delete(true, monitor);
+			}
+		});
+		noise.setPriority(Job.INTERACTIVE);
+		noise.schedule();
+		try {
+			for (long stop = currentTimeMillis() + 2000; currentTimeMillis() < stop;) {
+				createWithContent(test1, "script1");
+				assertEquals("script1",  ((Script)test1.getContent()).getContent());
+				test1.getResource().delete(true, null);
+			}
+		} finally {
+			noise.cancel();
+		}
+		
+	}
+
+	private void createWithContent(ITestCase test, String content) throws CoreException {
+		create(test.getResource().getParent());
+		ITestCase wc = (ITestCase) test.getWorkingCopy(null);
+		try {
+			Script script = CoreFactory.eINSTANCE.createScript();
+			script.setContent(content);
+			wc.setContent(script);
+		} finally {
+			wc.commitWorkingCopy(true, null);
+		}
+	}
+
+	
+	private void create(IContainer folder) throws CoreException {
+		if (folder.exists()) {
+			return;
+		}
+		create(folder.getParent());
+		((IFolder)folder).create(true, true, null);
+	}
+
 	private Scenario saveLoad(Scenario scenario, URI uri) {
 		Resource resource = new Q7LazyResource(uri);
 		resource.setTrackingModification(true);
@@ -104,17 +173,23 @@ public class PlainTextPersistenceModelTest {
 		return resource;
 	}
 
-	private URI toURI(IFile file) {
-		return URI.createPlatformResourceURI(file.getFullPath().toString(), true);
+	private URI toURI(IQ7Element file) {
+		return URI.createPlatformResourceURI(file.getPath().toString(), true);
 	}
 
-	private IFile createFile() throws CoreException {
+	private ITestCase createTestCase() throws CoreException {
+		return createProject().getRootFolder().createTestCase("test.test", true, null);
+	}
+
+	private IQ7Project createProject() throws CoreException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IProject project = workspace.getRoot().getProject("x");
 		project.create(null);
 		project.open(null);
-		IFile file = project.getFile("test.test");
-		return file;
+		RcpttNature.updateProjectNature(project, true);
+		IQ7Project result = RcpttCore.create(project);
+		assert result.exists();
+		return result;
 	}
 
 }

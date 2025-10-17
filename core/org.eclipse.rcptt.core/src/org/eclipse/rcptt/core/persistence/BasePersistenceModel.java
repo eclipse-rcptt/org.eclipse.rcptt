@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -83,22 +84,21 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 	public BasePersistenceModel(Resource element) {
 		this.element = element;
 		IPath nonExistent = null;
-		while (true) {
-			RcpttPlugin default1 = RcpttPlugin.getDefault();
-			assert default1 != null;
-			String uri = (element == null || element.getURI() == null) ? "_"
-					: element.getURI().toString();
-			nonExistent = default1
-					.getStateLocation()
-					.append("attachments")
-					.append(FileUtil.limitSize(FileUtil.getID(uri))
-							+ System.currentTimeMillis());
-			if (!nonExistent.toFile().exists()) {
-				break;
-			}
+		RcpttPlugin default1 = RcpttPlugin.getDefault();
+		assert default1 != null;
+		String uri = (element == null || element.getURI() == null) ? "_"
+				: element.getURI().toString();
+		java.nio.file.Path baseDirectory = default1
+				.getStateLocation()
+				.append("attachments").toFile().toPath();
+		java.nio.file.Path dir;
+		try {
+			Files.createDirectories(baseDirectory);
+			dir = Files.createTempDirectory(baseDirectory, FileUtil.limitSize(FileUtil.getID(uri)));
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to create a temporary directory in " + baseDirectory, e);
 		}
-		assert nonExistent != null;
-		rootPath = nonExistent;
+		rootPath = Path.fromOSString(dir.toString());
 		this.root = rootPath.toFile();
 		// Make index
 		try {
