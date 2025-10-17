@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
@@ -173,7 +174,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		} catch (CoreException e) {
 			// Ignore file not found exception
 			int code = e.getStatus().getCode();
-			if (code == EFS.ERROR_NOT_EXISTS) {
+			if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND) {
 				return null;
 			}
 			throw new IllegalStateException(e);

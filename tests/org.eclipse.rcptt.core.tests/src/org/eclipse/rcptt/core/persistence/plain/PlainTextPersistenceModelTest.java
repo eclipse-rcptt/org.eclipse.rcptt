@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.persistence.plain;
 
+import static java.lang.System.currentTimeMillis;
+
 import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
@@ -17,6 +19,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -53,6 +57,35 @@ public class PlainTextPersistenceModelTest {
 		scenario.setDescription(null);
 		scenario = saveLoad(scenario, uri);
 		Assert.assertNull(scenario.getDescription());
+	}
+	
+	@Test
+	public void returnNullWhenResourceDoesNotExist() throws IOException, CoreException {
+		IFile file = createFile();
+		URI uri = toURI(file);
+		Scenario scenario = ScenarioFactory.eINSTANCE.createScenario();
+		scenario.setVersion(Double.toString(RcpttCore.SCENARIO_VERSION));
+		scenario.setId(EcoreUtil.generateUUID());
+		scenario.setName("test");
+		scenario.setDescription("description1");
+		saveLoad(scenario, uri);
+		Q7LazyResource resource = new Q7LazyResource(uri);
+		
+		Job noise = Job.create("Delete/create", (ICoreRunnable) monitor -> {
+			while (!monitor.isCanceled()) {
+				file.delete(true, monitor);
+				saveLoad(scenario, uri);
+			}
+		});
+		noise.setPriority(Job.INTERACTIVE);
+		noise.schedule(0);
+		try {
+			for (long stop = currentTimeMillis() + 1000; currentTimeMillis() < stop;) {
+				PersistenceManager.getInstance().getModel(resource).updateMetadata(); // should not throw
+			}
+		} finally {
+			noise.cancel();
+		}
 	}
 	
 	private Scenario saveLoad(Scenario scenario, URI uri) {
