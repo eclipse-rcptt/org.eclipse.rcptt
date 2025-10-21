@@ -10,15 +10,19 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.tests.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.rcptt.core.Scenarios;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.IElementChangedListener;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
@@ -154,6 +158,47 @@ public class WorkingCopyTest {
 			RcpttCore.removeElementChangedListener(listener);
 		}
 	}
+	
+	@Test
+	public void doNotLeakResourcesParallel() throws InterruptedException, CoreException {
+		ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase", true, new NullProgressMonitor());
+		ICoreRunnable task = monitor -> {
+			while (!monitor.isCanceled()) {
+				ITestCase copy = (ITestCase) testcase
+						.getIndexingWorkingCopy(new NullProgressMonitor());
+				try {
+					copy.getID(); // poke model cache
+				} finally {
+					copy.discardWorkingCopy();
+				}
+			}
+		};
+		
+		Job job1 = Job.create("Working copy noise 1", task);
+		Job job2 = Job.create("Working copy noise 2", task);
+		job1.setPriority(Job.INTERACTIVE);
+		job2.setPriority(Job.INTERACTIVE);
+		try {
+			job1.schedule();
+			job2.schedule();
+			Thread.sleep(1000);
+		} finally {
+			job1.cancel();
+			job2.cancel();
+		}
+		job1.join();
+		job2.join();
+		assertSuccess(job1.getResult());
+		assertSuccess(job2.getResult());
+		System.gc();
+		
+		NO_ERRORS.assertNoErrors();
+	}
 
+	private static void assertSuccess(IStatus status) throws CoreException {
+		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			throw new CoreException(status);
+		}
+	}
 	
 }

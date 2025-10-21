@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -36,30 +33,38 @@ public class BecomeWorkingCopyOperation extends Q7Operation {
 		// state of this element
 		Q7NamedElement workingCopy = getWorkingCopy();
 		workingCopy.workingCopyMode = true;
+		workingCopy.setIndexing(indexing);
 		// create if needed, record usage
 		PerWorkingCopyInfo copyInfo = ModelManager.getModelManager()
 				.getPerWorkingCopyInfo(workingCopy, true, true);
 		try {
-			copyInfo.resourceInfo = (Q7ResourceInfo) workingCopy
-					.createElementInfo();
-			workingCopy.setIndexing(indexing);
-			workingCopy.generateInfos(copyInfo.resourceInfo, this.progressMonitor);
-			// workingCopy.extractAllPersistence();
-
-			if (workingCopy.getResource().isAccessible()) {
-				// report a F_PRIMARY_WORKING_COPY change delta for a primary
-				// working copy
-				if (!indexing) {
-					Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
-					delta.changed(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
-					addDelta(delta);
+			// synchronize not to leak resourceInfo for readOnly operations, which work outside of workspace locks
+			boolean changed = false;
+			synchronized (copyInfo) {
+				if (copyInfo.resourceInfo == null) { 
+					copyInfo.resourceInfo = (Q7ResourceInfo) workingCopy
+							.createElementInfo();
+					workingCopy.generateInfos(copyInfo.resourceInfo, this.progressMonitor);
+					changed =  true;
 				}
-			} else {
-				if (!indexing) {
-					// report an ADDED delta
-					Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
-					delta.added(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
-					addDelta(delta);
+			}
+			// workingCopy.extractAllPersistence();
+			if (changed) {
+				if (workingCopy.getResource().isAccessible()) {
+					// report a F_PRIMARY_WORKING_COPY change delta for a primary
+					// working copy
+					if (!indexing) {
+						Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
+						delta.changed(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+						addDelta(delta);
+					}
+				} else {
+					if (!indexing) {
+						// report an ADDED delta
+						Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
+						delta.added(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+						addDelta(delta);
+					}
 				}
 			}
 
