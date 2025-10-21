@@ -196,6 +196,22 @@ public class WorkingCopyTest {
 	}
 	
 	@Test
+	public void updateModelOnSave() throws InterruptedException, CoreException {
+		ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase", true, new NullProgressMonitor());
+		IQ7NamedElement wc = testcase.getWorkingCopy(null);
+		try {
+			wc.setDescription("Content1");
+			wc.commitWorkingCopy(true, null);
+			assertEquals("Content1", testcase.getDescription());
+			wc.setDescription("Content2");
+			wc.commitWorkingCopy(true, null);
+			assertEquals("Content2", testcase.getDescription());			
+		} finally {
+			wc.discardWorkingCopy();
+		}
+	}
+	
+	@Test
 	public void doNotConfuseIndexingAndWorkingCopies() throws InterruptedException, CoreException {
 		ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase", true, new NullProgressMonitor());
 		IQ7NamedElement wc = testcase.getWorkingCopy(null);
