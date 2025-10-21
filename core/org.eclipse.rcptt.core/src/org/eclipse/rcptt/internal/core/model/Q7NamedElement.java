@@ -167,6 +167,7 @@ public abstract class Q7NamedElement extends Openable implements
 
 		Q7NamedElement workingCopy = createWorkingCopy();
 		workingCopy.workingCopyMode = true;
+		workingCopy.setIndexing(indexing);
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
 						true /* record usage */);
@@ -236,7 +237,7 @@ public abstract class Q7NamedElement extends Openable implements
 	public NamedElement getModifiedNamedElement() throws ModelException {
 		PerWorkingCopyInfo info = getPerWorkingCopyInfo();
 		if (info != null) {
-			return info.resourceInfo.getNamedElement();
+			return info.getResourceInfo().getNamedElement();
 		}
 		return getNamedElement();
 	}
@@ -246,7 +247,7 @@ public abstract class Q7NamedElement extends Openable implements
 			throws ModelException {
 		PerWorkingCopyInfo info = getPerWorkingCopyInfo();
 		if (info != null) {
-			return info.resourceInfo.getPersistenceModel();
+			return info.getResourceInfo().getPersistenceModel();
 		}
 		return getPersistenceModel();
 	}
@@ -285,9 +286,7 @@ public abstract class Q7NamedElement extends Openable implements
 	@Override
 	public boolean hasUnsavedChanges() throws ModelException {
 		if (isWorkingCopy()) {
-			Q7ResourceInfo info = getPerWorkingCopyInfo().resourceInfo;
-			if (info != null)
-				return info.hasChanges();
+			return getPerWorkingCopyInfo().hasChanges();
 		}
 		try {
 			return accessInfoIfOpened(info2 -> ((Q7ResourceInfo)info2).hasChanges()).orElse(false);
@@ -306,7 +305,7 @@ public abstract class Q7NamedElement extends Openable implements
 		if (info == null) {
 			throw new IllegalStateException("Working copy is closed");
 		}
-		write.accept(info.resourceInfo);
+		write.accept(info.getResourceInfo());
 	}
 	
 	public final <V> V accessResourceInfo(Function<Q7ResourceInfo, V> infoToValue) throws ModelException {
@@ -333,7 +332,7 @@ public abstract class Q7NamedElement extends Openable implements
 			if (isInWorkingCopyMode()) {
 				PerWorkingCopyInfo info = getPerWorkingCopyInfo();
 				if (info != null) {
-					return infoToValue.apply(info.resourceInfo);
+					return infoToValue.apply(info.getResourceInfo());
 				}
 			}
 			return openAndAccessInfo(info -> {
@@ -353,11 +352,16 @@ public abstract class Q7NamedElement extends Openable implements
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Q7NamedElement)) {
-			return false;
+		if (obj instanceof Q7NamedElement) {
+			Q7NamedElement that = (Q7NamedElement) obj;
+			return super.equals(that) && indexing == that.indexing;
 		}
-
-		return super.equals(obj);
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Util.combineHashCodes(super.hashCode(), indexing ? 1 : 0);
 	}
 
 	public void updatePersistenceModel(IPersistenceModel newModel)

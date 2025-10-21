@@ -194,6 +194,54 @@ public class WorkingCopyTest {
 		
 		NO_ERRORS.assertNoErrors();
 	}
+	
+	@Test
+	public void doNotConfuseIndexingAndWorkingCopies() throws InterruptedException, CoreException {
+		ITestCase testcase = q7project.getRootFolder().createTestCase("mytestcase", true, new NullProgressMonitor());
+		IQ7NamedElement wc = testcase.getWorkingCopy(null);
+		wc.setDescription("Indexing");
+		wc.commitWorkingCopy(true, null);
+		
+		Job indexing = Job.create("Indexing", (ICoreRunnable)monitor -> {
+			while (!monitor.isCanceled()) {
+				ITestCase copy = (ITestCase) testcase
+						.getIndexingWorkingCopy(new NullProgressMonitor());
+				try {
+					assertEquals("Indexing", copy.getDescription());
+				} finally {
+					copy.discardWorkingCopy();
+				}
+			}
+		});
+		Job working = Job.create("Working", (ICoreRunnable)monitor -> {
+			while (!monitor.isCanceled()) {
+				ITestCase copy = (ITestCase) testcase
+						.getWorkingCopy(new NullProgressMonitor());
+				try {
+					copy.setDescription("Working");
+					assertEquals("Working", copy.getDescription());
+				} finally {
+					copy.discardWorkingCopy();
+				}
+			}
+		});
+		indexing.setPriority(Job.INTERACTIVE);
+		working.setPriority(Job.INTERACTIVE);
+		try {
+			indexing.schedule();
+			working.schedule();
+			Thread.sleep(1000);
+		} finally {
+			indexing.cancel();
+			working.cancel();
+		}
+		indexing.join();
+		working.join();
+		assertSuccess(indexing.getResult());
+		assertSuccess(working.getResult());
+		System.gc();
+		NO_ERRORS.assertNoErrors();
+	}
 
 	private static void assertSuccess(IStatus status) throws CoreException {
 		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
