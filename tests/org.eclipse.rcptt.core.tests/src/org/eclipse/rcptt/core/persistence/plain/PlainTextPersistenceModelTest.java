@@ -13,6 +13,7 @@ package org.eclipse.rcptt.core.persistence.plain;
 import static java.lang.System.currentTimeMillis;
 import static org.eclipse.core.runtime.Path.fromPortableString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -151,6 +152,8 @@ public class PlainTextPersistenceModelTest {
 			try {
 				for (long stop = currentTimeMillis() + 2000; currentTimeMillis() < stop;) {
 					setContent(test1, "script1");
+					assertTrue(test1.getResource().exists());
+					assertTrue(test1.exists());
 					assertEquals("script1",  ((Script)test1.getContent()).getContent());
 					test1.getResource().delete(true, null);
 					iteration++;
@@ -170,6 +173,8 @@ public class PlainTextPersistenceModelTest {
 			ITestCase newTest = ((IQ7Folder)test.getParent()).createTestCase(test.getPath().removeFileExtension().lastSegment(), true, null);
 			assertEquals(test, newTest);
 		}
+		assertTrue(test.exists());
+		assertTrue(test.getResource().exists());
 		ITestCase wc = (ITestCase) test.getWorkingCopy(null);
 		try {
 			Script script = CoreFactory.eINSTANCE.createScript();
