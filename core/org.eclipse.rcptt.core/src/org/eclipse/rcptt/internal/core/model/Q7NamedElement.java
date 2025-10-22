@@ -285,7 +285,7 @@ public abstract class Q7NamedElement extends Openable implements
 	@Override
 	public boolean hasUnsavedChanges() throws ModelException {
 		if (isWorkingCopy()) {
-			info = getPerWorkingCopyInfo().resourceInfo;
+			Q7ResourceInfo info = getPerWorkingCopyInfo().resourceInfo;
 			if (info != null)
 				return info.hasChanges();
 		}
