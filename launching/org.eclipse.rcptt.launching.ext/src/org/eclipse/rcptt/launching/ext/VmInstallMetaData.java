@@ -43,7 +43,7 @@ public final class VmInstallMetaData {
 		Preconditions.checkArgument(!OSArchitecture.Unknown.equals(arch));
 		this.install = Objects.requireNonNull(install);
 		this.arch = Objects.requireNonNull(arch);
-		Preconditions.checkArgument(!environments.isEmpty());
+		Preconditions.checkArgument(!environments.isEmpty(), install.getInstallLocation() + " provides no execution environments");
 		this.compatibleEnvironments = Set.copyOf(environments);
 	}
 	
