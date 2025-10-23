@@ -36,6 +36,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 	 *                if setting the source of the original compilation unit
 	 *                fails
 	 */
+	@Override
 	protected void executeOperation() throws ModelException {
 		try {
 			beginTask("Commit working copy", 2);
@@ -72,6 +73,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 		return (Q7NamedElement) getElementToProcess();
 	}
 
+	@Override
 	protected ISchedulingRule getSchedulingRule() {
 		IResource resource = getElementToProcess().getResource();
 		if (resource == null)
@@ -84,6 +86,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 		}
 	}
 
+	@Override
 	public Q7Status verify() {
 		Q7NamedElement cu = getNamedElement();
 		if (!cu.isWorkingCopy()) {

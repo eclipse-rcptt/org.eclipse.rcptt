@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,10 +28,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.rcptt.core.model.IContext;
 import org.eclipse.rcptt.core.model.IParent;
 import org.eclipse.rcptt.core.model.IQ7Element;
+import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.IQ7Folder;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
@@ -43,6 +47,7 @@ import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessingState;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor;
+import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDeltaBuilder;
 import org.eclipse.rcptt.internal.core.model.index.IndexManager;
 import org.eclipse.rcptt.internal.core.model.index.ProjectIndexerManager;
@@ -207,14 +212,50 @@ public class ModelManager {
 		return indexManager;
 	}
 
-	static class PerWorkingCopyInfo {
+	class PerWorkingCopyInfo {
 		private int useCount = 0;
-		private IQ7NamedElement workingCopy;
-		Q7ResourceInfo resourceInfo;
-		boolean complete = false;
+		private Q7ResourceInfo resourceInfo;
+		private boolean complete = false;
+		private final Q7NamedElement workingCopy;
 
-		private PerWorkingCopyInfo(IQ7NamedElement workingCopy) {
-			this.workingCopy = workingCopy;
+		private PerWorkingCopyInfo(Q7NamedElement workingCopy) {
+			this.workingCopy =  requireNonNull(workingCopy);
+		}
+		
+		/**
+		 * @param indexing 
+		 * @return false - if state is unchanged
+		 */
+		public void populate(IProgressMonitor monitor) throws ModelException {
+			try {
+				synchronized (this) {
+					if (resourceInfo == null) {
+						resourceInfo = (Q7ResourceInfo) workingCopy.createElementInfo();
+						workingCopy.generateInfos(resourceInfo, monitor);
+					} else {
+						return;
+					}
+					if (workingCopy.indexing) {
+						return;
+					}
+				}
+				// workingCopy.extractAllPersistence();
+				Q7ElementDelta delta = new Q7ElementDelta(getModel());
+				if (workingCopy.getResource().isAccessible()) {
+					// report a F_PRIMARY_WORKING_COPY change delta for a primary
+					// working copy
+					delta.changed(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+				} else {
+					// report an ADDED delta
+					delta.added(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+				}
+				getDeltaProcessor().registerModelDelta(delta);
+			} finally {
+				synchronized (this) {
+					complete = true;
+					notifyAll();
+				}
+			}
 		}
 
 		public IQ7NamedElement getWorkingCopy() {
@@ -242,9 +283,22 @@ public class ModelManager {
 		}
 
 		private void close() {
-			if (resourceInfo != null) {
-				resourceInfo.unload();
+			Q7ResourceInfo toClose;
+			synchronized (this) {
+				toClose = resourceInfo;
+				resourceInfo = null;
 			}
+			if (toClose != null) {
+				toClose.unload();
+			}
+		}
+
+		public synchronized boolean hasChanges() {
+			return resourceInfo != null && resourceInfo.hasChanges();
+		}
+
+		public synchronized Q7ResourceInfo getResourceInfo() {
+			return resourceInfo;
 		}
 	}
 
