@@ -44,6 +44,17 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Build
         run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: self_results
+          path: |
+            **/target/work/data/*.log
+            **/target/work/**/*.info
+            **/target/work/**/*.ini
+            **/*.hrpof
       - name: Archive update site
         uses: actions/upload-artifact@v4
         with:
