@@ -4,7 +4,7 @@ name: Merge downstream
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["Verify branch"]
     types: [completed] #requested
     branches: [release/2.6, release/2.7]
 
