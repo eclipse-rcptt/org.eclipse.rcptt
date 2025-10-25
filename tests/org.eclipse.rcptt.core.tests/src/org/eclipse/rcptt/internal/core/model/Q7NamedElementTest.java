@@ -32,6 +32,8 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.nature.RcpttNature;
@@ -129,6 +131,33 @@ public class Q7NamedElementTest {
 	@Test
 	public void noResourceleaksExists() {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
+	}
+	
+	@Test
+	public void existsIsNoiseResistant() throws CoreException, IOException {
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		Job noise = Job.create("Keep refetching model", (ICoreRunnable) monitor -> {
+			while (!monitor.isCanceled()) {
+				Thread.yield();
+				testcase.getNamedElement();
+			}
+		});
+		long stop = currentTimeMillis() + 10000;
+		try {
+			while (currentTimeMillis() < stop) {
+				Thread.yield();
+				TESTCASE_FILE.delete(true, null);
+				assertFalse(TESTCASE_FILE.exists());
+				assertFalse(testcase.exists());
+				try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+					TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+				}
+				assertTrue(TESTCASE_FILE.exists());
+				assertTrue(testcase.exists());
+			}
+		} finally {
+			noise.cancel();
+		}
 	}
 
 	

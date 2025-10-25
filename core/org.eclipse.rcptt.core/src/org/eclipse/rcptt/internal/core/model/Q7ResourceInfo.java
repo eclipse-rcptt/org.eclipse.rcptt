@@ -71,7 +71,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		onClose = LeakDetector.INSTANCE.register(this);
 		IPersistenceModel model = getPersistenceModel();
 
-		if (file != null && !file.exists()) {
+		if (file != null && !file.exists() || model == null) {
 			throw newNotExistsException(file);
 		}
 		boolean allowEmptyMetadataContent = model.isAllowEmptyMetadataContent();
