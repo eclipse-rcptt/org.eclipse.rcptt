@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -66,8 +67,9 @@ public class Q7NamedElementTest {
 		PROJECT.open(null);
 	}
 
-	@Test(timeout=20_000)
+	@Test(timeout=10_000)
 	public void reopenIfClosed() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
+		long stop = currentTimeMillis() + 9000;
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 		}
@@ -87,7 +89,7 @@ public class Q7NamedElementTest {
 		});
 		try {
 			barrier.await();
-			for (int i = 0; i < 10_000; i++) {
+			for (int i = 0; currentTimeMillis() < stop; i++) {
 				try {
 					assertFalse(closerTask.isDone());
 					assertNotNull(testcase.getNamedElement());
