@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -193,8 +192,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		if (resource.isModified()) {
 			return true;
 		}
-		Predicate<IPersistenceModel> unmodified = Predicate.not(IPersistenceModel::isModified);
-		return  !Optional.ofNullable(getPersistenceModel()).filter(unmodified).isPresent();
+		return  !Optional.ofNullable(getPersistenceModel()).filter(m -> !m.isModified()).isPresent();
 	}
 
 	public void createNamedElement(NamedElement createNamedElement) {
