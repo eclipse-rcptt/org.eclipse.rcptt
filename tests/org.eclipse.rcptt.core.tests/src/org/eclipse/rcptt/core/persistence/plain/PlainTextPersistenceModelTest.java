@@ -26,6 +26,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
@@ -161,6 +162,10 @@ public class PlainTextPersistenceModelTest {
 					assertEquals("script1",  ((Script)test1.getContent()).getContent());
 					test1.getResource().delete(true, null);
 					iteration++;
+					IStatus noiseResult = noise.getResult();
+					if (noiseResult != null) {
+						throw new CoreException(noiseResult);
+					}
 				}
 			} catch (Throwable e) {
 				throw new AssertionError("Failed on iteration " + iteration, e);
