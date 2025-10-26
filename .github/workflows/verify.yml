@@ -50,6 +50,7 @@ jobs:
         with:
           if-no-files-found: error
           name: build_results
+          include-hidden-files: true
           path: |
             **/target/work/**/*.log
             **/target/work/**/*.info
@@ -131,6 +132,7 @@ jobs:
         with:
           if-no-files-found: error
           name: self_results
+          include-hidden-files: true
           path: |
             list.txt
             rcpttTests/target/results/**
@@ -182,6 +184,7 @@ jobs:
         with:
           if-no-files-found: error
           name: mockup_results
+          include-hidden-files: true
           path: |
             list.txt
             rcpttTests/target/results/**
