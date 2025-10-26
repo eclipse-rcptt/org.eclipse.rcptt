@@ -51,7 +51,7 @@ jobs:
           if-no-files-found: error
           name: build_results
           path: |
-            **/target/work/data/*.log
+            **/target/work/**/*.log
             **/target/work/**/*.info
             **/target/work/**/*.ini
             **/*.hrpof
