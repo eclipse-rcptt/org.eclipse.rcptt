@@ -177,7 +177,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 			if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND) {
 				return null;
 			}
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Error code: " + code, e);
 		}
 		return contents;
 	}

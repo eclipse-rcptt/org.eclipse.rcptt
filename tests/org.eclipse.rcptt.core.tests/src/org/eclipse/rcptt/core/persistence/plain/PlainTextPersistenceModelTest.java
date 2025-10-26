@@ -37,6 +37,7 @@ import org.eclipse.rcptt.core.model.IQ7Folder;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.nature.RcpttNature;
+import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.core.persistence.PersistenceManager;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
@@ -98,7 +99,10 @@ public class PlainTextPersistenceModelTest {
 		noise.schedule(0);
 		try {
 			for (long stop = currentTimeMillis() + 1000; currentTimeMillis() < stop;) {
-				PersistenceManager.getInstance().getModel(resource).updateMetadata(); // should not throw
+				IPersistenceModel model = PersistenceManager.getInstance().getModel(resource);
+				if (model != null) {
+					model.updateMetadata(); // should not throw
+				}
 			}
 		} finally {
 			noise.cancel();
@@ -167,7 +171,7 @@ public class PlainTextPersistenceModelTest {
 		
 	}
 
-	private void setContent(ITestCase test, String content) throws CoreException {
+	private static void setContent(ITestCase test, String content) throws CoreException {
 		create(test.getResource().getParent());
 		if (!test.exists()) {
 			ITestCase newTest = ((IQ7Folder)test.getParent()).createTestCase(test.getPath().removeFileExtension().lastSegment(), true, null);
@@ -187,7 +191,7 @@ public class PlainTextPersistenceModelTest {
 	}
 
 	
-	private void create(IContainer folder) throws CoreException {
+	private static void create(IContainer folder) throws CoreException {
 		if (folder.exists()) {
 			return;
 		}
@@ -207,7 +211,10 @@ public class PlainTextPersistenceModelTest {
 	private Resource saveLoad(Resource resource) {
 		PersistenceManager.getInstance().saveResource(resource);
 		resource = new Q7LazyResource(resource.getURI());
-		PersistenceManager.getInstance().getModel(resource).updateMetadata();
+		IPersistenceModel model = PersistenceManager.getInstance().getModel(resource);
+		if (model != null) {
+			model.updateMetadata();
+		}
 		return resource;
 	}
 

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -71,7 +72,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		onClose = LeakDetector.INSTANCE.register(this);
 		IPersistenceModel model = getPersistenceModel();
 
-		if (file != null && !file.exists()) {
+		if (file != null && !file.exists() || model == null) {
 			throw newNotExistsException(file);
 		}
 		boolean allowEmptyMetadataContent = model.isAllowEmptyMetadataContent();
@@ -188,7 +189,10 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 		if (resource == null) {
 			return true;
 		}
-		return resource.isModified() || getPersistenceModel().isModified();
+		if (resource.isModified()) {
+			return true;
+		}
+		return  !Optional.ofNullable(getPersistenceModel()).filter(m -> !m.isModified()).isPresent();
 	}
 
 	public void createNamedElement(NamedElement createNamedElement) {
