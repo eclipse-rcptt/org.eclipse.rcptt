@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -156,6 +157,10 @@ public class Q7NamedElementTest {
 				}
 				assertTrue(message, TESTCASE_FILE.exists());
 				assertTrue(message, testcase.exists());
+				IStatus result = noise.getResult();
+				if (result != null) {
+					throw new CoreException(result);
+				}
 			}
 		} finally {
 			noise.cancel();
