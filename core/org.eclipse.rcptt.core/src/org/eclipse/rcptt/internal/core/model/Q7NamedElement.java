@@ -22,6 +22,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
@@ -162,7 +165,10 @@ public abstract class Q7NamedElement extends Openable implements
 
 	public IQ7NamedElement internalGetWorkingCopy(IProgressMonitor monitor,
 			boolean indexing) throws ModelException {
-
+		ISchedulingRule rule = getResource().getWorkspace().getRuleFactory().refreshRule(getResource());
+		IJobManager jobManager = Job.getJobManager();
+		jobManager.beginRule(rule, monitor);
+		try {
 		ModelManager manager = ModelManager.getModelManager();
 
 		Q7NamedElement workingCopy = createWorkingCopy();
@@ -182,6 +188,9 @@ public abstract class Q7NamedElement extends Openable implements
 				workingCopy, indexing);
 		op.runOperation(monitor);
 		return workingCopy;
+		} finally {
+			jobManager.endRule(rule);
+		}
 	}
 
 	protected abstract Q7NamedElement createWorkingCopy();
