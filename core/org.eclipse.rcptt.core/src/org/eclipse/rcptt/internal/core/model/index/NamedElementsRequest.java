@@ -76,6 +76,10 @@ public class NamedElementsRequest extends IndexRequest {
 			}
 			executor.shutdown();
 			while (!executor.isTerminated()) {
+				if (isCancelled) {
+					executor.shutdownNow();
+					break;
+				}
 				Thread.sleep(50);
 			}
 		} catch (Throwable t) {
