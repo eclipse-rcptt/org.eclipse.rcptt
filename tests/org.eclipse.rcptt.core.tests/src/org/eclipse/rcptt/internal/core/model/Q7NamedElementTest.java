@@ -144,16 +144,18 @@ public class Q7NamedElementTest {
 		});
 		long stop = currentTimeMillis() + 10000;
 		try {
+			int i = 0;
 			while (currentTimeMillis() < stop) {
 				Thread.yield();
 				TESTCASE_FILE.delete(true, null);
-				assertFalse(TESTCASE_FILE.exists());
-				assertFalse(testcase.exists());
+				String message = "Iteration " + i++;
+				assertFalse(message, TESTCASE_FILE.exists());
+				assertFalse(message, testcase.exists());
 				try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 					TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 				}
-				assertTrue(TESTCASE_FILE.exists());
-				assertTrue(testcase.exists());
+				assertTrue(message, TESTCASE_FILE.exists());
+				assertTrue(message, testcase.exists());
 			}
 		} finally {
 			noise.cancel();
