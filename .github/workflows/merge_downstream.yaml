@@ -28,7 +28,7 @@ jobs:
         run: |
           declare SOURCE="${{ github.event.workflow_run.head_branch }}"
           declare TARGET="${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}"
-          git fetch origin "$SOURCE" "$TARGET"
+          git fetch --shallow-since=2025-01-01 origin "$SOURCE" "$TARGET"
           git diff --name-only origin/$TARGET...origin/$SOURCE | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
           gh pr create -B "$TARGET" -H "$SOURCE" --title "Merge $SOURCE into $TARGET" --body "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})" || declare -i result=$?
           echo $result
