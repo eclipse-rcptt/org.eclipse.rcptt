@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
@@ -157,7 +158,7 @@ public class Q7NamedElementTest {
 					try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 						TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 					} catch (IOException e) {
-						throw new CoreException(Status.error("Failed to write " + TESTCASE_FILE, e));
+						throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.rcptt.core.tests", "Failed to write " + TESTCASE_FILE, e));
 					}
 					assertTrue(message, TESTCASE_FILE.exists());
 					assertTrue(message, testcase.exists());
