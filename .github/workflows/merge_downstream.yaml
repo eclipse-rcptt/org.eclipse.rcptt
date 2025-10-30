@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: ["Verify branch"]
     types: [completed] #requested
-    branches: [release/2.6, release/2.7]
+    branches: [release/2.6, release/2.7, waitJob_2.7_195, waitJob_195]
 
 env:
   downstream_release/2.6: release/2.7 waitJob_195
