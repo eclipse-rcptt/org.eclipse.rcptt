@@ -25,6 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: create pull request
-        run: devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}"
+        run: devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
