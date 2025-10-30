@@ -6,13 +6,12 @@ on:
   workflow_run:
     workflows: ["Verify branch"]
     types: [completed] #requested
-    branches: [release/2.6, release/2.7, waitJob_2.7_195, waitJob_195]
+    branches: [release/2.6, release/2.7, waitJob_195]
 
 env:
-  downstream_release/2.6: release/2.7 waitJob_195
+  downstream_release/2.6: release/2.7
   downstream_release/2.7: master
-  downstream_waitJob_195: waitJob_2.7_195 release/2.6
-  downstream_waitJob_2.7_195: release/2.7
+  downstream_waitJob_195: waitJob_2.7_195
 
 run-name: Merge ${{ github.event.workflow_run.head_branch }} downstream 
 
