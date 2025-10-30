@@ -18,4 +18,4 @@ git diff --name-only "HEAD...origin/$SOURCE" | grep pom.xml$ && exit 2 # Do not 
 git merge --no-edit "origin/$SOURCE"
 git push origin "$MERGE"
 gh workflow run verify.yml --ref "$MERGE"
-gh pr create -B "$TARGET" -H "$SOURCE" --title "Merge $SOURCE into $TARGET" --body "$MESSAGE" 
+gh pr create -B "$TARGET" -H "$MERGE" --title "Merge $SOURCE into $TARGET" --body "$MESSAGE" 

@@ -9,9 +9,10 @@ on:
     branches: [release/2.6, release/2.7]
 
 env:
-  downstream_release/2.6: release/2.7
+  downstream_release/2.6: release/2.7 waitJob_195
   downstream_release/2.7: master
-
+  downstream_waitJob_195: waitJob_2.7_195 release/2.6
+  downstream_waitJob_2.7_195: release/2.7
 
 run-name: Merge ${{ github.event.workflow_run.head_branch }} downstream 
 
@@ -25,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: create pull request
-        run: devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
+        run: |
+          for i in "${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}" ; do
+            devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "$i"" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
+          done
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
