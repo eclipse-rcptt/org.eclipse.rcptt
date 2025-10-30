@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: create pull request
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for i in ${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }} ; do
             devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "$i" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
           done
