@@ -28,7 +28,7 @@ jobs:
       - name: create pull request
         run: |
           for i in "${{ env[format('downstream_{0}', github.event.workflow_run.head_branch)] }}" ; do
-            devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "$i"" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
+            devenv/scrtipts/verify_merge.sh "${{ github.event.workflow_run.head_branch }}" "$i" "[Created by Github action](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})"
           done
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
