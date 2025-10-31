@@ -71,6 +71,8 @@ public abstract class UIRunnable<T> {
 			@Override
 			public synchronized boolean doProcessing(
 					org.eclipse.rcptt.tesla.core.context.ContextManagement.Context currentContext) {
+			try {
+
 				if (isCancelled.getAsBoolean()) {
 					result.completeExceptionally(new CoreException(Status.CANCEL_STATUS));
 					return false;
@@ -107,18 +109,8 @@ public abstract class UIRunnable<T> {
 				}
 				if (processed.compareAndSet(RunningState.Starting, RunningState.Execution)) {
 					debugProceed("Starting");
-					try {
-						result.complete(runnable.run());
-					} catch (Throwable e) {
-						result.completeExceptionally(e);
-						// Do not collect anything on error
-						collector.setNeedDisable();
-						// collector.clean();
-						processed.set(RunningState.Finished);
-						return true;
-					} finally {
-						debugProceed("Done");
-					}
+					result.complete(runnable.run());
+					debugProceed("Done");
 					processed.set(RunningState.Done);
 					return true;
 				} else {
@@ -130,6 +122,14 @@ public abstract class UIRunnable<T> {
 					return true;
 				}
 				return false;
+			} catch (Throwable e) {
+				result.completeExceptionally(e);
+				// Do not collect anything on error
+				collector.setNeedDisable();
+				// collector.clean();
+				processed.set(RunningState.Finished);
+				return true;
+			}
 			}
 
 			@Override
