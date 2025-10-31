@@ -245,7 +245,6 @@ public class UIJobCollectorTest {
 			job.join();
 			debug("Attempt " + i);
 			job.schedule();
-			Thread.sleep(i);
 			job.cancel();
 			job.schedule();
 			assertNever(schedulingTolerance, "Should not step immediately. Iteration " + i, () -> isEmpty(subject));
