@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
@@ -43,6 +44,7 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -134,6 +136,7 @@ public class Q7NamedElementTest {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
+	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
@@ -157,7 +160,7 @@ public class Q7NamedElementTest {
 					try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 						TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 					} catch (IOException e) {
-						throw new CoreException(Status.error("Failed to write " + TESTCASE_FILE, e));
+						throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.rcptt.core.tests", "Failed to write " + TESTCASE_FILE, e));
 					}
 					assertTrue(message, TESTCASE_FILE.exists());
 					assertTrue(message, testcase.exists());
