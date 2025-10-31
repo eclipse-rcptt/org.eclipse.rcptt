@@ -231,6 +231,10 @@ public class UIJobCollector implements IJobChangeListener {
 			JobsManager.getInstance().nulifyTime(job);
 		}
 
+		public synchronized Thread getLastThread() {
+			return lastThread;
+		}
+
 	}
 
 	private final Map<Job, JobInfo> jobs = Collections.synchronizedMap(new IdentityHashMap<Job, JobInfo>());
@@ -266,9 +270,9 @@ public class UIJobCollector implements IJobChangeListener {
 								TeslaSWTAccess.waitListeners(job);
 								
 								// TeslaSWTAccess.waitListeners() is not enough in 2022-09 and older https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/65
-								Thread lastThread = info.lastThread;
+								Thread lastThread = info.getLastThread();
 								if (lastThread != null) {
-									Context context = ContextManagement.makeContext(info.lastThread.getStackTrace());
+									Context context = ContextManagement.makeContext(lastThread.getStackTrace());
 									if (context.containsClass("org.eclipse.core.internal.jobs.JobListeners")) {
 										continue;
 									}
