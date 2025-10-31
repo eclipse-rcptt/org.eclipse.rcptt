@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
@@ -61,7 +62,11 @@ public class UIJobCollector implements IJobChangeListener {
 	private static final boolean DEBUG_REPORT_OUTPUT = "true".equals(Platform.getDebugOption("org.eclipse.rcptt.tesla.swt/debug/debugReportOutput"));
 	private static final PrintWriter DEBUG_WRITER = new PrintWriter(System.out);
 	private static final Object FAMILY = new Object();
-	
+	private final Object jobManagerLock;
+	{
+		jobManagerLock = Objects.requireNonNull(TeslaSWTAccess.getField(Object.class, Job.getJobManager(), "lock")); 
+	}
+
 	/** 
 	 * Timeouts and intervals for active job detection
 	 * 
@@ -384,6 +389,9 @@ public class UIJobCollector implements IJobChangeListener {
 		}
 		Job job = event.getJob();
 		if (job.belongsTo(FAMILY)) {
+			return;
+		}
+		if (calcJobStatus(job) == JobStatus.IGNORED) {
 			return;
 		}
 		JobInfo jobInfo = getOrCreateJobInfo(job);
@@ -892,9 +900,11 @@ public class UIJobCollector implements IJobChangeListener {
 			Thread.currentThread().interrupt();
 			return false;
 		}
-		synchronized (jobs) {
-			if (jobs.keySet().stream().allMatch(j -> j.getState() != Job.NONE)) {
-				return true;
+		synchronized (jobManagerLock) {
+			synchronized (jobs) {
+				if (jobs.keySet().stream().allMatch(j -> j.getState() != Job.NONE)) {
+					return true;
+				}
 			}
 		}
 		removeCompletedJob.schedule();
