@@ -4,6 +4,8 @@ set -ex
 
 SOURCE="$1"
 shift
+COMMIT="$1"
+shift
 TARGET="$1"
 shift
 MESSAGE="$1"
@@ -14,9 +16,9 @@ git config --local push.autoSetupRemote true
 git fetch --shallow-since=2025-01-01 origin "$SOURCE" "$TARGET"
 git fetch --shallow-since=2025-01-01 origin "$MERGE" && git checkout --track "$MERGE" || git checkout -b "$MERGE" "origin/$TARGET"
 git merge "origin/$TARGET"
-git diff --name-only "HEAD...origin/$SOURCE" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
-git merge-base --is-ancestor "origin/$SOURCE" "$MERGE" && exit 0 #Nothing to merge
-git merge --no-edit "origin/$SOURCE"
+git diff --name-only "HEAD...$COMMIT" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
+git merge-base --is-ancestor "$COMMIT" "$MERGE" && exit 0 #Nothing to merge
+git merge --no-edit "$COMMIT"
 git push origin "$MERGE"
 gh workflow run verify.yml --ref "$MERGE"
 gh pr create -B "$TARGET" -H "$MERGE" --title "Merge $SOURCE into $TARGET" --body "$MESSAGE" 
