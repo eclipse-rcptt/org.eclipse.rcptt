@@ -659,7 +659,7 @@ public class UIJobCollector implements IJobChangeListener {
 
 		
 		// Remove all canceled jobs
-		if (!removeCanceledJobs()) {
+		if (!removeCompletedJobs()) {
 			return false;
 		}
 		synchronized (jobs) {
@@ -879,7 +879,15 @@ public class UIJobCollector implements IJobChangeListener {
 		return false;
 	}
 
-	private boolean removeCanceledJobs() {
+	private boolean removeCompletedJobs() {
+		try {
+			if (!removeCompletedJob.join(1, null)) {
+				return false;
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return false;
+		}
 		synchronized (jobs) {
 			if (jobs.keySet().stream().allMatch(j -> j.getState() != Job.NONE)) {
 				return true;
@@ -984,7 +992,7 @@ public class UIJobCollector implements IJobChangeListener {
 			if (isCancelled.getAsBoolean()) {
 				return;
 			}
-			if (removeCanceledJobs()) {
+			if (removeCompletedJobs()) {
 				if (isJoinEmpty()) {
 					break;
 				}
