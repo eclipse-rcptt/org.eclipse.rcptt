@@ -232,7 +232,7 @@ public class AutThread extends Thread {
 				if (!haveAUT) {
 					String errorMessage = "FAIL: AUT requires "
 							+ architecture
-							+ " Java VM. It is incompatible with " + tpc.getTargetPlatform().getIncompatibleExecutionEnvironments()
+							+ " Java VM. It is incompatible with " + tpc.getTargetPlatform().explainJvmRequirements()
 							+ ". Such VM cannot be found.\nPlease specify -autVM {javaPath} command line argument to use different JVM.\nCurrent used JVM is: "
 							+ install.getInstallLocation().toString();
 					Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
@@ -258,8 +258,6 @@ public class AutThread extends Thread {
 		}
 	}
 
-
-	
 	private boolean updateJVM(ILaunchConfigurationWorkingCopy configuration, ITargetPlatformHelper target) {
 		try {
 			StringBuilder error = new StringBuilder();

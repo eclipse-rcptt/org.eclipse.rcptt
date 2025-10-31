@@ -105,10 +105,9 @@ public class Q7TargetPlatformManager {
 			return result;
 		}
 
-	    ITargetPlatformHelper info = newTargetPlatform( sm.split(1), location);
-	    assert findTarget(config, sm.split(1)) == info;
+		result = newTargetPlatform(sm.split(1), location);
 		done(monitor);
-		return info;
+		return result;
 	}
 
 	private synchronized static ITargetPlatformHelper newTargetPlatform(IProgressMonitor monitor,
@@ -121,7 +120,7 @@ public class Q7TargetPlatformManager {
 	}
 
 	private static void throwOnError(IStatus status) throws CoreException {
-		if (status.matches(IStatus.ERROR))
+		if (status.matches(IStatus.ERROR | IStatus.CANCEL))
 			throw new CoreException(status);
 		if (!status.isOK())
 			Q7ExtLaunchingPlugin.log(status);
@@ -138,6 +137,7 @@ public class Q7TargetPlatformManager {
 			throwOnError(platform.getStatus());
 			IStatus rv = Q7TargetPlatformInitializer.initialize(platform, subMonitor.split(50));
 			throwOnError(rv);
+			assert platform.getWeavingHook() != null;
 			isOk = true;
 			return platform;
 		} catch (CoreException e) {

@@ -31,6 +31,7 @@ import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
+import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -68,8 +69,6 @@ public class ExternalAUTMainTab extends MainTab {
 	@Override
 	protected void createJREBlock() {
 		fJreBlock = new JREBlock(this) {
-
-			OSArchitecture configArch;
 
 			IVMInstall getSelectedJVM() {
 				try {
@@ -119,19 +118,6 @@ public class ExternalAUTMainTab extends MainTab {
 			}
 
 			@Override
-			public void initializeFrom(final ILaunchConfiguration config)
-					throws CoreException {
-				super.initializeFrom(config);
-
-				String archAttrValue = config.getAttribute(
-						Q7LaunchingCommon.ATTR_ARCH, "");
-				if (archAttrValue.isEmpty())
-					configArch = null;
-				else
-					configArch = OSArchitecture.valueOf(archAttrValue);
-			}
-
-			@Override
 			public String validate() {
 				String value = super.validate();
 				if (value != null) {
@@ -140,20 +126,19 @@ public class ExternalAUTMainTab extends MainTab {
 				if (currentTargetPlatform == null) {
 					return null;
 				}
-				OSArchitecture architecture = configArch == null ? currentTargetPlatform
-						.detectArchitecture(null) : configArch;
-				IVMInstall install = getSelectedJVM();
-				if (install == null) {
-					return "The selected JVM can not be found. Ensure it is installed.";
+				
+				IStatus result;
+				JvmTargetCompatibility compatibility;
+				try {
+					compatibility = new JvmTargetCompatibility(currentTargetPlatform);
+					result =  compatibility.checkCompatibilty(getSelectedJVM());
+				} catch (CoreException e) {
+					result = e.getStatus();
 				}
 				
-				try {
-					OSArchitecture jvmArch = JDTUtils.detect(install);
-					if (!jvmArch.equals(architecture)) {
-						return "The selected AUT requires "+ architecture + " architecture, but selected JVM is " + jvmArch;
-					}
-				} catch (CoreException e) {
-					return e.getMessage();
+				if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
+					// TODO: format report
+					return result.toString();
 				}
 				return null;
 			}

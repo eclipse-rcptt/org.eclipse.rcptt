@@ -83,8 +83,8 @@ public class Q7LaunchDelegateUtils {
 			}
 			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, target)) {
 				return Status.error(String.format(
-						"No compatible JRE is configured. Architecture: %s, incompatible environments: %s",
-						architecture, target.getIncompatibleExecutionEnvironments()));
+						"No compatible JRE is configured. Requirements:\n%s",
+						architecture, target.explainJvmRequirements()));
 			}
 		} catch (CoreException e) {
 			return e.getStatus();
