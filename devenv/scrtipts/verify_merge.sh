@@ -15,7 +15,7 @@ git fetch --shallow-since=2025-01-01 origin "$SOURCE" "$TARGET"
 git fetch --shallow-since=2025-01-01 origin "$MERGE" && git checkout --track "$MERGE" || git checkout -b "$MERGE" "origin/$TARGET"
 git merge "origin/$TARGET"
 git diff --name-only "HEAD...origin/$SOURCE" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
-git merge-base --is-ancestor "$SOURCE" "$MERGE" && exit 0 #Nothing to merge
+git merge-base --is-ancestor "origin/$SOURCE" "$MERGE" && exit 0 #Nothing to merge
 git merge --no-edit "origin/$SOURCE"
 git push origin "$MERGE"
 gh workflow run verify.yml --ref "$MERGE"
