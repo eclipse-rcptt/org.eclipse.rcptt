@@ -14,9 +14,15 @@ MERGE="merge/$TARGET/$SOURCE"
 
 git config --local push.autoSetupRemote true
 git fetch --shallow-since=2025-01-01 origin "$SOURCE" "$TARGET"
-git fetch --shallow-since=2025-01-01 origin "$MERGE" && git checkout --track "$MERGE" || git checkout -b "$MERGE" "$COMMIT"
-git diff --name-only "HEAD...$COMMIT" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
-git merge-base --is-ancestor "$COMMIT" "$MERGE" && exit 0 # Nothing to merge
+if git fetch --shallow-since=2025-01-01 origin "$MERGE" ; then
+	git merge-base --is-ancestor "$COMMIT" "$MERGE" && exit 0 # Already merged
+	git diff --name-only "$MERGE...$COMMIT" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
+	git checkout --track "$MERGE"
+else
+	git merge-base --is-ancestor "$COMMIT" "origin/$TARGET" && exit 0 # Already merged
+	git diff --name-only "origin/$TARGET...$COMMIT" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
+	git checkout -b "$MERGE" "$COMMIT"
+fi
 git merge --no-edit "$COMMIT"
 git merge "origin/$TARGET" || true # If merge fails due to a conflict, create PR anyway for user to resolve
 git push origin "$MERGE"
