@@ -205,7 +205,10 @@ public final class JvmTargetCompatibility {
 	}
 
 	
-	public String findCompatibilityProblems(Set<String> ids) {
+	private String findCompatibilityProblems(Set<String> ids) {
+		if (ids.contains("JavaSE-23")) {
+			return "Java 23 and older are not supported. See https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166";
+		}
 		List<String> problems = target.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
 		if (!problems.isEmpty()) {
 			return Joiner.on("\n").join(problems);
@@ -217,16 +220,16 @@ public final class JvmTargetCompatibility {
 		StringBuilder result = new StringBuilder();
 		OSArchitecture arch = getArchitecture();
 		result.append("Architecture: ").append(arch).append("\n");
-		Set<String> pluginEnvironments = target.getModels().map(Model::model).map(JvmTargetCompatibility::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
+		Set<String> validEnvironments = target.getModels().map(Model::model).map(JvmTargetCompatibility::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
 		Set<String> incompatibleExecutionEnvironments = target.getModels().filter(m -> m.model().getPluginBase().getId().equals(ASM_ID))
 				.map(plugin -> Version.parseVersion(plugin.model().getPluginBase().getVersion()))
 				.map(OBJECTWEB_INCOMPATIBILITY::get).filter(Objects::nonNull).collect(Collectors.toSet());
-		pluginEnvironments.removeAll(incompatibleExecutionEnvironments);
+		validEnvironments.removeAll(incompatibleExecutionEnvironments);
 		result.append("org.objectweb.asm is incompatible with ").append(incompatibleExecutionEnvironments).append("\n");
-		pluginEnvironments.removeIf( e -> 
+		validEnvironments.removeIf( e -> 
 			!findCompatibilityProblems(Set.of(e)).isEmpty()
 		);
-		result.append("Plugins require one of ").append(pluginEnvironments).append("\n");
+		result.append("Plugins require one of ").append(validEnvironments).append("\n");
 		return result.toString();
 	}
 	
