@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,7 +68,7 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("restriction")
 public class Q7LaunchDelegateUtils {
 	
-	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor) {
+	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor, Supplier<String> explainJvmRequirements) {
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 3);
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
@@ -84,7 +85,7 @@ public class Q7LaunchDelegateUtils {
 			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, target)) {
 				return Status.error(String.format(
 						"No compatible JRE is configured. Requirements:\n%s",
-						architecture, target.explainJvmRequirements()));
+						architecture, explainJvmRequirements.get()));
 			}
 		} catch (CoreException e) {
 			return e.getStatus();

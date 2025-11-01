@@ -152,9 +152,5 @@ public interface ITargetPlatformHelper {
 	Map<String, Version> getVersions() throws CoreException;
 
 	int size();
-	
-	/** @return empty string if compatible, explanation of incompatibility otherwise **/
-	String findCompatibilityProblems(Set<String> providedExecutionEnvironemnts);
 
-	String explainJvmRequirements();
 }

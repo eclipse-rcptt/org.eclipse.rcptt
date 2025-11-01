@@ -10,13 +10,22 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.ext;
 
+import static java.util.Arrays.stream;
+import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
+import static org.osgi.framework.Version.valueOf;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,9 +34,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
+import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
+import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
+
+import com.google.common.base.Joiner;
 
 public final class JvmTargetCompatibility {
 	private final ITargetPlatformHelper target;
@@ -163,4 +179,79 @@ public final class JvmTargetCompatibility {
 			done(monitor);
 		}
 	}
+	
+
+	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
+	static {
+		var oi = OBJECTWEB_INCOMPATIBILITY;
+		oi.put(valueOf("9.6.0"), "JavaSE-23");
+		oi.put(valueOf("9.7.0"), "JavaSE-24");
+		oi.put(valueOf("9.7.1"), "JavaSE-25");
+		oi.put(valueOf("9.8.0"), "JavaSE-26");
+	}
+
+	
+	@Override
+	public String findCompatibilityProblems(Set<String> ids) {
+		if (!Collections.disjoint(ids, getIncompatibleExecutionEnvironments())) {
+			return "Present version of org.objectweb.asm is incompatible with " + Joiner.on(", ").join(getIncompatibleExecutionEnvironments());
+		}
+		
+		List<String> problems = targetPlatform.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
+		if (!problems.isEmpty()) {
+			return Joiner.on("\n").join(problems);
+		}
+		return "";
+	}
+
+	@Override
+	public String explainJvmRequirements() {
+		StringBuilder result = new StringBuilder();
+		OSArchitecture arch = detectArchitecture(result);
+		result.append("AUT architecture: ").append(arch).append("\n");
+		Set<String> pluginEnvironments = getModels().map(Model::model).map(TargetPlatformHelper::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
+		Set<String> incompatibleExecutionEnvironments = getIncompatibleExecutionEnvironments();
+		pluginEnvironments.removeAll(incompatibleExecutionEnvironments);
+		result.append("org.objectweb.asm is incompatible with ").append(incompatibleExecutionEnvironments).append("\n");
+		pluginEnvironments.removeIf( e -> 
+			!findCompatibilityProblems(Set.of(e)).isEmpty()
+		);
+		result.append("Plugins require one of ").append(pluginEnvironments).append("\n");
+		return result.toString();
+	}
+	
+	private static final String[] EMPTY = new String[0];
+	private static String[] getExecutionEnironments(IPluginModelBase plugin) {
+		if (plugin.isFragmentModel()) {
+			return EMPTY;
+		}
+		
+		BundleDescription description = plugin.getBundleDescription();
+		if (description == null) {
+			return EMPTY;
+		}
+		String[] executionEnvironments = description.getExecutionEnvironments();
+		return executionEnvironments;
+	}
+
+	/** @see org.eclipse.pde.internal.launching.launcher.VMHelper.getDefaultEEName(Set<IPluginModelBase>) **/
+	private static String isCompatible(IPluginModelBase plugin, Set<String> providedEnvironments) {
+		String[] executionEnvironments = getExecutionEnironments(plugin);
+		if (executionEnvironments.length == 0) {
+			return "";
+		}
+		if (!stream(executionEnvironments).anyMatch(providedEnvironments::contains)) {
+			return "Plugin " + plugin.getPluginBase().getId() + " is only compatible with " + Arrays.toString(executionEnvironments);
+		}
+		
+		if (plugin.getPluginBase().getId().equals("org.objectweb.asm")) {
+			String version = plugin.getPluginBase().getVersion();
+			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
+			if (providedEnvironments.contains(envId)) {
+				return "Plugin org.objectweb.asm_" + version + " is incompatible with " + envId;
+			}
+		}
+		return "";
+	}
+
 }
