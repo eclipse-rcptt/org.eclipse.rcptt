@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +32,10 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.nature.RcpttNature;
@@ -39,6 +44,7 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -66,8 +72,9 @@ public class Q7NamedElementTest {
 		PROJECT.open(null);
 	}
 
-	@Test(timeout=20_000)
+	@Test(timeout=10_000)
 	public void reopenIfClosed() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
+		long stop = currentTimeMillis() + 9000;
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 		}
@@ -87,7 +94,7 @@ public class Q7NamedElementTest {
 		});
 		try {
 			barrier.await();
-			for (int i = 0; i < 10_000; i++) {
+			for (int i = 0; currentTimeMillis() < stop; i++) {
 				try {
 					assertFalse(closerTask.isDone());
 					assertNotNull(testcase.getNamedElement());
@@ -127,6 +134,41 @@ public class Q7NamedElementTest {
 	@Test
 	public void noResourceleaksExists() {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
+	}
+	
+	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
+	@Test
+	public void existsIsNoiseResistant() throws CoreException, IOException {
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		Job noise = Job.create("Keep refetching model", (ICoreRunnable) monitor -> {
+			while (!monitor.isCanceled()) {
+				Thread.yield();
+				testcase.getNamedElement();
+			}
+		});
+		long stop = currentTimeMillis() + 10000;
+		try {
+			int i = 0;
+			while (currentTimeMillis() < stop) {
+				Thread.yield();
+				int iteration = i++;
+				WORKSPACE.run((ICoreRunnable) monitor -> {
+					TESTCASE_FILE.delete(true, null);
+					String message = "Iteration " + iteration;
+					assertFalse(message, TESTCASE_FILE.exists());
+					assertFalse(message, testcase.exists());
+					try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+						TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+					} catch (IOException e) {
+						throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.rcptt.core.tests", "Failed to write " + TESTCASE_FILE, e));
+					}
+					assertTrue(message, TESTCASE_FILE.exists());
+					assertTrue(message, testcase.exists());
+				}, WORKSPACE.getRuleFactory().createRule(TESTCASE_FILE), 0, null);
+			}
+		} finally {
+			noise.cancel();
+		}
 	}
 
 	

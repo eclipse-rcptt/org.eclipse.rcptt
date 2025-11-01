@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.swt.test;
 
+import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -114,6 +116,7 @@ public class UIJobCollectorTest {
 		rescheduling.cancel();
 		sleepingJob.cancel();
 		oscillatingJob.cancel();
+		busyLoop.cancel();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription d = workspace.getDescription();
 		d.setAutoBuilding(false);
@@ -178,7 +181,7 @@ public class UIJobCollectorTest {
 	}
 		
 	@Test
-	public void waitSecondRunAfterReschedule() throws InterruptedException {
+	public void waitSecondRunAfterStopAndReschedule() throws InterruptedException {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		UIJobCollector subject = new UIJobCollector(parameters);
@@ -210,18 +213,16 @@ public class UIJobCollectorTest {
 				}
 			};
 			addListener(job, jobListener);
-			debug("Attempt " + i);
 			assertEmpty("No jobs on start", subject);
 			while (job.getState() == Job.NONE) { // Sometimes the job is spuriously cancelled (by previous cycles?)				
 				job.schedule();
 			}
+			debug("Attempt " + i);
 			startedOnce.await();
 			job.cancel();
 			job.schedule();
 			completedOnce.await();
-			Thread.sleep(schedulingTolerance);
-			boolean result = isEmpty(subject);
-			Assert.assertFalse("Should wait for a rescheduled job to complete, but failed on attempt " + i, result);
+			assertNever(schedulingTolerance, "Should wait for a rescheduled job to complete, but failed on attempt " + i, () -> isEmpty(subject));
 			Assert.assertNotEquals(Job.NONE, job.getState());
 			debug("End of attempt " + i);
 			job.removeJobChangeListener(jobListener);
@@ -229,6 +230,28 @@ public class UIJobCollectorTest {
 		}
 	}
 	
+	@Test
+	public void waitSecondRunAfterCancelReschedule() throws InterruptedException {
+		Parameters parameters = new Parameters();
+		UIJobCollector subject = new UIJobCollector(parameters);
+		prepare(subject);
+		Job job = busyLoop;
+		long stop = currentTimeMillis() + 10000;
+		assertEmpty("No jobs on start", subject);
+		for (long i = 0; currentTimeMillis() < stop; i++) {
+			Assert.assertTrue(shutdown(job, 10000));
+			job.cancel();
+			job.join();
+			job.join();
+			debug("Attempt " + i);
+			job.schedule();
+			job.cancel();
+			job.schedule();
+			assertNever(schedulingTolerance, "Should not step immediately. Iteration " + i, () -> isEmpty(subject));
+			debug("End of attempt " + i);
+		}
+	}
+
 	@Test
 	public void doNotWaitForJobsRescheduledInFuture() throws InterruptedException {
 		Parameters parameters = new Parameters();
@@ -238,7 +261,7 @@ public class UIJobCollectorTest {
 		prepare(subject);
 		assertEmpty("No jobs on start", subject);
 		rescheduling.schedule(0);
-		long start = System.currentTimeMillis();
+		long start = currentTimeMillis();
 		rescheduling.join();
 		Thread.sleep(schedulingTolerance);
 		assertEmpty("Skip jobs scheduled for distant future", subject);
@@ -607,7 +630,18 @@ public class UIJobCollectorTest {
 		return subject.isEmpty(new org.eclipse.rcptt.tesla.core.context.ContextManagement.Context(),
 				InfoFactory.eINSTANCE.createQ7WaitInfoRoot());
 	}
+	
+	private void assertNever(int timeoutMs, String message, BooleanSupplier condition) {
+		long stop = currentTimeMillis() + timeoutMs;
+		while (currentTimeMillis() < stop) {
+			Thread.yield();
+			if (condition.getAsBoolean()) {
+				Assert.fail(message);
+			}
+		}
+	}
 
+	
 	@SuppressWarnings("resource")
 	private void addListener(IJobChangeListener listener) {
 		MANAGER.addJobChangeListener(listener);

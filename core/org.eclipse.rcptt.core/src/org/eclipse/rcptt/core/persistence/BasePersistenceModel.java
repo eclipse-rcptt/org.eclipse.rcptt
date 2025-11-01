@@ -174,10 +174,10 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 		} catch (CoreException e) {
 			// Ignore file not found exception
 			int code = e.getStatus().getCode();
-			if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND) {
+			if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND || code == IResourceStatus.FAILED_READ_LOCAL) {
 				return null;
 			}
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Error code: " + code, e);
 		}
 		return contents;
 	}
