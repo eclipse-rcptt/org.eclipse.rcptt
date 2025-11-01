@@ -14,11 +14,11 @@ MERGE="merge/$TARGET/$SOURCE"
 
 git config --local push.autoSetupRemote true
 git fetch --shallow-since=2025-01-01 origin "$SOURCE" "$TARGET"
-git fetch --shallow-since=2025-01-01 origin "$MERGE" && git checkout --track "$MERGE" || git checkout -b "$MERGE" "origin/$TARGET"
-git merge "origin/$TARGET"
+git fetch --shallow-since=2025-01-01 origin "$MERGE" && git checkout --track "$MERGE" || git checkout -b "$MERGE" "$COMMIT"
 git diff --name-only "HEAD...$COMMIT" | grep pom.xml$ && exit 2 # Do not merge version bumps and release management
-git merge-base --is-ancestor "$COMMIT" "$MERGE" && exit 0 #Nothing to merge
+git merge-base --is-ancestor "$COMMIT" "$MERGE" && exit 0 # Nothing to merge
 git merge --no-edit "$COMMIT"
+git merge "origin/$TARGET" || true # If merge fails due to a conflict, create PR anyway for user to resolve
 git push origin "$MERGE"
 gh workflow run verify.yml --ref "$MERGE"
 gh pr create -B "$TARGET" -H "$MERGE" --title "Merge $SOURCE into $TARGET" --body "$MESSAGE" 
