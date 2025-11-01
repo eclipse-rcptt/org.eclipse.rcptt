@@ -70,7 +70,7 @@ public class TargetPlatformChecker {
 		initializeTargetPlatform();
 		System.out.println("Target platform is valid.");
 	}
-	
+
 	private static IStatus createError(String message) {
 		return new Status(IStatus.ERROR, HeadlessRunnerPlugin.PLUGIN_ID, message, new RuntimeException());
 	}

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
@@ -67,7 +68,7 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("restriction")
 public class Q7LaunchDelegateUtils {
 	
-	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor) {
+	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor, IVMInstall vm) {
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 3);
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
@@ -81,11 +82,7 @@ public class Q7LaunchDelegateUtils {
 			if (architecture == null || architecture == OSArchitecture.Unknown) {
 				return Status.error(message.toString());
 			}
-			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, target)) {
-				return Status.error(String.format(
-						"No compatible JRE is configured. Requirements:\n%s",
-						architecture, target.explainJvmRequirements()));
-			}
+			Q7ExternalLaunchDelegate.updateJVM(wc, vm);
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
