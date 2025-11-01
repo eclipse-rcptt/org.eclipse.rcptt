@@ -262,7 +262,7 @@ public final class JvmTargetCompatibility {
 		if (plugin.getPluginBase().getId().equals(ASM_ID)) {
 			String version = plugin.getPluginBase().getVersion();
 			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
-			if (providedEnvironments.contains(envId)) {
+			if (envId != null && providedEnvironments.contains(envId)) {
 				return "Plugin org.objectweb.asm_" + version + " is incompatible with " + envId;
 			}
 		}
