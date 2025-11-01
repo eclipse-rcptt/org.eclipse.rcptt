@@ -15,10 +15,11 @@ import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
 import static org.osgi.framework.Version.valueOf;
+import org.osgi.framework.Version;
+
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -34,18 +35,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
-import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
+import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
 
 import com.google.common.base.Joiner;
 
 public final class JvmTargetCompatibility {
+	private static final String ASM_ID = "org.objectweb.asm";
 	private final ITargetPlatformHelper target;
 	private OSArchitecture architecture = OSArchitecture.Unknown;
 	
@@ -65,7 +66,7 @@ public final class JvmTargetCompatibility {
 			return false;
 		}
 		
-		if (!target.findCompatibilityProblems(jvm.compatibleEnvironments).isEmpty()) {
+		if (!findCompatibilityProblems(jvm.compatibleEnvironments).isEmpty()) {
 			return false;
 		}
 		
@@ -124,7 +125,12 @@ public final class JvmTargetCompatibility {
 	
 	private IStatus checkCompatibilty(VmInstallMetaData install) {
 		MultiStatus result = new MultiStatus(getClass(), 0, "Compatibility for " + install.install.getInstallLocation() + " and " + target.getName());
-		result.add(Status.info("AUT requirements: " + target.explainJvmRequirements()));
+		try {
+			result.add(Status.info("AUT requirements: " + explainJvmRequirements()));
+		} catch (CoreException e) {
+			result.add(e.getStatus());
+			return result;
+		}
 		result.add(Status.info("JVM architecture: " + install.arch));
 		try {
 			if (getArchitecture() != install.arch) {
@@ -135,7 +141,7 @@ public final class JvmTargetCompatibility {
 			result.add(e.getStatus());
 			return result;
 		}
-		String compatibilityProblems = target.findCompatibilityProblems(install.compatibleEnvironments);
+		String compatibilityProblems = findCompatibilityProblems(install.compatibleEnvironments);
 		if (!compatibilityProblems.isEmpty()) {
 			result.add(Status.error(compatibilityProblems));
 			return result;
@@ -171,10 +177,18 @@ public final class JvmTargetCompatibility {
 			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				return status;
 			}
-			if (!isCompatibleJvmPresent()) {
+			
+			Optional<VmInstallMetaData> vmOptional = findVM().findAny();
+			if (vmOptional.isEmpty()) {
 				return Status.error("No compatible JVM is configured");
 			}
-			return Q7LaunchDelegateUtils.validateForLaunch(target, sm.split(1, SubMonitor.SUPPRESS_NONE));
+			return Q7LaunchDelegateUtils.validateForLaunch(target, sm.split(1, SubMonitor.SUPPRESS_NONE), vmOptional.get().install);
+		} catch (CheckedExceptionWrapper e) {
+			if (e.getCause() instanceof CoreException ce) {
+				return ce.getStatus();
+			}
+			e.rethrowUnchecked();
+			throw e;
 		} finally {
 			done(monitor);
 		}
@@ -191,26 +205,22 @@ public final class JvmTargetCompatibility {
 	}
 
 	
-	@Override
 	public String findCompatibilityProblems(Set<String> ids) {
-		if (!Collections.disjoint(ids, getIncompatibleExecutionEnvironments())) {
-			return "Present version of org.objectweb.asm is incompatible with " + Joiner.on(", ").join(getIncompatibleExecutionEnvironments());
-		}
-		
-		List<String> problems = targetPlatform.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
+		List<String> problems = target.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
 		if (!problems.isEmpty()) {
 			return Joiner.on("\n").join(problems);
 		}
 		return "";
 	}
 
-	@Override
-	public String explainJvmRequirements() {
+	public String explainJvmRequirements() throws CoreException {
 		StringBuilder result = new StringBuilder();
-		OSArchitecture arch = detectArchitecture(result);
-		result.append("AUT architecture: ").append(arch).append("\n");
-		Set<String> pluginEnvironments = getModels().map(Model::model).map(TargetPlatformHelper::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
-		Set<String> incompatibleExecutionEnvironments = getIncompatibleExecutionEnvironments();
+		OSArchitecture arch = getArchitecture();
+		result.append("Architecture: ").append(arch).append("\n");
+		Set<String> pluginEnvironments = target.getModels().map(Model::model).map(JvmTargetCompatibility::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
+		Set<String> incompatibleExecutionEnvironments = target.getModels().filter(m -> m.model().getPluginBase().getId().equals(ASM_ID))
+				.map(plugin -> Version.parseVersion(plugin.model().getPluginBase().getVersion()))
+				.map(OBJECTWEB_INCOMPATIBILITY::get).filter(Objects::nonNull).collect(Collectors.toSet());
 		pluginEnvironments.removeAll(incompatibleExecutionEnvironments);
 		result.append("org.objectweb.asm is incompatible with ").append(incompatibleExecutionEnvironments).append("\n");
 		pluginEnvironments.removeIf( e -> 
@@ -219,6 +229,8 @@ public final class JvmTargetCompatibility {
 		result.append("Plugins require one of ").append(pluginEnvironments).append("\n");
 		return result.toString();
 	}
+	
+	
 	
 	private static final String[] EMPTY = new String[0];
 	private static String[] getExecutionEnironments(IPluginModelBase plugin) {
@@ -244,7 +256,7 @@ public final class JvmTargetCompatibility {
 			return "Plugin " + plugin.getPluginBase().getId() + " is only compatible with " + Arrays.toString(executionEnvironments);
 		}
 		
-		if (plugin.getPluginBase().getId().equals("org.objectweb.asm")) {
+		if (plugin.getPluginBase().getId().equals(ASM_ID)) {
 			String version = plugin.getPluginBase().getVersion();
 			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
 			if (providedEnvironments.contains(envId)) {

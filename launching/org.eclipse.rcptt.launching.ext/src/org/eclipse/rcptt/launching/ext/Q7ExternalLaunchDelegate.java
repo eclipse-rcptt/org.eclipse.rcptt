@@ -69,7 +69,6 @@ import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache.CachedInfo;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
-import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.PDEUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchMonitor;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
@@ -278,13 +277,8 @@ public class Q7ExternalLaunchDelegate extends
 		}
 	}
 
-	public static boolean updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
-			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> isCompatible(m, architecture, target)).findFirst().orElse(null);
-		if (jvm == null) {
-			return false;
-		}
-		IVMInstall jvmInstall = jvm.install;
+	public static void updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
+			IVMInstall jvmInstall) {
 		workingCopy
 				.setAttribute(
 						IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
@@ -292,11 +286,6 @@ public class Q7ExternalLaunchDelegate extends
 								"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
 								jvmInstall.getVMInstallType().getId(),
 								jvmInstall.getName()));
-		return true;
-	}
-
-	private static boolean isCompatible(VmInstallMetaData m, OSArchitecture architecture, ITargetPlatformHelper target) {
-		return m.arch.equals(architecture) && target.findCompatibilityProblems(m.compatibleEnvironments).isEmpty();
 	}
 
 	private static String getSubstitutedString(String text)
