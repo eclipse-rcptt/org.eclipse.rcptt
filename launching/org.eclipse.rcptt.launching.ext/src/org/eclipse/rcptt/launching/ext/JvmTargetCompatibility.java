@@ -167,7 +167,9 @@ public final class JvmTargetCompatibility {
 	}
 	
 	public Stream<VmInstallMetaData> findVM() {
-		return VmInstallMetaData.all().filter(this::isCompatible);
+		return VmInstallMetaData.all()
+			.filter(m -> !m.compatibleEnvironments.contains("JavaSE-23"))  // Java 23 and older are not supported by AJDT. See https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166;
+			.filter(this::isCompatible);
 	}
 
 	public IStatus validate(IProgressMonitor monitor) {
@@ -206,9 +208,6 @@ public final class JvmTargetCompatibility {
 
 	
 	private String findCompatibilityProblems(Set<String> ids) {
-		if (ids.contains("JavaSE-23")) {
-			return "Java 23 and older are not supported. See https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166";
-		}
 		List<String> problems = target.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
 		if (!problems.isEmpty()) {
 			return Joiner.on("\n").join(problems);
@@ -251,6 +250,14 @@ public final class JvmTargetCompatibility {
 
 	/** @see org.eclipse.pde.internal.launching.launcher.VMHelper.getDefaultEEName(Set<IPluginModelBase>) **/
 	private static String isCompatible(IPluginModelBase plugin, Set<String> providedEnvironments) {
+		if (plugin.getPluginBase().getId().equals(ASM_ID)) {
+			String version = plugin.getPluginBase().getVersion();
+			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
+			if (envId != null && providedEnvironments.contains(envId)) {
+				return "Plugin org.objectweb.asm_" + version + " is incompatible with " + envId;
+			}
+		}
+
 		String[] executionEnvironments = getExecutionEnironments(plugin);
 		if (executionEnvironments.length == 0) {
 			return "";
@@ -259,13 +266,6 @@ public final class JvmTargetCompatibility {
 			return "Plugin " + plugin.getPluginBase().getId() + " is only compatible with " + Arrays.toString(executionEnvironments);
 		}
 		
-		if (plugin.getPluginBase().getId().equals(ASM_ID)) {
-			String version = plugin.getPluginBase().getVersion();
-			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
-			if (envId != null && providedEnvironments.contains(envId)) {
-				return "Plugin org.objectweb.asm_" + version + " is incompatible with " + envId;
-			}
-		}
 		return "";
 	}
 
