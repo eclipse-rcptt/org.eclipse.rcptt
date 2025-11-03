@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.launching.aut;
 
+import static org.eclipse.rcptt.launching.Q7LaunchUtils.format;
+
 import java.io.File;
 import java.io.FilenameFilter;
 
@@ -62,7 +64,7 @@ public class AUTConnectionErrorDialog extends MessageDialog {
 		String message = DEFAULT_ERROR_MESSAGE;
 		if (status != null && !status.isOK()
 				&& !status.equals(Status.CANCEL_STATUS)) {
-			message = status.getMessage();
+			message = format(status);
 		}
 		if (status == null
 				|| (!status.isOK() && !status.equals(Status.CANCEL_STATUS))) {

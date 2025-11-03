@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
+import static org.eclipse.rcptt.launching.Q7LaunchUtils.format;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -27,10 +28,7 @@ import org.eclipse.pde.internal.ui.IHelpContextIds;
 import org.eclipse.pde.internal.ui.launcher.JREBlock;
 import org.eclipse.pde.internal.ui.launcher.ProgramBlock;
 import org.eclipse.pde.ui.launcher.MainTab;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
-import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
 import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.swt.SWT;
@@ -137,8 +135,7 @@ public class ExternalAUTMainTab extends MainTab {
 				}
 				
 				if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
-					// TODO: format report
-					return result.toString();
+					return format(result);
 				}
 				return null;
 			}
@@ -162,6 +159,7 @@ public class ExternalAUTMainTab extends MainTab {
 		fAUTProgramBlock = new AUTProgramBlock(this);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		final ScrolledComposite scrollContainer = new ScrolledComposite(parent,
 				SWT.V_SCROLL);
@@ -183,6 +181,7 @@ public class ExternalAUTMainTab extends MainTab {
 		// This results in scrollbar scrolling when user tabs to a control that
 		// is not in the field of view.
 		Listener listener = new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				Control child = (Control) e.widget;
 				Rectangle bounds = child.getBounds();
