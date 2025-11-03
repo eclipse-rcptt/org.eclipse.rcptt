@@ -14,6 +14,7 @@ import static java.util.Arrays.stream;
 import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
+import static org.osgi.framework.Version.parseVersion;
 import static org.osgi.framework.Version.valueOf;
 import org.osgi.framework.Version;
 
@@ -168,7 +169,6 @@ public final class JvmTargetCompatibility {
 	
 	public Stream<VmInstallMetaData> findVM() {
 		return VmInstallMetaData.all()
-			.filter(m -> !m.compatibleEnvironments.contains("JavaSE-23"))  // Java 23 and older are not supported by AJDT. See https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166;
 			.filter(this::isCompatible);
 	}
 
@@ -250,11 +250,25 @@ public final class JvmTargetCompatibility {
 
 	/** @see org.eclipse.pde.internal.launching.launcher.VMHelper.getDefaultEEName(Set<IPluginModelBase>) **/
 	private static String isCompatible(IPluginModelBase plugin, Set<String> providedEnvironments) {
-		if (plugin.getPluginBase().getId().equals(ASM_ID)) {
-			String version = plugin.getPluginBase().getVersion();
-			String envId = OBJECTWEB_INCOMPATIBILITY.get(Version.parseVersion(version));
+		String id = plugin.getPluginBase().getId();
+		Version version = parseVersion(plugin.getPluginBase().getVersion());
+		if (id.equals(ASM_ID)) {
+			String envId = OBJECTWEB_INCOMPATIBILITY.get(version);
 			if (envId != null && providedEnvironments.contains(envId)) {
-				return "Plugin org.objectweb.asm_" + version + " is incompatible with " + envId;
+				return incompatibleMessage(plugin, envId);
+			}
+		}
+		
+		if (id.equals("org.aspectj.weaver")) {
+			if (version.compareTo(parseVersion("1.9.22.202405141514")) <= 0) {
+				if (providedEnvironments.contains("JavaSE-23")) {
+					return incompatibleMessage(plugin, "JavaSE-23");
+				}
+			}
+			if (version.compareTo(parseVersion("1.9.24.202511030914")) < 0) {
+				if (providedEnvironments.contains("JavaSE-25")) {
+					return incompatibleMessage(plugin, "JavaSE-25");
+				}
 			}
 		}
 
@@ -267,6 +281,10 @@ public final class JvmTargetCompatibility {
 		}
 		
 		return "";
+	}
+	
+	private static String incompatibleMessage(IPluginModelBase plugin, String subject) {
+		return "Plugin " + plugin.getPluginBase().getId()+"_" + plugin.getPluginBase().getVersion() + " is incompatible with " + subject;
 	}
 
 }
