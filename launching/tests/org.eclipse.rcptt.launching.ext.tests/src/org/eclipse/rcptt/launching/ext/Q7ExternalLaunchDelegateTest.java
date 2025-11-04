@@ -81,7 +81,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	@BeforeClass
 	public static void beforeClass() throws CoreException {
-		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
+		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home"))).findFirst().get();
 		JavaRuntime.setDefaultVMInstall(install.install, null);
 	}
 	@SuppressWarnings("resource")
@@ -191,13 +191,14 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir = expandAut();
 		Aut aut = createAut(installDir, List.of("-consoleLog"));
 		int cancelCount =  0;
-		for (int i = 1; i < 100_000; i*=2) {
+		boolean success = false;
+		for (int i = 1; i < 100_000 && !success; i*=2) {
 			try {
 				IProgressMonitor monitor = new ExpiringProgressMonitor(i);
 				AutLaunch launch = aut.launch(monitor);
 				assertNotNull("Failed with delay " + i ,launch);
 				launch.terminate(); // Should not throw NPE
-				break; // AUT is already launched, nothing to cancel
+				success = true;
 			} catch (CoreException e) {
 				if (!e.getStatus().matches(IStatus.CANCEL)) {
 					throw e;
@@ -208,6 +209,7 @@ public class Q7ExternalLaunchDelegateTest {
 			}
 		}
 		Assert.assertNotEquals(0, cancelCount);
+		Assert.assertTrue(success);
 	}
 	
 	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
