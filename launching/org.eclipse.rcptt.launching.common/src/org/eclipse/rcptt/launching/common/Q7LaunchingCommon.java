@@ -12,6 +12,5 @@ package org.eclipse.rcptt.launching.common;
 
 public class Q7LaunchingCommon {
 
-	public static final String ATTR_ARCH = "com.xored.launching.common.attrArch";
 
 }

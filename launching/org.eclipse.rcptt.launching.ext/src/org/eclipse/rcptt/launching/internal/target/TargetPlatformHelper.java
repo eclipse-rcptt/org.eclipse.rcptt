@@ -16,7 +16,6 @@ import static java.util.Collections.emptyList;
 import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
-import static org.osgi.framework.Version.valueOf;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +47,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -77,6 +74,7 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IFileArtifactRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
+import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -166,29 +164,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return new Status(IStatus.ERROR, PLUGIN_ID, "Target platform is unset");
 		}
 		return status;
-	}
-	
-	
-	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
-	static {
-		var oi = OBJECTWEB_INCOMPATIBILITY;
-		oi.put(valueOf("9.6.0"), "JavaSE-23");
-		oi.put(valueOf("9.7.0"), "JavaSE-24");
-		oi.put(valueOf("9.7.1"), "JavaSE-25");
-		oi.put(valueOf("9.8.0"), "JavaSE-26");
-	}
-
-	public Set<String> getIncompatibleExecutionEnvironments() {
-		checkResolved();
-		return Stream.concat(
-				modelIndex.get("org.objectweb.asm")
-						.stream()
-						.map(base -> base.getPluginBase().getVersion())
-						.map(Version::parseVersion)
-						.map(OBJECTWEB_INCOMPATIBILITY::get)
-						.filter(java.util.Objects::nonNull),
-				Stream.of("JavaSE-23") // https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166
-		).collect(Collectors.toSet());
 	}
 
 	private IStatus getBundleStatus() {
@@ -485,6 +460,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		modelIndex.clear();
 		targetBundleIndex.clear();
 		registry = null;
+		weavingHook = null;
 	}
 
 	@Override
