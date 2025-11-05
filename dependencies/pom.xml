@@ -16,7 +16,7 @@
 	<parent>
     	<groupId>org.eclipse.rcptt</groupId>
   		<artifactId>mirroring</artifactId>
-    	<version>2.7.1-SNAPSHOT</version>
+    	<version>2.7.2-SNAPSHOT</version>
     	<relativePath>../releng/mirroring/pom.xml</relativePath>
   	</parent>
 
