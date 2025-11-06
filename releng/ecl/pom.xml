@@ -37,9 +37,9 @@
       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</url>
     </repository>
      <repository>
-      <id>eclipse-2021-12</id>
+      <id>ecl-platform-repository</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/2021-12</url>
+      <url>${ecl-platform-repository}</url>
     </repository>
   </repositories>
 </project>
