@@ -37,6 +37,7 @@ public final class DownloadCache implements Closeable {
 			.resolve(DownloadCache.class.getName());
 	private final Path cacheRoot;
 	private final Set<Path> verifiedFiles = Collections.synchronizedSet(new HashSet<>());
+
 	public DownloadCache(Path cacheRoot) {
 		super();
 		this.cacheRoot = cacheRoot;
@@ -46,7 +47,6 @@ public final class DownloadCache implements Closeable {
 			throw new AssertionError(e);
 		}
 	}
-
 
 	public record Request(URI uri, String sha512) {
 	}
@@ -62,14 +62,16 @@ public final class DownloadCache implements Closeable {
 			if (!verifiedFiles.contains(target)) {
 				String actualHash = computeSHA512(target);
 				if (!actualHash.equals(request.sha512())) {
-					throw new IOException("Cached " + request.uri + " has SHA512 hash " + actualHash + " but " + request.sha512() + " is expected" );
+					throw new IOException("Cached " + request.uri + " has SHA512 hash " + actualHash + " but "
+							+ request.sha512() + " is expected");
 				}
 				verifiedFiles.add(target);
 			}
 			return target;
 		}
 		if (Files.exists(tmp)) {
-			throw new IllegalStateException("Concurrent access to " + tmp + " while downloading " + request.uri + ". Concurrent downloads are not supported yet.");
+			throw new IllegalStateException("Concurrent access to " + tmp + " while downloading " + request.uri
+					+ ". Concurrent downloads are not supported yet.");
 		}
 		HttpRequest httpsRequest = HttpRequest.newBuilder()
 				.uri(request.uri())
@@ -84,9 +86,10 @@ public final class DownloadCache implements Closeable {
 			}
 			String actualHash = computeSHA512(tmp);
 			if (!actualHash.equals(request.sha512())) {
-				throw new IOException("Downloaded " + request.uri + " has SHA512 hash " + actualHash + " but " + request.sha512() + " is expected" );
+				throw new IOException("Downloaded " + request.uri + " has SHA512 hash " + actualHash + " but "
+						+ request.sha512() + " is expected");
 			}
-			
+
 			Files.move(tmp, target);
 			verifiedFiles.add(target);
 			return target;
@@ -97,9 +100,9 @@ public final class DownloadCache implements Closeable {
 			throw e;
 		}
 	}
-	
-    private static String computeSHA512(Path input) throws IOException {
-        try (InputStream fis = Files.newInputStream(input)) {
+
+	private static String computeSHA512(Path input) throws IOException {
+		try (InputStream fis = Files.newInputStream(input)) {
 			MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
 
 			// Use DigestInputStream for automatic digest updating
@@ -110,10 +113,10 @@ public final class DownloadCache implements Closeable {
 			}
 
 			return HexFormat.of().formatHex(sha512.digest());
-        } catch(NoSuchAlgorithmException e) {
-        	throw new IOException(e);
-        }
-    }
+		} catch (NoSuchAlgorithmException e) {
+			throw new IOException(e);
+		}
+	}
 
 	private String filename(String uripath) {
 		int pos = uripath.lastIndexOf("/");

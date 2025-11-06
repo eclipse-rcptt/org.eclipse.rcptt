@@ -16,6 +16,7 @@ import java.util.HashSet;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.rcptt.core.model.IElementChangedListener;
@@ -191,6 +192,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 		}
 	}
 
+	@Override
 	public void resourceChanged(final IResourceChangeEvent event) {
 		for (int i = 0; i < this.preResourceChangeListenerCount; i++) {
 			// wrap callbacks with Safe runnable for subsequent listeners to be
@@ -198,10 +200,12 @@ public class DeltaProcessingState implements IResourceChangeListener {
 			final IResourceChangeListener listener = this.preResourceChangeListeners[i];
 			if ((this.preResourceChangeEventMasks[i] & event.getType()) != 0)
 				SafeRunner.run(new ISafeRunnable() {
+					@Override
 					public void handleException(Throwable exception) {
 						exception.printStackTrace();
 					}
 
+					@Override
 					public void run() throws Exception {
 						listener.resourceChanged(event);
 					}
@@ -209,6 +213,10 @@ public class DeltaProcessingState implements IResourceChangeListener {
 		}
 		try {
 			getDeltaProcessor().resourceChanged(event);
+		} catch (InterruptedException e) {
+			OperationCanceledException result = new OperationCanceledException();
+			result.initCause(e);
+			throw result;
 		} finally {
 			// TODO (jerome) see 47631, may want to get rid of following so as
 			// to reuse delta processor ?
@@ -219,13 +227,13 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	}
 
-	public IQ7Project findProject(String name) {
+	public IQ7Project findProject(String name) throws InterruptedException {
 		if (getOldProjectNames().contains(name))
 			return ModelManager.getModelManager().getModel().getProject(name);
 		return null;
 	}
 
-	public synchronized HashSet<String> getOldProjectNames() {
+	public synchronized HashSet<String> getOldProjectNames() throws InterruptedException {
 		if (this.scriptProjectNamesCache == null) {
 			HashSet<String> result = new HashSet<String>();
 			IQ7Project[] projects;

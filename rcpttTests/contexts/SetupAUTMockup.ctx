@@ -5,8 +5,8 @@ Element-Name: SetupAUTMockup
 Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
-Runtime-Version: 2.6.0.202504052346
-Save-Time: 4/6/25, 2:44 PM
+Runtime-Version: 2.6.0.202505301849
+Save-Time: 6/1/25, 9:16 AM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -32,8 +32,7 @@ get-view Applications | get-tree | get-items | foreach -do {
  }
 
 // invoke-AUT selfQ7Mockups -args "-nosplash" -vmargs "-Xmx512m -XX:MaxPermSize=256m"
-invoke-AUT mockupsQ7 -inject [site-injection "https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/r" +
-	"epository/target/repository/"] -args "-nosplash" -vmargs "-Xmx512m"
+invoke-AUT mockupsQ7 -inject [site-injection [substitute-variables "${system_property:mockup_repository}"] ] -args "-nosplash" -vmargs "-Xmx512m"
 
 loop [val count 0] {
 	if [$count | lt 10] {
@@ -50,14 +49,23 @@ loop [val count 0] {
 			wait 5000
 			recur [$count | plus 1]
 		}
-		get-aut mockupsQ7 | eval {
-			get-menu -path "Window/Perspective/Open Perspective/Other..." | click
-			with [get-window "Open Perspective"] {
-				get-table | select "Q7 Quality"
-				get-button Open | click
+		try -command {
+			get-aut mockupsQ7 | eval {
+				get-menu -path "Window/Perspective/Open Perspective/Other..." | click
+				with [get-window "Open Perspective"] {
+					get-table | select "Q7 Quality"
+					get-button Open | click
+				}
+				get-menu -path "Window/Perspective/Reset Perspective..." | click
+				get-window "Reset Perspective" | get-button "Reset Perspective" | click
 			}
-			get-menu -path "Window/Perspective/Reset Perspective..." | click
-			get-window "Reset Perspective" | get-button "Reset Perspective" | click
+		} -catch {
+			get-menu "Window/Show View/Other..." | click
+			with [get-window "Show View"] {
+				get-tree | select "General/Console" | double-click
+				trace [get-view Console | get-text-viewer | get-property -raw true -name text]
+			}
+			assert-true [bool false] "Failed to open mockup perspective"
 		}
 	} -else {
 		assert-true [bool false] "mockupsQ7 is not available"

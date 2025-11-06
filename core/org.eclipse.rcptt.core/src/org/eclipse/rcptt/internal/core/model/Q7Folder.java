@@ -12,7 +12,6 @@ package org.eclipse.rcptt.internal.core.model;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
@@ -85,8 +84,7 @@ public class Q7Folder extends Openable implements IQ7Folder {
 	}
 
 	@Override
-	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm,
-			Map<IQ7Element, Object> newElements, IResource underlyingResource)
+	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, IResource underlyingResource)
 			throws ModelException {
 		// check whether this folder can be opened
 		if (!underlyingResource.isAccessible())
@@ -129,21 +127,21 @@ public class Q7Folder extends Openable implements IQ7Folder {
 		return new Q7Context(this, name);
 	}
 
-	public ITestCase[] getTestCases() throws ModelException {
+	public ITestCase[] getTestCases() throws ModelException, InterruptedException {
 		List<IQ7Element> list = getChildrenOfType(HandleType.TestCase);
 		return list.toArray(new ITestCase[list.size()]);
 	}
 
-	public IContext[] getContexts() throws ModelException {
+	public IContext[] getContexts() throws ModelException, InterruptedException {
 		List<IQ7Element> list = getChildrenOfType(HandleType.Context);
 		return list.toArray(new IContext[list.size()]);
 	}
 
-	public Object[] getForeignResources() throws ModelException {
-		return ((Q7FolderInfo) getElementInfo()).getForeignResources(getResource());
+	public Object[] getForeignResources() throws ModelException, InterruptedException {
+		return accessFolderInfo(info -> info.getForeignResources(getResource()));
 	}
 
-	public boolean hasSubfolders() throws ModelException {
+	public boolean hasSubfolders() throws ModelException, InterruptedException {
 		IQ7Element[] packages = ((IQ7Project) getParent()).getChildren();
 		int namesLength = this.path.segmentCount();
 		nextPackage: for (int i = 0, length = packages.length; i < length; i++) {
@@ -161,12 +159,8 @@ public class Q7Folder extends Openable implements IQ7Folder {
 		return false;
 	}
 
-	public boolean containsQ7Resources() throws ModelException {
-		Object elementInfo = getElementInfo();
-		if (!(elementInfo instanceof Q7FolderInfo))
-			return false;
-		Q7FolderInfo q7ElementInfo = (Q7FolderInfo) elementInfo;
-		return q7ElementInfo.containsQ7Resources();
+	public boolean containsQ7Resources() throws ModelException, InterruptedException {
+		return accessFolderInfo(Q7FolderInfo::containsQ7Resources);
 	}
 
 	public IFile getNewFile(IContainer container, String label, String extension) {
@@ -273,7 +267,7 @@ public class Q7Folder extends Openable implements IQ7Folder {
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7FolderInfo createElementInfo() {
 		return new Q7FolderInfo();
 	}
 
@@ -328,7 +322,7 @@ public class Q7Folder extends Openable implements IQ7Folder {
 		return new Q7ProjectMetadata(this);
 	}
 
-	public ITestSuite[] getTestSuites() throws ModelException {
+	public ITestSuite[] getTestSuites() throws ModelException, InterruptedException {
 		List<IQ7Element> list = getChildrenOfType(HandleType.TestSuite);
 		return list.toArray(new ITestSuite[list.size()]);
 	}
@@ -363,5 +357,10 @@ public class Q7Folder extends Openable implements IQ7Folder {
 
 	public IVerification getVerification(String name) {
 		return new Q7Verification(this, name);
+	}
+	private <V> V accessFolderInfo(ThrowingFunction<Q7FolderInfo, V> infoToValue) throws ModelException, InterruptedException {
+		return openAndAccessInfo(info -> {
+			return infoToValue.apply((Q7FolderInfo)info);
+		}, null);
 	}
 }

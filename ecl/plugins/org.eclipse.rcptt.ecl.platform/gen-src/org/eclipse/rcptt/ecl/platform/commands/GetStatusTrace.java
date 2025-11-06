@@ -42,6 +42,7 @@ public interface GetStatusTrace extends Command {
 	 * @see #setStatus(ProcessStatus)
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getGetStatusTrace_Status()
 	 * @model required="true"
+	 *        annotation="http://www.eclipse.org/ecl/input"
 	 * @generated
 	 */
 	ProcessStatus getStatus();

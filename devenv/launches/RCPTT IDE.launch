@@ -23,10 +23,10 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -showsplash org.eclipse.rcptt.platform -nosplash --launcher.GTK_version 2"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/22"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -showsplash org.eclipse.rcptt.platform -nosplash"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms128m -Xmx768m -Dorg.eclipse.swt.browser.DefaultType=mozilla -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false&#10;-XX:+HeapDumpOnOutOfMemoryError"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms128m -Xmx768m -Dorg.eclipse.swt.browser.DefaultType=mozilla -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false&#10;-XX:+HeapDumpOnOutOfMemoryError&#10;-Djava.security.manager=disallow"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="product" value="org.eclipse.rcptt.platform.product"/>
     <stringAttribute key="productFile" value="/org.eclipse.rcptt.ide/org.eclipse.rcptt.product"/>
@@ -34,8 +34,8 @@
         <setEntry value="bcpg@default:default"/>
         <setEntry value="bcprov@default:default"/>
         <setEntry value="com.google.gson@default:default"/>
-        <setEntry value="com.google.guava*33.4.6.jre@default:default"/>
         <setEntry value="com.google.guava.failureaccess@default:default"/>
+        <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.ibm.icu@default:default"/>
         <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.sun.jna.platform@default:default"/>
@@ -351,7 +351,6 @@
         <setEntry value="org.eclipse.pde.ui.templates@default:default"/>
         <setEntry value="org.eclipse.pde.ui@default:default"/>
         <setEntry value="org.eclipse.pde@default:default"/>
-        <setEntry value="org.eclipse.platform.doc.isv@default:default"/>
         <setEntry value="org.eclipse.platform.doc.user@default:default"/>
         <setEntry value="org.eclipse.platform@default:default"/>
         <setEntry value="org.eclipse.rcp@default:default"/>
@@ -500,7 +499,6 @@
         <setEntry value="org.eclipse.rcptt.tesla.recording.core.ecl@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.core@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.swt.fragment@default:false"/>
-        <setEntry value="org.eclipse.rcptt.ui.activities@default:default"/>
         <setEntry value="org.eclipse.rcptt.ui.report@default:default"/>
         <setEntry value="org.eclipse.rcptt.ui@default:default"/>
         <setEntry value="org.eclipse.rcptt.updates.aspectj.e44x@default:default"/>

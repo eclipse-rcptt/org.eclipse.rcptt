@@ -36,6 +36,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 	 *                if setting the source of the original compilation unit
 	 *                fails
 	 */
+	@Override
 	protected void executeOperation() throws ModelException {
 		try {
 			beginTask("Commit working copy", 2);
@@ -52,7 +53,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 				// }
 				// }
 
-				workingCopy.getInfo().save();
+				workingCopy.writeWorkingCopy(info -> info.save());
 			}
 
 			setAttribute(HAS_MODIFIED_RESOURCE_ATTR, TRUE);
@@ -72,6 +73,7 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 		return (Q7NamedElement) getElementToProcess();
 	}
 
+	@Override
 	protected ISchedulingRule getSchedulingRule() {
 		IResource resource = getElementToProcess().getResource();
 		if (resource == null)
@@ -84,13 +86,18 @@ public class CommitWorkingCopyOperation extends Q7Operation {
 		}
 	}
 
+	@Override
 	public Q7Status verify() {
 		Q7NamedElement cu = getNamedElement();
 		if (!cu.isWorkingCopy()) {
 			return new Q7Status(0, "Is not a working copy");
 		}
-		if (cu.hasResourceChanged() && !this.force) {
-			return new Q7Status(0, "Update conflict");
+		try {
+			if (cu.hasResourceChanged() && !this.force) {
+				return new Q7Status(0, "Update conflict");
+			}
+		} catch (ModelException e) {
+			return e.getQ7Status();
 		}
 		return Q7Status.OK;
 	}

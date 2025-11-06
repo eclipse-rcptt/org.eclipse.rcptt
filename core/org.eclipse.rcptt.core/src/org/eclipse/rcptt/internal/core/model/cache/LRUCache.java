@@ -16,7 +16,6 @@ import java.util.Hashtable;
 
 import org.eclipse.rcptt.internal.core.model.Q7Element;
 
-@SuppressWarnings("rawtypes")
 public class LRUCache implements Cloneable {
 
 	protected static class LRUCacheEntry {
@@ -51,7 +50,7 @@ public class LRUCache implements Cloneable {
 
 	protected int fTimestampCounter;
 
-	protected Hashtable fEntryTable;
+	protected Hashtable<Object, LRUCacheEntry> fEntryTable;
 
 	protected LRUCacheEntry fEntryQueue;
 
@@ -68,7 +67,7 @@ public class LRUCache implements Cloneable {
 
 		fTimestampCounter = fCurrentSpace = 0;
 		fEntryQueue = fEntryQueueTail = null;
-		fEntryTable = new Hashtable(size);
+		fEntryTable = new Hashtable<>(size);
 		fSpaceLimit = size;
 	}
 
@@ -94,7 +93,7 @@ public class LRUCache implements Cloneable {
 
 		fCurrentSpace = 0;
 		LRUCacheEntry entry = fEntryQueueTail; // Remember last entry
-		fEntryTable = new Hashtable(); // Clear it out
+		fEntryTable = new Hashtable<>(); // Clear it out
 		fEntryQueue = fEntryQueueTail = null;
 		while (entry != null) { // send deletion notifications in LRU order
 			privateNotifyDeletionFromCache(entry);
@@ -134,7 +133,7 @@ public class LRUCache implements Cloneable {
 		return fSpaceLimit;
 	}
 
-	public Enumeration keys() {
+	public Enumeration<Object> keys() {
 
 		return fEntryTable.keys();
 	}
@@ -142,7 +141,7 @@ public class LRUCache implements Cloneable {
 	public ICacheEnumeration keysAndValues() {
 		return new ICacheEnumeration() {
 
-			Enumeration fValues = fEntryTable.elements();
+			Enumeration<LRUCacheEntry> fValues = fEntryTable.elements();
 			LRUCacheEntry fEntry;
 
 			public boolean hasMoreElements() {
@@ -206,11 +205,11 @@ public class LRUCache implements Cloneable {
 		this.privateAddEntry(entry, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void privateAddEntry(LRUCacheEntry entry, boolean shuffle) {
 
 		if (!shuffle) {
-			fEntryTable.put(entry._fKey, entry);
+			LRUCacheEntry oldEntry = fEntryTable.put(entry._fKey, entry);
+			assert oldEntry == null;
 			fCurrentSpace += entry._fSpace;
 		}
 
@@ -331,7 +330,7 @@ public class LRUCache implements Cloneable {
 		int length = fEntryTable.size();
 		Object[] unsortedKeys = new Object[length];
 		String[] unsortedToStrings = new String[length];
-		Enumeration e = this.keys();
+		Enumeration<Object> e = this.keys();
 		for (int i = 0; i < length; i++) {
 			Object key = e.nextElement();
 			unsortedKeys[i] = key;

@@ -67,6 +67,7 @@ public class GetStatusMessageImpl extends CommandImpl implements GetStatusMessag
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ProcessStatus getStatus() {
 		if (status != null && status.eIsProxy()) {
 			InternalEObject oldStatus = (InternalEObject)status;
@@ -93,6 +94,7 @@ public class GetStatusMessageImpl extends CommandImpl implements GetStatusMessag
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setStatus(ProcessStatus newStatus) {
 		ProcessStatus oldStatus = status;
 		status = newStatus;

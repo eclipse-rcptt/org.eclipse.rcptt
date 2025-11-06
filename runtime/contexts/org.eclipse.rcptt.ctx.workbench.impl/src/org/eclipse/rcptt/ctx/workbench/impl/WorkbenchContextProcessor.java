@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.workbench.impl;
 
+import static java.lang.Math.toIntExact;
+import static java.lang.System.currentTimeMillis;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -48,6 +51,7 @@ import org.eclipse.ui.intro.IIntroPart;
 import org.osgi.framework.Bundle;
 
 public class WorkbenchContextProcessor implements IContextProcessor {
+	@Override
 	public boolean isApplied(final Context context) {
 		try {
 			return UIRunnable.exec(new UIRunnable<Boolean>() {
@@ -86,6 +90,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		}
 	};
 	private Runnable closeModalDialogsAsync = new Runnable() {
+		@Override
 		public void run() {
 			Utils.closeDialogs();
 		}
@@ -118,12 +123,15 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		}
 	};
 
-	public void apply(final Context context) throws CoreException {
+	@Override
+	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkbenchContext ctx = (WorkbenchContext) context;
 		final UIJobCollector collector = new UIJobCollector();
+		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
 		Job.getJobManager().addJobChangeListener(collector);
 		try {
 			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					collector.enable();
 				}
@@ -131,21 +139,21 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 			if (ctx.isNoModalDialogs()) {
 				PlatformUI.getWorkbench().getDisplay().asyncExec(closeModalDialogsAsync);
 				PlatformUI.getWorkbench().getDisplay().asyncExec(closeModalDialogsAsync);
-				IStatus status = UIRunnable.exec(closeModalDialogs);
+				IStatus status = UIRunnable.exec(closeModalDialogs, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 				if (!status.isOK()) {
 					throw new CoreException(status);
 				}
 
 			}
-			UIRunnable.exec(closeIntro);
-			final IWorkbenchPage page = UIRunnable.exec(activatePerspective(ctx));
+			UIRunnable.exec(closeIntro,  toIntExact(stop - currentTimeMillis()), isCancelled);
+			final IWorkbenchPage page = UIRunnable.exec(activatePerspective(ctx), toIntExact(stop - currentTimeMillis()), isCancelled);
 			if (ctx.isCloseEditors()) {
 				if (page != null) {
-					UIRunnable.exec(closeAllEditors(page));
+					UIRunnable.exec(closeAllEditors(page), Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 				}
 			}
 			if (ctx.isClearClipboard()) {
-				UIRunnable.exec(clearClipboard);
+				UIRunnable.exec(clearClipboard,  toIntExact(stop - currentTimeMillis()), isCancelled);
 			}
 			String perspectiveId = getPerspectiveId(ctx);
 			if (page != null && perspectiveId != null && perspectiveId.length() > 0 && ctx.isResetPerspective()) {
@@ -155,23 +163,31 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 				// perspective
 				// collector.addAllJobs(10 * 1000);
 				setPageInput(page, getDefaultPageInput());
-				UIRunnable.exec(closeAllPerspectives(page));
-				UIRunnable.exec(cleanOtherPerspectives(page));
+				UIRunnable.exec(closeAllPerspectives(page), Math.toIntExact(stop - currentTimeMillis()), isCancelled);
+				UIRunnable.exec(cleanOtherPerspectives(page), Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 			}
 
-			UIRunnable.exec(setPerspective(ctx, page));
+			UIRunnable.exec(setPerspective(ctx, page), Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 
-			openParts(ctx);
+			openParts(ctx, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 
-			updateSelection(ctx);
+			updateSelection(ctx, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 			UIRunnable.exec(new UIRunnable<Object>() {
 				@Override
 				public Object run() throws CoreException {
 					collector.setNeedDisable();
 					return null;
 				}
-			});
-			collector.join(TeslaLimits.getContextJoinTimeout());
+			}, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
+			collector.join(TeslaLimits.getContextJoinTimeout(), isCancelled);
+		} catch (CoreException e) {
+			if (e.getStatus().matches(IStatus.CANCEL)) {
+				throw e;
+			}
+			CoreException ee = new CoreException(RcpttPlugin
+					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));
+			RcpttPlugin.log(e);
+			throw ee;			
 		} catch (Exception e) {
 			CoreException ee = new CoreException(RcpttPlugin
 					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));
@@ -182,7 +198,8 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		}
 	}
 
-	private void updateSelection(WorkbenchContext ctx) {
+	private void updateSelection(WorkbenchContext ctx, int timeout_ms, BooleanSupplier isCancelled) {
+		long stop = currentTimeMillis() + timeout_ms;
 		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
 		for (IWorkbenchWindow win : windows) {
 			IWorkbenchPage[] pages = win.getPages();
@@ -197,7 +214,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 						final ISelectionProvider provider = part.getSite().getSelectionProvider();
 						if (provider != null) {
 							try {
-								UIRunnable.exec(setSelection(provider));
+								UIRunnable.exec(setSelection(provider), Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 							} catch (Throwable e) {
 								RcpttPlugin.log(e);
 							}
@@ -261,6 +278,15 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 			@Override
 			public Object run() throws CoreException {
 				try {
+					// getViewReferences() returns invalid results if all perspectives are closed
+					// @see https://github.com/eclipse-platform/eclipse.platform.ui/issues/2978
+					IViewReference[] viewReferences = page.getViewReferences();
+					for (IViewReference i: viewReferences) {
+						// some views do not belong to a perspective, and are not closed on perspective reset, consuming screen space
+						// close them in a resetting workbench context explicitly
+						// @see https://github.com/eclipse-platform/eclipse.platform.ui/issues/2976
+						page.hideView(i);
+					}
 					page.closeAllPerspectives(false, false);
 				} catch (Throwable e) {
 					RcpttPlugin.log(e);
@@ -319,6 +345,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		}
 	}
 
+	@Override
 	public Context create(EObject param) throws CoreException {
 		return UIRunnable.exec(new UIRunnable<WorkbenchContext>() {
 			@Override
@@ -349,9 +376,9 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 		return activePage;
 	}
 
-	private void openParts(WorkbenchContext context) throws CoreException {
+	private void openParts(WorkbenchContext context, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
 		final IWorkbench workbench = PlatformUI.getWorkbench();
-
+		long stop = currentTimeMillis() + timeout_ms;
 		final IWorkbenchPage page = UIRunnable.exec(new UIRunnable<IWorkbenchPage>() {
 			@Override
 			public IWorkbenchPage run() throws CoreException {
@@ -368,7 +395,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 				}
 				return activePage;
 			}
-		});
+		}, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 		if (page != null) {
 			// show views
 			for (final String viewId : context.getViews()) {
@@ -387,7 +414,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 							page.showView(viewId);
 							return null;
 						}
-					});
+					}, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 				}
 			}
 			// close opened editors
@@ -398,7 +425,7 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 						page.closeAllEditors(false);
 						return null;
 					}
-				});
+				}, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
 			}
 			// open editors
 			try {

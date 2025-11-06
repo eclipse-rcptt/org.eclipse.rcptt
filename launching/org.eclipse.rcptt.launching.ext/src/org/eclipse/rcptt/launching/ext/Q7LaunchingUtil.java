@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -107,6 +108,11 @@ public class Q7LaunchingUtil {
 	public static void updateLaunchConfiguration(ITargetPlatformHelper target,
 			final ILaunchConfigurationWorkingCopy config) throws CoreException {
 		if (target != null) {
+			IStatus status = target.resolve(null);
+			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+				throw new CoreException(status);
+			}
+			
 			Q7TargetPlatformManager.setHelper(config, target);
 
 			config.setAttribute(IQ7Launch.TARGET_PLATFORM, target.getName());
@@ -124,7 +130,7 @@ public class Q7LaunchingUtil {
 			if (product == null && application == null) {
 				throw new CoreException(
 						Q7LaunchingPlugin
-								.createStatus("Failed to launch AUT since there is no Product and Application ID found."));
+								.createStatus("Failed to launch AUT since no Product and Application ID are found."));
 			}
 			config.setAttribute(IQ7Launch.AUT_LOCATION,
 					target.getTargetPlatformProfilePath());

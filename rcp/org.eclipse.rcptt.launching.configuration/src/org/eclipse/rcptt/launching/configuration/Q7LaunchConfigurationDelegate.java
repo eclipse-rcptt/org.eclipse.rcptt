@@ -235,6 +235,9 @@ public class Q7LaunchConfigurationDelegate extends
 					new FileOutputStream(config))) {
 				props.store(out, "Configuration File");
 			}
+			// Workaround for https://github.com/eclipse-oomph/oomph/issues/152
+			// Create a configured directory so that Oomph can ensure it is writable and use it and not fall back to default 
+			new File(config.getParent(), ".p2").mkdirs();
 		} catch (IOException e) {
 			throw new CoreException(Q7ExtLaunchingPlugin.status(e));
 		}
@@ -282,6 +285,7 @@ public class Q7LaunchConfigurationDelegate extends
 
 		Q7ExternalLaunchDelegate.BundlesToLaunch bundles = collector.getResult();
 
+		Q7ExternalLaunchDelegate.removeUnresolved(bundles);
 		Q7ExternalLaunchDelegate.setBundlesToLaunch(info, bundles);
 
 		Q7LaunchDelegateUtils.setDelegateFields(this, bundles.fModels, Maps.transformValues(bundles.fAllBundles.asMap(), ArrayList::new));

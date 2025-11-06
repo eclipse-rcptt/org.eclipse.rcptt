@@ -25,7 +25,7 @@ import org.eclipse.rcptt.ecl.core.Command;
  * </ul>
  *
  * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getEcho()
- * @model annotation="http://www.eclipse.org/ecl/docs description='Takes a string argument and writes it into an output pipe. ' returns='value of <code>str</code> argument' example='echo \"MyStr\" | log'"
+ * @model annotation="http://www.eclipse.org/ecl/docs description='Takes a string argument and writes it into an output pipe. ' returns='value of &lt;code&gt;str&lt;/code&gt; argument' example='echo \"MyStr\" | log'"
  * @generated
  */
 public interface Echo extends Command {
@@ -42,6 +42,7 @@ public interface Echo extends Command {
 	 * @see #setStr(String)
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getEcho_Str()
 	 * @model default=""
+	 *        annotation="http://www.eclipse.org/ecl/input"
 	 * @generated
 	 */
 	String getStr();

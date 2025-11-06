@@ -22,33 +22,30 @@ import org.eclipse.rcptt.internal.core.model.Q7Project;
 
 public class ModelUpdater {
 
-	protected void addToParentInfo(Openable child) {
+	protected void addToParentInfo(Openable child) throws InterruptedException {
 
 		Openable parent = (Openable) child.getParent();
-		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
-				info.addChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+		if (parent == null) {
+			return;
 		}
+		parent.accessInfoIfOpened(info -> {
+			info.addChild(child);
+			return null;
+		});
 	}
 
-	protected static void close(Openable element) {
-
+	protected static void close(Openable element) throws InterruptedException {
 		try {
 			element.close();
 		} catch (ModelException e) {
-			// do nothing
+			throw new IllegalStateException(e);
 		}
 	}
 
-	protected void elementAdded(Openable element) {
+	protected void elementAdded(Openable element) throws InterruptedException {
 
 		HandleType elementType = element.getElementType();
 		if (elementType.equals(HandleType.Project)) {
-
 			addToParentInfo(element);
 		} else {
 			addToParentInfo(element);
@@ -57,16 +54,14 @@ public class ModelUpdater {
 		}
 	}
 
-	protected void elementChanged(Openable element) {
+	protected void elementChanged(Openable element) throws InterruptedException {
 
 		close(element);
 	}
 
-	protected void elementRemoved(Openable element) {
+	protected void elementRemoved(Openable element) throws InterruptedException {
 
-		if (element.isOpen()) {
-			close(element);
-		}
+		close(element);
 		removeFromParentInfo(element);
 		HandleType elementType = element.getElementType();
 
@@ -91,8 +86,9 @@ public class ModelUpdater {
 	 * Converts a <code>IResourceDelta</code> rooted in a <code>Workspace</code>
 	 * into the corresponding set of <code>IModelElementDelta</code>, rooted in
 	 * the relevant <code>Model</code>s.
+	 * @throws InterruptedException 
 	 */
-	public void processDelta(IQ7ElementDelta delta) {
+	public void processDelta(IQ7ElementDelta delta) throws InterruptedException {
 
 		// if (DeltaProcessor.VERBOSE){
 		// System.out.println("UPDATING Model with Delta: ["+Thread.currentThread()+":"
@@ -109,17 +105,16 @@ public class ModelUpdater {
 	 * Removes the given element from its parents cache of children. If the
 	 * element does not have a parent, or the parent is not currently open, this
 	 * has no effect.
+	 * @throws InterruptedException 
 	 */
-	protected void removeFromParentInfo(Openable child) {
+	protected void removeFromParentInfo(Openable child) throws InterruptedException {
 
 		Openable parent = (Openable) child.getParent();
-		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
+		if (parent != null) {
+			parent.accessInfoIfOpened(info -> {
 				info.removeChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+				return null;
+			});
 		}
 	}
 
@@ -129,8 +124,9 @@ public class ModelUpdater {
 	 * corresponds to a resource on the buildpath. If it is not a resource on
 	 * the buildpath, it will be added as a non-java resource by the sender of
 	 * this method.
+	 * @throws InterruptedException 
 	 */
-	protected void traverseDelta(IQ7ElementDelta delta, IQ7Project project) {
+	protected void traverseDelta(IQ7ElementDelta delta, IQ7Project project) throws InterruptedException {
 
 		boolean processChildren = true;
 

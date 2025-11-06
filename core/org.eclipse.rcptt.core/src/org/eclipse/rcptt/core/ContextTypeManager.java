@@ -98,7 +98,7 @@ public class ContextTypeManager {
 		if (processor instanceof IEclAwareProcessor) {
 			((IEclAwareProcessor) processor).apply(context, session);
 		} else {
-			processor.apply(context);
+			processor.apply(context, () -> session.isClosed());
 		}
 	}
 

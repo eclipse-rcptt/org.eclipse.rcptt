@@ -11,10 +11,8 @@
 package org.eclipse.rcptt.internal.core.model;
 
 import org.eclipse.rcptt.core.model.IQ7Element;
-import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.model.ModelManager.PerWorkingCopyInfo;
-import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
 
 public class BecomeWorkingCopyOperation extends Q7Operation {
 
@@ -33,43 +31,21 @@ public class BecomeWorkingCopyOperation extends Q7Operation {
 		// state of this element
 		Q7NamedElement workingCopy = getWorkingCopy();
 		workingCopy.workingCopyMode = true;
+		workingCopy.setIndexing(indexing);
 		// create if needed, record usage
 		PerWorkingCopyInfo copyInfo = ModelManager.getModelManager()
 				.getPerWorkingCopyInfo(workingCopy, true, true);
+		
+		
 		try {
-			copyInfo.resourceInfo = (Q7ResourceInfo) workingCopy
-					.createElementInfo();
-			workingCopy.setIndexing(indexing);
-			workingCopy.openWhenClosed(copyInfo.resourceInfo,
-					this.progressMonitor);
-			// workingCopy.extractAllPersistence();
-
-			if (workingCopy.getResource().isAccessible()) {
-				// report a F_PRIMARY_WORKING_COPY change delta for a primary
-				// working copy
-				if (!indexing) {
-					Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
-					delta.changed(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
-					addDelta(delta);
-				}
-			} else {
-				if (!indexing) {
-					// report an ADDED delta
-					Q7ElementDelta delta = new Q7ElementDelta(this.getModel());
-					delta.added(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
-					addDelta(delta);
-				}
-			}
-
+			copyInfo.populate(this.progressMonitor);
 			this.resultElements = new IQ7Element[] { workingCopy };
 		} catch (ModelException e) {
 			workingCopy.discardWorkingCopy();
 			throw e;
-		} finally {
-			synchronized (copyInfo) {
-				copyInfo.complete = true;
-				copyInfo.notifyAll();
-			}
+		} catch (Throwable e) { 
+			workingCopy.discardWorkingCopy();
+			throw e;
 		}
 	}
 

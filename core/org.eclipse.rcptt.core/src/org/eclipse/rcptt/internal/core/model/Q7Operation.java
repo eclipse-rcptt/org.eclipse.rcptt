@@ -25,11 +25,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.IQ7Folder;
@@ -39,6 +41,7 @@ import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
+import org.osgi.framework.FrameworkUtil;
 
 @SuppressWarnings("rawtypes")
 public abstract class Q7Operation implements IWorkspaceRunnable,
@@ -193,6 +196,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 		}
 	}
 
+	@Override
 	public void beginTask(String name, int totalWork) {
 		if (progressMonitor != null) {
 			progressMonitor.beginTask(name, totalWork);
@@ -327,6 +331,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 		}
 	}
 
+	@Override
 	public void done() {
 		if (progressMonitor != null) {
 			progressMonitor.done();
@@ -374,8 +379,9 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 
 	/**
 	 * Performs the operation specific behavior. Subclasses must override.
+	 * @throws InterruptedException 
 	 */
-	protected abstract void executeOperation() throws ModelException;
+	protected abstract void executeOperation() throws ModelException, InterruptedException;
 
 	/*
 	 * Returns the index of the first registered action with the given id,
@@ -481,12 +487,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 	 * Creates and returns a subprogress monitor if appropriate.
 	 */
 	protected IProgressMonitor getSubProgressMonitor(int workAmount) {
-		IProgressMonitor sub = null;
-		if (progressMonitor != null) {
-			sub = new SubProgressMonitor(progressMonitor, workAmount,
-					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-		}
-		return sub;
+		return SubMonitor.convert(progressMonitor, workAmount);
 	}
 
 	/**
@@ -498,12 +499,14 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 				&& this.getAttribute(HAS_MODIFIED_RESOURCE_ATTR) == TRUE;
 	}
 
+	@Override
 	public void internalWorked(double work) {
 		if (progressMonitor != null) {
 			progressMonitor.internalWorked(work);
 		}
 	}
 
+	@Override
 	public boolean isCanceled() {
 		if (progressMonitor != null) {
 			return progressMonitor.isCanceled();
@@ -534,12 +537,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 	 */
 	protected void moveResources(IResource[] resources, IPath destinationPath)
 			throws ModelException {
-		IProgressMonitor subProgressMonitor = null;
-		if (progressMonitor != null) {
-			subProgressMonitor = new SubProgressMonitor(progressMonitor,
-					resources.length,
-					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-		}
+		IProgressMonitor subProgressMonitor = getSubProgressMonitor(resources.length);
 		IWorkspace workspace = resources[0].getWorkspace();
 		try {
 			workspace.move(resources, destinationPath, false,
@@ -674,6 +672,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 	 * @exception CoreException
 	 *                if the operation fails
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
 		ModelManager manager = ModelManager.getModelManager();
 		DeltaProcessor deltaProcessor = manager.getDeltaProcessor();
@@ -683,6 +682,8 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 			pushOperation(this);
 			try {
 				executeOperation();
+			} catch (InterruptedException e) {
+				throw new CoreException(error(e));
 			} finally {
 				if (this.isTopLevelOperation()) {
 					this.runPostActions();
@@ -733,10 +734,16 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 					} // else deltas are fired while processing the resource
 						// delta
 				}
+			} catch (InterruptedException e) {
+				throw new CoreException(error(e));
 			} finally {
 				popOperation();
 			}
 		}
+	}
+
+	private  final IStatus error(InterruptedException e) {
+		return new Status(IStatus.CANCEL, FrameworkUtil.getBundle(getClass()).getSymbolicName(), 0, "Interrupted", e);
 	}
 
 	/**
@@ -799,6 +806,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 		topLevelOp.attributes.put(key, attribute);
 	}
 
+	@Override
 	public void setCanceled(boolean value) {
 		if (progressMonitor != null) {
 			progressMonitor.setCanceled(value);
@@ -814,12 +822,14 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 		isNested = nested;
 	}
 
+	@Override
 	public void setTaskName(String name) {
 		if (progressMonitor != null) {
 			progressMonitor.setTaskName(name);
 		}
 	}
 
+	@Override
 	public void subTask(String name) {
 		if (progressMonitor != null) {
 			progressMonitor.subTask(name);
@@ -839,6 +849,7 @@ public abstract class Q7Operation implements IWorkspaceRunnable,
 		return commonVerify();
 	}
 
+	@Override
 	public void worked(int work) {
 		if (progressMonitor != null) {
 			progressMonitor.worked(work);

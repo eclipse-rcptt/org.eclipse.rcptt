@@ -137,7 +137,7 @@ public enum BaseAutManager implements AutManager, ILaunchConfigurationListener,
 					for (AutListener listener : listeners) {
 						listener.launchRemoved(autLaunch);
 					}
-					autLaunch.terminate();
+					autLaunch.shutdown();
 				}
 			}
 		}

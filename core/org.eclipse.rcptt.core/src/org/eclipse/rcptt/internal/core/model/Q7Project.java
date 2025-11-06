@@ -65,12 +65,12 @@ public class Q7Project extends Openable implements IQ7Project {
 		return project;
 	}
 
-	public Object[] getForeignResources() throws ModelException {
-		return ((Q7ProjectInfo) getElementInfo()).getForeignResources(project);
+	public Object[] getForeignResources() throws ModelException, InterruptedException {
+		return openAndAccessInfo(info -> ((Q7ProjectInfo)info).getForeignResources(project), null);
 	}
 
 	protected boolean buildStructure(OpenableElementInfo info,
-			IProgressMonitor pm, Map<IQ7Element, Object> newElements,
+			IProgressMonitor pm, 
 			IResource underlyingResource) throws ModelException {
 		// check whether this project fragment can be opened
 		if (!this.resourceExists()) {
@@ -80,11 +80,10 @@ public class Q7Project extends Openable implements IQ7Project {
 		getMetadata(); // Trigger metadata creation.
 
 		// TODO determine fragment kind
-		return this.computeChildren(info, newElements);
+		return this.computeChildren(info);
 	}
 
-	protected boolean computeChildren(OpenableElementInfo info,
-			Map<IQ7Element, Object> newElements) throws ModelException {
+	protected boolean computeChildren(OpenableElementInfo info) throws ModelException {
 		try {
 			IResource underlyingResource = this.getResource();
 			if (underlyingResource.getType() == IResource.FOLDER
@@ -137,7 +136,7 @@ public class Q7Project extends Openable implements IQ7Project {
 	}
 
 	@Override
-	protected Object createElementInfo() {
+	protected Q7ProjectInfo createElementInfo() {
 		return new Q7ProjectInfo();
 	}
 
@@ -145,7 +144,7 @@ public class Q7Project extends Openable implements IQ7Project {
 		return project.getName();
 	}
 
-	public IQ7Folder[] getFolders() throws ModelException {
+	public IQ7Folder[] getFolders() throws ModelException, InterruptedException {
 		List<IQ7Element> result = getChildrenOfType(HandleType.Folder);
 		return result.toArray(new IQ7Folder[result.size()]);
 	}

@@ -39,7 +39,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-final class DmgExtract {
+public final class DmgExtract {
 
 	private static final XPathExpression KEYS;
 	static {

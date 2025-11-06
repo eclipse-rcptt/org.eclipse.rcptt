@@ -24,17 +24,18 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
-
 import org.eclipse.rcptt.core.model.IElementChangedListener;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7Element.HandleType;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.IQ7Folder;
-import org.eclipse.rcptt.core.model.IQ7Model;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -43,7 +44,7 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.internal.core.model.ModelInfo;
 import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.Openable;
-import org.eclipse.rcptt.internal.core.model.Q7ElementInfo;
+import org.eclipse.rcptt.internal.core.model.OpenableElementInfo;
 import org.eclipse.rcptt.internal.core.model.Q7FolderInfo;
 import org.eclipse.rcptt.internal.core.model.Q7Model;
 import org.eclipse.rcptt.internal.core.model.Q7NamedElement;
@@ -51,11 +52,13 @@ import org.eclipse.rcptt.internal.core.model.Q7Project;
 import org.eclipse.rcptt.internal.core.model.Q7ProjectInfo;
 import org.eclipse.rcptt.internal.core.model.index.IndexManager;
 import org.eclipse.rcptt.internal.core.model.index.ProjectIndexerManager;
+import org.osgi.framework.FrameworkUtil;
 
 public class DeltaProcessor {
 	public static boolean DEBUG = false;
 	public static boolean VERBOSE = false;
 	public static final int DEFAULT_CHANGE_EVENT = 0; // must not collide with
+	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(DeltaProcessor.class));
 
 	// ElementChangedEvent
 	// event masks
@@ -168,16 +171,18 @@ public class DeltaProcessor {
 	/*
 	 * Adds the given child handle to its parent's cache of children.
 	 */
-	private void addToParentInfo(Openable child) {
+	private void addToParentInfo(Openable child) throws InterruptedException {
 		Openable parent = (Openable) child.getParent();
-		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
-				info.addChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+		if (parent == null) {
+			return;
 		}
+		parent.accessInfo(info -> {
+			OpenableElementInfo openable = (OpenableElementInfo) info;
+			if (openable.isStructureKnown()) {
+				info.addChild(child);
+			}
+			return null;
+		});
 	}
 
 	/*
@@ -190,7 +195,7 @@ public class DeltaProcessor {
 				this.rootsToRefresh);
 	}
 
-	private void checkProjectsBeingAddedOrRemoved(IResourceDelta delta) {
+	private void checkProjectsBeingAddedOrRemoved(IResourceDelta delta) throws InterruptedException {
 		IResource resource = delta.getResource();
 		IResourceDelta[] children = null;
 
@@ -289,7 +294,12 @@ public class DeltaProcessor {
 		try {
 			element.close();
 		} catch (ModelException e) {
-			// do nothing
+			LOG.log(e.getStatus());
+		} catch(InterruptedException e) {
+			Thread.currentThread().interrupt();
+			OperationCanceledException result = new OperationCanceledException();
+			result.initCause(e);
+			throw result;
 		}
 	}
 
@@ -318,7 +328,7 @@ public class DeltaProcessor {
 	 * none was found.
 	 */
 	private Openable createElement(IResource resource, HandleType elementType,
-			Q7Project rootInfo) {
+			Q7Project rootInfo) throws InterruptedException {
 		if (resource == null) {
 			return null;
 		}
@@ -437,7 +447,7 @@ public class DeltaProcessor {
 	/*
 	 * Note that the project is about to be deleted.
 	 */
-	private void deleting(IProject project) {
+	private void deleting(IProject project) throws InterruptedException {
 
 		try {
 			// discard indexing jobs that belong to this project so that the
@@ -458,7 +468,7 @@ public class DeltaProcessor {
 		}
 	}
 
-	private void elementAdded(Openable element, IResourceDelta delta) {
+	private void elementAdded(Openable element, IResourceDelta delta) throws InterruptedException {
 		HandleType elementType = element.getElementType();
 		if (elementType.equals(HandleType.Project)) {
 			// project add is handled by DylanProject.configure() because
@@ -534,7 +544,7 @@ public class DeltaProcessor {
 	 * parent's cache of children <li>Add a REMOVED entry in the delta </ul>
 	 * Delta argument could be null if processing an external ZIP change
 	 */
-	private void elementRemoved(Openable element, IResourceDelta delta, Q7Project rootInfo) {
+	private void elementRemoved(Openable element, IResourceDelta delta, Q7Project rootInfo) throws InterruptedException {
 		HandleType elementType = element.getElementType();
 		if (delta == null || (delta.getFlags() & IResourceDelta.MOVED_TO) == 0) {
 			// regular element removal
@@ -849,15 +859,14 @@ public class DeltaProcessor {
 	 * reporting a content change (K_CHANGE with F_CONTENT flag set). </ul>
 	 */
 	private void nonQ7ResourcesChanged(Openable element, IResourceDelta delta)
-			throws ModelException {
+			throws ModelException, InterruptedException {
 		// reset non-q7 resources if element was open
-		if (element.isOpen()) {
-			Q7ElementInfo info = (Q7ElementInfo) element.getElementInfo();
+		boolean cont = element.accessInfoIfOpened(info -> {
 			switch (element.getElementType()) {
 			case Model:
 				((ModelInfo) info).foreignResources = null;
 				this.currentDelta().addResourceDelta(delta);
-				return;
+				return false;
 			case Project:
 				((Q7ProjectInfo) info).setForeignResources(null);
 				// if a package fragment root is the project, clear it too
@@ -866,6 +875,10 @@ public class DeltaProcessor {
 				((Q7FolderInfo) info).setForeignResources(null);
 				break;
 			}
+			return true;
+		}).orElse(true);
+		if (!cont) {
+			return;
 		}
 		Q7ElementDelta current = this.currentDelta();
 		Q7ElementDelta elementDelta = current.find(element);
@@ -899,20 +912,13 @@ public class DeltaProcessor {
 		}
 	}
 
-	private IQ7ElementDelta processResourceDelta(IResourceDelta changes) {
+	private IQ7ElementDelta processResourceDelta(IResourceDelta changes) throws InterruptedException {
 		try {
-			IQ7Model model = this.manager.getModel();
-			if (!model.isOpen()) {
-				// force opening of q7 model so that model element delta are
-				// reported
-				try {
-					model.open(null);
-				} catch (ModelException e) {
-					if (VERBOSE) {
-						e.printStackTrace();
-					}
-					return null;
-				}
+			Q7Model model = this.manager.getModel();
+			try {
+				model.openAndAccessInfo(ignored -> null, null);
+			} catch (ModelException e) {
+				throw new AssertionError(e);
 			}
 			this.currentElement = null;
 			// get the workspace delta, and start processing there.
@@ -1009,16 +1015,18 @@ public class DeltaProcessor {
 	 * element does not have a parent, or the parent is not currently open, this
 	 * has no effect.
 	 */
-	private void removeFromParentInfo(Openable child) {
+	private void removeFromParentInfo(Openable child) throws InterruptedException {
 		Openable parent = (Openable) child.getParent();
-		if (parent != null && parent.isOpen()) {
-			try {
-				Q7ElementInfo info = (Q7ElementInfo) parent.getElementInfo();
-				info.removeChild(child);
-			} catch (ModelException e) {
-				// do nothing - we already checked if open
-			}
+		if (parent == null) {
+			return;
 		}
+		parent.accessInfo(info -> {
+			OpenableElementInfo openable = (OpenableElementInfo) info;
+			if (openable.isStructureKnown()) {
+				info.removeChild(child);
+			}
+			return null;
+		});
 	}
 
 	/*
@@ -1032,7 +1040,7 @@ public class DeltaProcessor {
 	 * @see IResource
 	 */
 	@SuppressWarnings("unused")
-	public void resourceChanged(IResourceChangeEvent event) {
+	public void resourceChanged(IResourceChangeEvent event) throws InterruptedException {
 		int eventType = this.overridenEventType == -1 ? event.getType()
 				: this.overridenEventType;
 		IResource resource = event.getResource();
@@ -1121,7 +1129,7 @@ public class DeltaProcessor {
 	}
 
 	private void traverseDelta(IResourceDelta delta, HandleType elementType,
-			Q7Project rootInfo, Set<IQ7NamedElement> toIndex) {
+			Q7Project rootInfo, Set<IQ7NamedElement> toIndex) throws InterruptedException {
 
 		IResource res = delta.getResource();
 		// set stack of elements
@@ -1185,7 +1193,7 @@ public class DeltaProcessor {
 	}
 
 	public boolean updateCurrentDeltaAndIndex(IResourceDelta delta,
-			HandleType elementType, Q7Project rootInfo, Set<IQ7NamedElement> toIndex) {
+			HandleType elementType, Q7Project rootInfo, Set<IQ7NamedElement> toIndex) throws InterruptedException {
 		Openable element;
 		switch (delta.getKind()) {
 		case IResourceDelta.ADDED:
@@ -1385,7 +1393,7 @@ public class DeltaProcessor {
 	/*
 	 * Update Model given some delta
 	 */
-	public void updateModel(IQ7ElementDelta customDelta) {
+	public void updateModel(IQ7ElementDelta customDelta) throws InterruptedException {
 		if (customDelta == null) {
 			for (int i = 0, length = this.modelDeltas.size(); i < length; i++) {
 				IQ7ElementDelta delta = this.modelDeltas.get(i);

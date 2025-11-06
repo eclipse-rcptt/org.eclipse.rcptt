@@ -32,7 +32,7 @@ public class Q7Context extends Q7NamedElement implements IContext {
 	}
 
 	public ContextType getType() throws ModelException {
-		NamedElement element = getInfo().getNamedElement();
+		NamedElement element = getNamedElement();
 		return ContextTypeManager.getInstance().getTypeByContext(
 				(Context) element);
 	}

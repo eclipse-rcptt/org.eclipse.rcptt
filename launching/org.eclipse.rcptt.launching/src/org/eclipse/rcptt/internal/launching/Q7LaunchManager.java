@@ -721,8 +721,8 @@ public class Q7LaunchManager {
 				public void run() {
 					try {
 						runnable.run();
-					} catch (Exception e) {
-						Q7LaunchingPlugin.log(e);
+					} catch (Throwable e) {
+						session.stop( RcpttPlugin.createStatus(e));
 					} finally {
 						complete = true;
 					}

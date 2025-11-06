@@ -15,7 +15,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER_NAME="ubuntu"
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
-      image: basilevs/ubuntu-rcptt:3.7.1
+      image: basilevs/ubuntu-rcptt:3.7.3
       imagePullPolicy: Always
       tty: true
       resources:
@@ -90,6 +90,7 @@ class Build implements Serializable {
   private final String[] PLATFORMS=["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"];
 
   private final def script
+  private String mvn_args;
 
   String YAML_BUILD_AGENT="""
 apiVersion: v1
@@ -115,6 +116,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   Build(def script) {
     this.script = script
+    this.mvn_args = ""
   }
 
   void build_and_test(Boolean sign) {
@@ -183,7 +185,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void get_version_from_pom() {
-    return sh_with_return("mvn -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
+    return sh_with_return("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
   }
 
   private void get_version() {
@@ -201,7 +203,6 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         "rcpttTests",
         "-DrcpttPath=${getWorkspace()}/$PRODUCTS_DIR/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip"
       )
-      this.script.junit "rcpttTests/target/*-reports/*.xml"
     }
   }
 
@@ -215,7 +216,6 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
           "mockups/rcpttTests",
           "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
       )
-      this.script.junit "mockups/rcpttTests/target/*-reports/*.xml"
     }
   }
 
@@ -238,6 +238,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 	    this.script.sh "test -f ${dir}/target/results/tests.html"
     } finally {
 	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
+      this.script.junit "${dir}/target/*-reports/*.xml"
     }
   }
 
@@ -358,9 +359,24 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   private void maven_deploy(String version) {
     withBuildContainer() {
-      mvn('-Dtycho.mode=maven -f runner/product org.eclipse.tycho:tycho-versions-plugin::set-version -DnewVersion=' + version)
+      def repo = version.endsWith("-SNAPSHOT") ? "snapshots" : "releases"
+      def classifiers = PLATFORMS
+      def types = PLATFORMS.collect { "zip" }
+      def files = PLATFORMS.collect { "`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${it}.zip`" }
       mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
-      mvn('-f releng/runner/pom.xml clean deploy')
+      mvn("deploy:deploy-file \
+        -Dversion=$version \
+        -Durl=https://repo.eclipse.org/content/repositories/rcptt-$repo/ \
+        -DgroupId=org.eclipse.rcptt.runner \
+        -DrepositoryId=repo.eclipse.org \
+        -DgeneratePom=true \
+        -DartifactId=rcptt.runner \
+        -Dfile=${files[0]} \
+        -Dclassifier=${classifiers[0]} \
+        \"-Dfiles=${files[1..-1].join(",")}\" \
+        -Dclassifiers=${classifiers[1..-1].join(",")} \
+        -Dtypes=${types[1..-1].join(",")} \
+        ")
       mvn('-f maven-plugin/pom.xml clean deploy')
     }
   }
@@ -370,7 +386,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + this.mvn_args + " " + arguments)
   } 
 
 }

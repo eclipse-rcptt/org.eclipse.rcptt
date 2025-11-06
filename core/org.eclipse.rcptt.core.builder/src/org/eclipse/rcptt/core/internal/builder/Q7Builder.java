@@ -29,10 +29,12 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rcptt.core.builder.IQ7ProblemReporter.ProblemType;
@@ -57,12 +59,14 @@ import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.ReferencedProjectScope;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
 import org.eclipse.rcptt.internal.core.model.index.NamedElementCollector;
+import org.osgi.framework.FrameworkUtil;
 
 public class Q7Builder extends IncrementalProjectBuilder {
 
 	private static final String MSG_Q7_Builder = "RCP Testing Tool: Checking model consistency";
 	private static boolean isEnable = true;
 	private static List<Runnable> listeners = new ArrayList<Runnable>();
+	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(Q7Builder.class));
 	
 	/** Listener is called at the end of each project build */
 	public static synchronized void addListener(Runnable runnable) {
@@ -194,11 +198,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		ModelManager.getModelManager().projectStartBuilding(getProject());
 		try {
 			while (debug_sleep) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					// Ignore
-				}
+				Thread.sleep(50);
 			}
 			ModelManager.getModelManager().getIndexManager()
 					.waitUntilReady(new NullProgressMonitor());// new
@@ -220,8 +220,10 @@ public class Q7Builder extends IncrementalProjectBuilder {
 					}
 				}
 			}
+		} catch (InterruptedException e) {
+			throw new CoreException(error(e));
 		} catch (RuntimeException e) {
-			log(e);
+			throw new CoreException(error(e));
 		} finally {
 			monitor.done();
 			ModelManager.getModelManager().projectStopBuilding(getProject());
@@ -255,7 +257,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void fullBuild(final IProgressMonitor monitor)
-			throws CoreException {
+			throws CoreException, InterruptedException {
 		try {
 			monitor.beginTask(MSG_Q7_Builder, 100);
 			NamedElementCollector collector = new NamedElementCollector() {
@@ -292,7 +294,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void incrementalBuild(IResourceDelta delta,
-			IProgressMonitor monitor) throws CoreException {
+			IProgressMonitor monitor) throws CoreException, InterruptedException {
 		monitor.beginTask(MSG_Q7_Builder, 40);
 		// Check for project metadata file change
 		boolean needFullBuildProjectMetadataChange = false;
@@ -559,4 +561,13 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		}
 		return rv;
 	}
+	
+	private static IStatus error(InterruptedException e) {
+		return new Status(IStatus.CANCEL, LOG.getBundle().getSymbolicName(), 0, "Interrupted", e);
+	}
+	
+	private static IStatus error(Exception e) {
+		return new Status(IStatus.CANCEL, LOG.getBundle().getSymbolicName(), 0, e.getLocalizedMessage(), e);
+	}
+
 }

@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.preferences.impl;
 
+import static java.lang.Math.toIntExact;
+import static java.lang.System.currentTimeMillis;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -53,7 +57,9 @@ public class PreferencesContextProcessor implements IContextProcessor {
 	private static final String[] EXCLUDE_SCOPE_LIST = new String[] {
 			DefaultScope.SCOPE, ConfigurationScope.SCOPE };
 
-	public void apply(final Context contextToApply) throws CoreException {
+	@Override
+	public void apply(final Context contextToApply, BooleanSupplier isCancelled) throws CoreException {
+		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
 		final UIJobCollector collector = new UIJobCollector();
 		Job.getJobManager().addJobChangeListener(collector);
 		SWTUIPlayer.disableMessageDialogs();
@@ -65,15 +71,15 @@ public class PreferencesContextProcessor implements IContextProcessor {
 					doApply((PreferencesContext) contextToApply);
 					return null;
 				}
-			});
+			},  toIntExact(stop - currentTimeMillis()), isCancelled);
 			UIRunnable.exec(new UIRunnable<Object>() {
 				@Override
 				public Object run() throws CoreException {
 					collector.setNeedDisable();
 					return null;
 				}
-			});
-			collector.join(TeslaLimits.getJobTimeout());
+			},  toIntExact(stop - currentTimeMillis()), isCancelled);
+			collector.join(TeslaLimits.getJobTimeout(), isCancelled);
 		} catch (Exception e) {
 			CoreException ee = new CoreException(RcpttPlugin.createStatus(
 					"Failed to execute context: " + contextToApply.getName()
@@ -86,6 +92,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		}
 	}
 
+	@Override
 	public Context create(EObject param) throws CoreException {
 		UIRunnable.exec(new UIRunnable<PreferencesContext>() {
 			@Override
@@ -228,6 +235,7 @@ public class PreferencesContextProcessor implements IContextProcessor {
 		}
 	}
 
+	@Override
 	public boolean isApplied(Context context) {
 		throw new UnsupportedOperationException();
 	}

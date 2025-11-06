@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
-
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
@@ -28,22 +28,26 @@ public class AllProjectScope implements ISearchScope {
 			List<IPath> result = new ArrayList<IPath>();
 			IQ7Project[] projects;
 			try {
-				projects = ModelManager.getModelManager().getModel()
-						.getProjects();
-				for (IQ7Project iq7Project : projects) {
-					result.add(iq7Project.getPath());
-				}
+				projects = ModelManager.getModelManager().getModel().getProjects();
 			} catch (ModelException e) {
-				RcpttPlugin.log(e);
+				throw new IllegalStateException(e);
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+				OperationCanceledException e2 = new OperationCanceledException();
+				e2.initCause(e);
+				throw e2;
+			}
+			for (IQ7Project iq7Project : projects) {
+				result.add(iq7Project.getPath());
 			}
 			paths = (IPath[]) result.toArray(new IPath[result.size()]);
 		}
 		return paths;
 	}
 
-	public boolean contains(IPath path) {
-		getPaths();
-		for (IPath p : paths) {
+	@Override
+	public boolean contains(IPath path){
+		for (IPath p : getPaths()) {
 			if (p.isPrefixOf(path)) {
 				return true;
 			}
