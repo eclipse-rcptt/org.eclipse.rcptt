@@ -8,7 +8,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.telnet.server;bundle-version="[2.8.0,3.0.0)"
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Automatic-Module-Name: org.eclipse.rcptt.ecl.telnet.server.ui

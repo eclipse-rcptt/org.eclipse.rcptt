@@ -4,7 +4,7 @@ Bundle-Name: RCPTT Utilities Plugin which depends on JaveSE only
 Bundle-SymbolicName: org.eclipse.rcptt.util;singleton:=true
 Bundle-Version: 2.8.0.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.rcptt.util
 Require-Bundle: org.eclipse.core.runtime,
  org.jsoup;resolution:=optional

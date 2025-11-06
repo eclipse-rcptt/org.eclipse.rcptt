@@ -6,7 +6,7 @@ Bundle-Version: 2.8.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore,
  org.eclipse.rcptt.core.scenario,
