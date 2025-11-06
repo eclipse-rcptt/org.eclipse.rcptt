@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sherlock UI
 Bundle-SymbolicName: org.eclipse.rcptt.watson.ui
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.8.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.sherlock.ui.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.watson.core;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.watson.jobs;bundle-version="[2.7.2,3.0.0)",
+ org.eclipse.rcptt.watson.core;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.watson.jobs;bundle-version="[2.8.0,3.0.0)",
  org.eclipse.draw2d
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy

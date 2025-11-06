@@ -29,6 +29,7 @@ import org.eclipse.pde.internal.launching.IPDEConstants;
 import org.eclipse.pde.internal.launching.launcher.LaunchConfigurationHelper;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.launching.aut.BaseAutManager;
+import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
@@ -77,19 +78,13 @@ public class NewAUTWizard extends Wizard {
 			ILaunchConfigurationWorkingCopy workingCopy = Q7LaunchingUtil
 					.createLaunchConfiguration(target, page.getTargetName());
 			OSArchitecture autArch = page.getArchitecture();
-			workingCopy.setAttribute(Q7LaunchingCommon.ATTR_ARCH,
-					autArch.name());
-			OSArchitecture jvmArch = page.getJVMArch();
 			List<String> vmArgs = Q7LaunchDelegateUtils.getVMArgs(target, null);
-			if (!autArch.equals(jvmArch)
-					&& Platform.getOS().equals(Platform.OS_MACOSX) && autArch.equals(OSArchitecture.x86)) {
-				UpdateVMArgs.addIfAbsent(vmArgs, ATTR_D32, "");
-			}
 			workingCopy
 					.setAttribute(
 							IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 							Q7LaunchDelegateUtils.joinCommandArgs(vmArgs));
 
+			
 			IVMInstall install = page.getJVMInstall();
 			if (install != null) {
 				workingCopy
