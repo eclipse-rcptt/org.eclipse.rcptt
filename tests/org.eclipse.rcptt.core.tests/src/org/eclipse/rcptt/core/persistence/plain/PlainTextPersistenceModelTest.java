@@ -177,7 +177,6 @@ public class PlainTextPersistenceModelTest {
 		}
 	}
 	
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test
 	public void ensureNoCrosstalkBetweenDifferentFiles() throws IOException, CoreException {
 		IQ7Project project = getProject();
