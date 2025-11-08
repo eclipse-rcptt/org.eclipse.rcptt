@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.group.impl;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,8 +44,9 @@ public class GroupContextProcessor implements IContextProcessor, IEclAwareProces
 	}
 
 	@Override
-	public void apply(Context context) throws CoreException {
-		apply(context, null);
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
+		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+				getClass().getName() + " is ECL-aware and must be passed a session object", null));
 	}
 
 	@Override

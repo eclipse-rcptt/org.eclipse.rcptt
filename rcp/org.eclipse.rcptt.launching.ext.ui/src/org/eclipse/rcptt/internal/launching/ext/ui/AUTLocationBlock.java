@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.PLUGIN_ID;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,9 +20,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.Launch;
 import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -29,6 +30,7 @@ import org.eclipse.pde.internal.ui.SWTFactory;
 import org.eclipse.rcptt.internal.launching.ext.PDELocationUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -69,6 +71,7 @@ public class AUTLocationBlock {
 
 	private class Listener extends SelectionAdapter implements ModifyListener {
 
+		@Override
 		public void modifyText(ModifyEvent e) {
 			if (needUpdate) {
 				updateInfo();
@@ -100,17 +103,18 @@ public class AUTLocationBlock {
 		}
 
 		if (needUpdate && valid) {
-			info = null;
 			runInDialog(new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						info = Q7TargetPlatformManager.getTarget(original, monitor);
-						assert info.getStatus().isOK();
+						setTarget(updateTarget(monitor));
 					} catch (CoreException e) {
 						setStatus(e.getStatus());
 					}
+					done(monitor);
 				}
+
 			});
 		}
 		if (info != null) {
@@ -208,14 +212,15 @@ public class AUTLocationBlock {
 		}
 		needUpdate = false;
 		runInDialog(new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				try {
-					info = Q7TargetPlatformManager.getTarget(original, monitor);
+					setTarget(updateTarget(monitor));
 				} catch (CoreException e) {
-					Activator.log(e);
+					setStatus(e.getStatus());
 				}
-
+				done(monitor);
 			}
 		});
 		locationField.setText(location);
@@ -223,11 +228,36 @@ public class AUTLocationBlock {
 		needUpdate = true;
 	}
 	
+	private void setTarget(ITargetPlatformHelper updateTarget) {
+		ITargetPlatformHelper old = info;
+		info = null;
+		if (old != null) {
+			old.delete();
+		}
+		info = updateTarget;
+	}
+
+	private ITargetPlatformHelper updateTarget(IProgressMonitor monitor) throws CoreException {
+		SubMonitor sm = SubMonitor.convert(monitor, 2);
+		ITargetPlatformHelper temp = Q7TargetPlatformManager.getTarget(original, sm.split(1));
+		if (temp.getStatus().matches(IStatus.ERROR|IStatus.CANCEL)) {
+			throw new CoreException(temp.getStatus());
+		}
+		JvmTargetCompatibility compatibility = new JvmTargetCompatibility(temp);
+		IStatus result = compatibility.validate(sm.split(1));
+		if (result.matches(IStatus.ERROR|IStatus.CANCEL)) {
+			temp.delete();
+			throw new CoreException(result);
+		}
+		return temp;
+	}
+
 	private void runInDialog(final IRunnableWithProgress run) {
 		final TimeTriggeredProgressMonitorDialog dialog = new TimeTriggeredProgressMonitorDialog(
 				fTab.getControl().getShell(), 500);
 		try {
 			dialog.run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					run.run(new SyncProgressMonitor(monitor, dialog.getShell()

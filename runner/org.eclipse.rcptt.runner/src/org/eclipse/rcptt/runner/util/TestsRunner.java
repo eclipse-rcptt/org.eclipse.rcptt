@@ -19,8 +19,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,11 +49,13 @@ import org.eclipse.rcptt.core.workspace.IWorkspaceFinder;
 import org.eclipse.rcptt.core.workspace.ProjectUtil;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.core.workspace.WorkspaceFinder;
+import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.eclipse.rcptt.internal.core.model.Q7InternalContext;
 import org.eclipse.rcptt.internal.core.model.Q7TestCase;
 import org.eclipse.rcptt.internal.core.model.index.NamedElementCollector;
-import org.eclipse.rcptt.internal.core.model.index.TestSuiteElementCollector;
 import org.eclipse.rcptt.internal.launching.TestEngineManager;
+import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
+import org.eclipse.rcptt.launching.utils.TestSuiteElementCollector;
 import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
 import org.eclipse.rcptt.runner.HeadlessRunner;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
@@ -83,7 +87,7 @@ public class TestsRunner {
 		auts = new AUTsManager(conf, caller.tpc);
 	}
 
-	public Q7ReportIterator findAndRunTests() throws CoreException, AutLaunchFail {
+	public Q7ReportIterator findAndRunTests() throws CoreException, AutLaunchFail, InterruptedException {
 		System.out.println("Looking for tests...");
 
 		TestSuite[] tests;
@@ -115,8 +119,7 @@ public class TestsRunner {
 		return false;
 	}
 
-	private TestSuite[] findScenarios() throws CoreException {
-		final List<TestSuite> tests = new ArrayList<TestSuite>();
+	private TestSuite[] findScenarios() throws CoreException, InterruptedException {
 		final List<String> testNamePatterns = buildTestNamePatterns(conf.toTest);
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription descrition = workspace.getDescription();
@@ -138,24 +141,31 @@ public class TestsRunner {
 			return new TestSuite[0];
 		}
 
-		System.out.println("Searching for tests in projects:");
-		for (final IProject project : projects) {
-			final TestSuite suite = new TestSuite(project);
-			System.out.println(String.format("    %s... ", project.getName()));
-			IQ7Project q7Projet = RcpttCore.create(project);
+		System.out.println("Searching for tests in workspace:");
 			NamedElementCollector collector = null;
 			if (conf.suites.size() == 0) {
 				collector = new NamedElementCollector(HandleType.TestCase);
 			} else {
 				collector = new TestSuiteElementCollector(conf.suites, true);
 			}
+			
 			try {
-				q7Projet.accept(collector);
-			} catch (ModelException e) {
-				System.out.println(String.format("ERROR: %s", e.getMessage()));
-				continue;
+				ModelManager.getModelManager().getModel().accept(collector);
+			} catch (CheckedExceptionWrapper e) {
+				e.rethrow(CoreException.class);
+				e.rethrow(InterruptedException.class);
+				e.rethrowUnchecked();
+				throw e;
 			}
 			IWorkspaceFinder finder = WorkspaceFinder.getInstance();
+			if (collector instanceof TestSuiteElementCollector ts) {
+				Set<String> absent = ts.getAbsentSuites();
+				if (!absent.isEmpty()) {
+					throw new CoreException(Status.error(String.format("Test suites %s were not found", absent)));
+				}
+			}
+			
+			Map<IQ7Project, TestSuite> result = new HashMap<>();
 			for (IQ7NamedElement element : collector.getElements()) {
 				if (!(element instanceof ITestCase)) {
 					continue;
@@ -178,21 +188,24 @@ public class TestsRunner {
 					continue;
 				}
 
-				if (ensureIntegrity(tcase, finder, new HashSet<String>()))
-					suite.add(tcase);
-
+				if (!ensureIntegrity(tcase, finder, new HashSet<String>())) {
+					throw new CoreException(Status.error(tcase.getPath() + " is malformed"));
+				}
+				
+				TestSuite suite = result.computeIfAbsent(tcase.getQ7Project(), p -> new TestSuite(p.getProject()));
+				suite.add(tcase);
 			}
-			if (conf.suites.size() == 0)
-				suite.sort();
+			
+			if (conf.suites.size() == 0) {
+				result.values().forEach(TestSuite::sort);
+			}
 
-			if (suite.getScenarios().size() == 0) {
+			if (result.isEmpty()) {
 				System.out.println(String.format("No tests found"));
 			} else {
-				tests.add(suite);
 				System.out.println("Complete OK");
 			}
-		}
-		return tests.toArray(new TestSuite[tests.size()]);
+		return result.values().toArray(new TestSuite[0]);
 	}
 
 	private boolean isSkipExecuton(ITestCase testCase) {

@@ -19,11 +19,6 @@
             genModel="model/objects.genmodel"
             uri="http://www.eclipse.org/ecl/platform/objects.ecore">
      </package>
-     <package
-            class="org.eclipse.rcptt.ecl.platform.commands.CommandsPackage"
-            genModel="model/commands.genmodel"
-            uri="http://www.eclipse.org/ecl/platform/commands.ecore">
-      </package>
      
    </extension>
    <extension
@@ -137,4 +132,12 @@
             name="errorLog">
       </listenSource>
    </extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated commands -->
+      <package
+            uri="http://www.eclipse.org/ecl/platform/commands.ecore"
+            class="org.eclipse.rcptt.ecl.platform.commands.CommandsPackage"
+            genModel="model/commands.genmodel"/>
+   </extension>
+
 </plugin>

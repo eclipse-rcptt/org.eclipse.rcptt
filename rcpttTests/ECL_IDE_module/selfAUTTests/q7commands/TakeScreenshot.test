@@ -79,16 +79,13 @@ with [get-window "Execution details"] {
 		get-property activePage | equals Screenshots | verify-true
 		get-property tabCount | equals 2 | verify-true
 	}
-	get-label "Screenshot 1 from 5" | get-property caption | equals "Screenshot 1 from 5" | verify-true
+	get-label "Screenshot 1 from 2"
 }
 with [get-window "Execution details" | get-button Next] {
 	click
-	click
-	click
-	click
 }
 with [get-window "Execution details"] {
-	get-label "Screenshot 5 from 5" | get-property caption | equals "Screenshot 5 from 5" | verify-true
+	get-label "Screenshot 2 from 2"
 	get-button Next | get-property enablement | equals false | verify-true
 	get-button Previous | get-property enablement | equals true | verify-true
 }

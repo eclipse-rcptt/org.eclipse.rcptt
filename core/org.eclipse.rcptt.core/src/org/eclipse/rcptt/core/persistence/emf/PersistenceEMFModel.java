@@ -60,15 +60,11 @@ public class PersistenceEMFModel extends BasePersistenceModel {
 	@Override
 	protected synchronized void doStoreTo(File file)
 			throws FileNotFoundException, IOException {
-		OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-		InputStream inputStream = read(PersistenceManager.CONTENT_ENTRY);
-		try {
+		try (OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+				InputStream inputStream = read(PersistenceManager.CONTENT_ENTRY)) {
 			if (inputStream != null) {
 				FileUtil.copyNoClose(inputStream, out);
 			}
-		} finally {
-			FileUtil.safeClose(out);
-			FileUtil.safeClose(inputStream);
 		}
 	}
 

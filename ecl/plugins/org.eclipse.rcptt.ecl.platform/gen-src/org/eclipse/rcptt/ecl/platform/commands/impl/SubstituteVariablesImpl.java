@@ -100,6 +100,7 @@ public class SubstituteVariablesImpl extends CommandImpl implements SubstituteVa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getExpression() {
 		return expression;
 	}
@@ -109,6 +110,7 @@ public class SubstituteVariablesImpl extends CommandImpl implements SubstituteVa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setExpression(String newExpression) {
 		String oldExpression = expression;
 		expression = newExpression;
@@ -121,6 +123,7 @@ public class SubstituteVariablesImpl extends CommandImpl implements SubstituteVa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isIgnoreUndefined() {
 		return ignoreUndefined;
 	}
@@ -130,6 +133,7 @@ public class SubstituteVariablesImpl extends CommandImpl implements SubstituteVa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIgnoreUndefined(boolean newIgnoreUndefined) {
 		boolean oldIgnoreUndefined = ignoreUndefined;
 		ignoreUndefined = newIgnoreUndefined;
@@ -214,7 +218,7 @@ public class SubstituteVariablesImpl extends CommandImpl implements SubstituteVa
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (expression: ");
 		result.append(expression);
 		result.append(", ignoreUndefined: ");

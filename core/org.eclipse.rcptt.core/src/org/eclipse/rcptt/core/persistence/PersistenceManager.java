@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -401,22 +402,17 @@ public class PersistenceManager implements IPlainConstants {
 	public EObject loadTeslaContent(Q7LazyResource q7LazyResource, EObject self) {
 		IPersistenceModel model = getModel(q7LazyResource);
 		if (model != null) {
-			if (model.size(TESLA_CONTENT_ENTRY) == 0) {
-				return null;
-			}
-			InputStream stream = model.read(TESLA_CONTENT_ENTRY);
-			if (stream != null) {
-				try {
+			try (InputStream stream = model.read(TESLA_CONTENT_ENTRY)) {
+				if (stream != null) {
 					XMIResourceImpl res = new XMIResourceImpl();
 					res.load(stream, getOptions());
 					if (res.getContents().size() == 1) {
 						return res.getContents().get(0);
 					}
-
-				} catch (IOException e) {
-					RcpttPlugin.log(String.format("Error reading content for %s",
-							q7LazyResource.getURI()), e);
 				}
+			} catch (IOException e) {
+				RcpttPlugin.log(String.format("Error reading content for %s",
+						q7LazyResource.getURI()), e);
 			}
 		}
 		return null;
@@ -437,7 +433,11 @@ public class PersistenceManager implements IPlainConstants {
 		return new IPersistenceModelFactory() {
 
 			public IPersistenceModel createModel(Resource resource) {
-				return detectFormat(file, resource).createModel(resource);
+				IPersistenceModelFactory format = detectFormat(file, resource);
+				if (format == null) {
+					return null;
+				}
+				return format.createModel(resource);
 			}
 
 			public boolean isSupported(InputStream stream) {
@@ -470,6 +470,11 @@ public class PersistenceManager implements IPlainConstants {
 					return factory;
 				}
 			} catch (CoreException e) {
+				// Ignore file not found exception
+				int code = e.getStatus().getCode();
+				if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND) {
+					return null;
+				}
 				RcpttPlugin.log(e);
 			} finally {
 				FileUtil.safeClose(contents);

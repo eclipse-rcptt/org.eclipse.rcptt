@@ -152,6 +152,5 @@ public interface ITargetPlatformHelper {
 	Map<String, Version> getVersions() throws CoreException;
 
 	int size();
-	
-	public Set<String> getIncompatibleExecutionEnvironments();
+
 }

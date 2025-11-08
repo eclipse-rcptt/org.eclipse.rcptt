@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _K14SUHPREeGn3IInLDRicw
-Runtime-Version: 2.5.5.202404041628
-Save-Time: 6/19/24, 12:09 AM
+Runtime-Version: 2.8.0.202510310519
+Save-Time: 11/4/25, 12:40 PM
 Tags: feature/debug, selfAUT
 Testcase-Type: ecl
 
@@ -36,6 +36,7 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "MyProject/CreateJavaProject" | double-click
+set-q7-option -key jobSleepingStepTime -value 500
 with [get-editor CreateJavaProject | get-section Script] {
     with [get-text-viewer] {
         set-caret-pos 1 30

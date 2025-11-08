@@ -15,16 +15,19 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.rcptt.ecl.internal.core.CorePlugin;
 
 public class SessionManager {
 	private ExecutorService executor;
 	int count = 0;
 	private boolean useJobs = false;;
+	private final Map<String, Object> properties = Collections.synchronizedMap(new HashMap<>()); 
 
 	public SessionManager(boolean useJobs) {
 		executor = Executors.newCachedThreadPool();
@@ -35,10 +38,14 @@ public class SessionManager {
 		count++;
 		String uuid = initRecover(client);
 		if (uuid != null) {
-			executor.execute(new SessionRequestHandler(client, useJobs));
+			executor.execute(new SessionRequestHandler(client, useJobs, properties));
 		} else {
 			client.close();
 		}
+	}
+	
+	public Object setProperty(String key, Object value) {
+		return properties.put(key, value);
 	}
 
 	private String initRecover(Socket client) throws IOException {

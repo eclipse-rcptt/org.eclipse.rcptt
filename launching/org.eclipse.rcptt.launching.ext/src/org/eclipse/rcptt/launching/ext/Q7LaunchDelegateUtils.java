@@ -14,6 +14,8 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.find;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
+import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.pde.internal.build.IPDEBuildConstants.BUNDLE_SIMPLE_CONFIGURATOR;
 import static org.eclipse.pde.internal.launching.launcher.LaunchConfigurationHelper.getBundleURL;
 
@@ -28,18 +30,30 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
+import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
 import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
+import org.eclipse.pde.internal.launching.launcher.LaunchValidationOperation;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.internal.launching.ext.AJConstants;
-import org.eclipse.rcptt.internal.launching.ext.PDEUtils;
+import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
+import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -53,6 +67,64 @@ import com.google.common.collect.Lists;
 
 @SuppressWarnings("restriction")
 public class Q7LaunchDelegateUtils {
+	
+	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor, IVMInstall vm) {
+		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 3);
+		ILaunchConfigurationWorkingCopy wc = null;
+		try {
+			IStatus status = target.resolve(sm.split(1));
+			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+				return status;
+			}
+			wc = Q7LaunchingUtil.createLaunchConfiguration(target);
+			StringBuilder message = new StringBuilder();
+			OSArchitecture architecture = target.detectArchitecture(message);
+			if (architecture == null || architecture == OSArchitecture.Unknown) {
+				return Status.error(message.toString());
+			}
+			Q7ExternalLaunchDelegate.updateJVM(wc, vm);
+		} catch (CoreException e) {
+			return e.getStatus();
+		}
+
+		LaunchValidationOperation validation = new LaunchValidationOperation(wc, target.getModels().map(Model::model).collect(toSet())) {
+			@Override
+			protected IExecutionEnvironment[] getMatchingEnvironments()
+					throws CoreException {
+				IExecutionEnvironmentsManager manager = JavaRuntime
+						.getExecutionEnvironmentsManager();
+				IExecutionEnvironment[] envs = manager
+						.getExecutionEnvironments();
+				return envs;
+			}
+		};
+		try {
+			wc.delete();
+		} catch (CoreException e1) {
+			return e1.getStatus();
+		}
+		try {
+			StringBuilder b = new StringBuilder();
+			validation.run(sm.split(1));
+			Map<Object, Object[]> input = validation.getInput();
+			for (Map.Entry<Object, Object[]> e : input.entrySet()) {
+				Object value = e.getKey();
+				if (value instanceof ResolverError) {
+					b.append(value.toString()).append("\n");
+				}
+			}
+			if (b.length() > 0) {
+				return Status.error("Bundle validation failed: " + b.toString());
+			}
+			done(monitor);
+		} catch (CoreException e) {
+			return e.getStatus();
+		} catch (OperationCanceledException e) {
+			return Status.CANCEL_STATUS;
+		}
+		return Status.OK_STATUS;
+	}
+
 	private static String getEntry(IPluginModelBase bundle, String startLevel) {
 		StringBuilder result = new StringBuilder("reference:");
 		result.append(getBundleURL(bundle, false));

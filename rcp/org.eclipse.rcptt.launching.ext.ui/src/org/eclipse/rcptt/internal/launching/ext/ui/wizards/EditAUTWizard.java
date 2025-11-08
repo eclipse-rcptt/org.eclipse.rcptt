@@ -132,10 +132,6 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			target.save();
 
 			workingCopy.rename(page.getTargetName());
-			OSArchitecture autArch = page.getArchitecture();
-			workingCopy.setAttribute(Q7LaunchingCommon.ATTR_ARCH,
-					autArch.name());
-			OSArchitecture jvmArch = page.getJVMArch();
 			String vmArgs = workingCopy.getAttribute(
 					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 					target.getIniVMArgs());
@@ -145,14 +141,6 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 						.trim();
 			} else {
 				vmArgs = vmArgs.trim();
-			}
-			if (!autArch.equals(jvmArch)
-					&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-				if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-					vmArgs += " " + ATTR_D32;
-				} else {
-					vmArgs = ATTR_D32;
-				}
 			}
 			if (vmArgs != null && vmArgs.length() > 0) {
 				vmArgs = UpdateVMArgs.updateAttr(vmArgs);
@@ -182,7 +170,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 						.getAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 								AUTLaunchArgumentsHelper
-									.getInitialProgramArguments(autArch.name()));
+									.getInitialProgramArguments(page.getArchitecture().name()));
 				workingCopy
 						.setAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,

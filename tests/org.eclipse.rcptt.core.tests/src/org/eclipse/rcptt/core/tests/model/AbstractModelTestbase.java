@@ -71,71 +71,7 @@ public abstract class AbstractModelTestbase extends SuiteOfTestCases {
 
 	protected String fTestProjectName = "org.eclipse.rcptt.core.tests";
 
-	class DeltaListener implements IElementChangedListener {
-		IQ7ElementDelta[] deltas;
 
-		public void elementChanged(Q7ElementChangedEvent ev) {
-			IQ7ElementDelta delta = ev.getDelta();
-			if ((delta.getFlags() & IQ7ElementDelta.F_WORKING_COPY) != 0) {
-				return; // Skip working copy delta here
-			}
-			IQ7ElementDelta[] copy = new IQ7ElementDelta[deltas.length + 1];
-			System.arraycopy(deltas, 0, copy, 0, deltas.length);
-			copy[deltas.length] = ev.getDelta();
-			deltas = copy;
-		}
-
-		public String toString() {
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0, length = this.deltas.length; i < length; i++) {
-				IQ7ElementDelta delta = this.deltas[i];
-				IQ7ElementDelta[] children = delta.getAffectedChildren();
-				int childrenLength = children.length;
-				IResourceDelta[] resourceDeltas = delta.getResourceDeltas();
-				int resourceDeltasLength = resourceDeltas == null ? 0
-						: resourceDeltas.length;
-				if (childrenLength == 0 && resourceDeltasLength == 0) {
-					buffer.append(delta);
-				} else {
-					sortDeltas(children);
-					for (int j = 0; j < childrenLength; j++) {
-						buffer.append(children[j]);
-						if (j != childrenLength - 1) {
-							buffer.append("\n");
-						}
-					}
-					for (int j = 0; j < resourceDeltasLength; j++) {
-						if (j == 0 && buffer.length() != 0) {
-							buffer.append("\n");
-						}
-						buffer.append(resourceDeltas[j]);
-						if (j != resourceDeltasLength - 1) {
-							buffer.append("\n");
-						}
-					}
-				}
-				if (i != length - 1) {
-					buffer.append("\n\n");
-
-				}
-			}
-			return buffer.toString();
-		}
-
-		protected void sortDeltas(IQ7ElementDelta[] elementDeltas) {
-			Comparer comparer = new Comparer() {
-				public int compare(Object a, Object b) {
-					IQ7ElementDelta deltaA = (IQ7ElementDelta) a;
-					IQ7ElementDelta deltaB = (IQ7ElementDelta) b;
-					return deltaA.getElement().getName()
-							.compareTo(deltaB.getElement().getName());
-				}
-			};
-			Util.sort(elementDeltas, comparer);
-		}
-	}
-
-	protected DeltaListener deltaListener = new DeltaListener();
 
 	public AbstractModelTestbase(String testProjectName, String name) {
 		super(name);
@@ -483,31 +419,6 @@ public abstract class AbstractModelTestbase extends SuiteOfTestCases {
 		}, null);
 	}
 
-	/**
-	 * Starts listening to element deltas, and queues them in fgDeltas.
-	 */
-	public void startDeltas() {
-		waitUntilIndexesReady();
-		waitForAutoBuild();
-		clearDeltas();
-		RcpttCore.addElementChangedListener(this.deltaListener);
-	}
-
-	/**
-	 * Stops listening to element deltas, and clears the current deltas.
-	 */
-	public void stopDeltas() {
-		RcpttCore.removeElementChangedListener(this.deltaListener);
-		clearDeltas();
-	}
-
-	/**
-	 * Empties the current deltas.
-	 */
-	public void clearDeltas() {
-		this.deltaListener.deltas = new IQ7ElementDelta[0];
-	}
-
 	protected void sortResources(Object[] resources) {
 		Util.Comparer comparer = new Util.Comparer() {
 			public int compare(Object a, Object b) {
@@ -520,74 +431,6 @@ public abstract class AbstractModelTestbase extends SuiteOfTestCases {
 		Util.sort(resources, comparer);
 	}
 
-	protected void assertDeltas(String message, String expected) {
-		String actual = this.deltaListener.toString();
-		if (!expected.equals(actual)) {
-			System.out.println(actual);
-		}
-		assertEquals(message, expected, actual);
-	}
-
-	protected void assertDeltas(String message, String expected,
-			IQ7ElementDelta delta) {
-		String actual = delta == null ? "<null>" : delta.toString();
-		if (!expected.equals(actual)) {
-			System.out.println(actual);
-		}
-		assertEquals(message, expected, actual);
-	}
-
-	/**
-	 * Returns the last delta for the given element from the cached delta.
-	 */
-	protected IQ7ElementDelta getDeltaFor(IQ7Element element) {
-		return getDeltaFor(element, false);
-	}
-
-	/**
-	 * Returns the delta for the given element from the cached delta. If the
-	 * boolean is true returns the first delta found.
-	 */
-	protected IQ7ElementDelta getDeltaFor(IQ7Element element,
-			boolean returnFirst) {
-		IQ7ElementDelta[] deltas = this.deltaListener.deltas;
-		if (deltas == null)
-			return null;
-		IQ7ElementDelta result = null;
-		for (int i = 0; i < deltas.length; i++) {
-			IQ7ElementDelta delta = searchForDelta(element,
-					this.deltaListener.deltas[i]);
-			if (delta != null) {
-				if (returnFirst) {
-					return delta;
-				}
-				result = delta;
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Returns a delta for the given element in the delta tree
-	 */
-	protected IQ7ElementDelta searchForDelta(IQ7Element element,
-			IQ7ElementDelta delta) {
-
-		if (delta == null) {
-			return null;
-		}
-		if (delta.getElement().equals(element)) {
-			return delta;
-		}
-		for (int i = 0; i < delta.getAffectedChildren().length; i++) {
-			IQ7ElementDelta child = searchForDelta(element,
-					delta.getAffectedChildren()[i]);
-			if (child != null) {
-				return child;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Ensures the elements are present after creation.
@@ -640,7 +483,7 @@ public abstract class AbstractModelTestbase extends SuiteOfTestCases {
 	}
 
 	public void ensureCorrectPositioning(IParent container, IQ7Element sibling,
-			IQ7Element positioned) throws ModelException {
+			IQ7Element positioned) throws ModelException, InterruptedException {
 		IQ7Element[] children = container.getChildren();
 		if (sibling != null) {
 			// find the sibling

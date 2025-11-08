@@ -23,7 +23,7 @@ public class EclTcpServer extends Thread {
 	private final ServerSocket socket;
 	private final int port;
 	private volatile boolean starting = true;
-	private SessionManager manager = null;
+	private final SessionManager manager;
 
 	public boolean isStarting() {
 		return starting;
@@ -35,6 +35,13 @@ public class EclTcpServer extends Thread {
 		this.port = port;
 		manager = new SessionManager(useJobs);
 	}
+	
+	/**
+	 * @since 2.7.0 
+	 */
+	public Object setProperty(String key, Object value) {
+		return manager.setProperty(key, value);
+	}
 
 	@Override
 	public void run() {
@@ -42,6 +49,7 @@ public class EclTcpServer extends Thread {
 		try (Closeable closeable = socket) {
 			while (!isInterrupted()) {
 				try {
+					@SuppressWarnings("resource") // closed in org.eclipse.rcptt.ecl.server.tcp.SessionRequestHandler.run()
 					Socket client = socket.accept();
 					//client.setKeepAlive(true);
 					client.setTcpNoDelay(true);
@@ -53,7 +61,6 @@ public class EclTcpServer extends Thread {
 					}
 				}
 			}
-			socket.close();
 		} catch (Exception e) {
 			log(CorePlugin.err("Failed to start ECL TCP server", e));
 		} finally {

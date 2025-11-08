@@ -13,10 +13,12 @@
 package org.eclipse.rcptt.internal.launching;
 
 import static org.eclipse.core.runtime.Path.fromPortableString;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -27,10 +29,11 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
-import org.eclipse.rcptt.internal.core.model.index.TestSuiteElementCollector;
+import org.eclipse.rcptt.launching.utils.TestSuiteElementCollector;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +43,7 @@ public class TestSuiteElementCollectorTest {
 	
 
 	@Test
-	public void corruptedResourcesShouldProduceReadaleErrorMessage() throws CoreException, IOException {
+	public void corruptedResourcesShouldProduceReadaleErrorMessage() throws CoreException, IOException, InterruptedException {
 		TestSuiteElementCollector subject = new TestSuiteElementCollector(Arrays.asList("testsuite1"), false);
 		IProject project = importProject(fromPortableString("/resources/testSuiteReferencingCorruptedResource"), new IPath[] {
 				fromPortableString("corrupted.test"),
@@ -52,9 +55,24 @@ public class TestSuiteElementCollectorTest {
 			RcpttCore.create(project).accept(subject);
 			Assert.fail("Should throw on corrupted resource");
 		} catch (ModelException e) {
-			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
+			Assert.assertEquals("Empty resource platform:/resource/testSuiteReferencingCorruptedResource/corrupted.test. Empty metadata is allowed. File: /testSuiteReferencingCorruptedResource/corrupted.test", e.getMessage());
 		}
-		
+	}
+	
+	@Test
+	public void reportAbsentSuites() throws CoreException, IOException, InterruptedException {
+		TestSuiteElementCollector subject = new TestSuiteElementCollector(Arrays.asList("suite", "absent"), false);
+		IProject project = importProject(fromPortableString("/resources/org.eclipse.rcptt.test.normalsuite"), new IPath[] {
+				fromPortableString("test.test"),
+				fromPortableString("rcptt.properties"),
+				fromPortableString("suite.suite")
+		});
+		IQ7Project q7Project = RcpttCore.create(project);
+		q7Project.accept(subject);
+		assertEquals(Set.of( "absent"), subject.getAbsentSuites());
+		q7Project.getRootFolder().createTestSuite("absent", true, null);
+		q7Project.accept(subject);
+		assertEquals(Set.of(), subject.getAbsentSuites());
 	}
 	
 	private IProject importProject(IPath bundleAbsoluteProjecRoot, IPath[] relativeProjectFiles) {

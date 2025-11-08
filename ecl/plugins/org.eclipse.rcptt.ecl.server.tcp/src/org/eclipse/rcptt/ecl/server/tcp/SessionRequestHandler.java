@@ -15,11 +15,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.internal.core.CorePlugin;
@@ -28,16 +27,15 @@ import org.eclipse.rcptt.ecl.runtime.EclRuntime;
 import org.eclipse.rcptt.ecl.runtime.IPipe;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.ecl.runtime.ISession;
-import org.osgi.framework.FrameworkUtil;
 
 final class SessionRequestHandler implements Runnable {
 	private final Socket socket;
 	private final ISession session;
 	private final BufferedInputStream inputStream;
 	private final int defaultTimeout;
-	private final static ILog LOG = Platform.getLog(FrameworkUtil.getBundle(SessionRequestHandler.class));
 
-	SessionRequestHandler(Socket socket, boolean useJobs) throws IOException {
+
+	SessionRequestHandler(Socket socket, boolean useJobs, Map<String, Object> properties) throws IOException {
 		// super("ECL tcp session:" + socket.getPort());
 		this.socket = socket;
 		try {
@@ -46,10 +44,11 @@ final class SessionRequestHandler implements Runnable {
 			CorePlugin.log(e);
 		}
 		this.session = EclRuntime.createSession(useJobs);
+		properties.forEach(session::putProperty);
 		this.inputStream = new BufferedInputStream(socket.getInputStream());
 		this.defaultTimeout = socket.getSoTimeout();
 	}
-
+	
 	public void run() {
 		try {
 			IPipe pipe = CoreUtils.createEMFPipe(inputStream,

@@ -10,37 +10,44 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ctx.parameters.impl;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.rcptt.core.IContextProcessor;
+import org.eclipse.rcptt.core.IEclAwareProcessor;
+import org.eclipse.rcptt.core.scenario.Context;
 import org.eclipse.rcptt.ecl.core.CoreFactory;
 import org.eclipse.rcptt.ecl.core.Declaration;
 import org.eclipse.rcptt.ecl.core.Global;
 import org.eclipse.rcptt.ecl.core.Val;
 import org.eclipse.rcptt.ecl.runtime.BoxedValues;
 import org.eclipse.rcptt.ecl.runtime.ISession;
-
-import org.eclipse.rcptt.core.IContextProcessor;
-import org.eclipse.rcptt.core.IEclAwareProcessor;
-import org.eclipse.rcptt.core.scenario.Context;
 import org.eclipse.rcptt.parameters.Parameter;
 import org.eclipse.rcptt.parameters.ParametersContext;
 
 public class ParametersContextProcessor implements IContextProcessor, IEclAwareProcessor {
 
+	@Override
 	public boolean isApplied(Context context) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void apply(Context context) throws CoreException {
-		apply(context, null);
+	@Override
+	public void apply(Context context, BooleanSupplier isCancelled) throws CoreException {
+		throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+				getClass().getName() + " is ECL-aware and must be passed a session object", null));
 	}
 
+	@Override
 	public Context create(EObject param) throws CoreException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void apply(Context context, ISession session) throws CoreException {
 		ParametersContext ctx = (ParametersContext) context;
 		for (Parameter p : ctx.getParameters()) {

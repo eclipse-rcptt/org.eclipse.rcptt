@@ -44,7 +44,7 @@ public interface GetLog extends Command {
 	 * @return the value of the '<em>Levels</em>' attribute list.
 	 * @see org.eclipse.rcptt.ecl.platform.commands.CommandsPackage#getGetLog_Levels()
 	 * @model default="false"
-	 *        annotation="http://www.eclipse.org/ecl/docs description='Log entry severities to show. Any of <code>error</code>, <code>warning</code>, <code>info</code>, <code>OK</code>, <code>Cancel</code> in any letter case.'"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Log entry severities to show. Any of &lt;code&gt;error&lt;/code&gt;, &lt;code&gt;warning&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;OK&lt;/code&gt;, &lt;code&gt;Cancel&lt;/code&gt; in any letter case.'"
 	 * @generated
 	 */
 	EList<String> getLevels();

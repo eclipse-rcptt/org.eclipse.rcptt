@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.core.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -25,10 +28,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.rcptt.core.model.IContext;
 import org.eclipse.rcptt.core.model.IParent;
 import org.eclipse.rcptt.core.model.IQ7Element;
+import org.eclipse.rcptt.core.model.IQ7ElementDelta;
 import org.eclipse.rcptt.core.model.IQ7Folder;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.IQ7Project;
@@ -42,6 +47,7 @@ import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessingState;
 import org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor;
+import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDelta;
 import org.eclipse.rcptt.internal.core.model.deltas.Q7ElementDeltaBuilder;
 import org.eclipse.rcptt.internal.core.model.index.IndexManager;
 import org.eclipse.rcptt.internal.core.model.index.ProjectIndexerManager;
@@ -62,8 +68,10 @@ public class ModelManager {
 	private Set<IProject> buildingProjects = new HashSet<IProject>();
 
 	public ModelManager() {
-		if (Platform.isRunning())
+		RcpttCore.getInstance();
+		if (Platform.isRunning()) {
 			this.indexManager = new IndexManager();
+		}
 	}
 
 	public synchronized static ModelManager getModelManager() {
@@ -73,71 +81,84 @@ public class ModelManager {
 		return instance;
 	}
 
-	public void startup() {
-		this.cache = new ModelCache();
-
-		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(this.deltaState,
-				IResourceChangeEvent.PRE_BUILD
-						| IResourceChangeEvent.POST_BUILD
-						| IResourceChangeEvent.POST_CHANGE
-						| IResourceChangeEvent.PRE_DELETE
-						| IResourceChangeEvent.PRE_CLOSE);
-		RcpttCore.getInstance();
-		getIndexManager().reset();
-		ProjectIndexerManager.startIndexing();
-	}
-
 	public void shutdown() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this.deltaState);
 	}
 
-	public synchronized Object getInfo(IQ7Element element) {
-		return this.cache.getInfo(element);
+	public interface Factory<T> {
+		T get() throws ModelException;
+	}
+	
+	public <V> V accessInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		synchronized (this) {
+			if (this.cache == null) {
+				this.cache = new ModelCache(Long.parseLong(System.getProperty("org.eclipse.rcptt.cache_size", "50000000")));
+				final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+				workspace.addResourceChangeListener(this.deltaState,
+						IResourceChangeEvent.PRE_BUILD
+								| IResourceChangeEvent.POST_BUILD
+								| IResourceChangeEvent.POST_CHANGE
+								| IResourceChangeEvent.PRE_DELETE
+								| IResourceChangeEvent.PRE_CLOSE);
+				getIndexManager().reset();
+				ProjectIndexerManager.startIndexing();
+			}
+		}
+		return this.cache.<Q7ElementInfo, V>accessInfo(element, Q7ElementInfo.class, element::createElementInfo, infoToValue);
 	}
 
-	protected synchronized void putInfos(IQ7Element openedElement,
-			Map<IQ7Element, Object> newElements) {
-		// remove children
-		Object existingInfo = this.cache.peekAtInfo(openedElement);
-		if (openedElement instanceof IParent
-				&& existingInfo instanceof Q7ElementInfo) {
-			IQ7Element[] children = ((Q7ElementInfo) existingInfo)
-					.getChildren();
-			for (int i = 0, size = children.length; i < size; ++i) {
-				Q7Element child = (Q7Element) children[i];
+	public <V> Optional<V> peekInfo(Q7Element element, Function<Q7ElementInfo, V> infoToValue) throws InterruptedException {
+		synchronized (this) {
+			if (cache == null) {
+				return Optional.empty();
+			}
+		}
+		return this.cache.<Q7ElementInfo, V>peekInfo(element, Q7ElementInfo.class, infoToValue);
+	}
+
+	private static class PrivateException extends RuntimeException {
+		private static final long serialVersionUID = 8128191168800868905L;
+		public PrivateException(Exception e) {
+			super(e);
+		}
+	}
+	
+	synchronized void removeInfoAndChildren(Q7Element element)
+			throws ModelException, InterruptedException {
+		synchronized (this) {
+			if (cache == null) {
+				return;
+			}
+		}
+		try {
+			this.cache.peekInfo(element, Object.class, info -> {
 				try {
-					child.close();
+					if (element instanceof IParent && info instanceof Q7ElementInfo) {
+						IQ7Element[] children = ((Q7ElementInfo) info).getChildren();
+						for (int i = 0, size = children.length; i < size; ++i) {
+							Q7Element child = (Q7Element) children[i];
+							child.close();
+						}
+					}
+				} catch (InterruptedException e) {
+					throw new PrivateException(e);
 				} catch (ModelException e) {
-					// ignore
+					throw new PrivateException(e);
 				}
-			}
-		}
-		Iterator<Map.Entry<IQ7Element, Object>> iterator = newElements
-				.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<IQ7Element, Object> element = iterator.next();
-			this.cache.putInfo(element.getKey(), element.getValue());
-		}
-	}
-
-	synchronized Object removeInfoAndChildren(Q7Element element)
-			throws ModelException {
-		Object info = this.cache.peekAtInfo(element);
-		if (info != null) {
-			element.closing(info);
-			if (element instanceof IParent && info instanceof Q7ElementInfo) {
-				IQ7Element[] children = ((Q7ElementInfo) info).getChildren();
-				for (int i = 0, size = children.length; i < size; ++i) {
-					Q7Element child = (Q7Element) children[i];
-					child.close();
-				}
-			}
+				return null;
+			});
 			this.cache.removeInfo(element);
-			return info;
+		} catch (PrivateException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof InterruptedException) {
+				throw (InterruptedException)cause;
+			}
+			if (cause instanceof ModelException) {
+				throw (ModelException)cause;
+			}
+			throw new AssertionError(e);
 		}
-		return null;
 	}
 
 	private static IQ7Element create(IFile file, IQ7Project project) {
@@ -191,18 +212,50 @@ public class ModelManager {
 		return indexManager;
 	}
 
-	Object peekAtInfo(IQ7Element element) {
-		return this.cache.peekAtInfo(element);
-	}
-
-	static class PerWorkingCopyInfo {
+	class PerWorkingCopyInfo {
 		private int useCount = 0;
-		private IQ7NamedElement workingCopy;
-		Q7ResourceInfo resourceInfo;
-		boolean complete = false;
+		private Q7ResourceInfo resourceInfo;
+		private boolean complete = false;
+		private final Q7NamedElement workingCopy;
 
-		private PerWorkingCopyInfo(IQ7NamedElement workingCopy) {
-			this.workingCopy = workingCopy;
+		private PerWorkingCopyInfo(Q7NamedElement workingCopy) {
+			this.workingCopy =  requireNonNull(workingCopy);
+		}
+		
+		/**
+		 * @param indexing 
+		 * @return false - if state is unchanged
+		 */
+		public void populate(IProgressMonitor monitor) throws ModelException {
+			try {
+				synchronized (this) {
+					if (resourceInfo == null) {
+						resourceInfo = (Q7ResourceInfo) workingCopy.createElementInfo();
+						workingCopy.generateInfos(resourceInfo, monitor);
+					} else {
+						return;
+					}
+					if (workingCopy.indexing) {
+						return;
+					}
+				}
+				// workingCopy.extractAllPersistence();
+				Q7ElementDelta delta = new Q7ElementDelta(getModel());
+				if (workingCopy.getResource().isAccessible()) {
+					// report a F_PRIMARY_WORKING_COPY change delta for a primary
+					// working copy
+					delta.changed(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+				} else {
+					// report an ADDED delta
+					delta.added(workingCopy, IQ7ElementDelta.F_WORKING_COPY);
+				}
+				getDeltaProcessor().registerModelDelta(delta);
+			} finally {
+				synchronized (this) {
+					complete = true;
+					notifyAll();
+				}
+			}
 		}
 
 		public IQ7NamedElement getWorkingCopy() {
@@ -230,9 +283,22 @@ public class ModelManager {
 		}
 
 		private void close() {
-			if (resourceInfo != null) {
-				resourceInfo.unload();
+			Q7ResourceInfo toClose;
+			synchronized (this) {
+				toClose = resourceInfo;
+				resourceInfo = null;
 			}
+			if (toClose != null) {
+				toClose.unload();
+			}
+		}
+
+		public synchronized boolean hasChanges() {
+			return resourceInfo != null && resourceInfo.hasChanges();
+		}
+
+		public synchronized Q7ResourceInfo getResourceInfo() {
+			return resourceInfo;
 		}
 	}
 
@@ -255,7 +321,7 @@ public class ModelManager {
 	}
 
 	int discardPerWorkingCopyInfo(Q7NamedElement workingCopy)
-			throws ModelException {
+			throws ModelException, InterruptedException {
 		// create the delta builder (this remembers the current content of the
 		// working copy)
 		// outside the perWorkingCopyInfos lock (see bug 50667)
@@ -313,7 +379,7 @@ public class ModelManager {
 	private static final IQ7NamedElement[] EMPTY_NAMED_ELEMENTS = new IQ7NamedElement[0];
 
 	public IQ7NamedElement[] findContextUsageInWorkingCopies(String contextId,
-			ISearchScope scope) throws ModelException {
+			ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -334,7 +400,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findVerificationUsageInWorkingCopies(
-			String verificationId, ISearchScope scope) throws ModelException {
+			String verificationId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -351,7 +417,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findTestCaseUsageInWorkingCopies(
-			String testCaseId, ISearchScope scope) throws ModelException {
+			String testCaseId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())
@@ -368,7 +434,7 @@ public class ModelManager {
 	}
 
 	public IQ7NamedElement[] findTestSuiteUsageInWorkingCopies(
-			String testSuiteId, ISearchScope scope) throws ModelException {
+			String testSuiteId, ISearchScope scope) throws ModelException, InterruptedException {
 		List<IQ7NamedElement> result = new ArrayList<IQ7NamedElement>();
 
 		for (PerWorkingCopyInfo info : perWorkingCopyInfos.values())

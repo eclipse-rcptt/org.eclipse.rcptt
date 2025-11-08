@@ -95,7 +95,7 @@ public class DeleteQ7ElementProcessor extends DeleteResourcesProcessor {
 		}
 	}
 
-	private int countReferences(IResource[] resources, IResource[] toDelete) {
+	private int countReferences(IResource[] resources, IResource[] toDelete) throws InterruptedException {
 
 		int counter = 0;
 		for (IResource resource : resources) {
@@ -142,7 +142,7 @@ public class DeleteQ7ElementProcessor extends DeleteResourcesProcessor {
 		return result;
 	}
 
-	private int resolveReferences(IQ7Element element, IResource[] ignore) {
+	private int resolveReferences(IQ7Element element, IResource[] ignore) throws InterruptedException {
 		if (element instanceof IContext) {
 			try {
 				IContext ctx = (IContext) element;

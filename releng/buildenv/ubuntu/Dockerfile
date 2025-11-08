@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM eclipse-temurin:21
+FROM maven:3.9.9-eclipse-temurin-21
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -37,13 +37,4 @@ RUN apt-get update \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-## Install a maven
-ARG MAVEN_VERSION=3.9.9
-ARG BASE_URL=https://archive.apache.org/dist/maven/maven-3
-ENV MAVEN_HOME=/usr/share/maven
-
-RUN wget --no-verbose --output-document=/tmp/apache-maven.tar.gz ${BASE_URL}/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-  && mkdir ${MAVEN_HOME} \
-  && tar -xzf /tmp/apache-maven.tar.gz -C ${MAVEN_HOME} --strip-components=1 \
-  && rm -f /tmp/apache-maven.tar.gz \
-  && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn
+CMD ["jshell"]
