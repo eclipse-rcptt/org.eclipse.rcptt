@@ -11,6 +11,10 @@
 package org.eclipse.rcptt.tesla.swt.aspects.test;
 
 import com.google.common.collect.ImmutableList;
+
+import static org.osgi.framework.FrameworkUtil.getBundle;
+import static org.osgi.framework.Version.parseVersion;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +32,28 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Assert;
 import org.junit.Test;
+import org.osgi.framework.Version;
 
 public class ImagesAspectTest {
 
 	private static final ISharedImages SHARED_IMAGES = PlatformUI.getWorkbench().getSharedImages();
+	private static final String IMAGE_EXTENSION;
+	static {
+		// Version is not exact here, ideally it should be set to a version introducing SVG icons
+		Version workbenchVersion = getBundle(SHARED_IMAGES.getClass()).getVersion();
+		if (workbenchVersion.compareTo(parseVersion("3.130.0")) > 0) {
+			IMAGE_EXTENSION = ".svg";
+		} else {
+			IMAGE_EXTENSION = ".png";
+		}
+	}
 
 	@Test
 	public void newImageFromImageData() {
 		final Image image = new Image(Display.getCurrent(),
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FOLDER).getImageData());
 		try {
-			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj.png",
+			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
 					ImageSources.INSTANCE.find(image).toString());
 		} finally {
 			image.dispose();
@@ -51,7 +66,7 @@ public class ImagesAspectTest {
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FOLDER).getImageData(),
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FILE).getImageData());
 		try {
-			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj.png",
+			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
 					ImageSources.INSTANCE.find(image).toString());
 		} finally {
 			image.dispose();
@@ -73,7 +88,7 @@ public class ImagesAspectTest {
 			for (ImageSource source : composite.children) {
 				strings.add(source.toString());
 			}
-			Assert.assertEquals(ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj.png",
+			Assert.assertEquals(ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
 					"org.eclipse.ui/icons/full/ovr16/warning_ovr.png"), strings);
 		} finally {
 			iconImage.dispose();

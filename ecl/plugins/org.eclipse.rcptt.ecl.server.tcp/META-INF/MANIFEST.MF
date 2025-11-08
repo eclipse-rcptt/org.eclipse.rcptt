@@ -7,7 +7,7 @@ Bundle-Activator: org.eclipse.rcptt.ecl.internal.server.tcp.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.core;bundle-version="[2.8.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.rcptt.ecl.internal.server.tcp,
  org.eclipse.rcptt.ecl.server.tcp
 Bundle-Vendor: Eclipse RCP Testing Tool Project

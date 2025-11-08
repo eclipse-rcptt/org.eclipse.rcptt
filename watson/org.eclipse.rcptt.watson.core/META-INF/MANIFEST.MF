@@ -7,7 +7,7 @@ Bundle-Version: 2.8.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.rcptt.sherlock.core,
  org.eclipse.rcptt.sherlock.core.info,
  org.eclipse.rcptt.sherlock.core.internal,

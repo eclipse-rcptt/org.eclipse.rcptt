@@ -40,7 +40,7 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "TestQ7Prj/Test scenario" | double-click -nowait
 get-editor "Test scenario" | get-button Record | click
 
-try -times 10 -delay 1000 -command {
+try -times 10 -delay 10000 -command {
 	get-window "Control Panel - Test scenario (TestQ7Prj) - selfQ7 [Recording]" | get-button "Switch to Assertion Mode" 
     	| click
 }
