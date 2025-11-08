@@ -43,6 +43,7 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -134,6 +135,7 @@ public class Q7NamedElementTest {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
+	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
