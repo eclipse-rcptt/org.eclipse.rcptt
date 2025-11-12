@@ -173,11 +173,11 @@ jobs:
           include-hidden-files: true
           path: |
             list.txt
-            rcpttTests/target/results/**
-            rcpttTests/target/surefire-reports/**
-            rcpttTests/target/**/*log
-            rcpttTests/target/**/*.info
-            rcpttTests/target/**/*.ini
+            rcpttTests/**/target/results/**
+            rcpttTests/**/target/surefire-reports/**
+            rcpttTests/**/target/**/*log
+            rcpttTests/**/target/**/*.info
+            rcpttTests/**/target/**/*.ini
             **/*.hrpof
   mockup_test:
     runs-on: ubuntu-latest
