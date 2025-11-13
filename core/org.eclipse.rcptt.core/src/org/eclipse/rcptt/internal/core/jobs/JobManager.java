@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 
 public abstract class JobManager {
@@ -243,7 +244,14 @@ public abstract class JobManager {
 							}
 							previousJob = currentJob;
 						}
-						Thread.sleep(50);
+						boolean blocking = false;
+						var job = Job.getJobManager().currentJob();
+						if (job != null) {
+							blocking = job.yieldRule(subProgress) != null;
+						}
+						if (!blocking) {
+							Thread.sleep(50);
+						}
 					}
 					if (timeout != -1
 							&& (System.currentTimeMillis() - start) > timeout) {

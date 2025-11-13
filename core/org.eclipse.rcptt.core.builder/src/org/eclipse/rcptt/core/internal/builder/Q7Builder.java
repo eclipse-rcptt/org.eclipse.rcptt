@@ -34,9 +34,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.builder.IQ7ProblemReporter.ProblemType;
 import org.eclipse.rcptt.core.builder.IQ7Validator;
 import org.eclipse.rcptt.core.model.IContext;
@@ -343,6 +345,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 			for (final IQ7NamedElement element : elements) {
 				if (monitor.isCanceled()) {
 					monitor.done();
+					executor.shutdownNow();
 					return;
 				}
 				executor.execute(new Runnable() {
@@ -389,12 +392,20 @@ public class Q7Builder extends IncrementalProjectBuilder {
 				});
 			}
 			executor.shutdown();
-			while (!executor.isTerminated()) {
-				try {
-					Thread.sleep(50);
-				} catch (Throwable e) {
-					// ignore
-				}
+			try {
+				while (!executor.isTerminated()) {
+					boolean blocking = false;
+					var job = Job.getJobManager().currentJob();
+					if (job != null) {
+						blocking = job.yieldRule(new SubProgressMonitor(monitor, 1)) != null;
+					}
+					if (!blocking) {
+						Thread.sleep(50);
+					}
+			}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new OperationCanceledException();
 			}
 
 			CycleGraph graph = ModelCycleDetector.buildCycles(
