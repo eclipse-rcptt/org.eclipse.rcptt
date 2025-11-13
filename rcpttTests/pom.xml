@@ -45,6 +45,7 @@
   </properties>
 	<modules>
 		<module>rcptt_ide</module>
+		<module>mockups</module>
 	</modules>
   <dependencies>
 		<dependency>
