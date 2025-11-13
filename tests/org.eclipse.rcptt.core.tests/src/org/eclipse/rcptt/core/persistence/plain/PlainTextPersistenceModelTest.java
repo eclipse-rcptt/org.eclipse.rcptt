@@ -82,7 +82,7 @@ public class PlainTextPersistenceModelTest {
 		Assert.assertNull(scenario.getDescription());
 	}
 	
-	@Test
+	@Test(timeout = 100000)
 	public void returnNullWhenResourceDoesNotExist() throws IOException, CoreException {
 		ITestCase file = createTestCase();
 		URI uri = toURI(file);
