@@ -2,19 +2,19 @@
 Format-Version: 1.0
 Q7-vendor: www.xored.com/q7
 Context-Type: com.xored.q7.parameters.context
-Element-Name: Symbol?Message
+Element-Name: Symbol/Message
 Element-Type: context
 Element-Version: 2.0
-Id: _hDCVwF9LEeSraotlA4fdQw
+Id: _EdPaAF9LEeSraotlA4fdQw
 Q7-Runtime-Version: 1.3.14.201410271213
-Save-Time: 10/29/14 4:30 PM
+Save-Time: 10/29/14 4:29 PM
 
 ------=_.parameters.context-2e023de5-3294-36a9-ac1d-6701f05a40ee
 Content-Type: text/properties
 Entry-Name: .parameters.context
 
-#Wed Oct 29 16:30:10 NOVT 2014
-message=Symbol "?" is not acceptable in an AUT name.
-symbol=?
+#Wed Oct 29 16:29:05 NOVT 2014
+message=Symbol "/" is not acceptable in an AUT name.
+symbol=/
 
 ------=_.parameters.context-2e023de5-3294-36a9-ac1d-6701f05a40ee--
