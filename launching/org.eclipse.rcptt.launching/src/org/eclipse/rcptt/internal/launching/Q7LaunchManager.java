@@ -612,7 +612,8 @@ public class Q7LaunchManager {
 				plan.add(parent);
 				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_FINISH,
 						ExecutionPhase.FINISH);
-				result.add(plan.size() > 1 ? new GroupExecutable(parent, plan) : parent);
+				Executable attempt = plan.size() > 1 ? new GroupExecutable(parent, plan) : parent;
+				result.add(new RetryExecutable(attempt));
 			}
 			return result;
 		}

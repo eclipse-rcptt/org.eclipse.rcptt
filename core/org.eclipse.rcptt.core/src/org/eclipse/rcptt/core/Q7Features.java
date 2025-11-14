@@ -22,6 +22,7 @@ public class Q7Features extends AbstractFeatureManager {
 	// "q7.contexts.workspace.clear.timeout";
 	public static final String Q7_WORKSPACE_FORCE_GC = "q7.contexts.workspace.clear.force.gc";
 	public static final String LAUNCHING_KILL_AUT_ON_CONNECT_ERROR = "launching.kill.aut.on.connect.error";
+	public static final String RETRY_TEST = "q7.retry.count";
 	// Code:
 	private static Q7Features features;
 
@@ -77,5 +78,12 @@ public class Q7Features extends AbstractFeatureManager {
 				.value("false").defaultValue("false")
 				.values(AbstractFeatureManager.BOOLEAN_VALUES).editable(true)
 				.showIn(TeslaFeatures.ADV_OPTIONS, TeslaFeatures.CP_OPTIONS);
+		
+		option(RETRY_TEST)
+			.name("Retry test after failure (times)")
+			.description("If a test fails, try executing it again and collect both failed and succesfull reports")
+			.value("1")
+			.values(AbstractFeatureManager.INT_VALUES).editable(true)
+			.showIn(TeslaFeatures.ADV_OPTIONS);
 	}
 }
