@@ -258,35 +258,32 @@ public class Q7Builder extends IncrementalProjectBuilder {
 
 	protected void fullBuild(final IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
-		try {
-			monitor.beginTask(MSG_Q7_Builder, 100);
-			NamedElementCollector collector = new NamedElementCollector() {
-				@Override
-				public boolean visit(IQ7Element element) {
-					if (monitor.isCanceled()) {
-						return false;
-					}
-					return super.visit(element);
+		monitor.beginTask(MSG_Q7_Builder, 100);
+		NamedElementCollector collector = new NamedElementCollector() {
+			@Override
+			public boolean visit(IQ7Element element) {
+				if (monitor.isCanceled()) {
+					return false;
 				}
-			};
-			IQ7Project project = getQ7Project();
-			project.accept(collector);
-			monitor.worked(10);
-			List<IQ7NamedElement> elements = collector.getElements();
+				return super.visit(element);
+			}
+		};
+		IQ7Project project = getQ7Project();
+		project.accept(collector);
+		monitor.worked(10);
+		List<IQ7NamedElement> elements = collector.getElements();
 
-			// simply rebuild all contexts each time
-			IContext[] contexts = Q7SearchCore.findAllContexts();
-			for (IContext c : contexts)
-				elements.add(c);
+		// simply rebuild all contexts each time
+		IContext[] contexts = Q7SearchCore.findAllContexts();
+		for (IContext c : contexts)
+			elements.add(c);
 
-			// List<IQ7NamedElement> elements = calculateExtraDependencies(
-			// collector.getElements(), null, new SubProgressMonitor(
-			// monitor, 10));
-			buildElements(elements, new SubProgressMonitor(monitor, 90));
+		// List<IQ7NamedElement> elements = calculateExtraDependencies(
+		// collector.getElements(), null, new SubProgressMonitor(
+		// monitor, 10));
+		buildElements(elements, new SubProgressMonitor(monitor, 90));
 
-			monitor.done();
-		} catch (CoreException e) {
-		}
+		monitor.done();
 	}
 
 	private IQ7Project getQ7Project() {
