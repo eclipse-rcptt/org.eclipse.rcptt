@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -37,6 +39,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
+import org.eclipse.rcptt.core.model.search.Q7SearchCore;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
@@ -52,6 +55,13 @@ public class Q7NamedElementTest {
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject("TEST");
 	private static final IFile TESTCASE_FILE = PROJECT.getFile("testcase.test");
 	
+	private static final IResourceChangeListener indexWaiter = new IResourceChangeListener() {
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+			Q7SearchCore.findAllTagReferences();
+		}
+	};
+	
 	@Rule
 	public final NoErrorsInLog NO_ERRORS = new NoErrorsInLog(RcpttCore.class);
 	
@@ -61,10 +71,12 @@ public class Q7NamedElementTest {
 		for (IProject i: WORKSPACE.getRoot().getProjects()) {
 			i.delete(true,  true, null);
 		}
+		WORKSPACE.removeResourceChangeListener(indexWaiter);
 	}
 	
 	@Before
 	public void before() throws CoreException {
+		WORKSPACE.addResourceChangeListener(indexWaiter);
 		IProjectDescription deQ7ion = WORKSPACE.newProjectDescription(PROJECT.getName());
 		deQ7ion.setNatureIds(new String[] { RcpttNature.NATURE_ID });
 		PROJECT.create(deQ7ion, null);
@@ -174,7 +186,7 @@ public class Q7NamedElementTest {
 		void accept(T data) throws Exception;
 	}
 	
-	public void noResourceleaks(ThrowingConsumer<ITestCase> action) {
+	private void noResourceleaks(ThrowingConsumer<ITestCase> action) {
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE | IFile.FORCE, null);
 		} catch (Exception e) {
