@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.rcptt.core.ecl.core.model.ExecutionPhase;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
@@ -113,6 +114,27 @@ public abstract class Executable implements IExecutable {
 	public void removeListener(Listener listener) {
 		listeners.remove(listener);
 	}
+	
+	public interface IStatusSupplier {
+		IStatus get() throws InterruptedException;
+	}
+	
+	public IStatus mergeResults(IStatusSupplier ... statuses) throws InterruptedException {
+		MultiStatus localResult = new MultiStatus(getClass(), 0, getName() + " result");
+		for (IStatusSupplier i: statuses) {
+			IStatus tmp = i.get();
+			if (tmp.matches(IStatus.CANCEL|IStatus.ERROR)) {
+				return tmp;
+			}
+			if (!tmp.isOK()) {
+				localResult.merge(tmp);
+			}
+		}
+		if (localResult.isOK()) {
+			return Status.OK_STATUS;
+		}
+		return localResult;
+	}
 
 	final void executeAndRememberResult() throws InterruptedException {
 		if (state != State.WAITING)
@@ -126,25 +148,6 @@ public abstract class Executable implements IExecutable {
 			startLaunching();
 			listeners.onStatusChange(this);
 			localResult = execute();
-			Preconditions.checkNotNull(localResult);
-			for (final Executable child : getChildren()) {
-				if (result != null)
-					localResult = result;
-				if (!localResult.isOK()) {
-					child.cancel(cancelledForPreviousFailures);
-					continue;
-				}
-				child.addListener(listeners);
-				try {
-					child.executeAndRememberResult();
-					IStatus rv = handleChildResult(child.getResultStatus());
-					if (!rv.isOK()) {
-						localResult = rv;
-					}
-				} finally {
-					child.removeListener(listeners);
-				}
-			}
 		} catch (InterruptedException e) {
 			localResult = RcpttPlugin.createStatus("Execution was unexpectedly terminated", e);
 			throw e;
@@ -190,7 +193,26 @@ public abstract class Executable implements IExecutable {
 	}
 
 	/** Should only be called from org.eclipse.rcptt.internal.launching.Executable.executeAndRememberResult() */
-	protected abstract IStatus execute() throws InterruptedException;
+	protected IStatus execute() throws InterruptedException {
+		IStatus localResult = Status.OK_STATUS;
+		for (final Executable child : getChildren()) {
+			if (!localResult.isOK()) {
+				child.cancel(cancelledForPreviousFailures);
+				continue;
+			}
+			child.addListener(listeners);
+			try {
+				child.executeAndRememberResult();
+				IStatus rv = handleChildResult(child.getResultStatus());
+				if (!rv.isOK()) {
+					localResult = rv;
+				}
+			} finally {
+				child.removeListener(listeners);
+			}
+		}
+		return localResult;
+	}
 
 	protected Executable(boolean debug) {
 		this(debug, ExecutionPhase.AUTO, false);

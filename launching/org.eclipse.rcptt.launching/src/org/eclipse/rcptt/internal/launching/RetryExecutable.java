@@ -44,14 +44,13 @@ public class RetryExecutable extends Executable {
 	}
 
 	@Override
-	protected IStatus execute() throws InterruptedException {
+	protected final IStatus execute() throws InterruptedException {
 		int attempts = Math.max(1, Q7Features.getInstance().getIntValue(Q7Features.RETRY_TEST));
 		MultiStatus status = new MultiStatus(getClass(), 0, "Execution result for " + getName());
 		boolean first = true;
 		for (int i = 0; i < attempts; i++) {
 			this.attempt = i + 1;
-			delegate.executeAndRememberResult();
-			IStatus temp  = delegate.getResultStatus();
+			IStatus temp  = delegate.execute();
 			if (temp.matches(IStatus.CANCEL)) {
 				return temp;
 			}
