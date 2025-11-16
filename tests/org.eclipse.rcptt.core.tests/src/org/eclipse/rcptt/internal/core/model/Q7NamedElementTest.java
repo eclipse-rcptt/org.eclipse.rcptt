@@ -214,7 +214,7 @@ public class Q7NamedElementTest {
 	public void noResourceleaksExists() {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
-	
+
 	@Test(timeout=100_000)
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
