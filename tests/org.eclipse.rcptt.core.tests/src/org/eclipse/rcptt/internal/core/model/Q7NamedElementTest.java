@@ -137,17 +137,17 @@ public class Q7NamedElementTest {
 		assertNotNull(testcase.getNamedElement()); // should not deadlock or throw exceptions
 	}
 	
-	@Test
+	@Test(timeout=200_000)
 	public void noResourceleaksID() {
 		noResourceleaks(testcase -> Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID()));
 	}
 	
-	@Test
+	@Test(timeout=200_000)
 	public void noResourceleaksExists() {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
-	@Test
+	@Test(timeout=200_000)
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		Job noise = Job.create("Keep refetching model", (ICoreRunnable) monitor -> {
