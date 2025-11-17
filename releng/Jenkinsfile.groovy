@@ -235,7 +235,6 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 	          -DexplicitRunner=`readlink -f ${runner}` \
 	          ${args}"
 	    }
-	    this.script.sh "test -f ${dir}/*/target/results/*.html -o -f ${dir}/target/results/*.html"
     } finally {
 	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/**/target/results/**/*, ${dir}/**/target/**/*log,${dir}/**/target/surefire-reports/**, **/*.hprof"
       this.script.junit "${dir}/**/target/*-reports/*.xml"
