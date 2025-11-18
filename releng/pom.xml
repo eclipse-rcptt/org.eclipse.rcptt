@@ -24,7 +24,7 @@
   </licenses>
   
   <properties>
-    <tycho-version>5.0.0</tycho-version>
+    <tycho-version>4.0.13</tycho-version>
     <tycho-groupid>org.eclipse.tycho</tycho-groupid>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ajdt43repository>http://download.eclipse.org/tools/ajdt/431/dev/update/</ajdt43repository>
