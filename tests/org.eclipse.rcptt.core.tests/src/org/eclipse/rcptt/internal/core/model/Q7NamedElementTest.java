@@ -65,6 +65,9 @@ public class Q7NamedElementTest {
 	@Rule
 	public final NoErrorsInLog NO_ERRORS = new NoErrorsInLog(RcpttCore.class);
 	
+	@Rule
+	public final NoErrorsInLog NO_RESORUCES_ERRORS = new NoErrorsInLog(IWorkspace.class);
+	
 	@Before
 	@After
 	public void cleanup() throws CoreException {
@@ -72,6 +75,12 @@ public class Q7NamedElementTest {
 			i.delete(true,  true, null);
 		}
 		WORKSPACE.removeResourceChangeListener(indexWaiter);
+	}
+	
+	@After
+	public void after() {
+		NO_ERRORS.assertNoErrors();
+		NO_RESORUCES_ERRORS.assertNoErrors();
 	}
 	
 	@Before
