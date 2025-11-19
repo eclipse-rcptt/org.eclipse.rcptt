@@ -3,19 +3,22 @@ package org.eclipse.rcptt.internal.launching;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
-import java.util.function.Function;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.launching.AutLaunch;
 
 public class RetryExecutable extends Executable {
-	private final Function<String, Executable> delegateSupplier;
+	private final ThrowingFunction<String, Executable> delegateSupplier;
 	private Executable delegate;
 	private ArrayList<Executable> children = new ArrayList<>();
 
-	public RetryExecutable(Function<String, Executable> delegate) {
+	public interface ThrowingFunction<T, R> {
+		R apply(T t) throws CoreException;
+	}
+	public RetryExecutable(ThrowingFunction<String, Executable> delegate) throws CoreException {
 		super(false);
 		this.delegateSupplier = delegate;
 		this.delegate = requireNonNull(delegate.apply("attempt 1"));
@@ -64,8 +67,12 @@ public class RetryExecutable extends Executable {
 			if (!temp.matches(IStatus.ERROR)) {
 				return error;
 			}
-			delegate = requireNonNull(delegateSupplier.apply("attempt " + (i + 1)));
-			children.add(delegate);
+			try {
+				delegate = requireNonNull(delegateSupplier.apply("attempt " + (i + 1)));
+				children.add(delegate);
+			} catch (CoreException e) {
+				return e.getStatus();
+			}
 		}
 		executeChild(delegate);
 		return error;

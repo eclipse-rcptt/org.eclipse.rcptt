@@ -88,6 +88,7 @@ public class PrepareExecutionWrapper extends Executable {
 		super(executable.isDebug(), ExecutionPhase.AUTO, true);
 		this.launch = launch;
 		this.executable = executable;
+		Preconditions.checkArgument(!(executable instanceof PrepareExecutionWrapper), "Can't wrap itself");
 		Preconditions.checkNotNull(getActualElement());
 		Preconditions.checkNotNull(getActualElement().getID());
 	}
@@ -96,6 +97,7 @@ public class PrepareExecutionWrapper extends Executable {
 		return executable;
 	}
 
+	@Override
 	public AutLaunch getAut() {
 		return launch;
 	}
@@ -235,14 +237,17 @@ public class PrepareExecutionWrapper extends Executable {
 		return executable.getChildren();
 	}
 
+	@Override
 	public IQ7NamedElement getActualElement() {
 		return executable.getActualElement();
 	}
 
+	@Override
 	public String getName() {
 		return executable.getName();
 	}
 
+	@Override
 	public int getType() {
 		return executable.getType();
 	}
