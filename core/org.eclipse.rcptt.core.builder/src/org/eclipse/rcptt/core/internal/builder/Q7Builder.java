@@ -243,7 +243,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 	}
 
 	private static boolean addResource(IResource resource,
-			List<IQ7NamedElement> elements) {
+			List<IQ7NamedElement> elements) throws CoreException {
 		if (resource instanceof IFile
 				&& RcpttCore.isQ7File(resource.getFullPath())
 				&& !WorkspaceMonitor.isIgnored(resource)) {
@@ -254,11 +254,8 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		return true;
 	}
 
-	private static void deleteMarkers(IFile file) {
-		try {
-			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
-		} catch (CoreException ce) {
-		}
+	private static void deleteMarkers(IFile file) throws CoreException {
+		file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
 	}
 
 	protected void fullBuild(final IProgressMonitor monitor)
@@ -359,10 +356,10 @@ public class Q7Builder extends IncrementalProjectBuilder {
 								"Validate RCPTT element " + element.getName(), 2 + validators.length);
 						subMonitor.subTask("Validate RCPTT element "
 								+ element.getName());
-						deleteMarkers((IFile) element.getResource());
-						subMonitor.worked(1);
-
 						try {
+							deleteMarkers((IFile) element.getResource());
+							subMonitor.worked(1);
+
 							final IQ7NamedElement indexingWorkingCopy = element.getIndexingWorkingCopy(null);
 							try {
 								for (IQ7Validator validator : validators) {

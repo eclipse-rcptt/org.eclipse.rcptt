@@ -12,14 +12,18 @@ package org.eclipse.rcptt.internal.core.jobs;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 
 public abstract class JobManager {
 
+	private static final IWorkspaceRoot ROOT = ResourcesPlugin.getWorkspace().getRoot();
 	/* queue of jobs to execute */
 	protected IJob[] awaitingJobs = new IJob[10];
 	protected int jobStart = 0;
@@ -244,14 +248,12 @@ public abstract class JobManager {
 							}
 							previousJob = currentJob;
 						}
-						boolean blocking = false;
-						var job = Job.getJobManager().currentJob();
-						if (job != null) {
-							blocking = job.yieldRule(subProgress) != null;
+						ISchedulingRule currentRule = Job.getJobManager().currentRule();
+						if (currentRule != null && ROOT.isConflicting(currentRule)) {
+							throw new IllegalStateException("Can't wait while holding any locks. Currently holding: " + currentRule );
 						}
-						if (!blocking) {
-							Thread.sleep(50);
-						}
+						
+						Thread.sleep(50);
 					}
 					if (timeout != -1
 							&& (System.currentTimeMillis() - start) > timeout) {
