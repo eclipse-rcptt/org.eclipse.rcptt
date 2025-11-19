@@ -55,10 +55,15 @@ public class Q7NamedElementTest {
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject("TEST");
 	private static final IFile TESTCASE_FILE = PROJECT.getFile("testcase.test");
 	
+	private static final Job reindex = Job.create("Reindex", (ICoreRunnable) (m) -> Q7SearchCore.findAllTagReferences()); 
+	static {
+		reindex.setPriority(Job.INTERACTIVE);
+	}
+	
 	private static final IResourceChangeListener indexWaiter = new IResourceChangeListener() {
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
-			Q7SearchCore.findAllTagReferences();
+			reindex.schedule();
 		}
 	};
 	
@@ -71,6 +76,7 @@ public class Q7NamedElementTest {
 	@Before
 	@After
 	public void cleanup() throws CoreException {
+		reindex.cancel();
 		for (IProject i: WORKSPACE.getRoot().getProjects()) {
 			i.delete(true,  true, null);
 		}
