@@ -101,6 +101,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 			return changedResources;
 		}
 
+		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
@@ -191,6 +192,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		"Internal error in RCP Testing Tool Builder", e));
 	}
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
@@ -240,7 +242,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 	}
 
 	private static boolean addResource(IResource resource,
-			List<IQ7NamedElement> elements) {
+			List<IQ7NamedElement> elements) throws CoreException {
 		if (resource instanceof IFile
 				&& RcpttCore.isQ7File(resource.getFullPath())
 				&& !WorkspaceMonitor.isIgnored(resource)) {
@@ -251,11 +253,8 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		return true;
 	}
 
-	private static void deleteMarkers(IFile file) {
-		try {
-			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
-		} catch (CoreException ce) {
-		}
+	private static void deleteMarkers(IFile file) throws CoreException {
+		file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
 	}
 
 	protected void fullBuild(final IProgressMonitor monitor)
@@ -346,6 +345,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 					return;
 				}
 				executor.execute(new Runnable() {
+					@Override
 					public void run() {
 						IProgressMonitor subMonitor = new SubProgressMonitor(
 								monitor, 1);
@@ -354,10 +354,10 @@ public class Q7Builder extends IncrementalProjectBuilder {
 								"Validate RCPTT element " + element.getName(), 2 + validators.length);
 						subMonitor.subTask("Validate RCPTT element "
 								+ element.getName());
-						deleteMarkers((IFile) element.getResource());
-						subMonitor.worked(1);
-
 						try {
+							deleteMarkers((IFile) element.getResource());
+							subMonitor.worked(1);
+
 							final IQ7NamedElement indexingWorkingCopy = element.getIndexingWorkingCopy(null);
 							try {
 								for (IQ7Validator validator : validators) {
