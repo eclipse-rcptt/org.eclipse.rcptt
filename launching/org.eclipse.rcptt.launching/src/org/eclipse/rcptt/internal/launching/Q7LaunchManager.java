@@ -601,7 +601,7 @@ public class Q7LaunchManager {
 					List<Executable> plan = new ArrayList<Executable>();
 					EclScenarioExecutable parent = debugger == null ? new EclScenarioExecutable(launch, test)
 							: new EclDebugTestExecutable(launch, test, debugger);
-					parent.setVariantName(append(variant.name, name));
+					parent.setVariantName(Lists.newArrayList(variant.name));
 					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_START,
 							ExecutionPhase.START);
 					try {
@@ -699,10 +699,6 @@ public class Q7LaunchManager {
 		} else {
 			session.oneFinished();
 		}
-	}
-
-	private static List<String> append(List<String> name, String name2) {
-		return Stream.concat(name.stream(), Stream.of(name2)).toList();
 	}
 
 	private final List<ExecutionSession> sessions = new ArrayList<ExecutionSession>();
