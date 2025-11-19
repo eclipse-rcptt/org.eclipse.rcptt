@@ -20,9 +20,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -588,32 +590,33 @@ public class Q7LaunchManager {
 
 		private List<Executable> makeExecutionPlans(ITestCase test, IContext[] contexts,
 				IVerification[] verifications, List<List<String>> supportedVariants) {
-			if (contexts == null)
-				contexts = new IContext[0];
-			if (verifications == null)
-				verifications = new IVerification[0];
+			Objects.requireNonNull(verifications);
+			Objects.requireNonNull(contexts);
 			List<Executable> result = new ArrayList<Executable>();
 			for (ContextVariant variant : getContextVariants(Arrays.asList(contexts))) {
-				List<Executable> plan = new ArrayList<Executable>();
 				if (supportedVariants != null && !supportedVariants.contains(variant.name)) {
 					continue; // Skip variant if it is not required.
 				}
-				EclScenarioExecutable parent = debugger == null ? new EclScenarioExecutable(launch, test)
-						: new EclDebugTestExecutable(launch, test, debugger);
-				parent.setVariantName(Lists.newArrayList(variant.name));
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_START,
-						ExecutionPhase.START);
-				try {
-					addContextExecutables(plan, Lists.newArrayList(contexts), variant);
-				} catch (ModelException e) {
-					Q7LaunchingPlugin.log("Failed to populate contexts for executable: " + parent.getName(), e);
-				}
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_RUN, ExecutionPhase.RUN);
-				plan.add(parent);
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_FINISH,
-						ExecutionPhase.FINISH);
-				Executable attempt = plan.size() > 1 ? new GroupExecutable(parent, plan) : parent;
-				result.add(new RetryExecutable(attempt));
+				Function<String, Executable> attemptSupplier = (name) -> {
+					List<Executable> plan = new ArrayList<Executable>();
+					EclScenarioExecutable parent = debugger == null ? new EclScenarioExecutable(launch, test)
+							: new EclDebugTestExecutable(launch, test, debugger);
+					parent.setVariantName(append(variant.name, name));
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_START,
+							ExecutionPhase.START);
+					try {
+						addContextExecutables(plan, Lists.newArrayList(contexts), variant);
+					} catch (ModelException e) {
+						Q7LaunchingPlugin.log("Failed to populate contexts for executable: " + parent.getName(), e);
+					}
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_RUN, ExecutionPhase.RUN);
+					plan.add(parent);
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_FINISH,
+							ExecutionPhase.FINISH);
+					Executable attempt = plan.size() > 1 ? new GroupExecutable(parent, plan) : parent;
+					return attempt;
+				};
+				result.add(new RetryExecutable(attemptSupplier));
 			}
 			return result;
 		}
@@ -694,6 +697,10 @@ public class Q7LaunchManager {
 		} else {
 			session.oneFinished();
 		}
+	}
+
+	private static List<String> append(List<String> name, String name2) {
+		return Stream.concat(name.stream(), Stream.of(name2)).toList();
 	}
 
 	private final List<ExecutionSession> sessions = new ArrayList<ExecutionSession>();

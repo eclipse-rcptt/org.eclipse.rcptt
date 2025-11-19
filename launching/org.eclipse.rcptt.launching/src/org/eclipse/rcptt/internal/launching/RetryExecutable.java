@@ -1,31 +1,35 @@
 package org.eclipse.rcptt.internal.launching;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
+import java.util.ArrayList;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.launching.AutLaunch;
 
 public class RetryExecutable extends Executable {
-	private final Executable delegate;
-	private int attempt = 1;
+	private final Function<String, Executable> delegateSupplier;
+	private Executable delegate;
+	private ArrayList<Executable> children = new ArrayList<>();
 
-	public RetryExecutable(Executable delegate) {
-		super(delegate.isDebug());
-		this.delegate = Objects.requireNonNull(delegate);
+	public RetryExecutable(Function<String, Executable> delegate) {
+		super(false);
+		this.delegateSupplier = delegate;
+		this.delegate = requireNonNull(delegate.apply("attempt 1"));
+		children.add(this.delegate);
 	}
 
 	@Override
 	public String getName() {
-		return this.delegate.getName() + " attempt " + attempt;
+		return "Retry " + this.delegate.getName();
 	}
 
 	@Override
 	public AutLaunch getAut() {
-		// TODO Auto-generated method stub
-		return null;
+		return delegate.getAut();
 	}
 
 	@Override
@@ -35,36 +39,36 @@ public class RetryExecutable extends Executable {
 
 	@Override
 	public int getType() {
-		return TYPE_SCENARIO;
+		return delegate.getType();
 	}
 
 	@Override
 	public Executable[] getChildren() {
-		return new Executable[] {delegate};
+		return children.toArray(Executable[]::new);
 	}
 
 	@Override
 	protected final IStatus execute() throws InterruptedException {
 		int attempts = Math.max(1, Q7Features.getInstance().getIntValue(Q7Features.RETRY_TEST));
-		MultiStatus status = new MultiStatus(getClass(), 0, "Execution result for " + getName());
-		boolean first = true;
-		for (int i = 0; i < attempts; i++) {
-			this.attempt = i + 1;
-			IStatus temp  = delegate.execute();
+		
+		IStatus error = null;
+		for (int i = 1; i < attempts; i++) {
+			IStatus temp  = executeChild(delegate);
 			if (temp.matches(IStatus.CANCEL)) {
 				return temp;
 			}
-			status.add(temp);
-			if (!temp.matches(IStatus.ERROR)) {
-				if (first) {
-					return temp;
-				} else {
-					return status;
-				}
+			// Remember if error, return on success 
+			if (error == null) {
+				error = temp;
 			}
-			first = false;
+			if (!temp.matches(IStatus.ERROR)) {
+				return error;
+			}
+			delegate = requireNonNull(delegateSupplier.apply("attempt " + (i + 1)));
+			children.add(delegate);
 		}
-		return status;
+		executeChild(delegate);
+		return error;
 	}
 
 }

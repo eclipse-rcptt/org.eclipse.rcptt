@@ -15,6 +15,7 @@ import static org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin.PLUGIN_ID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -44,6 +45,7 @@ public abstract class Executable implements IExecutable {
 
 	private final ExecutionPhase phase;
 
+	@Override
 	public abstract Executable[] getChildren();
 
 	public interface Listener {
@@ -95,6 +97,7 @@ public abstract class Executable implements IExecutable {
 	}
 
 	private void setResult(IStatus result) {
+		Objects.requireNonNull(result);
 		boolean changed = false;
 		synchronized (this) {
 			if (this.result == null) {
@@ -192,7 +195,7 @@ public abstract class Executable implements IExecutable {
 		return resultStatus;
 	}
 
-	/** Should only be called from org.eclipse.rcptt.internal.launching.Executable.executeAndRememberResult() */
+	/** Should only be called from org.eclipse.rcptt.internal.launching.Executable.executeAndRememberResult() or from overrides */
 	protected IStatus execute() throws InterruptedException {
 		IStatus localResult = Status.OK_STATUS;
 		for (final Executable child : getChildren()) {
@@ -200,18 +203,22 @@ public abstract class Executable implements IExecutable {
 				child.cancel(cancelledForPreviousFailures);
 				continue;
 			}
-			child.addListener(listeners);
-			try {
-				child.executeAndRememberResult();
-				IStatus rv = handleChildResult(child.getResultStatus());
-				if (!rv.isOK()) {
-					localResult = rv;
-				}
-			} finally {
-				child.removeListener(listeners);
+			IStatus rv = executeChild(child);
+			if (!rv.isOK()) {
+				localResult = rv;
 			}
 		}
 		return localResult;
+	}
+
+	protected final IStatus executeChild(final Executable child) throws InterruptedException {
+		child.addListener(listeners);
+		try {
+			child.executeAndRememberResult();
+			return handleChildResult(child.getResultStatus());
+		} finally {
+			child.removeListener(listeners);
+		}
 	}
 
 	protected Executable(boolean debug) {
@@ -224,6 +231,7 @@ public abstract class Executable implements IExecutable {
 		this.collectLog = collectLog;
 	}
 
+	@Override
 	public boolean isDebug() {
 		return debug;
 	}
@@ -246,15 +254,18 @@ public abstract class Executable implements IExecutable {
 		return result;
 	}
 
+	@Override
 	public Report getResultReport() {
 		return null;
 	}
 
+	@Override
 	public String getId() {
 		return null;
 	}
 
 
+	@Override
 	public ExecutionPhase getPhase() {
 		return phase;
 	}

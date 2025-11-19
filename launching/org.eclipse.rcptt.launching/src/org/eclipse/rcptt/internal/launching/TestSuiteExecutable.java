@@ -74,11 +74,6 @@ public class TestSuiteExecutable extends Executable {
 	}
 
 	@Override
-	public IStatus execute() throws InterruptedException {
-		return Status.OK_STATUS;
-	}
-
-	@Override
 	protected IStatus handleChildResult(IStatus resultStatus) {
 		if (resultStatus.matches(IStatus.CANCEL))
 			return resultStatus;
