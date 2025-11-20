@@ -616,7 +616,7 @@ public class Q7LaunchManager {
 					Executable attempt = plan.size() > 1 ? new GroupExecutable(parent, plan) : parent;
 					return new PrepareExecutionWrapper(launch, attempt);
 				};
-				result.add(new RetryExecutable(attemptSupplier));
+				result.add(RetryExecutable.wrap(attemptSupplier));
 			}
 			return result;
 		}
