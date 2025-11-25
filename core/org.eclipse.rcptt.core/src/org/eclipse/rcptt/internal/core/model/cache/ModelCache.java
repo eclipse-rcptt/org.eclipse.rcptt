@@ -43,7 +43,9 @@ public class ModelCache {
 	private static final ILog LOG = Platform.getLog(FrameworkUtil.getBundle(ModelCache.class));
 
 	protected ModelInfo modelInfo;
-
+	
+	private static final System.Logger TRACE = System.getLogger(ModelCache.class.getName()); 
+	
 	private final Cache<IQ7Element, Object> openableCache;
 
 	public ModelCache(long approxSizeInBytes) {
@@ -73,12 +75,12 @@ public class ModelCache {
 			return locks.exclusively(element, TIMEOUT_MS, () -> {
 				try {
 					Object[] result = new Object[1]; // info2 may be immediately deallocated, compute the value while it lasts
-					boolean[] found = new boolean[] {false};
+					boolean[] allocated = new boolean[] {false};
 					T info = clazz.cast(this.openableCache.get(element, () -> {
 						T info3 = infoFactory.get();
 						try {
 							T info2 = clazz.cast(info3);
-							found[0] = true;
+							allocated[0] = true;
 							result[0] = infoToValue.apply(info2); 
 							return info2;
 						} catch (Throwable e) {
@@ -86,11 +88,12 @@ public class ModelCache {
 							throw e;
 						}
 					}));
-					if (found[0]) {
-						return (V)result[0];
+					if (!allocated[0]) {
+						// info was not allocated now, using old value
+						result[0] = infoToValue.apply(info);
 					}
-					// info was not allocated now, using old value
-					return infoToValue.apply(info);
+					TRACE.log(System.Logger.Level.TRACE, "accessInfo.exclusively({0}, {1}, {2}, {3}) = {4}, {5}", element.getPath(), clazz, infoFactory, infoToValue, allocated[0] ? "allocated" : "reused", result[0]);
+					return (V)result[0];
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
 					Throwables.throwIfUnchecked(cause);
@@ -126,6 +129,7 @@ public class ModelCache {
 	public void removeInfo(IQ7Element element) throws InterruptedException {
 		try {
 			locks.exclusively(element, TIMEOUT_MS, () -> {
+				TRACE.log(System.Logger.Level.TRACE, "removeInfo.exclusively({0})", element.getPath());
 				this.openableCache.invalidate(element);
 				return null;
 			});
