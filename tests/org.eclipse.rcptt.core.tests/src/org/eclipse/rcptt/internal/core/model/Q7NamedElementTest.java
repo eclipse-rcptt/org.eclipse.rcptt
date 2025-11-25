@@ -173,15 +173,16 @@ public class Q7NamedElementTest {
 				testcase.getNamedElement();
 			}
 		});
-		long stop = currentTimeMillis() + 1000000;
+		long stop = currentTimeMillis() + 10000;
 		try {
 			int i = 0;
 			while (currentTimeMillis() < stop) {
 				String message = "Iteration " + i++;
 				TRACE.log(System.Logger.Level.TRACE, message);
 				Thread.yield();
-				TESTCASE_FILE.delete(true, null);
+				WORKSPACE.run(ignored -> {TESTCASE_FILE.delete(true, null);},TESTCASE_FILE.getProject(), 0, null);
 				assertFalse(message, TESTCASE_FILE.exists());
+				TRACE.log(System.Logger.Level.TRACE, "Deleted");
 				assertFalse(message, testcase.exists());
 				try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 					TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);

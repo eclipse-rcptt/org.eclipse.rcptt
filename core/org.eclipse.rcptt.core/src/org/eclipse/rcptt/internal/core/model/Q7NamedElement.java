@@ -106,6 +106,10 @@ public abstract class Q7NamedElement extends Openable implements
 			throws InterruptedException, ModelException {
 		checkCurrentRule();
 		IFile resource = getResource();
+		if (!resource.exists()) {
+			close();
+			throw newNotPresentException();
+		}
 		try {
 			Optional<V> result = accessInfoIfOpened(info -> {
 				try {
