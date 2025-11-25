@@ -43,6 +43,7 @@ import org.eclipse.rcptt.core.model.search.Q7SearchCore;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
+import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,11 +52,12 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class Q7NamedElementTest {
+	private static final System.Logger TRACE = System.getLogger(Q7NamedElementTest.class.getName()); 
 	private static final IWorkspace WORKSPACE = ResourcesPlugin.getWorkspace();
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject("TEST");
 	private static final IFile TESTCASE_FILE = PROJECT.getFile("testcase.test");
+	private static final Job reindex = Job.create("Reindex", (ICoreRunnable) (m) -> Q7SearchCore.findAllTagReferences());
 	
-	private static final Job reindex = Job.create("Reindex", (ICoreRunnable) (m) -> Q7SearchCore.findAllTagReferences()); 
 	static {
 		reindex.setPriority(Job.INTERACTIVE);
 	}
@@ -171,13 +173,14 @@ public class Q7NamedElementTest {
 				testcase.getNamedElement();
 			}
 		});
-		long stop = currentTimeMillis() + 10000;
+		long stop = currentTimeMillis() + 1000000;
 		try {
 			int i = 0;
 			while (currentTimeMillis() < stop) {
+				String message = "Iteration " + i++;
+				TRACE.log(System.Logger.Level.TRACE, message);
 				Thread.yield();
 				TESTCASE_FILE.delete(true, null);
-				String message = "Iteration " + i++;
 				assertFalse(message, TESTCASE_FILE.exists());
 				assertFalse(message, testcase.exists());
 				try (InputStream is = getClass().getResourceAsStream("testcase.test")) {

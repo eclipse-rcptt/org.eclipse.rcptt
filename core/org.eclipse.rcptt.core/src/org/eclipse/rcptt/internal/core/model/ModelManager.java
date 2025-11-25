@@ -124,7 +124,7 @@ public class ModelManager {
 		}
 	}
 	
-	synchronized void removeInfoAndChildren(Q7Element element)
+	void removeInfoAndChildren(Q7Element element)
 			throws ModelException, InterruptedException {
 		synchronized (this) {
 			if (cache == null) {
