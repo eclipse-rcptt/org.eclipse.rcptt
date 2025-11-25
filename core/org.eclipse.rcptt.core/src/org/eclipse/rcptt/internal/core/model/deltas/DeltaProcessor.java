@@ -176,11 +176,8 @@ public class DeltaProcessor {
 		if (parent == null) {
 			return;
 		}
-		parent.accessInfo(info -> {
-			OpenableElementInfo openable = (OpenableElementInfo) info;
-			if (openable.isStructureKnown()) {
-				info.addChild(child);
-			}
+		parent.accessInfoIfOpened(info -> {
+			info.addChild(child);
 			return null;
 		});
 	}

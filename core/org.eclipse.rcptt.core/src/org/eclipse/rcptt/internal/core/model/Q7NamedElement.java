@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.internal.core.model;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -37,6 +38,8 @@ import org.eclipse.rcptt.internal.core.model.ModelManager.PerWorkingCopyInfo;
 
 public abstract class Q7NamedElement extends Openable implements
 		IQ7NamedElement {
+	private static final IJobManager JOB_MANAGER = Job.getJobManager();
+
 
 	protected String name;
 	protected boolean workingCopyMode = false;
@@ -72,14 +75,17 @@ public abstract class Q7NamedElement extends Openable implements
 			IProgressMonitor pm,
 			IResource underlyingResource) throws ModelException {
 		// Check if not working copy
+		IFile resource = (IFile) getResource();
+		assert underlyingResource.equals(resource);
+		checkCurrentRule();
+		
 		if (!isInWorkingCopyMode()) {
-			if (!underlyingResource.isAccessible()) {
+			if (!resource.isAccessible()) {
 				throw newNotPresentException();
 			}
 		}
 
 		Q7ResourceInfo resourceInfo = (Q7ResourceInfo) info;
-		IFile resource = (IFile) getResource();
 		try {
 			resourceInfo.load(resource);
 		} catch (Throwable e) {
@@ -91,7 +97,38 @@ public abstract class Q7NamedElement extends Openable implements
 				resourceInfo.createNamedElement(createNamedElement());
 			}
 		}
+		
 		return true;
+	}
+	
+	@Override
+	public <V> V openAndAccessInfo(ThrowingFunction<OpenableElementInfo, V> infoToValue, IProgressMonitor monitor)
+			throws InterruptedException, ModelException {
+		checkCurrentRule();
+		IFile resource = getResource();
+		try {
+			Optional<V> result = accessInfoIfOpened(info -> {
+				try {
+					return infoToValue.apply(info);
+				} catch (ModelException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+			if (result.isPresent()) {
+				return result.get();
+			}
+		} catch (IllegalStateException e) {
+			if (e.getCause() instanceof ModelException) {
+				throw (ModelException)e.getCause();
+			}
+			throw e;
+		}
+		try {
+			JOB_MANAGER.beginRule(resource, monitor);
+			return super.openAndAccessInfo(infoToValue, monitor);
+		} finally {
+			JOB_MANAGER.endRule(resource);
+		}
 	}
 
 	@Override
@@ -382,5 +419,13 @@ public abstract class Q7NamedElement extends Openable implements
 
 	public void setIndexing(boolean indexing) {
 		this.indexing = indexing;
+	}
+	
+	private void checkCurrentRule() {
+		IFile resource = getResource();
+		ISchedulingRule currentRule = JOB_MANAGER.currentRule();
+		if (currentRule != null && !currentRule.contains(resource)) {
+			throw new IllegalStateException("Current rule " + currentRule + " conflicts with the requested " + resource);
+		}
 	}
 }
