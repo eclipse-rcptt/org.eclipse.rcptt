@@ -26,10 +26,13 @@ import org.eclipse.rcptt.core.model.IQ7ElementVisitor;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
+import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 
 import com.google.common.base.Throwables;
 
 public abstract class Openable extends Q7Element implements IOpenable {
+	private static final System.Logger TRACE = System.getLogger(Openable.class.getName()); 
+
 
 	protected Openable(Q7Element parent) throws IllegalArgumentException {
 		super(parent);
@@ -38,14 +41,20 @@ public abstract class Openable extends Q7Element implements IOpenable {
 	@Override
 	public boolean exists() {
 		try {
-			return openAndAccessInfo(info -> true, null);
+			Boolean result = openAndAccessInfo(info -> true, null);
+			TRACE.log(System.Logger.Level.TRACE, "({0}) = {1}", this.getPath(), result);
+			return result;
 		} catch (ModelException e) {
-			if (e.getStatus() instanceof Q7Status)
-				if (((Q7Status) e.getStatus()).getStatusCode() == Q7StatusCode.NotPressent)
+			if (e.getStatus() instanceof Q7Status) {
+				if (((Q7Status) e.getStatus()).getStatusCode() == Q7StatusCode.NotPressent) {
+					TRACE.log(System.Logger.Level.TRACE, () -> "(" +this.getPath()+") = ModelException, false",  e);
 					return false;
+				}
+			}
 			throw new RuntimeException(e); 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+			TRACE.log(System.Logger.Level.TRACE, () -> "(" +this.getPath()+") = InterruptedException, true", e);
 			return true;
 		}
 	}
@@ -104,7 +113,7 @@ public abstract class Openable extends Q7Element implements IOpenable {
 		return parentElement.exists();
 	}
 
-	protected void generateInfos(OpenableElementInfo info, IProgressMonitor monitor)
+	final void generateInfos(OpenableElementInfo info, IProgressMonitor monitor)
 			throws ModelException {
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
@@ -153,7 +162,7 @@ public abstract class Openable extends Q7Element implements IOpenable {
 		V apply(T openable) throws ModelException;
 	}
 	
-	public final <V> V openAndAccessInfo(ThrowingFunction<OpenableElementInfo, V> infoToValue, IProgressMonitor monitor) throws InterruptedException, ModelException {
+	public <V> V openAndAccessInfo(ThrowingFunction<OpenableElementInfo, V> infoToValue, IProgressMonitor monitor) throws InterruptedException, ModelException {
 		try {
 			return accessInfo(info -> {
 				OpenableElementInfo openable = (OpenableElementInfo)info;
