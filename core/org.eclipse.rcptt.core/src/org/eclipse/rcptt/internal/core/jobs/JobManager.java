@@ -89,13 +89,6 @@ public abstract class JobManager {
 			if (currentJob != null
 					&& (jobFamily == null || currentJob.belongsTo(jobFamily))) {
 				currentJob.cancel();
-
-				// wait until current active job has finished
-				synchronized (this) {
-					while (this.processingThread.isAlive() && this.executing) {
-						this.wait(50);
-					}
-				}
 			}
 
 			// flush and compact awaiting jobs
@@ -248,10 +241,7 @@ public abstract class JobManager {
 							}
 							previousJob = currentJob;
 						}
-						ISchedulingRule currentRule = Job.getJobManager().currentRule();
-						if (currentRule != null && ROOT.isConflicting(currentRule)) {
-							throw new IllegalStateException("Can't wait while holding any locks. Currently holding: " + currentRule );
-						}
+						checkRule();
 						
 						Thread.sleep(50);
 					}
@@ -278,6 +268,13 @@ public abstract class JobManager {
 		if (progress != null)
 			progress.done();
 		return status;
+	}
+
+	private void checkRule() {
+		ISchedulingRule currentRule = Job.getJobManager().currentRule();
+		if (currentRule != null && ROOT.isConflicting(currentRule)) {
+			throw new IllegalStateException("Can't wait while holding any locks. Currently holding: " + currentRule );
+		}
 	}
 
 	public abstract String processName();

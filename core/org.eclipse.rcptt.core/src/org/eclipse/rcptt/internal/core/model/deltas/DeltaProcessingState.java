@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
-
 import org.eclipse.rcptt.core.model.IElementChangedListener;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -202,7 +201,6 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				SafeRunner.run(new ISafeRunnable() {
 					@Override
 					public void handleException(Throwable exception) {
-						exception.printStackTrace();
 					}
 
 					@Override
