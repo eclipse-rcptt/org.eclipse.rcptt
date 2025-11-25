@@ -26,7 +26,6 @@ import org.eclipse.rcptt.core.model.IQ7ElementVisitor;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
 import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
-import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 
 import com.google.common.base.Throwables;
 
@@ -51,6 +50,7 @@ public abstract class Openable extends Q7Element implements IOpenable {
 					return false;
 				}
 			}
+			TRACE.log(System.Logger.Level.TRACE, () -> "(" +this.getPath()+") = ModelException, unrecognized",  e);
 			throw new RuntimeException(e); 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

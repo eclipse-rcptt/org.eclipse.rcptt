@@ -129,7 +129,7 @@ public class ModelCache {
 	public void removeInfo(IQ7Element element) throws InterruptedException {
 		try {
 			locks.exclusively(element, TIMEOUT_MS, () -> {
-				TRACE.log(System.Logger.Level.TRACE, "removeInfo.exclusively({0})", element.getPath());
+				TRACE.log(System.Logger.Level.TRACE, () -> "removeInfo.exclusively("+element.getPath()+")");
 				this.openableCache.invalidate(element);
 				return null;
 			});
