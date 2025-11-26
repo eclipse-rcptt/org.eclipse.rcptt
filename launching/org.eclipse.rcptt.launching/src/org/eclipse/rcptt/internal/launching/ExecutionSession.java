@@ -157,7 +157,7 @@ public class ExecutionSession implements IExecutionSession {
 	private int getScenariosByStatus(IExecutable[] executables, int status, boolean matchOk) {
 		int count = 0;
 		for (IExecutable executable : executables) {
-			if (executable instanceof PrepareExecutionWrapper) {
+			if (executable instanceof PrepareExecutionWrapper || executable instanceof RetryExecutable) {
 				if (
 					executable.getStatus() == IExecutable.State.COMPLETED &&
 					(
