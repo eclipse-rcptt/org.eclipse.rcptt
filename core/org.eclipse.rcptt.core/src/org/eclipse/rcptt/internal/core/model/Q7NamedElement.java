@@ -18,10 +18,9 @@ import java.util.function.Function;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IResourceRuleFactory;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -29,11 +28,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.Q7Status;
-import org.eclipse.rcptt.core.model.Q7Status.Q7StatusCode;
 import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.core.persistence.plain.IPlainConstants;
 import org.eclipse.rcptt.core.scenario.NamedElement;
-import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.core.model.ModelManager.PerWorkingCopyInfo;
 
 public abstract class Q7NamedElement extends Openable implements
@@ -205,30 +202,32 @@ public abstract class Q7NamedElement extends Openable implements
 	}
 
 	public IQ7NamedElement internalGetWorkingCopy(IProgressMonitor monitor,
-			boolean indexing) throws ModelException {
-		ISchedulingRule rule = getResource().getWorkspace().getRuleFactory().refreshRule(getResource());
+			boolean indexing) throws ModelException {		
+		IFile resource = getResource();
+		IResourceRuleFactory ruleFactory = resource.getWorkspace().getRuleFactory();
+		ISchedulingRule rule = indexing ? resource : ruleFactory.validateEditRule(new IResource[] {getResource()});
 		IJobManager jobManager = Job.getJobManager();
-		jobManager.beginRule(rule, monitor);
-		try {
 		ModelManager manager = ModelManager.getModelManager();
-
-		Q7NamedElement workingCopy = createWorkingCopy();
-		workingCopy.workingCopyMode = true;
-		workingCopy.setIndexing(indexing);
-		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
-				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
-						true /* record usage */);
-		if (perWorkingCopyInfo != null) {
-			return perWorkingCopyInfo.getWorkingCopy(); // return existing
-			// handle instead of the
-			// one
-			// created above
-		}
-
-		BecomeWorkingCopyOperation op = new BecomeWorkingCopyOperation(
-				workingCopy, indexing);
-		op.runOperation(monitor);
-		return workingCopy;
+		try {
+			jobManager.beginRule(rule, monitor);
+	
+			Q7NamedElement workingCopy = createWorkingCopy();
+			workingCopy.workingCopyMode = true;
+			workingCopy.setIndexing(indexing);
+			ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
+					.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
+							true /* record usage */);
+			if (perWorkingCopyInfo != null) {
+				return perWorkingCopyInfo.getWorkingCopy(); // return existing
+				// handle instead of the
+				// one
+				// created above
+			}
+	
+			BecomeWorkingCopyOperation op = new BecomeWorkingCopyOperation(
+					workingCopy, indexing);
+			op.runOperation(monitor);
+			return workingCopy;
 		} finally {
 			jobManager.endRule(rule);
 		}
@@ -360,25 +359,6 @@ public abstract class Q7NamedElement extends Openable implements
 	
 	public final <V> V accessResourceInfo(Function<Q7ResourceInfo, V> infoToValue) throws ModelException {
 		try {
-			if (!getResource().getWorkspace().isTreeLocked()) {
-				// refresh, only if this project is not building right now
-				if (!ModelManager.getModelManager().isProjectBuilding()
-						&& !indexing) {
-					try {
-						getResource().refreshLocal(IResource.DEPTH_INFINITE,
-								new NullProgressMonitor());
-					} catch (CoreException e) {
-						RcpttPlugin.log(e);
-					}
-				}
-			}
-			if (!getResource().isSynchronized(IResource.DEPTH_INFINITE)) {
-				Q7Status status = new Q7Status(Q7Status.ERROR, "Resource: " + getResource()
-					+ " is locked and can not be synchronized. Wait for indexing and build to complete and try a again.");
-				status.setStatusCode(Q7StatusCode.NotPressent);
-				throw new ModelException(status);
-			}
-
 			if (isInWorkingCopyMode()) {
 				PerWorkingCopyInfo info = getPerWorkingCopyInfo();
 				if (info != null) {
