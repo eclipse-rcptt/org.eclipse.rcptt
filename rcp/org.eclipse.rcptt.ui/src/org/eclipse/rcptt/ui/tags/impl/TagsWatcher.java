@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.IElementChangedListener;
 import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7ElementDelta;
@@ -46,11 +48,12 @@ public class TagsWatcher implements IElementChangedListener {
 		}
 	}
 
+	private final Job reloadTagsJob = Job.create("Index RCPTT tags", ignored -> {reloadTags(); return Status.OK_STATUS; });
 	public void elementChanged(Q7ElementChangedEvent event) {
 		IQ7ElementDelta delta = event.getDelta();
 		// container changes
 		if (hasContainerChanges(delta)) {
-			reloadTags();
+			reloadTagsJob.schedule();
 			return;
 		}
 		// named element changes

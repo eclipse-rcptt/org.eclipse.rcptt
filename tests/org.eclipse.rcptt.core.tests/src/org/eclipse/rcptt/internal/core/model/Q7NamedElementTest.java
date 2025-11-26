@@ -33,9 +33,12 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
@@ -57,15 +60,27 @@ public class Q7NamedElementTest {
 	private static final IProject PROJECT = WORKSPACE.getRoot().getProject("TEST");
 	private static final IFile TESTCASE_FILE = PROJECT.getFile("testcase.test");
 	private static final Job reindex = Job.create("Reindex", (ICoreRunnable) (m) -> Q7SearchCore.findAllTagReferences());
-	
 	static {
 		reindex.setPriority(Job.INTERACTIVE);
 	}
+	
+	private static final Job WORKSPACE_NOISE = new WorkspaceJob("Workspace noise") {
+		{
+			setRule(WORKSPACE.getRoot());
+			setPriority(INTERACTIVE);
+		}
+		@Override
+		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+			return Status.OK_STATUS;
+		}
+	};
+	
 	
 	private static final IResourceChangeListener indexWaiter = new IResourceChangeListener() {
 		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			reindex.schedule();
+			WORKSPACE_NOISE.schedule();
 		}
 	};
 	
@@ -164,7 +179,7 @@ public class Q7NamedElementTest {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
-	@Test(timeout=200_000)
+	@Test(timeout=100_000)
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		Job noise = Job.create("Keep refetching model", (ICoreRunnable) monitor -> {
