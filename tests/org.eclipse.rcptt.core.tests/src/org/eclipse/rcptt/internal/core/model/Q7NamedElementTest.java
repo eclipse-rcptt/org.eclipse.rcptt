@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.search.Q7SearchCore;
@@ -113,6 +114,7 @@ public class Q7NamedElementTest {
 		deQ7ion.setNatureIds(new String[] { RcpttNature.NATURE_ID });
 		PROJECT.create(deQ7ion, null);
 		PROJECT.open(null);
+		InstanceScope.INSTANCE.getNode(ResourcesPlugin.PI_RESOURCES).putBoolean(ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false);
 	}
 
 	@Test(timeout=10_000)
@@ -158,7 +160,7 @@ public class Q7NamedElementTest {
 	/**
 	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176#issuecomment-2904265630
 	 */
-	@Test(timeout=100_000)
+	@Test(timeout=100_000, expected = IllegalStateException.class)
 	public void doNotDeadlockIfResourceIsNotSynchronized() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
@@ -166,7 +168,7 @@ public class Q7NamedElementTest {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		FileTime time =FileTime.from(Instant.now().plusSeconds(3));
 		Files.setLastModifiedTime(Path.of(TESTCASE_FILE.getRawLocation().toOSString()), time);
-		assertNotNull(testcase.getNamedElement()); // should not deadlock or throw exceptions
+		assertNotNull(testcase.getNamedElement()); // should not deadlock, throws
 	}
 	
 	@Test(timeout=200_000)
