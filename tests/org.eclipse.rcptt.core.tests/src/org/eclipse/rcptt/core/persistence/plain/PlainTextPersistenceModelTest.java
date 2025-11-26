@@ -64,6 +64,7 @@ public class PlainTextPersistenceModelTest {
 		for (IProject project: WORKSPACE.getRoot().getProjects()) {
 			project.delete(true, true, null);
 		}
+		Q7NamedElementTest.enableSyncOnAccess(false);
 	}
 	
 	@Test
