@@ -275,6 +275,10 @@ public abstract class JobManager {
 		if (currentRule != null && ROOT.isConflicting(currentRule)) {
 			throw new IllegalStateException("Can't wait while holding any locks. Currently holding: " + currentRule );
 		}
+		
+		if (ROOT.getWorkspace().isTreeLocked()) {
+			throw new IllegalStateException("Can't wait while holding any locks. Currently holding workspace tree.");
+		}
 	}
 
 	public abstract String processName();
