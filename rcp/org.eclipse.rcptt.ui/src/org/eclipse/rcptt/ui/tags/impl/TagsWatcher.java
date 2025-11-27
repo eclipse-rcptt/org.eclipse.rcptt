@@ -10,11 +10,18 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.tags.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.core.model.IElementChangedListener;
 import org.eclipse.rcptt.core.model.IQ7Element;
@@ -28,31 +35,40 @@ import org.eclipse.rcptt.core.tags.Tag;
 import org.eclipse.rcptt.core.tags.TagsFactory;
 import org.eclipse.rcptt.core.tags.TagsRegistry;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
+
 public class TagsWatcher implements IElementChangedListener {
 
 	// separator regex for the hierarchical tags
 	public static final String HIERARCHY_SEP = "[/]"; //$NON-NLS-1$
 
 	private final TagsRegistry tags;
-	private Map<IQ7NamedElement, List<String>> TagsRefsMap;
+	private final Multimap<IQ7NamedElement, String> TagsRefsMap = Multimaps.synchronizedMultimap(MultimapBuilder.hashKeys().arrayListValues().build());
+	private final Job reloadTagsJob = Job.create("Index RCPTT tags", ignored -> {reloadTags(); return Status.OK_STATUS; });
+	private final QueueJob<IQ7NamedElement> reindexElement = new QueueJob<IQ7NamedElement>("Index RCPTT element tags", new QueueJob.UniqueQueue<>()) {
+
+		@Override
+		protected void process(IQ7NamedElement item, SubMonitor monitor) {
+			monitor.beginTask(item.getPath().toPortableString(), 1);
+			processElementChanged(item);
+			monitor.done();
+		}
+		
+	};
+	
 
 	public TagsWatcher(final TagsRegistry tags) {
 		this.tags = tags;
-		// Initial tags load
-		TagsRefsMap = Q7SearchCore.findAllTagReferences();
-		for (Map.Entry<IQ7NamedElement, List<String>> entry : TagsRefsMap
-				.entrySet()) {
-			for (String tag : entry.getValue()) {
-				addTagRef(tag, entry.getKey());
-			}
-		}
+		reloadTagsJob.schedule();
 	}
 
-	private final Job reloadTagsJob = Job.create("Index RCPTT tags", ignored -> {reloadTags(); return Status.OK_STATUS; });
 	public void elementChanged(Q7ElementChangedEvent event) {
 		IQ7ElementDelta delta = event.getDelta();
 		// container changes
 		if (hasContainerChanges(delta)) {
+			reindexElement.cancel();
 			reloadTagsJob.schedule();
 			return;
 		}
@@ -65,11 +81,11 @@ public class TagsWatcher implements IElementChangedListener {
 				processElementRemoved(changedElement);
 				break;
 			case IQ7ElementDelta.ADDED:
-				processElementChanged(changedElement);
+				reindexElement.add(changedElement);
 				break;
 			case IQ7ElementDelta.CHANGED:
 				if ((childDelta.getFlags() & IQ7ElementDelta.F_CONTENT) != 0) {
-					processElementChanged(changedElement);
+					reindexElement.add(changedElement);
 				}
 				break;
 			}
@@ -103,65 +119,51 @@ public class TagsWatcher implements IElementChangedListener {
 	}
 
 	private void processElementRemoved(IQ7NamedElement element) {
-		List<String> tagsToRemove = TagsRefsMap.get(element);
-		if (tagsToRemove != null) {
-			for (String tag : tagsToRemove) {
-				removeTagRef(tag, element);
-			}
+		Collection<String> tagsToRemove = TagsRefsMap.removeAll(element);
+		for (String tag : tagsToRemove) {
+			removeTagRef(tag, element);
 		}
-		TagsRefsMap.remove(element);
 	}
 
 	private void processElementChanged(IQ7NamedElement element) {
-		List<String> oldTags = TagsRefsMap.get(element);
-		if (oldTags == null) {
-			oldTags = new ArrayList<String>();
-		}
-		List<String> newTags = new ArrayList<String>();
+		String[] currentTags = Q7SearchCore.findTagsByDocument(element);
+		setTags(element, asList(currentTags));
+	}
 
-		for (String newTag : Q7SearchCore.findTagsByDocument(element)) {
-			if (!oldTags.contains(newTag)) {
+	private void setTags(IQ7NamedElement element, Collection<String> currentTags) {
+		Set<String> oldTags = new HashSet<>(TagsRefsMap.get(element));
+		for (String newTag : currentTags) {
+			if (TagsRefsMap.put(element, newTag)) {
 				addTagRef(newTag, element);
 			}
-			newTags.add(newTag);
+			oldTags.remove(newTag);
 		}
 
 		for (String oldTag : oldTags) {
-			if (!newTags.contains(oldTag)) {
+			if (TagsRefsMap.remove(element, oldTag)) {
 				removeTagRef(oldTag, element);
 			}
 		}
-		TagsRefsMap.put(element, newTags);
 	}
 
 	private void reloadTags() {
 		Map<IQ7NamedElement, List<String>> ActualTagsRefsMap = Q7SearchCore
 				.findAllTagReferences();
 
-		for (Map.Entry<IQ7NamedElement, List<String>> actualEntry : ActualTagsRefsMap
-				.entrySet()) {
-			if (TagsRefsMap.get(actualEntry.getKey()) == null) {
-				// new named element added
-				for (String tag : actualEntry.getValue()) {
-					addTagRef(tag, actualEntry.getKey());
-				}
-			} else {
-				// existing element
-				processElementChanged(actualEntry.getKey());
+		ActualTagsRefsMap.forEach((k, v) -> {
+			setTags(k, v);
+		});
+		ArrayList<IQ7NamedElement> removed = new ArrayList<>();
+		TagsRefsMap.keySet().removeIf(k -> {
+			if (ActualTagsRefsMap.containsKey(k)) {
+				return false;
 			}
-		}
-
-		for (Map.Entry<IQ7NamedElement, List<String>> oldEntry : TagsRefsMap
-				.entrySet()) {
-			if (ActualTagsRefsMap.get(oldEntry.getKey()) == null) {
-				// named element deleted
-				for (String tag : oldEntry.getValue()) {
-					removeTagRef(tag, oldEntry.getKey());
-				}
-			}
-		}
-
-		TagsRefsMap = ActualTagsRefsMap;
+			removed.add(k);
+			return true;
+		});
+		removed.forEach(k -> {
+			setTags(k, emptyList());
+		});
 	}
 
 	private void addTagRef(final String tagString, final IQ7NamedElement ref) {
