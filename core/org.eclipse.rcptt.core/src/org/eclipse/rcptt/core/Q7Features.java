@@ -83,6 +83,7 @@ public class Q7Features extends AbstractFeatureManager {
 			.name("Retry test after failure (times)")
 			.description("If a test fails, try executing it again and collect both failed and succesfull reports")
 			.value("1")
+			.defaultValue("1")
 			.values(AbstractFeatureManager.INT_VALUES).editable(true)
 			.showIn(TeslaFeatures.ADV_OPTIONS);
 	}
