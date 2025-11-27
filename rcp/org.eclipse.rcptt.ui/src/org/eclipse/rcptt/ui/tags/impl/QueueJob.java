@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -80,7 +81,7 @@ abstract class QueueJob<T> extends Job {
 			sm.setWorkRemaining(queue.estimateSize());
 			process(i, sm.split(1, SubMonitor.SUPPRESS_NONE));
 		}
-		return null;
+		return Status.OK_STATUS;
 	}
 	
 	@Override
