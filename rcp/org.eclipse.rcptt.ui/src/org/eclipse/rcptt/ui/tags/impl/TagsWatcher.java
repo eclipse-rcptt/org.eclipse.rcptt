@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -45,9 +47,22 @@ public class TagsWatcher implements IElementChangedListener {
 	public static final String HIERARCHY_SEP = "[/]"; //$NON-NLS-1$
 
 	private final TagsRegistry tags;
-	private final Multimap<IQ7NamedElement, String> TagsRefsMap = Multimaps.synchronizedMultimap(MultimapBuilder.hashKeys().arrayListValues().build());
-	private final Job reloadTagsJob = Job.create("Index RCPTT tags", ignored -> {reloadTags(); return Status.OK_STATUS; });
-	private final QueueJob<IQ7NamedElement> reindexElement = new QueueJob<IQ7NamedElement>("Index RCPTT element tags", new QueueJob.UniqueQueue<>()) {
+	private final Multimap<IQ7NamedElement, String> TagsRefsMap = Multimaps
+			.synchronizedMultimap(MultimapBuilder.hashKeys().arrayListValues().build());
+	private final Job reloadTagsJob = new Job("Index RCPTT tags") {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			reloadTags();
+			return Status.OK_STATUS;
+		};
+		@Override
+		public boolean shouldSchedule() {
+			reindexElement.cancel();
+			return super.shouldSchedule();
+		};
+	};
+	private final QueueJob<IQ7NamedElement> reindexElement = new QueueJob<IQ7NamedElement>("Index RCPTT element tags",
+			new QueueJob.UniqueQueue<>()) {
 
 		@Override
 		protected void process(IQ7NamedElement item, SubMonitor monitor) {
@@ -55,15 +70,15 @@ public class TagsWatcher implements IElementChangedListener {
 			processElementChanged(item);
 			monitor.done();
 		}
-		
+
 	};
-	
 
 	public TagsWatcher(final TagsRegistry tags) {
 		this.tags = tags;
 		reloadTagsJob.schedule();
 	}
 
+	@Override
 	public void elementChanged(Q7ElementChangedEvent event) {
 		IQ7ElementDelta delta = event.getDelta();
 		// container changes
@@ -96,7 +111,7 @@ public class TagsWatcher implements IElementChangedListener {
 			if (iq7ElementDelta.getElement() instanceof IQ7Project) {
 				if ((iq7ElementDelta.getFlags() & IQ7ElementDelta.F_OPENED) != 0
 						|| (iq7ElementDelta.getFlags() & IQ7ElementDelta.F_CLOSED) != 0) {
-					reloadTags();
+					reloadTagsJob.schedule();
 					break;
 				}
 			}

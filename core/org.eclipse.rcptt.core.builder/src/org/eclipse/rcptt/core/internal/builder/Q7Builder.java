@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -193,6 +192,10 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		"Internal error in RCP Testing Tool Builder", e));
 	}
 
+	private static final Job waitIndex = Job.create("Build is wating for indexing to complete", monitor -> {
+		ModelManager.getModelManager().getIndexManager()
+		.waitUntilReady(monitor);
+	});
 	@Override
 	@SuppressWarnings("rawtypes")
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
@@ -205,10 +208,16 @@ public class Q7Builder extends IncrementalProjectBuilder {
 			while (debug_sleep) {
 				Thread.sleep(50);
 			}
-			ModelManager.getModelManager().getIndexManager()
-					.waitUntilReady(new NullProgressMonitor());// new
-																// SubProgressMonitor(monitor,
-																// -1));
+			waitIndex.schedule();
+			while (!waitIndex.join(100, monitor)) {
+				if (monitor.isCanceled()) {
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
+				// Avoiding deadlock with indexing 🤢
+				// https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176
+				Job.getJobManager().currentJob().yieldRule(monitor);
+			}
+			
 			getQ7Project().getMetadata();
 			if (kind == FULL_BUILD) {
 				fullBuild(monitor);
