@@ -12,6 +12,8 @@
  ********************************************************************************/
 package org.eclipse.rcptt.internal.launching;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -25,12 +27,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.rcptt.core.ContextTypeManager;
 import org.eclipse.rcptt.core.Q7Features;
 import org.eclipse.rcptt.core.ecl.core.model.GetReport;
 import org.eclipse.rcptt.core.ecl.core.model.ResetVerifications;
@@ -40,6 +44,7 @@ import org.eclipse.rcptt.core.model.IQ7NamedElement;
 import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
+import org.eclipse.rcptt.core.workspace.IWorkspaceFinder;
 import org.eclipse.rcptt.ecl.core.Sequence;
 import org.eclipse.rcptt.ecl.debug.commands.CommandsFactory;
 import org.eclipse.rcptt.ecl.debug.commands.ServerInfo;
@@ -47,7 +52,10 @@ import org.eclipse.rcptt.ecl.debug.commands.StartServer;
 import org.eclipse.rcptt.ecl.debug.commands.StopServer;
 import org.eclipse.rcptt.ecl.debug.core.NullDebuggerTransport;
 import org.eclipse.rcptt.launching.AutLaunch;
+import org.eclipse.rcptt.launching.IExecutable;
 import org.eclipse.rcptt.launching.IExecutionSession;
+import org.eclipse.rcptt.launching.ILaunchListener;
+import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.parameters.ResetParams;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.reporting.util.RcpttReportGenerator;
@@ -131,6 +139,62 @@ public class Q7LaunchManagerTest {
 		}
 		IStatus result = Q7LaunchManager.getInstance().getExecutionSessions()[0].getResultStatus();
 		Assert.assertEquals(MESSAGE, result.getMessage());
+	}
+	
+	@Test
+	public void notifyContextCompletion() throws CoreException, InterruptedException {
+		Q7TestLaunch launch = new Q7TestLaunch(configuration, ILaunchManager.RUN_MODE);
+		IWorkspaceFinder finder = mock();
+		IContext context = mock();
+		when(finder.findContext(testCase, "contextId")).thenReturn(new IContext[] {context});
+		when(testCase.getContexts()).thenReturn(new String[] {"contextId"});
+		when(context.getID()).thenReturn("contextId");
+		when(context.getType()).thenReturn(ContextTypeManager.getInstance().getTypes()[0]);
+		when(context.getElementName()).thenReturn("ContextName");
+		
+		Q7LaunchManager subject = Q7LaunchManager.getInstance();
+		List<String> completedExecutableNames = Collections.synchronizedList(new ArrayList<>());
+		subject.addListener(new ILaunchListener() {
+			@Override
+			public void started(IExecutionSession session) {
+			}
+			
+			@Override
+			public void launchStatusChanged(IExecutable... executable) {
+				for (var i: executable) {
+					completedExecutableNames.add(i.getName());
+				}
+			}
+			
+			@Override
+			public void finished() {
+			}
+		});
+		subject.execute(new IQ7NamedElement[] {testCase}, aut, launch, finder, Collections.emptyMap(), (ignored1, ignored2) -> new NullDebuggerTransport());
+		while (!launch.isTerminated()) {
+			Thread.sleep(100);
+		}
+		assertThat(completedExecutableNames, hasItem("ContextName"));
+	}
+	
+	@Test
+	public void doNotPostExecuteTwice() throws CoreException, InterruptedException {
+		Q7TestLaunch launch = new Q7TestLaunch(configuration, ILaunchManager.RUN_MODE);
+		IContext context = mock();
+		when(context.getID()).thenReturn("id");
+		when(context.getType()).thenReturn(ContextTypeManager.getInstance().getTypes()[0]);
+		when(context.getElementType()).thenReturn(HandleType.Context);
+		when(context.getElementName()).thenReturn("ContextName");
+		
+		Q7LaunchManager subject = Q7LaunchManager.getInstance();
+		subject.execute(new IQ7NamedElement[] {context}, aut, launch, null, Collections.emptyMap(), (ignored1, ignored2) -> new NullDebuggerTransport());
+		while (!launch.isTerminated()) {
+			Thread.sleep(100);
+		}
+		IExecutionSession session = Q7LaunchManager.getInstance().getExecutionSessions()[0];
+		// Double reading of report in org.eclipse.rcptt.internal.launching.PrepareExecutionWrapper.postExecute(IStatus) would cause an assertion error
+		IStatus resultStatus = session.getExecutables()[0].getResultStatus();
+		assertTrue(Q7LaunchUtils.format(resultStatus), resultStatus.isOK()); 
 	}
 	
 	@Test

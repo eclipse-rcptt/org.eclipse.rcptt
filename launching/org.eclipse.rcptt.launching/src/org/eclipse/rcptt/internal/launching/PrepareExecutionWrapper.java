@@ -155,7 +155,7 @@ public class PrepareExecutionWrapper extends Executable {
 				TestEngineManager.getInstance().fireExecutionStarted(scenario);
 			}
 		}
-		return executable.execute();
+		return executeChild(executable);
 	}
 
 	private Report getReport() throws InterruptedException, ModelException {
@@ -273,7 +273,7 @@ public class PrepareExecutionWrapper extends Executable {
 
 	@Override
 	public IStatus postExecute(IStatus status) {
-		IStatus temp = executable.postExecute(status);
+		IStatus temp = executable.getResultStatus();
 		if (status.isOK() && !temp.isOK())
 			status = temp;
 		Report resultReport = null;
