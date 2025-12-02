@@ -57,6 +57,7 @@ import org.eclipse.rcptt.launching.IExecutionSession;
 import org.eclipse.rcptt.launching.ILaunchListener;
 import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.parameters.ResetParams;
+import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.reporting.util.RcpttReportGenerator;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
@@ -205,14 +206,17 @@ public class Q7LaunchManagerTest {
 		for (int i = 0; i<reports.length; i++) {
 			Report report = ReportFactory.eINSTANCE.createReport();
 			Node root = ReportFactory.eINSTANCE.createNode();
-			ReportHelper.getInfo(root).setId("id");
+			Q7Info info = ReportHelper.getInfo(root);
+			info.setId("id");
+			info.setDescription("Description " + i);
 			report.setRoot(root);
 			reports[i] = report;
 		}
 		when(aut.execute(ArgumentMatchers.isA(GetReport.class))).thenReturn(reports[0], reports[1], reports[2]);
 		
-		CoreException coreException = new CoreException(Status.error("Test mock failure"));
-		doThrow(coreException).doNothing().when(aut).run(any(), anyLong(), any(), any());
+		CoreException coreException0 = new CoreException(Status.error("Test mock failure 0"));
+		CoreException coreException1 = new CoreException(Status.error("Test mock failure 1"));
+		doThrow(coreException0).doThrow(coreException1).doNothing().when(aut).run(any(), anyLong(), any(), any());
 		
 		Q7TestLaunch launch = new Q7TestLaunch(configuration, ILaunchManager.RUN_MODE);
 		Q7LaunchManager.getInstance().execute(new IQ7NamedElement[] {testCase}, aut, launch, null, Collections.emptyMap(), (ignored1, ignored2) -> new NullDebuggerTransport());
@@ -221,13 +225,22 @@ public class Q7LaunchManagerTest {
 		}
 		IExecutionSession session = Q7LaunchManager.getInstance().getExecutionSessions()[0];
 		assertEquals(1, session.getFailedCount());
-		Report aggregateReport = session.getExecutables()[0].getResultReport();
+		IExecutable retryExecutable = session.getExecutables()[0];
+		Report aggregateReport = retryExecutable.getResultReport();
 		String text = toString(aggregateReport);
 		assertTrue(text.contains("attempt 0"));
 		assertTrue(text.contains("attempt 1"));
-		assertFalse(text.contains("attempt 2"));
+		assertTrue(text.contains("attempt 2"));
 		assertFalse(text.contains("attempt 3"));
-		assertTrue(text.contains("Test mock failure"));
+		assertTrue(text.contains("Test mock failure 0"));
+		assertTrue(text.contains("Test mock failure 1"));
+		IExecutable[] children = retryExecutable.getChildren();
+		assertEquals("Description 0", getReportDescription(children[0]));
+		assertEquals("Description 1", getReportDescription(children[1])); // Ensure that reports are not exact copies
+	}
+	
+	private String getReportDescription(IExecutable executable) {
+		return ReportHelper.getInfo(executable.getResultReport().getRoot()).getDescription();
 	}
 
 	private String toString(Report aggregateReport) {

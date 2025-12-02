@@ -52,13 +52,17 @@ public class ExecutionSession implements IExecutionSession {
 				this);
 		reportSession = new SherlockReportSession(reportRoot);
 		Executable[] testCases = getTestCases();
-		for (Executable executable : testCases) {
-			if (executable instanceof PrepareExecutionWrapper) {
-				((PrepareExecutionWrapper) executable)
-						.setReportSession(reportSession);
-			}
-		}
+		installReports(executables);
 		testCasesCount = testCases.length;
+	}
+
+	private void installReports(Executable[] testCases) {
+		for (Executable executable : testCases) {
+			if (executable instanceof IReportProducer p) {
+				p.configure(IReportStore.from(reportSession));
+			}
+			installReports(executable.getChildren());
+		}
 	}
 
 	@Override

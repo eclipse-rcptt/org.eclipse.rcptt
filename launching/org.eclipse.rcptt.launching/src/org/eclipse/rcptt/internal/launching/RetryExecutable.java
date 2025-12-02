@@ -17,12 +17,13 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 
 import com.google.common.base.Preconditions;
 
-public class RetryExecutable extends Executable {
+public class RetryExecutable extends Executable implements IReportProducer {
 	private final ThrowingFunction<String, Executable> delegateSupplier;
 	private Executable delegate;
 	private final ArrayList<Executable> children = new ArrayList<>();
 	private final int attempts;
 	private long startTime = System.currentTimeMillis();
+	private IReportStore reportStore = new IReportStore.InMemory();
 
 	public interface ThrowingFunction<T, R> {
 		R apply(T t) throws CoreException;
@@ -91,6 +92,11 @@ public class RetryExecutable extends Executable {
 	}
 
 	@Override
+	public void configure(IReportStore reportStore) {
+		this.reportStore = requireNonNull(reportStore);
+	}
+
+	@Override
 	protected final IStatus execute() throws InterruptedException {
 		IStatus error = null;
 		startTime = currentTimeMillis();
@@ -118,4 +124,11 @@ public class RetryExecutable extends Executable {
 		return error;
 	}
 
+	@Override
+	protected final IStatus executeChild(Executable child) throws InterruptedException {
+		if (child instanceof IReportProducer p) {
+			p.configure(reportStore);
+		}
+		return super.executeChild(child);
+	}
 }

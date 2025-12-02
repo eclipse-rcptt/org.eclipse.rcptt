@@ -211,7 +211,7 @@ public abstract class Executable implements IExecutable {
 		return localResult;
 	}
 
-	protected final IStatus executeChild(final Executable child) throws InterruptedException {
+	protected IStatus executeChild(final Executable child) throws InterruptedException {
 		child.addListener(listeners);
 		try {
 			child.executeAndRememberResult();

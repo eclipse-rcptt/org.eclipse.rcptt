@@ -15,6 +15,8 @@ import static org.eclipse.rcptt.internal.core.RcpttPlugin.createStatus;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +44,7 @@ import org.eclipse.rcptt.ecl.core.util.ScriptletFactory;
 import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.internal.launching.IReportStore.IReportHandle;
 import org.eclipse.rcptt.internal.launching.ecl.EclScenarioExecutable;
 import org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil;
 import org.eclipse.rcptt.launching.AutLaunch;
@@ -60,10 +63,9 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportContainer;
 import org.eclipse.rcptt.sherlock.core.streams.SherlockReportSession;
 import org.eclipse.rcptt.tesla.core.TeslaFeatures;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-public class PrepareExecutionWrapper extends Executable {
+public class PrepareExecutionWrapper extends Executable implements IReportProducer {
 
 	@Override
 	public void cancel(IStatus status) {
@@ -80,9 +82,9 @@ public class PrepareExecutionWrapper extends Executable {
 
 	private final AutLaunch launch;
 	private final Executable executable;
-	private SherlockReportSession reportSession;
 
-	private String resultReportID;
+	private IReportStore reportSaver = new IReportStore.InMemory();
+	private Optional<IReportHandle> reportHandle = Optional.empty();
 
 	public PrepareExecutionWrapper(AutLaunch launch, Executable executable) throws ModelException {
 		super(executable.isDebug(), ExecutionPhase.AUTO, true);
@@ -109,10 +111,7 @@ public class PrepareExecutionWrapper extends Executable {
 
 	@Override
 	public Report getResultReport() {
-		if (resultReportID != null && reportSession != null) {
-			return reportSession.getReport(resultReportID);
-		}
-		return TestSuiteUtils.generateReport(getActualElement(), getResultStatus());
+		return reportHandle.map(IReportHandle::load).orElseGet(() -> TestSuiteUtils.generateReport(getActualElement(), getResultStatus())); 
 	}
 
 	@Override
@@ -158,6 +157,11 @@ public class PrepareExecutionWrapper extends Executable {
 		return executeChild(executable);
 	}
 
+	@Override
+	public void configure(IReportStore saver) {
+		this.reportSaver = Objects.requireNonNull(saver);
+	}
+	
 	private Report getReport() throws InterruptedException, ModelException {
 		Report resultReport = null;
 		final String id = getActualElement().getID();
@@ -301,7 +305,7 @@ public class PrepareExecutionWrapper extends Executable {
 						break;
 					}
 				}
-				assert Objects.equal(rootInfo.getId(), getActualElement().getID());
+				assert Objects.equals(rootInfo.getId(), getActualElement().getID());
 			}
 			return super.postExecute(status);
 		} catch (InterruptedException e) {
@@ -321,9 +325,7 @@ public class PrepareExecutionWrapper extends Executable {
 					TestEngineManager.getInstance().fireExecutionCompleted(scenario, resultReport);
 				}
 			}
-			if (this.reportSession != null) {
-				resultReportID = this.reportSession.write(resultReport);
-			}
+			reportHandle = Optional.of(reportSaver.save(resultReport));
 			listeners.updateSessionCounters(this, status);
 		}
 	}
@@ -335,10 +337,6 @@ public class PrepareExecutionWrapper extends Executable {
 		root.setDuration(root.getEndTime() - root.getStartTime());
 		ReportHelper.appendLog(root, LoggingCategory.NORMAL, getLog());
 		return report;
-	}
-
-	public void setReportSession(SherlockReportSession reportSession) {
-		this.reportSession = reportSession;
 	}
 
 	public List<String> getVariantName() {
