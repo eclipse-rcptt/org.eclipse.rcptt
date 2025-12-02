@@ -55,7 +55,7 @@
 	  <source>
 	    <repository>
         <id>kepler</id>
-	      <url>http://download.eclipse.org/releases/kepler</url>
+	      <url>https://download.eclipse.org/releases/kepler</url>
 	      <layout>p2</layout>
 	    </repository>
 	  </source>

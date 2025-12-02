@@ -25,7 +25,7 @@ documentation -->
 	<properties>
 		<coreRepository>${buildUrl}/repository/core/target/repository</coreRepository>
 		<orbitRepository>
-			http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
+			https://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
 	</properties>
 
 	<repositories>
