@@ -16,5 +16,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.data.apache.poi.impl;visibility:=reexport,
  org.eclipse.rcptt.ecl.filesystem;bundle-version="[2.8.0,3.0.0)",
  org.apache.poi;bundle-version="3.9.0",
- org.apache.poi.ooxml;bundle-version="3.9.0"
+ org.apache.poi.ooxml;bundle-version="3.9.0",
+ org.apache.commons.codec
 Bundle-ActivationPolicy: lazy
