@@ -154,15 +154,4 @@
       </build>
     </profile>
   </profiles>
-  <pluginRepositories>
-    <!-- this repo is required for eclipse-ini-patcher plugin (see above)
-	 to improve Mac OS X product materialization
-	 (see github.com/komaz/eclipse-ini-patcher)
-    -->
-    <pluginRepository>
-      <id>xored</id>
-      <name>Xored Maven repository</name>
-      <url>http://maven.xored.com/nexus/content/repositories/releases/</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>
