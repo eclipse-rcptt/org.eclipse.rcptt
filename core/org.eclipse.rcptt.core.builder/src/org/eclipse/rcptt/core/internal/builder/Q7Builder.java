@@ -99,6 +99,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 			return changedResources;
 		}
 
+		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
@@ -189,6 +190,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		"Internal error in RCP Testing Tool Builder", e));
 	}
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
@@ -343,6 +345,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 					return;
 				}
 				executor.execute(new Runnable() {
+					@Override
 					public void run() {
 						IProgressMonitor subMonitor = new SubProgressMonitor(
 								monitor, 1);

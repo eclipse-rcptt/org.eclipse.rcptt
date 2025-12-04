@@ -15,10 +15,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.concurrent.BrokenBarrierException;
@@ -29,9 +31,11 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -111,9 +115,9 @@ public class Q7NamedElementTest {
 	public void before() throws CoreException {
 		WORKSPACE.addResourceChangeListener(indexWaiter);
 		IProjectDescription deQ7ion = WORKSPACE.newProjectDescription(PROJECT.getName());
-		deQ7ion.setNatureIds(new String[] { RcpttNature.NATURE_ID });
 		PROJECT.create(deQ7ion, null);
 		PROJECT.open(null);
+		RcpttNature.updateProjectNature(PROJECT, true);
 		enableSyncOnAccess(false);
 	}
 
@@ -173,6 +177,32 @@ public class Q7NamedElementTest {
 		FileTime time =FileTime.from(Instant.now().plusSeconds(3));
 		Files.setLastModifiedTime(Path.of(TESTCASE_FILE.getRawLocation().toOSString()), time);
 		assertNotNull(testcase.getNamedElement()); // should not deadlock or throw exceptions
+	}
+	
+	/**
+	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/229
+	 */
+	@Test(timeout=100_000)
+	public void doNotDeadlockReopen() throws CoreException, InterruptedException, ExecutionException, IOException, BrokenBarrierException {
+		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+		}
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		Path fsPath = Path.of(TESTCASE_FILE.getRawLocation().toOSString());
+		PROJECT.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+		PROJECT.close(null);
+		try (BufferedWriter b = Files.newBufferedWriter(fsPath, StandardOpenOption.APPEND)) {
+			b.append("------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac\n"
+					+ "Content-Type: text/ecl\n"
+					+ "Entry-Name: .content\n"
+					+ "\n"
+					+ "set-q7-option\n"
+					+ "------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--\n"
+			);
+		}
+		PROJECT.open(null);
+		PROJECT.refreshLocal(IResource.DEPTH_INFINITE, null);
+		PROJECT.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
 	}
 	
 	@Test(timeout=200_000)
