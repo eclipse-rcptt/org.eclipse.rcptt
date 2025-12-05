@@ -182,7 +182,7 @@ public final class JvmTargetCompatibility {
 			
 			Optional<VmInstallMetaData> vmOptional = findVM().findAny();
 			if (vmOptional.isEmpty()) {
-				return Status.error("No compatible JVM is configured");
+				return Status.error("No compatible JVM is configured:\n" + explainJvmRequirements());
 			}
 			return Q7LaunchDelegateUtils.validateForLaunch(target, sm.split(1, SubMonitor.SUPPRESS_NONE), vmOptional.get().install);
 		} catch (CheckedExceptionWrapper e) {
@@ -191,6 +191,8 @@ public final class JvmTargetCompatibility {
 			}
 			e.rethrowUnchecked();
 			throw e;
+		} catch (CoreException e) {
+			return e.getStatus();
 		} finally {
 			done(monitor);
 		}
