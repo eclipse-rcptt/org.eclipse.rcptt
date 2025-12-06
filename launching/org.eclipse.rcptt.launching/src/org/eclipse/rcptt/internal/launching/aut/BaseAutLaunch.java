@@ -625,7 +625,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		EnterContext ec = Q7CoreFactory.eINSTANCE.createEnterContext();
 		ec.setData(context);
 		try {
-			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout(), monitor, null);
+			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout()+1000, monitor, null);
 			if (result.matches(IStatus.ERROR)) {
 				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
