@@ -61,7 +61,7 @@ public class Q7LaunchConfigurationDelegate extends LaunchConfigurationDelegate
 				if (t instanceof ITestCase) {
 					try {
 						// triggers underlying deserilization from plain text
-						((ITestCase) t).getID();
+						t.getID();
 					} catch (Exception e) {
 						throw new CoreException(
 								Q7LaunchingPlugin.createStatus(String.format(
@@ -71,7 +71,7 @@ public class Q7LaunchConfigurationDelegate extends LaunchConfigurationDelegate
 				} else if (t instanceof IContext) {
 					try {
 						// triggers underlying deserilization from plain text
-						((IContext) t).getID();
+						t.getID();
 					} catch (Exception e) {
 						throw new CoreException(
 								Q7LaunchingPlugin.createStatus(String.format(
@@ -81,7 +81,7 @@ public class Q7LaunchConfigurationDelegate extends LaunchConfigurationDelegate
 				} else if (t instanceof IVerification) {
 					try {
 						// triggers underlying deserilization from plain text
-						((IVerification) t).getID();
+						t.getID();
 					} catch (Exception e) {
 						throw new CoreException(
 								Q7LaunchingPlugin.createStatus(String.format(

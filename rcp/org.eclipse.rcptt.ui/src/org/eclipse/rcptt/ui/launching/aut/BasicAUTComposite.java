@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.rcptt.core.launching.events.AutBundleState;
@@ -192,7 +193,8 @@ public abstract class BasicAUTComposite {
 		final AutElement element = getElement();
 		if (element != null) {
 			// try to use configure wizard if available
-			Shell shell = viewer.getControl().getShell();
+			IShellProvider modalRoot = PlatformUI.getWorkbench().getModalDialogShellProvider();
+			Shell shell = modalRoot.getShell();
 			ILaunchConfiguration config = element.getAut().getConfig();
 			if (config != null) {
 				IWizard configWizard = getInitWizard("edit");
@@ -216,11 +218,6 @@ public abstract class BasicAUTComposite {
 					DebugUITools.openLaunchConfigurationPropertiesDialog(shell,
 							config, IDebugUIConstants.ID_RUN_LAUNCH_GROUP);
 				}
-			}
-			try {
-				ShellUtilsProvider.getShellUtils().forceActive(shell);
-			} catch (CoreException e) {
-				throw new RuntimeException(e);
 			}
 		}
 	}
