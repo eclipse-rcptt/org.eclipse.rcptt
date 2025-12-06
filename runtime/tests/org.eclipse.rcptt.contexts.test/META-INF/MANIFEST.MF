@@ -16,4 +16,5 @@ Require-Bundle: org.junit,
  org.eclipse.swt,
  org.eclipse.rcptt.tesla.ecl.impl,
  org.eclipse.rcptt.ctx.workbench.impl,
- org.eclipse.rcptt.reporting
+ org.eclipse.rcptt.reporting,
+ com.google.guava;bundle-version="30.0.0"
