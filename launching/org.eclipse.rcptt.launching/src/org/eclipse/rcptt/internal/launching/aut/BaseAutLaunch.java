@@ -626,7 +626,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		ec.setData(context);
 		try {
 			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout()+1000, monitor, null);
-			if (result.matches(IStatus.ERROR)) {
+			if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
 			}
