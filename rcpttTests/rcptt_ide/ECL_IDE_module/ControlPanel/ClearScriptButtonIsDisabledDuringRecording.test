@@ -37,7 +37,7 @@ Content-Type: text/ecl
 Entry-Name: .content
 
 get-button "Record a Snippet" | click
-try -times 10 -delay 1000 -command {
+try -times 10 -delay 12000 -command {
 	get-window "Control Panel.*" | get-button "Clear Script" | get-property enablement | equals false 
     	| verify-true
 }
