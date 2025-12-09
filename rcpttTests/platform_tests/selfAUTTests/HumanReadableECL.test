@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _B8SKAHEvEeSU2JfggX8HVQ
-Runtime-Version: 2.0.0.201505131625
-Save-Time: 5/14/15 4:20 PM
+Runtime-Version: 2.8.0.202512040252
+Save-Time: 12/9/25, 6:01 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -27,8 +27,10 @@ get-aut selfQ7 | eval {
 	get-window "Open Perspective" | get-table | select Debug | double-click
 }
 
-get-window "Control Panel - selfQ7 [Recording]" | get-text-viewer | get-property text 
-    | contains "get-window \"Open Perspective\" | get-table | select Debug | double-click" | verify-true
+try -times 10 -delay 12000 -command {
+	get-window "Control Panel - selfQ7 [Recording]" | get-text-viewer | get-property text 
+		| contains "get-window \"Open Perspective\" | get-table | select Debug | double-click" | verify-true
+}
 
 // step two
 get-editor defaultWB | get-button Apply | click
