@@ -13,14 +13,40 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>tests</artifactId>
-  <packaging>rcpttTest</packaging>
-  <parent>
-    <groupId>org.eclipse.rcptt.tests</groupId>
-    <artifactId>base</artifactId>
-    <version>2.7.2-SNAPSHOT</version>
-    <relativePath>./pom-base.xml</relativePath>
-  </parent>
-  <properties><mockup_repository>https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository/</mockup_repository></properties>
+  <packaging>pom</packaging>
+  <groupId>org.eclipse.rcptt.tests</groupId>
+  <version>2.8.0-SNAPSHOT</version>
+  
+    <pluginRepositories>
+    <pluginRepository>
+      <id>rcptt-releases</id>
+      <name>RCPTT Maven repository Releases</name>
+      <url>https://repo.eclipse.org/content/repositories/rcptt-releases/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>rcptt-snapshots</id>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <name>RCPTT Maven repository Snapshots</name>
+      <url>https://repo.eclipse.org/content/repositories/rcptt-snapshots/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <properties>
+    <rcptt-maven-group>org.eclipse.rcptt</rcptt-maven-group>
+    <rcptt-maven-version>2.8.0-SNAPSHOT</rcptt-maven-version>
+    <rcptt-maven-plugin>rcptt-maven-plugin</rcptt-maven-plugin>
+    <runner-version>2.8.0-SNAPSHOT</runner-version>
+    <rcpttRepo>http://download.eclipse.org/rcptt/nightly/2.8.0/latest/repository</rcpttRepo>
+    <autRepository>file://${basedir}/../modules/repository/target/repository</autRepository>
+    <runtimeRepository>file:/${user.dir}/runtime/updates/org.eclipse.rcptt.updates.runtime.e4x/q7</runtimeRepository>
+    <mockup_repository>https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository/</mockup_repository>
+  </properties>
+	<modules>
+		<module>rcptt_ide</module>
+		<module>mockups</module>
+	</modules>
   <dependencies>
 		<dependency>
 			<groupId>org.jboss.byteman</groupId>

@@ -94,9 +94,13 @@ public final class DownloadCache implements Closeable {
 			verifiedFiles.add(target);
 			return target;
 		} catch (Throwable e) {
-			Files.deleteIfExists(tmp);
-			Files.deleteIfExists(target);
-			Files.delete(target.getParent());
+			try {
+				Files.deleteIfExists(tmp);
+				Files.deleteIfExists(target);
+				Files.delete(target.getParent());
+			} catch (Throwable e1)  {
+				e.addSuppressed(e1);
+			}
 			throw e;
 		}
 	}

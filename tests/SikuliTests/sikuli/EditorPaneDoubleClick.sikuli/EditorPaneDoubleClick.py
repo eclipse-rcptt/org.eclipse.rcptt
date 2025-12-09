@@ -1,1 +1,0 @@
-doubleClick("1363778274912.png")

@@ -63,8 +63,10 @@ public class HeadlessRunnerApp implements IApplication {
 			e.printStackTrace();
 			return ILLEGAL_ARGUMENT;
 		} catch (AutLaunchFail e) {
+			e.printStackTrace();
 			return AUT_FAIL_EXIT_CODE;
 		} catch (TargetPlatformFail e) {
+			e.printStackTrace();
 			return TARGET_PLATFORM_FAIL_EXIT_CODE;
 		}
 	}
