@@ -36,13 +36,6 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <!-- 
-       If RCPTT tests are planned to be run on an update site, 
-       RCPTT Maven Plugin can download Eclipse SDK of required version
-       for current platform from repository below (to see 
-       an up-to-date list of available versions visit this link:
-       http://maven.xored.com/nexus/content/repositories/ci4rcptt-releases/org/eclipse/sdk/
-  -->
   <properties>
     <rcptt-maven-version>2.4.0-SNAPSHOT</rcptt-maven-version>
   </properties>

@@ -1,6 +1,0 @@
-click("ILALIVILIILI.png")
-type("Line1")
-type(Key.ENTER)
-type("Line2")
-type(Key.ENTER)
-type("Line3")
