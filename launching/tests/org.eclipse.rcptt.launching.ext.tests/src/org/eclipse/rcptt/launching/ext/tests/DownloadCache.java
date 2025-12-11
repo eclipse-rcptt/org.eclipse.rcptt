@@ -82,7 +82,8 @@ public final class DownloadCache implements Closeable {
 			HttpResponse<Path> response = client.send(httpsRequest, HttpResponse.BodyHandlers.ofFile(tmp));
 
 			if (response.statusCode() != 200) {
-				throw new IOException("Failed to download file. HTTP status code: " + response.statusCode());
+				throw new IOException(
+						"Failed to download " + request.uri + ". HTTP status code: " + response.statusCode());
 			}
 			String actualHash = computeSHA512(tmp);
 			if (!actualHash.equals(request.sha512())) {
