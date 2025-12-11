@@ -1,6 +1,0 @@
-r=find("fiIe2.png")
-b1=r.find("1362562069976.png")
-click(b1)
-r2=find("filel.png")
-b2=r2.find("1362562119744.png")
-click(b2)
