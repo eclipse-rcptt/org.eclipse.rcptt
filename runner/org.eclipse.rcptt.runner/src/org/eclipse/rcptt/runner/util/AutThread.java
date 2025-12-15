@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.pde.internal.launching.IPDEConstants;
+import org.eclipse.pde.internal.launching.launcher.LauncherUtils;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.Q7LaunchManager.SessionRunnable;
@@ -42,6 +43,7 @@ import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
@@ -54,6 +56,7 @@ import org.eclipse.rcptt.runner.PrintStreamMonitor;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
 import org.eclipse.rcptt.util.StringUtils;
+import org.eclipse.swt.internal.C;
 
 import com.google.common.base.Strings;
 
@@ -200,7 +203,9 @@ public class AutThread extends Thread {
 
 			Optional<VmInstallMetaData> autVM = manager.getAutVm();
 			if (autVM.isPresent()) {
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, autVM.get().formatVmContainerPath());
+				VmInstallMetaData resolved = autVM.get();
+				assert resolved.install.getVMInstallType().findVMInstallByName(resolved.install.getName()) != null;
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, resolved.formatVmContainerPath());
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
 			}
 
@@ -343,6 +348,9 @@ public class AutThread extends Thread {
 			}
 
 			String errorMessage = String.format("AUT-%s: Launch failed. Reason: %s", autId, e.getMessage());
+			if (e instanceof CoreException c) {
+				errorMessage += "\n" + Q7LaunchUtils.format(c.getStatus());
+			}
 			System.out.println(errorMessage);
 			System.out.println(
 					String.format("AUT-%s: For more information check AUT output at '%s'", autId, outFilePath));

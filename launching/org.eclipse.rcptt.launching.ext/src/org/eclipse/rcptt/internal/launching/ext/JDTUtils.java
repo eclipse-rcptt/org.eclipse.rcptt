@@ -228,7 +228,7 @@ public class JDTUtils {
 		standin.setName(name);
 		IVMInstall result = standin.convertToRealVM();
 		try {
-			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocation);
+			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocationCopy);
 		} catch (IOException e) {
 			throw new CoreException(Status.error("Can't register JVM from " + jvmInstallationLocation, e));
 		}
