@@ -37,7 +37,7 @@
 <unit id="org.aspectj.weaver" version="0.0.0"/>
 <unit id="org.eclipse.equinox.weaving.aspectj" version="0.0.0"/>
 <unit id="org.eclipse.equinox.weaving.hook" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/ajdt/423/dev/update"/>
+<repository location="https://download.eclipse.org/tools/ajdt/423/dev/update"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <repository location="https://download.eclipse.org/swtchart/releases/0.14.0/repository"/>

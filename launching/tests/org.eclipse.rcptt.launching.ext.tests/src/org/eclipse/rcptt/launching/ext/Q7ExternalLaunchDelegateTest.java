@@ -81,7 +81,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	@BeforeClass
 	public static void beforeClass() throws CoreException {
-		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
+		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home"))).findFirst().get();
 		JavaRuntime.setDefaultVMInstall(install.install, null);
 	}
 	@SuppressWarnings("resource")
@@ -191,13 +191,14 @@ public class Q7ExternalLaunchDelegateTest {
 		Path installDir = expandAut();
 		Aut aut = createAut(installDir, List.of("-consoleLog"));
 		int cancelCount =  0;
-		for (int i = 1; i < 100_000; i*=2) {
+		boolean success = false;
+		for (int i = 1; i < 100_000 && !success; i*=2) {
 			try {
 				IProgressMonitor monitor = new ExpiringProgressMonitor(i);
 				AutLaunch launch = aut.launch(monitor);
 				assertNotNull("Failed with delay " + i ,launch);
 				launch.terminate(); // Should not throw NPE
-				break; // AUT is already launched, nothing to cancel
+				success = true;
 			} catch (CoreException e) {
 				if (!e.getStatus().matches(IStatus.CANCEL)) {
 					throw e;
@@ -208,6 +209,7 @@ public class Q7ExternalLaunchDelegateTest {
 			}
 		}
 		Assert.assertNotEquals(0, cancelCount);
+		Assert.assertTrue(success);
 	}
 	
 	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
@@ -288,14 +290,14 @@ public class Q7ExternalLaunchDelegateTest {
 	private Path expandAut() throws IOException, InterruptedException {
 		Request request = switch (Platform.getOS()) {
 		case Platform.OS_MACOSX -> request(
-				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-macosx-cocoa-aarch64.dmg",
-				"77ae164c4b11d18f162b1ff97b088865469b2267033d45169e4f7f14694767bb98a25a3697b33233ed8bc5bb17eb18f214c59913581938f757887ff8bdef960b");
+				"https://ftp.yz.yamagata-u.ac.jp/pub/eclipse/eclipse/downloads/drops4/R-4.38-202512010920/eclipse-platform-4.38-macosx-cocoa-aarch64.dmg",
+				"80ed014319de547ead8f552ace8a469a0fa18a595bd316fa1cdedfcccf31315b58b5ec91232d59d6224398d930d092d5813efeac7b55a3271a3e6297bb6effad");
 		case Platform.OS_WIN32 -> request(
 				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-win32-x86_64.zip",
 				"e90eb939cef8caada36a058bbed3a3b14c53e496f5feb439abc2e53332a4c71d3d43c02b8d202d88356eb318395551bce32db9d8e5e2fd1fc9e152e378dc325f");
 		case Platform.OS_LINUX -> request(
-				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-linux-gtk-x86_64.tar.gz",
-				"973c94a0a029c29d717823a53c3a65f99fa53d51f605872c5dd854620e16cd4cb2c2ff8a5892cd550a70ab19e1a0a0d2e792661e936bd3d2bef4532bc533048b");
+				"https://ftp.yz.yamagata-u.ac.jp/pub/eclipse/eclipse/downloads/drops4/R-4.38-202512010920/eclipse-platform-4.38-linux-gtk-x86_64.tar.gz",
+				"e498da6b1203409a9902760d29d6d91f37fa0fa2622cb3b75af517c21ab8dec191439868a4da6a00e6c4829aba9c4f65ef61a6f629dd75e258f609e0de6ead7c");
 		default -> throw new IllegalStateException();
 		};
 		Path distribution = CACHE.download(request);

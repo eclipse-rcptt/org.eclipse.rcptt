@@ -1,0 +1,43 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.preferences
+Element-Name: ClearPreferences
+Element-Type: context
+Element-Version: 2.0
+Id: _Ns1HMM1SEeCKjp0mPLHiEg
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 11/27/25, 10:18 AM
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf
+Content-Type: q7/binary
+Entry-Name: .q7.content
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAAC1Vk1vm0AQvedXICrl
+lsVOLxGJHaWO01i1Y1RcOTdEYAzb4N3t7mCcf9/B2Bg3rvLlXNAuvJl587FvubhczjNrAdpwKTp2m7Vs
+C0QkYy6Sjp3j7OTMvuweXUidMIgyrgwwHSlEFuGSKQ0z0IQH43rbdU8KhCVayzl3a9enpWsKJoxL7zt2
+iqhcxymKgsl5wiiAcz8a1BCzCym+rhCnrVabYEM/SmEennBhMKSIG6sXWdY+N6jS6QrpENJpIG1LhHPo
+2L0MQu013/O4Ywd3pn07GrX9PvR+/FatuTe85f3EtiKCC68ZEHUOdvfIsi6isiwC145r7uW38mvKs9is
+PzYTyTnj8QZGwDjE0KL6uPik/oHu74yPmrpZkromU9t6hKeO3b8fTALv53jkTYLxXdAbjv1+MLzyJ8F0
+cHc9ntrWIsxy8j8LMwO2s2bpVDRfwVmEC56EKPWhmT83o2iwVJnUoNmMZwj6KkK+CJEGr87D/R8/psHI
+XFO8tbFh1BmNZsoxvZa4Z6rI3NBYROnNysB9a3kioroNe+gC0Y58pyzjSYoFlE8GInzIIP5YV6Wcq5QV
+Uj9SUAN4cOZr11RcZImWuar5Hmd4viNVx39yieekV9ViK1rV/tfk5uSsWl52j78sr85LDw3q7rRa+4Df
+y0g7YlUZntbOt7JVvdivXTvgRqjnRk31WRXVacCdOimnYv72w3fovphUFgOBWn5sfmJ4yJNPoLcvBjMF
+xygNFLVUQSkHEEgRmJx2YnsOBFDP33cOqFe5+oRsqqPawJFSkGDExPPF6tO6umRWG2KI5VCtU9hsX3Pj
+lPP4QMFTVt7kEPNPEPI0ND4NlhhTC7LwyZMqV99gRtpYJ7q6PPfmuUmG/k2c9/ycdI/+AlBLBwjdTabl
+mQIAAPsIAABQSwECFAAUAAgICAAAACEA3U2m5ZkCAAD7CAAACAAJAAAAAAAAAAAAAAAAAAAALmNvbnRl
+bnRVVAUAAQAAAABQSwUGAAAAAAEAAQA/AAAA2AIAAAAA
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf--

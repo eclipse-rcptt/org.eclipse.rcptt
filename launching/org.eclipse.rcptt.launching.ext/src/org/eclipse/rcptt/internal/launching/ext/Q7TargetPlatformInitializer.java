@@ -46,8 +46,6 @@ import com.google.common.collect.ImmutableList.Builder;
 public class Q7TargetPlatformInitializer {
 	private static final String EMF_FEATURE_GROUP = "org.eclipse.emf.feature.group";
 	private static final String EQUINOX_EXECUTABLE_FEATURE_GROUP = "org.eclipse.equinox.executable.feature.group";
-	private static final String EMF_VALIDATION_FEATURE_GROUP = "org.eclipse.emf.validation.feature.group";
-	private static final String EMF_TRANSACTION_FEATURE_GROUP = "org.eclipse.emf.transaction.feature.group";
 	public static final String P2_GROUP_FEATURE = "org.eclipse.equinox.p2.type.group";
 	public static final String P2_CATEGORY_FEATURE = "org.eclipse.equinox.p2.type.category";
 
@@ -110,15 +108,10 @@ public class Q7TargetPlatformInitializer {
 					sm.split(20, SubMonitor.SUPPRESS_NONE), q7Info, map);
 			MultiStatus rv = new MultiStatus(PLUGIN_ID, 0, "Runtime injection failed for target platform " + target,
 					null);
-			if (injectionConfiguration != null) {
-				rv.add(target.applyInjection(injectionConfiguration,  sm.split(40, SubMonitor.SUPPRESS_NONE)));
-				if (rv.matches(IStatus.CANCEL))
-					return rv;
-			}
+			rv.add(target.applyInjection(injectionConfiguration,  sm.split(40, SubMonitor.SUPPRESS_NONE)));
 			done(monitor);
-			if (!rv.isOK())
-				return rv;
-			return Status.OK_STATUS;
+			assert rv.matches(IStatus.ERROR | IStatus.CANCEL) || target.getWeavingHook() != null;
+			return rv;
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
@@ -126,11 +119,6 @@ public class Q7TargetPlatformInitializer {
 
 	public static InjectionConfiguration createInjectionConfiguration(
 			IProgressMonitor monitor, Q7Info q7Info, Map<String, Version> map) {
-		boolean hasEMF = map.containsKey(AUTInformation.EMF);
-		boolean hasEMFTransaction = map
-				.containsKey(AUTInformation.EMF_TRANSACTION);
-		boolean hasEMFValidation = map
-				.containsKey(AUTInformation.EMF_VALIDATION);
 		boolean hasRAP = map.containsKey(AUTInformation.RAP);
 
 		InjectionConfiguration injectionConfiguration = InjectionFactory.eINSTANCE
@@ -150,13 +138,6 @@ public class Q7TargetPlatformInitializer {
 		q7Deps.setUri(q7Info.deps.toString());
 
 		if (!hasRAP) {
-//			if (!hasEMFTransaction) {
-//				q7Deps.getUnits().add(EMF_TRANSACTION_FEATURE_GROUP);
-//			}
-//			if (!hasEMFValidation) {
-//				q7Deps.getUnits().add(EMF_VALIDATION_FEATURE_GROUP);
-//				q7Deps.getUnits().add("com.ibm.icu");
-//			}
 			q7Deps.getUnits().add(EMF_FEATURE_GROUP);
 		}
 		if (hasRAP) {
@@ -277,14 +258,5 @@ public class Q7TargetPlatformInitializer {
 			}
 		}
 		return false;
-	}
-
-	public static InjectionConfiguration getAspectJInjection(Q7Info q7Info,
-			IProgressMonitor progressMonitor) throws CoreException {
-		InjectionConfiguration injectionConfiguration = InjectionFactory.eINSTANCE.createInjectionConfiguration();
-		UpdateSite aspectsSite = InjectionFactory.eINSTANCE.createUpdateSite();
-		aspectsSite.setUri(q7Info.aspectj.toString());
-		injectionConfiguration.getEntries().add(aspectsSite);
-		return injectionConfiguration;
 	}
 }

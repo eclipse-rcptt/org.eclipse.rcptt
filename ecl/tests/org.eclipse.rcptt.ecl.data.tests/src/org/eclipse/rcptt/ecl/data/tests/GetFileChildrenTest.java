@@ -53,12 +53,16 @@ public class GetFileChildrenTest extends TestWithSession {
 	@Test
 	public void testProject() throws IOException, CoreException {
 		createWorkspaceFile();
+		int extraChildren = 0;
+		if (project.getFolder(".settings").exists()) {
+			extraChildren++;
+		}
 		String check = "get-file \"workspace:/project\" | get children | length | eq %d | assert-true";
-		runScript(format(check, 2), uri); // .project , folder
+		runScript(format(check, 2 + extraChildren), uri); // .project , folder
 		file.delete(true, null);
-		runScript(format(check, 2), uri);
+		runScript(format(check, 2 + extraChildren), uri);
 		folder.delete(true, null);
-		runScript(format(check, 1), uri);
+		runScript(format(check, 1 + extraChildren), uri);
 	}
 
 	@Test
