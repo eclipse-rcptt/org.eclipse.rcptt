@@ -30,7 +30,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.pde.internal.launching.IPDEConstants;
-import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.Q7LaunchManager.SessionRunnable;
@@ -201,7 +200,9 @@ public class AutThread extends Thread {
 
 			Optional<VmInstallMetaData> autVM = manager.getAutVm();
 			if (autVM.isPresent()) {
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, autVM.get().formatVmContainerPath());
+				VmInstallMetaData resolved = autVM.get();
+				assert resolved.install.getVMInstallType().findVMInstallByName(resolved.install.getName()) != null;
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, resolved.formatVmContainerPath());
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
 			}
 
