@@ -30,7 +30,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.pde.internal.launching.IPDEConstants;
-import org.eclipse.pde.internal.launching.launcher.LauncherUtils;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.launching.Q7LaunchManager.SessionRunnable;
@@ -56,7 +55,6 @@ import org.eclipse.rcptt.runner.PrintStreamMonitor;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
 import org.eclipse.rcptt.util.StringUtils;
-import org.eclipse.swt.internal.C;
 
 import com.google.common.base.Strings;
 
