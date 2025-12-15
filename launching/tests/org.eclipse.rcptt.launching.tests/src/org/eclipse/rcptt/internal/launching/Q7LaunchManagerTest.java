@@ -55,7 +55,6 @@ import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.IExecutable;
 import org.eclipse.rcptt.launching.IExecutionSession;
 import org.eclipse.rcptt.launching.ILaunchListener;
-import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.parameters.ResetParams;
 import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
@@ -63,6 +62,7 @@ import org.eclipse.rcptt.reporting.util.RcpttReportGenerator;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -195,7 +195,7 @@ public class Q7LaunchManagerTest {
 		IExecutionSession session = Q7LaunchManager.getInstance().getExecutionSessions()[0];
 		// Double reading of report in org.eclipse.rcptt.internal.launching.PrepareExecutionWrapper.postExecute(IStatus) would cause an assertion error
 		IStatus resultStatus = session.getExecutables()[0].getResultStatus();
-		assertTrue(Q7LaunchUtils.format(resultStatus), resultStatus.isOK()); 
+		assertTrue(StatusUtil.format(resultStatus), resultStatus.isOK()); 
 	}
 	
 	@Test

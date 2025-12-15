@@ -42,7 +42,6 @@ import org.eclipse.rcptt.launching.Aut;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.Q7LaunchUtils;
 import org.eclipse.rcptt.launching.ext.Q7ExternalLaunchDelegate;
 import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
@@ -54,6 +53,7 @@ import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.PrintStreamMonitor;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.eclipse.rcptt.util.StringUtils;
 
 import com.google.common.base.Strings;
@@ -347,7 +347,7 @@ public class AutThread extends Thread {
 
 			String errorMessage = String.format("AUT-%s: Launch failed. Reason: %s", autId, e.getMessage());
 			if (e instanceof CoreException c) {
-				errorMessage += "\n" + Q7LaunchUtils.format(c.getStatus());
+				errorMessage += "\n" + StatusUtil.format(c.getStatus());
 			}
 			System.out.println(errorMessage);
 			System.out.println(
