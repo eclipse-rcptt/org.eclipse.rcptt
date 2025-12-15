@@ -27,7 +27,7 @@
     <tycho-version>4.0.13</tycho-version>
     <tycho-groupid>org.eclipse.tycho</tycho-groupid>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ajdt43repository>https://download.eclipse.org/tools/ajdt/431/dev/update/</ajdt43repository>
+    <ajdt43repository>https://download.eclipse.org/rcptt/dependencies/ajdt/nightly/2.2/</ajdt43repository>
     <hookVersion>1.4.0.v20240213-1357</hookVersion>
     <signExcludeInnerJars>true</signExcludeInnerJars>
     <eclipse-pde-repository>https://download.eclipse.org/staging/2026-03</eclipse-pde-repository>
