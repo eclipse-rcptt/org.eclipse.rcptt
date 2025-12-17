@@ -15,9 +15,6 @@ import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
 import static org.osgi.framework.Version.parseVersion;
-import static org.osgi.framework.Version.valueOf;
-import org.osgi.framework.Version;
-
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,11 +39,11 @@ import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
 import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper.Model;
+import org.osgi.framework.Version;
 
 import com.google.common.base.Joiner;
 
 public final class JvmTargetCompatibility {
-	private static final String ASM_ID = "org.objectweb.asm";
 	private final ITargetPlatformHelper target;
 	private OSArchitecture architecture = OSArchitecture.Unknown;
 	
@@ -198,17 +194,6 @@ public final class JvmTargetCompatibility {
 		}
 	}
 	
-
-	private static final TreeMap<Version, String> OBJECTWEB_INCOMPATIBILITY = new TreeMap<>();
-	static {
-		var oi = OBJECTWEB_INCOMPATIBILITY;
-		oi.put(valueOf("9.6.0"), "JavaSE-23");
-		oi.put(valueOf("9.7.0"), "JavaSE-24");
-		oi.put(valueOf("9.7.1"), "JavaSE-25");
-		oi.put(valueOf("9.8.0"), "JavaSE-26");
-	}
-
-	
 	private String findCompatibilityProblems(Set<String> ids) {
 		List<String> problems = target.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
 		if (!problems.isEmpty()) {
@@ -222,11 +207,6 @@ public final class JvmTargetCompatibility {
 		OSArchitecture arch = getArchitecture();
 		result.append("Architecture: ").append(arch).append("\n");
 		Set<String> validEnvironments = target.getModels().map(Model::model).map(JvmTargetCompatibility::getExecutionEnironments).flatMap(Arrays::stream).collect(Collectors.toCollection(HashSet::new));
-		Set<String> incompatibleExecutionEnvironments = target.getModels().filter(m -> m.model().getPluginBase().getId().equals(ASM_ID))
-				.map(plugin -> Version.parseVersion(plugin.model().getPluginBase().getVersion()))
-				.map(OBJECTWEB_INCOMPATIBILITY::get).filter(Objects::nonNull).collect(Collectors.toSet());
-		validEnvironments.removeAll(incompatibleExecutionEnvironments);
-		result.append("org.objectweb.asm is incompatible with ").append(incompatibleExecutionEnvironments).append("\n");
 		validEnvironments.removeIf( e -> 
 			!findCompatibilityProblems(Set.of(e)).isEmpty()
 		);
@@ -254,12 +234,6 @@ public final class JvmTargetCompatibility {
 	private static String isCompatible(IPluginModelBase plugin, Set<String> providedEnvironments) {
 		String id = plugin.getPluginBase().getId();
 		Version version = parseVersion(plugin.getPluginBase().getVersion());
-		if (id.equals(ASM_ID)) {
-			String envId = OBJECTWEB_INCOMPATIBILITY.get(version);
-			if (envId != null && providedEnvironments.contains(envId)) {
-				return incompatibleMessage(plugin, envId);
-			}
-		}
 		
 		if (id.equals("org.aspectj.weaver")) {
 			if (version.compareTo(parseVersion("1.9.22.202405141514")) <= 0) {
