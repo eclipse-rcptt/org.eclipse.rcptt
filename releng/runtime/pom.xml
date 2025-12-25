@@ -85,6 +85,7 @@ documentation -->
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
 					<requireEagerResolve>true</requireEagerResolve> <!--aspectj-maven-plugin fails without prepared Target Platform-->
+					<executionEnvironment>JavaSE-17</executionEnvironment>
 				</configuration>
 			</plugin>
 		</plugins>
