@@ -128,7 +128,6 @@
            <!--
 		   <vmArgs>
 			 <vmArg>-Xmx768m</vmArg>
-			 <vmArg>-XX:MaxPermSize=256m</vmArg>
 		   </vmArgs>
            -->
           </aut>
@@ -148,7 +147,6 @@
 
             <vmArgs>
               <vmArg>-Xmx1024m</vmArg>
-              <vmArg>-XX:MaxPermSize=256m</vmArg>
             </vmArgs>
           </runner>
 

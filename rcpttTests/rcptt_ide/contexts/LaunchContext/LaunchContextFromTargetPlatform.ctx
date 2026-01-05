@@ -9,8 +9,8 @@ Element-Name: LaunchContextFromTargetPlatform
 Element-Type: context
 Element-Version: 2.0
 Id: _NyEh4Ks5EeKWk6cOzG_MPA
-Runtime-Version: 1.5.0.201407281253
-Save-Time: 7/29/14 7:35 AM
+Runtime-Version: 2.8.0.202512070802
+Save-Time: 1/5/26, 11:16 AM
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
 Content-Type: text/plain
@@ -30,25 +30,33 @@ Contributors:
 Content-Type: q7/binary
 Entry-Name: debug.launchtypes
 
-UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAIAAAALmNvbnRlbnTtVUuL3EYQvvtXNAqEGLyafj8mXpt+
-gsGBhKzBV62mPSPQK5Jmd/bfp0ZiNz6EnJJL2DqUurqrvnq06O/9x0vXooc8zc3Q3xakxAXKfT0cmv54
-W3y5Sze6+PjhzfthOpa5bptxzuVUj8tS1sulPOT783H/uTr39enuaczo0jX7FzB6BQP4ft7D/m1xWpZx
-v9s9Pj6WQ3csAXL39ZdPzy7/kOEl9Pn8Grr67MBnt/oUqK+6fFvYcWybulqgAvSlP+QJ3eV5QT/9pt4W
-qDncFvXQlZdhyofyD1W2a+nQa5kvS4EOea6nZlzW8v0wPk3N8QTB9VtEMTbvQBOOvl6j0e/Dt+WxmjL6
-1Neo6g9oWE7QefnjDxf7s21btMbOaMpznh4gHbo7NTMap+E4Vd0aAQGoqqGgseqfoAjUVUuemqqdV5Ar
-eFcdwOehatrqvs3ovHZ0jQPHbkbDt9WI21zQr+d7aB59burcg/kA17kiPZ6a+vSSqskzREEth2Zepub+
-fO333VoRbP6VrFrW4O+u7fv5t/lYtbs8tjcPBJenpWtX71X5od+Ah2nerzsI5G/mdoOavlmgY1RPebs0
-KGM3TC/7h6E+d7lf1sMV6uZfFvgtuuoIv442AvPIFQ7YEost3iRwwzXngm4mwS9fjdm2ppoGnMRmgQYc
-LyBkO02raE0s8ZISQYwP3njrnVfeuOiMpy4555lT7rqicBQcs9FFqyxxWlNlrdRWM2uhmGiTTFKaqLj0
-FgsLkFx4wYyQTjLjlZDREhGEMFIxLWOKItIgQgwu0IiDDzSEYAIBWwUcqI/eJ6YIVyEIzXhwwjLwh/Wm
-pZcsURySkEx5K2Aq2jBFoQdumdWJecYkpYHKEKUWEbQRKSmjdExcC01CkEqKbRr4VV7lVV7lfy0Sax0C
-d5tFkwIW4VGw9B8KsI+1gumktqxaAn9xTgRX2ngZdNIOR02BpjyQhlE+EgmvvbjSFQfmEJwprNcamY/O
-W8qI5QmeehZ94vC+B02T1EpjSMKdwJ4my4BmkiYa0gWqTeIA7xmRxBFNSIzGC+mdBmxOBSEqcYYDM0xK
-nIJTjERgOgmEBwW55I0EclKREiYicywEkryVJHohAgXiE8nYGDCxwWEjgX6DSERKzYELeTARfBUN0Qoq
-rx1gRSVPFAiO6kCiSUr4yGJkzzcFMxLA/dxGaBBrWuw+vPkTUEsHCCkM/iWCAwAAHAsAAFBLAQIUABQA
-CAAIAAAAIQApDP4lggMAABwLAAAIAAAAAAAAAAAAAAAAAAAAAAAuY29udGVudFBLBQYAAAAAAQABADYA
-AAC4AwAAAAA=
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAADtVUuL3EYQvvtXNAqE
+GLyafj8mXpt+gsGBhKzBV62mPSPQK5Jmd/bfp0ZiNz6EnJJL2DqUurqrvnq06O/9x0vXooc8zc3Q3xak
+xAXKfT0cmv54W3y5Sze6+PjhzfthOpa5bptxzuVUj8tS1sulPOT783H/uTr39enuaczo0jX7FzB6BQP4
+ft7D/m1xWpZxv9s9Pj6WQ3csAXL39ZdPzy7/kOEl9Pn8Grr67MBnt/oUqK+6fFvYcWybulqgAvSlP+QJ
+3eV5QT/9pt4WqDncFvXQlZdhyofyD1W2a+nQa5kvS4EOea6nZlzW8v0wPk3N8QTB9VtEMTbvQBOOvl6j
+0e/Dt+WxmjL61Neo6g9oWE7QefnjDxf7s21btMbOaMpznh4gHbo7NTMap+E4Vd0aAQGoqqGgseqfoAjU
+VUuemqqdV5AreFcdwOehatrqvs3ovHZ0jQPHbkbDt9WI21zQr+d7aB59burcg/kA17kiPZ6a+vSSqskz
+REEth2Zepub+fO333VoRbP6VrFrW4O+u7fv5t/lYtbs8tjcPBJenpWtX71X5od+Ah2nerzsI5G/mdoOa
+vlmgY1RPebs0KGM3TC/7h6E+d7lf1sMV6uZfFvgtuuoIv442AvPIFQ7YEost3iRwwzXngm4mwS9fjdm2
+ppoGnMRmgQYcLyBkO02raE0s8ZISQYwP3njrnVfeuOiMpy4555lT7rqicBQcs9FFqyxxWlNlrdRWM2uh
+mGiTTFKaqLj0FgsLkFx4wYyQTjLjlZDREhGEMFIxLWOKItIgQgwu0IiDDzSEYAIBWwUcqI/eJ6YIVyEI
+zXhwwjLwh/WmpZcsURySkEx5K2Aq2jBFoQdumdWJecYkpYHKEKUWEbQRKSmjdExcC01CkEqKbRr4VV7l
+VV7lfy0Sax0Cd5tFkwIW4VGw9B8KsI+1gumktqxaAn9xTgRX2ngZdNIOR02BpjyQhlE+EgmvvbjSFQfm
+EJwprNcamY/OW8qI5QmeehZ94vC+B02T1EpjSMKdwJ4my4BmkiYa0gWqTeIA7xmRxBFNSIzGC+mdBmxO
+BSEqcYYDM0xKnIJTjERgOgmEBwW55I0EclKREiYicywEkryVJHohAgXiE8nYGDCxwWEjgX6DSERKzYEL
+eTARfBUN0Qoqrx1gRSVPFAiO6kCiSUr4yGJkzzcFMxLA/dxGaBBrWuw+vPkTUEsHCCkM/iWCAwAAHAsA
+AFBLAQIUABQACAgIAAAAIQApDP4lggMAABwLAAAIAAkAAAAAAAAAAAAAAAAAAAAuY29udGVudFVUBQAB
+AAAAAFBLBQYAAAAAAQABAD8AAADBAwAAAAA=
 ------=_debug.launchtypes-7159add4-14d7-36f5-abc2-a36dec1fc18e--
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae
+Content-Type: text/breakpoints
+Entry-Name: debug.breakpoints
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"/>
+
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae--
 ------=_TargetAUT.debug.launchconfiguration-19da4a7e-6194-326f-8912-7bc611c72ec0
 Content-Type: text/launchconfiguration
 Entry-Name: TargetAUT.debug.launchconfiguration
@@ -104,7 +112,7 @@ Entry-Name: TargetAUT.debug.launchconfiguration
     <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
   </attributes>
   <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.VM_ARGUMENTS" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
-    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="-Xmx512m -XX:MaxPermSize=256m"/>
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="-Xmx512m"/>
   </attributes>
   <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.WORKING_DIRECTORY" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
     <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${target_home}"/>
@@ -129,11 +137,3 @@ Entry-Name: debug.launches
 <org.eclipse.rcptt.ctx.debug:Launch xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:org.eclipse.rcptt.ctx.debug="http://eclipse.org/rcptt/ctx/debug" mode="run" configurationName="TargetAUT"/>
 
 ------=_debug.launches-be8ac185-ac72-3f40-ae87-94751ee91eea--
-------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae
-Content-Type: text/breakpoints
-Entry-Name: debug.breakpoints
-
-<?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"/>
-
-------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae--
