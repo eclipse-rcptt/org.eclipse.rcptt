@@ -5,8 +5,8 @@ Element-Name: SetupAUTMockup
 Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
-Runtime-Version: 2.6.0.202505301849
-Save-Time: 6/1/25, 9:16 AM
+Runtime-Version: 2.8.0.202512070802
+Save-Time: 1/5/26, 11:16 AM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -31,7 +31,7 @@ get-view Applications | get-tree | get-items | foreach -do {
     }
  }
 
-// invoke-AUT selfQ7Mockups -args "-nosplash" -vmargs "-Xmx512m -XX:MaxPermSize=256m"
+// invoke-AUT selfQ7Mockups -args "-nosplash" -vmargs "-Xmx512m"
 invoke-AUT mockupsQ7 -inject [site-injection [substitute-variables "${system_property:mockup_repository}"] ] -args "-nosplash" -vmargs "-Xmx512m"
 
 loop [val count 0] {
