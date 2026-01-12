@@ -2,16 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime JFace Databinding Support
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.jface.databinding.rap;singleton:=true
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Activator: org.eclipse.rcptt.tesla.jface.databinding.rap.DatabindingActivator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.core;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.7.2,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.7.3,3.0.0)",
  org.eclipse.core.databinding,
  org.eclipse.core.databinding.observable,
- org.eclipse.rcptt.tesla.jface.databinding.aspects.rap;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.tesla.jface.databinding.observable.aspects.rap;bundle-version="[2.7.2,3.0.0)"
+ org.eclipse.rcptt.tesla.jface.databinding.aspects.rap;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.jface.databinding.observable.aspects.rap;bundle-version="[2.7.3,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.rcptt.tesla.jface.databinding.rap

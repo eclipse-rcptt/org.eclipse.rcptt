@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SWT RCPTT Utiilties
 Bundle-SymbolicName: org.eclipse.rcptt.core.swt;singleton:=true
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.swt,
- org.eclipse.rcptt.util;bundle-version="[2.7.2,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.7.3,3.0.0)",
  org.eclipse.rcptt.tesla.recording.core.ecl,
  org.eclipse.jface,
  org.eclipse.jface.databinding

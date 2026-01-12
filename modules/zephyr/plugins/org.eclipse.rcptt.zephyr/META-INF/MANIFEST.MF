@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Zephyr support core
 Bundle-SymbolicName: org.eclipse.rcptt.zephyr;singleton:=true
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.7.3.qualifier
 Require-Bundle: org.eclipse.core.resources,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.core;bundle-version="2.7.2",
- org.eclipse.rcptt.reporting;bundle-version="2.7.2",
+ org.eclipse.rcptt.core;bundle-version="2.7.3",
+ org.eclipse.rcptt.reporting;bundle-version="2.7.3",
  com.google.gson,
- org.eclipse.rcptt.reporting.util;bundle-version="2.7.2",
+ org.eclipse.rcptt.reporting.util;bundle-version="2.7.3",
  org.eclipse.debug.core,
  org.eclipse.equinox.security,
  org.eclipse.rcptt.util,
- org.eclipse.rcptt.launching;bundle-version="2.7.2",
+ org.eclipse.rcptt.launching;bundle-version="2.7.3",
  org.apache.httpcomponents.httpclient;bundle-version="4.5.13",
  org.apache.httpcomponents.httpcore;bundle-version="4.4.14",
  org.apache.commons.lang3

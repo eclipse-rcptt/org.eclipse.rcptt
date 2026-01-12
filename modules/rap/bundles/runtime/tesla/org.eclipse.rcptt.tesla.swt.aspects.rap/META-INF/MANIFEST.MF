@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime SWT Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.swt.aspects.rap;singleton:=true
-Bundle-Version: 2.7.2.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rap.rwt,
  org.eclipse.rap.filedialog,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.watson.core;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.util;bundle-version="[2.7.2,3.0.0)",
- org.eclipse.rcptt.tesla.ecl;bundle-version="[2.7.2,3.0.0)",
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.watson.core;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.ecl;bundle-version="[2.7.3,3.0.0)",
  javax.servlet
 onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
