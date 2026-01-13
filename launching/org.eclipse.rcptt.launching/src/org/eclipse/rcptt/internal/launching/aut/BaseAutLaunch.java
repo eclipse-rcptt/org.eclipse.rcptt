@@ -625,7 +625,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		EnterContext ec = Q7CoreFactory.eINSTANCE.createEnterContext();
 		ec.setData(context);
 		try {
-			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout()+1000, monitor, null);
+			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout()+10000, monitor, null);
 			if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
@@ -948,7 +948,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 	}
 
 	private IStatus internalExecute(Command command, long timeout, IProgressMonitor monitor,
-			Map<String, String> properties) throws InterruptedException, CoreException {
+			Map<String, String> properties) throws InterruptedException {
 		try {
 			long stop = System.currentTimeMillis() + timeout;
 			TimeoutInterruption interruption = TimeoutInterruption.forTimeout(monitor, timeout, this);
@@ -966,10 +966,10 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			});
 		} catch (CoreException e) {
 			if (e.getStatus().matches(IStatus.CANCEL)) {
-				throw e;
+				return e.getStatus();
 			}
-			throw new CoreException(new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
-					"Failed to execute " + command, e));
+			return new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
+					"Failed to execute " + command, e);
 		}
 	}
 
