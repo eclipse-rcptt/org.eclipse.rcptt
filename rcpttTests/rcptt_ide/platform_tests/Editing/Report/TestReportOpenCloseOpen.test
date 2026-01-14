@@ -1,0 +1,33 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _CXBZkDqaEeSXcJNyN3x-Zg,_U616EDqaEeSXcJNyN3x-Zg
+Element-Name: TestReportOpenCloseOpen
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _VNpDQD8ZEeSyDoCDFnaFCg
+Runtime-Version: 1.5.3.201409120955
+Save-Time: 10/17/14 12:05 PM
+Tags: skipExecution
+Testcase-Type: ecl
+Verifications: _UnfUID8XEeSyDoCDFnaFCg
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+In test run report, open a test , close test subtab, open a test again. A test subtab should reappear.
+Open BUG https://bugs.eclipse.org/bugs/show_bug.cgi?id=444450
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view "Test Explorer" | get-tree | select "q7project/q7project_2014_09_12.report" | double-click
+with [get-editor "q7project_2014_09_12"] {
+    get-section "Test cases" | get-table | select simpleTest2 | double-click
+    get-tab-folder | get-tab-item simpleTest2 | close
+    get-section "Test cases" | get-table | select simpleTest2 | double-click
+    get-tab-folder | get-tab-item simpleTest2 | close
+}
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

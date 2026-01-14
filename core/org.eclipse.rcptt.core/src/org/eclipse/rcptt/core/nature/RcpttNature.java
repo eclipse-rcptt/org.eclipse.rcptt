@@ -40,6 +40,7 @@ public class RcpttNature implements IProjectNature {
 	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#configure()
 	 */
+	@Override
 	public void configure() throws CoreException {
 		if (!hasBuilder(project))
 			enableFor(project);
@@ -50,6 +51,7 @@ public class RcpttNature implements IProjectNature {
 	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#deconfigure()
 	 */
+	@Override
 	public void deconfigure() throws CoreException {
 		//Builder is associated with nature and will be deactivated automatically
 	}
@@ -101,6 +103,7 @@ public class RcpttNature implements IProjectNature {
 	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#getProject()
 	 */
+	@Override
 	public IProject getProject() {
 		return project;
 	}
@@ -112,6 +115,7 @@ public class RcpttNature implements IProjectNature {
 	 * org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core
 	 * .resources.IProject)
 	 */
+	@Override
 	public void setProject(IProject project) {
 		this.project = project;
 	}
