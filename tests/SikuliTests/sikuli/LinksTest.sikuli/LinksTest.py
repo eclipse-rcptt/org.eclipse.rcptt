@@ -1,5 +1,0 @@
-click("SectionWithL.png")
-click("SectionWithL-1.png")
-click("Thisisahyper.png")
-click("Thisisahyper-1.png")
-click("Thisisahyper-2.png")

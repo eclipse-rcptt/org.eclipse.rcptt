@@ -17,7 +17,7 @@ documentation
 	<parent>
 		<artifactId>bundles</artifactId>
 		<groupId>org.eclipse.rcptt.module.rap</groupId>
-		<version>2.7.3-SNAPSHOT</version>
+		<version>2.8.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>runtime</artifactId>
