@@ -12,18 +12,18 @@
 <unit id="com.sun.xml.bind" version="0.0.0"/>
 <unit id="javax.activation" version="0.0.0"/>
 <unit id="javax.xml" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.nebula.widgets.grid.feature.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/nebula/releases/latest"/>
+<repository location="https://download.eclipse.org/nebula/releases/latest"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.rcptt.updates.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/rcptt/nightly/2.5.5/latest/repository"/>
+<repository location="https://download.eclipse.org/rcptt/nightly/2.5.5/latest/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<repository location="http://download.eclipse.org/releases/2019-03"/>
+<repository location="https://download.eclipse.org/releases/2019-03"/>
 <unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.platform.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.core.filesystem.macosx" version="0.0.0"/>
@@ -36,12 +36,12 @@
 <unit id="org.eclipse.emf.transaction.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.gmf.feature.group" version="0.0.0"/>
 <unit id="org.jsoup" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/2019-03"/>
+<repository location="https://download.eclipse.org/releases/2019-03"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ajdt.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.contribution.weaving.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/ajdt/48/dev/update"/>
+<repository location="https://download.eclipse.org/tools/ajdt/48/dev/update"/>
 </location>
 </locations>
 	<environment>

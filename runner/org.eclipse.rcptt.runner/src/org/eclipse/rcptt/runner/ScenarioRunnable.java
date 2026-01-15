@@ -71,7 +71,7 @@ public class ScenarioRunnable {
 				}
 				IExecutable[] executables = exec.getExecutables();
 				for (IExecutable e: executables) {
-					report = makeReport((PrepareExecutionWrapper) e);
+					report = makeReport(e);
 					if (!e.getResultStatus().isOK()) {
 						break;
 					}
@@ -109,7 +109,7 @@ public class ScenarioRunnable {
 		}
 	}
 
-	private Report makeReport(PrepareExecutionWrapper executable) {
+	private Report makeReport(IExecutable executable) {
 		Report report = executable.getResultReport();
 		Preconditions.checkState(report != null, executable.getName() + " failed to emit non-null report");
 		return report;
