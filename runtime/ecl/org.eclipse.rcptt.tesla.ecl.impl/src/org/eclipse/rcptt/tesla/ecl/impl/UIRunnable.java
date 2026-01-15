@@ -173,7 +173,7 @@ public abstract class UIRunnable<T> {
 				if (time > stop) {
 					// Lets also capture all thread dump.
 					storeTimeoutInReport(display, collector);
-					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout during execution of " + runnable, new RuntimeException()) {
+					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout (" + timeout_ms + "ms) during execution of " + runnable, new RuntimeException()) {
 						{
 							setSeverity(ERROR);
 						}
