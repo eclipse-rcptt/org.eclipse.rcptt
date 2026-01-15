@@ -117,7 +117,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 		AUTCommandLine cmd = new AUTCommandLine();
 
 		cmd.setExecutable(java.getFile().getAbsolutePath());
-		cmd.setWorkingDirectory(getResolvedQ7Dir(getQ7Coords().getPlatform()));
+		cmd.setWorkingDirectory(getResolvedQ7Dir());
 
 		// Q7 VM Args
 
@@ -354,7 +354,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 		ok &= getProjectsDir().exists();
 		ok &= getThisProjectDir().exists();
 		ok &= getAutDir().exists();
-		ok &= getQ7Dir(getQ7Coords().getPlatform()).exists();
+		ok &= getQ7Dir().exists();
 		if (!ok) {
 			throw new MojoFailureException(
 					"Cannot execute RCPTT tests. Something is corrupted during prepare goal. Is lifecycle have been modified?");
