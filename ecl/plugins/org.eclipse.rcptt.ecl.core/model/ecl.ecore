@@ -325,7 +325,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="Case" eSuperTypes="#//Command">
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
       <details key="description" value="Corresponds command from &lt;code>then&lt;/code> branch if an object from the &lt;code>input&lt;/code> matches the &lt;code>condition&lt;/code> object."/>
-      <details key="returns" value="An internal object describing the case."/>
+      <details key="returns" value="An internal object describing the case. Can only be used by a containing &lt;code>switch&lt;/code> command."/>
       <details key="example" value="list 1 2 3 | get 0 | switch [case 1 {&#xD;&#xA;&#x9;log -message &quot;First item is 1&quot;&#xD;&#xA;}] [case 2 {&#xA;&#x9;log -message &quot;First item is 2&quot;&#xA;}]"/>
     </eAnnotations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="condition" lowerBound="1"
@@ -337,7 +337,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="then" eType="#//Command"
         containment="true">
       <eAnnotations source="http://www.eclipse.org/ecl/docs">
-        <details key="description" value="Branch being executed when &lt;code>input&lt;/code> matches the object specified in &lt;code>condition&lt;/code>"/>
+        <details key="description" value="Code to execute. &lt;code>input&lt;/code> is propagated from the command to this branch code."/>
       </eAnnotations>
     </eStructuralFeatures>
   </eClassifiers>
