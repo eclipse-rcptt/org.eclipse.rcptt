@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Group Context UI
 Bundle-SymbolicName: org.eclipse.rcptt.ctx.group.ui;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Activator: org.eclipse.rcptt.ctx.group.ui.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.ui;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.core;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.ctx.group;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.ui;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.ctx.group;bundle-version="[2.7.3,3.0.0)",
  org.eclipse.ui.forms,
  org.eclipse.core.resources,
- org.eclipse.rcptt.launching;bundle-version="[2.6.1,3.0.0)"
+ org.eclipse.rcptt.launching;bundle-version="[2.7.3,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.rcptt.ctx.group.ui

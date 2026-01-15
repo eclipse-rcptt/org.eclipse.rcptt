@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core Search Tests
 Bundle-SymbolicName: org.eclipse.rcptt.core.search.test
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit;bundle-version="4.8.2",

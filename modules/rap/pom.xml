@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.eclipse.rcptt</groupId>
     <artifactId>rap</artifactId>
-    <version>2.6.1-SNAPSHOT</version>
+    <version>2.7.3-SNAPSHOT</version>
     <relativePath>../../releng/rap/pom.xml</relativePath>
   </parent>
 
@@ -41,6 +41,14 @@
           <id>rap-rcptt-runtime</id>
           <layout>p2</layout>
           <url>${buildUrl}/modules/rap/repositories/org.eclipse.rcptt.runtime-updatesite.rap/target/repository/</url>
+        </repository>
+        <repository>
+          <snapshots>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+          <id>rap-runtime</id>
+          <layout>p2</layout>
+          <url>https://download.eclipse.org/rt/rap/4.4/RC1-20250826-0731</url>
         </repository>
       </repositories>
     </profile>

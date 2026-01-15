@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.ecl.perf;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-9
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.eclipse.rcptt.ecl.perf,
  org.eclipse.rcptt.ecl.perf.impl,
  org.eclipse.rcptt.ecl.perf.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.rcptt.ecl.core;bundle-version="[2.6.1,3.0.0)";visibility:=reexport
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.7.3,3.0.0)";visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.rcptt.ecl.perf.internal.EclPerfPlugin
 Automatic-Module-Name: org.eclipse.rcptt.ecl.perf

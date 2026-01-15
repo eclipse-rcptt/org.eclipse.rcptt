@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="RCP Testing Tool IDE" uid="org.eclipse.rcptt.platform.product" id="org.eclipse.rcptt.platform.product" application="org.eclipse.ui.ide.workbench" version="2.6.1.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="RCP Testing Tool IDE" uid="org.eclipse.rcptt.platform.product" id="org.eclipse.rcptt.platform.product" application="org.eclipse.ui.ide.workbench" version="2.7.3.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="icons/about.png"/>
@@ -315,14 +315,12 @@
       <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.ecf.core.feature"/>
       <feature id="org.eclipse.equinox.p2.rcp.feature"/>
-      <feature id="org.eclipse.ecf.filetransfer.feature"/>
       <feature id="org.eclipse.e4.rcp"/>
       <feature id="org.eclipse.egit"/>
       <feature id="org.eclipse.jgit"/>
       <feature id="org.eclipse.equinox.p2.discovery.feature"/>
       <feature id="org.eclipse.rcptt.module.nebula"/>
       <feature id="org.eclipse.rcptt.launching"/>
-      <feature id="org.eclipse.ecf.filetransfer.httpclient5.feature" installMode="root"/>
    </features>
 
    <configurations>

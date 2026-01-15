@@ -177,12 +177,18 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		oi.put(valueOf("9.7.1"), "JavaSE-25");
 		oi.put(valueOf("9.8.0"), "JavaSE-26");
 	}
-	
+
 	public Set<String> getIncompatibleExecutionEnvironments() {
 		checkResolved();
-		return modelIndex.get("org.objectweb.asm").stream().map(base -> base.getPluginBase().getVersion())
-				.map(Version::parseVersion).map(OBJECTWEB_INCOMPATIBILITY::get).filter(java.util.Objects::nonNull)
-				.collect(Collectors.toSet());
+		return Stream.concat(
+				modelIndex.get("org.objectweb.asm")
+						.stream()
+						.map(base -> base.getPluginBase().getVersion())
+						.map(Version::parseVersion)
+						.map(OBJECTWEB_INCOMPATIBILITY::get)
+						.filter(java.util.Objects::nonNull),
+				Stream.of("JavaSE-23") // https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/166
+		).collect(Collectors.toSet());
 	}
 
 	private IStatus getBundleStatus() {
@@ -695,7 +701,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			List<IInstallableUnit> unitsToInstall = new ArrayList<IInstallableUnit>();
 
 			// Query for all entries and then choose required.
-			IQuery<IInstallableUnit> finalQuery = P2Utils.createQuery(site);
+			IQuery<IInstallableUnit> finalQuery = P2Utils.createQuery(site.isAllUnits() ? Set.of() : site.getUnits() );
 
 			IQueryResult<IInstallableUnit> result = repository.query(finalQuery,
 					monitor);

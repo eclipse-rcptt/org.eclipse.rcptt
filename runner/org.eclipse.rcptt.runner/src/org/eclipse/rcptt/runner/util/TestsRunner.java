@@ -33,6 +33,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.rcptt.core.internal.builder.MigrateProjectsJob;
@@ -141,7 +142,11 @@ public class TestsRunner {
 			return new TestSuite[0];
 		}
 
+		ModelManager.getModelManager().getIndexManager()
+		.waitUntilReady(new NullProgressMonitor());
+		
 		System.out.println("Searching for tests in workspace:");
+		
 			NamedElementCollector collector = null;
 			if (conf.suites.size() == 0) {
 				collector = new NamedElementCollector(HandleType.TestCase);

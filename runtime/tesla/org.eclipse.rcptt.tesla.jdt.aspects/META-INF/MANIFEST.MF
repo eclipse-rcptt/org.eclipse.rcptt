@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime JDT Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.jdt.aspects;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.core.am;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.7.3,3.0.0)",
  org.eclipse.jdt.core
 Eclipse-SupplementBundle: org.eclipse.jdt.core
 Export-Package: org.eclipse.rcptt.tesla.jdt

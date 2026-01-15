@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime JFace Support Tweaks
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.jface.fragment.rap;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.7.3.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Fragment-Host: org.eclipse.rap.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-17
