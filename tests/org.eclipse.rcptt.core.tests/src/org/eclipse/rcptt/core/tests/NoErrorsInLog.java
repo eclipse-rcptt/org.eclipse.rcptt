@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.junit.rules.ExternalResource;
 import org.osgi.framework.FrameworkUtil;
 
@@ -68,7 +69,7 @@ public class NoErrorsInLog extends ExternalResource {
 					.filter(RuntimeException.class::isInstance).map(RuntimeException.class::cast).forEach(e -> {
 						throw e;
 					});
-			throw new AssertionError(new CoreException(statusLog));
+			throw new AssertionError(StatusUtil.format(statusLog), new CoreException(statusLog));
 		}
 	}
 

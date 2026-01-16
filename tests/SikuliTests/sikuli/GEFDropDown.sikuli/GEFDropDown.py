@@ -1,6 +1,0 @@
-r=find("OperationsOp.png")
-click(r.find("perati0nO-1.png"))
-click("OpenProcessE.png")
-click(find("F0rEach1newV.png").find("newVar.png"))
-click("E.png")
-click(find("newVar-1.png").find("newVar3.png"))

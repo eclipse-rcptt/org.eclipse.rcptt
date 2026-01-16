@@ -21,17 +21,16 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.pde.launching.IPDELauncherConstants;
-import org.eclipse.rcptt.ecl.client.tcp.EclTcpClientManager;
-import org.eclipse.rcptt.ecl.runtime.IPipe;
-import org.eclipse.rcptt.ecl.runtime.ISession;
-
 import org.eclipse.rcptt.core.ecl.core.model.GetQ7Information;
 import org.eclipse.rcptt.core.ecl.core.model.Q7CoreFactory;
 import org.eclipse.rcptt.core.ecl.core.model.Q7Information;
 import org.eclipse.rcptt.core.ecl.core.model.SetQ7Features;
+import org.eclipse.rcptt.ecl.client.tcp.EclTcpClientManager;
+import org.eclipse.rcptt.ecl.runtime.IPipe;
+import org.eclipse.rcptt.ecl.runtime.ISession;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
-import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
+import org.eclipse.rcptt.util.FileUtil;
 
 public final class Q7LaunchUtils {
 

@@ -31,7 +31,7 @@ public class ExecutionSession implements IExecutionSession {
 	private final String name;
 	private final Executable[] executables;
 	private Date startTime;
-	private final ListenerList listeners = new ListenerList();
+	private final ListenerList<IExecutionSessionListener> listeners = new ListenerList<>();
 
 	private Executable executable;
 
@@ -52,15 +52,20 @@ public class ExecutionSession implements IExecutionSession {
 				this);
 		reportSession = new SherlockReportSession(reportRoot);
 		Executable[] testCases = getTestCases();
-		for (Executable executable : testCases) {
-			if (executable instanceof PrepareExecutionWrapper) {
-				((PrepareExecutionWrapper) executable)
-						.setReportSession(reportSession);
-			}
-		}
+		installReports(executables);
 		testCasesCount = testCases.length;
 	}
 
+	private void installReports(Executable[] testCases) {
+		for (Executable executable : testCases) {
+			if (executable instanceof IReportProducer p) {
+				p.configure(IReportStore.from(reportSession));
+			}
+			installReports(executable.getChildren());
+		}
+	}
+
+	@Override
 	public Q7TestLaunch getLaunch() {
 		return this.launch;
 	}
@@ -69,10 +74,12 @@ public class ExecutionSession implements IExecutionSession {
 		return reportSession;
 	}
 
+	@Override
 	public Executable[] getExecutables() {
 		return executables;
 	}
 
+	@Override
 	public Executable[] getTestCases() {
 		List<Executable> result = internalGetTestCases(executables);
 		return result.toArray(new Executable[result.size()]);
@@ -91,14 +98,17 @@ public class ExecutionSession implements IExecutionSession {
 		return result;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void addListener(IExecutionSessionListener listener) {
 		this.listeners.add(listener);
 	}
 
+	@Override
 	public void removeListener(IExecutionSessionListener listener) {
 		this.listeners.remove(listener);
 	}
@@ -115,10 +125,12 @@ public class ExecutionSession implements IExecutionSession {
 		this.startTime = startTime;
 	}
 
+	@Override
 	public Date getStartTime() {
 		return startTime;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return result == null;
 	}
@@ -134,8 +146,8 @@ public class ExecutionSession implements IExecutionSession {
 		for (Executable ex : executables) {
 			ex.cancel(result);
 		}
-		for (Object o : listeners.getListeners()) {
-			((IExecutionSessionListener) o).executionFinished();
+		for (IExecutionSessionListener o : listeners) {
+			o.executionFinished();
 		}
 		if (launch != null) {
 			launch.setSession(null);
@@ -145,11 +157,12 @@ public class ExecutionSession implements IExecutionSession {
 				Q7LaunchingPlugin.log(e);
 			}
 		}
-		for (Object o : listeners.getListeners()) {
-			((IExecutionSessionListener) o).statisticsUpdate();
+		for (IExecutionSessionListener o : listeners) {
+			o.statisticsUpdate();
 		}
 	}
 
+	@Override
 	public int getFailedCount() {
 		return getScenariosByStatus(executables, IStatus.ERROR, false);
 	}
@@ -157,7 +170,7 @@ public class ExecutionSession implements IExecutionSession {
 	private int getScenariosByStatus(IExecutable[] executables, int status, boolean matchOk) {
 		int count = 0;
 		for (IExecutable executable : executables) {
-			if (executable instanceof PrepareExecutionWrapper) {
+			if (executable instanceof PrepareExecutionWrapper || executable instanceof RetryExecutable) {
 				if (
 					executable.getStatus() == IExecutable.State.COMPLETED &&
 					(
@@ -174,36 +187,40 @@ public class ExecutionSession implements IExecutionSession {
 		return count;
 	}
 
+	@Override
 	public int getStoppedCount() {
 		return getScenariosByStatus(executables, IStatus.CANCEL, false);
 	}
 
+	@Override
 	public int getFinishedCount() {
 		return getScenariosByStatus(executables, IStatus.ERROR | IStatus.INFO, true);
 	}
 
+	@Override
 	public int getTotalCount() {
 		return testCasesCount;
 	}
 
 	public void resetCounters() {
-		for (Object o : listeners.getListeners()) {
-			((IExecutionSessionListener) o).statisticsUpdate();
+		for (IExecutionSessionListener o : listeners) {
+			o.statisticsUpdate();
 		}
 	}
 
 	public void oneFailed() {
-		for (Object o : listeners.getListeners()) {
-			((IExecutionSessionListener) o).statisticsUpdate();
+		for (IExecutionSessionListener o : listeners) {
+			o.statisticsUpdate();
 		}
 	}
 
 	public void oneFinished() {
-		for (Object o : listeners.getListeners()) {
-			((IExecutionSessionListener) o).statisticsUpdate();
+		for (IExecutionSessionListener o : listeners) {
+			o.statisticsUpdate();
 		}
 	}
 
+	@Override
 	public long getTotalTime() {
 		long total = 0;
 		for (IExecutable executable : executables) {
@@ -233,6 +250,7 @@ public class ExecutionSession implements IExecutionSession {
 		endTime = date;
 	}
 
+	@Override
 	public Date getEndTime() {
 		return endTime;
 	}

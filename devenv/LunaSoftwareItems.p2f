@@ -4,106 +4,106 @@
   <ius size='20'>
     <iu id='org.antlr.runtime' name='ANTLR Runtime' version='3.2.0.v201101311130'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.aspectj.feature.group' name='AspectJ Compiler' version='1.8.5.20150128171000'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/44/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/44/dev/update'/>
       </repositories>
     </iu>
     <iu id='org.aspectj.source.feature.group' name='AspectJ Compiler Source Code' version='1.8.5.20150128171000'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/44/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/44/dev/update'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.ajdt.feature.group' name='AspectJ Development Tools' version='2.2.4.e44x-20150202-1700'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/44/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/44/dev/update'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.ajdt.source.feature.group' name='AspectJ Development Tools (AJDT) Source Code' version='2.2.4.e44x-20150202-1700'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/44/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/44/dev/update'/>
       </repositories>
     </iu>
     <iu id='epp.package.standard' name='Eclipse IDE for Eclipse Committers' version='4.4.2.20150219-0708'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.sdk.feature.group' name='EMF - Eclipse Modeling Framework SDK' version='2.10.2.v20150123-0452'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.query.sdk.feature.group' name='EMF Model Query SDK' version='1.8.0.201405281426'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.transaction.sdk.feature.group' name='EMF Model Transaction SDK' version='1.8.0.201405281451'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.validation.sdk.feature.group' name='EMF Validation Framework SDK' version='1.8.0.201405281429'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='com.google.gson' name='Google GSON' version='2.2.4.v201311231704'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.gef.sdk.feature.group' name='Graphical Editing Framework GEF SDK' version='3.9.101.201408150207'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.zest.sdk.feature.group' name='Graphical Editing Framework Zest Visualization Toolkit SDK' version='1.5.101.201408150207'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.gmf.sdk.feature.group' name='Graphical Modeling Framework (GMF) Tooling SDK' version='3.2.1.201502182128'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.graphiti.sdk.feature.feature.group' name='Graphiti SDK (Incubation)' version='0.11.2.v20150204-0954'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='com.google.guava' name='Guava: Google Core Libraries for Java' version='15.0.0.v201403281430'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.jsoup' name='jsoup: Java HTML Parser' version='1.7.2.v201304221138'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.jsoup.source' name='jsoup: Java HTML Parser Source' version='1.7.2.v201304221138'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.ocl.all.sdk.feature.group' name='OCL Classic SDK: Ecore/UML Parsers,Evaluator,Edit' version='5.0.2.v20141027-1335'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.xsd.sdk.feature.group' name='XSD - XML Schema Definition SDK' version='2.10.0.v20150123-0452'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/luna'/>
+        <repository location='https://download.eclipse.org/releases/luna'/>
       </repositories>
     </iu>
   </ius>
