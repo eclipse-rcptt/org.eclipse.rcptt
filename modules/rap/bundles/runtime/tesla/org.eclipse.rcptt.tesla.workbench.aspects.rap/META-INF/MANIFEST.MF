@@ -2,17 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime Workbench Support Aspects
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.workbench.aspects.rap;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.6.2.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.aspectj.runtime;visibility:=reexport,
  org.eclipse.rap.rwt,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.swt.aspects.rap;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.tesla.core.context;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.core.am.rap;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.rap;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.aspects.rap;bundle-version="[2.6.2,3.0.0)",
  org.eclipse.rap.ui.workbench;bundle-version="[3.1.0,4.0.0]",
- org.eclipse.rcptt.tesla.recording.aspects.swt.rap;bundle-version="[2.6.1,3.0.0)"
+ org.eclipse.rcptt.tesla.recording.aspects.swt.rap;bundle-version="[2.6.2,3.0.0)"
 onEnvironment: JavaSE-17
 Import-Package: org.osgi.framework
 Eclipse-SupplementBundle: org.eclipse.rap.ui.workbench

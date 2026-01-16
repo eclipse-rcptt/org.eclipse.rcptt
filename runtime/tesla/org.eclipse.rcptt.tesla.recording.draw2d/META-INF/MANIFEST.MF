@@ -2,21 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime Draw2d Support
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.recording.draw2d;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.6.2.qualifier
 Bundle-Activator: org.eclipse.rcptt.tesla.recording.core.gef.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.gef,
- org.eclipse.rcptt.tesla.recording.swt;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.core;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.core;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.swt;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.core;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.6.2,3.0.0)",
  org.eclipse.ui,
- org.eclipse.rcptt.tesla.swt;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.draw2d;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.forms;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.swt;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.workbench;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.jface;bundle-version="[2.6.1,3.0.0)",
+ org.eclipse.rcptt.tesla.swt;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.draw2d;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.forms;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.swt;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.workbench;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.jface;bundle-version="[2.6.2,3.0.0)",
  org.eclipse.ui.forms,
  org.eclipse.emf.common
 Bundle-RequiredExecutionEnvironment: JavaSE-17

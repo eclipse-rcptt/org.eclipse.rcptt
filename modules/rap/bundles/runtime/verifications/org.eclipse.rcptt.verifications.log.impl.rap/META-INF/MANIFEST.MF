@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Error Log Verification Runtime
 Bundle-SymbolicName: org.eclipse.rcptt.verifications.log.impl.rap;singleton:=true
-Bundle-Version: 2.6.1.qualifier
+Bundle-Version: 2.6.2.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Require-Bundle: org.eclipse.rcptt.core;bundle-version="[2.6.1,3.0.0)",
+Require-Bundle: org.eclipse.rcptt.core;bundle-version="[2.6.2,3.0.0)",
  org.eclipse.core.runtime,
- org.eclipse.rcptt.verifications.log;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.verifications;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.reporting;bundle-version="[2.6.1,3.0.0)",
- org.eclipse.rcptt.tesla.ecl.impl.rap;bundle-version="[2.6.1,3.0.0)"
+ org.eclipse.rcptt.verifications.log;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.verifications;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.reporting;bundle-version="[2.6.2,3.0.0)",
+ org.eclipse.rcptt.tesla.ecl.impl.rap;bundle-version="[2.6.2,3.0.0)"

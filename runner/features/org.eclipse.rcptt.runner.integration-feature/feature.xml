@@ -12,7 +12,7 @@
 <feature
       id="org.eclipse.rcptt.runner.integration"
       label="%featureName"
-      version="2.6.1.qualifier"
+      version="2.6.2.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -31,15 +31,15 @@
 
    <includes
          id="org.eclipse.rcptt.core"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <includes
          id="org.eclipse.rcptt.launching"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.reporting.html"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <plugin
          id="com.google.gson"
@@ -47,11 +47,11 @@
 
    <plugin
          id="org.eclipse.rcptt.watson.core"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <plugin
          id="org.eclipse.rcptt.ecl.debug.core"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <plugin
          id="org.eclipse.jface"
@@ -71,7 +71,7 @@
 
    <plugin
          id="org.eclipse.rcptt.watson.jobs"
-         version="2.6.1.qualifier"/>
+         version="2.6.2.qualifier"/>
 
    <plugin
          id="com.google.guava"
