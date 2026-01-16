@@ -5,8 +5,8 @@ Element-Name: SetupAUTMockup
 Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
-Runtime-Version: 2.8.0.202512070802
-Save-Time: 1/5/26, 11:16 AM
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 1/16/26, 3:18 PM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -18,6 +18,16 @@ proc "has-property" [val control -input] [val property] {
 		bool true // return true
 	} -catch {
 		bool false // return false
+	}
+}
+
+proc waitForTaskToComplete {
+	loop {
+		if [get-view "Execution View" | get-label ".*/1"
+			| get-property caption -raw | not-eq "1/1"] {
+			wait 500
+			recur
+		}
 	}
 }
 

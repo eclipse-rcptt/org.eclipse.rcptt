@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _GLGj8FFQEeqyG-160wAoew
-Runtime-Version: 2.8.0.202510140748
-Save-Time: 10/22/25, 5:22 PM
+Runtime-Version: 2.7.3.202601151826
+Save-Time: 1/16/26, 10:52 AM
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -73,10 +73,12 @@ get-aut selfQ7 | eval {
 }
 
 with [get-window "Control Panel - t2 (test) - selfQ7 [Asserting]"] {
-	with [get-window "Assertion and Verification"] {
-		get-tree | get-item -path "TreeItem \\(Basic Properties\\)/columns" | expand
-		get-tree | get-item -path "TreeItem \\(Basic Properties\\)/columns" | check
-		get-button Add | click
+	try -times 10 -delay 10000 -command {
+		with [get-window "Assertion and Verification"] {
+			get-tree | get-item -path "TreeItem \\(Basic Properties\\)/columns" | expand
+			get-tree | get-item -path "TreeItem \\(Basic Properties\\)/columns" | check
+			get-button Add | click
+		}
 	}
 }
 
