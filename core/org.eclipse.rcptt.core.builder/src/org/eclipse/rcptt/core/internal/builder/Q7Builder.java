@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rcptt.core.builder.IQ7ProblemReporter.ProblemType;
 import org.eclipse.rcptt.core.builder.IQ7Validator;
@@ -260,7 +261,8 @@ public class Q7Builder extends IncrementalProjectBuilder {
 
 	protected void fullBuild(final IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
-		monitor.beginTask(MSG_Q7_Builder, 100);
+		SubMonitor sm = SubMonitor.convert(monitor, MSG_Q7_Builder, 100);
+		getProject().refreshLocal(IResource.DEPTH_INFINITE, sm.split(10));
 		NamedElementCollector collector = new NamedElementCollector() {
 			@Override
 			public boolean visit(IQ7Element element) {
@@ -272,7 +274,7 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		};
 		IQ7Project project = getQ7Project();
 		project.accept(collector);
-		monitor.worked(10);
+		sm.worked(10);
 		List<IQ7NamedElement> elements = collector.getElements();
 
 		// simply rebuild all contexts each time
@@ -283,9 +285,9 @@ public class Q7Builder extends IncrementalProjectBuilder {
 		// List<IQ7NamedElement> elements = calculateExtraDependencies(
 		// collector.getElements(), null, new SubProgressMonitor(
 		// monitor, 10));
-		buildElements(elements, new SubProgressMonitor(monitor, 90));
+		buildElements(elements, sm.split(80));
 
-		monitor.done();
+		IProgressMonitor.done(monitor);
 	}
 
 	private IQ7Project getQ7Project() {
