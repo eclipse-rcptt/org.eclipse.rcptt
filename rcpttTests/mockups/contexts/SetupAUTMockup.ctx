@@ -1,0 +1,84 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.ecl
+Element-Name: SetupAUTMockup
+Element-Type: context
+Element-Version: 2.0
+Id: _cQEZwD2QEeSxD9UFwnFS6w
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 1/16/26, 3:18 PM
+
+------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
+Content-Type: text/ecl
+Entry-Name: .ecl.context
+
+proc "has-property" [val control -input] [val property] {
+	try {
+		$control | get-property $property -raw
+		bool true // return true
+	} -catch {
+		bool false // return false
+	}
+}
+
+proc waitForTaskToComplete {
+	loop {
+		if [get-view "Execution View" | get-label ".*/1"
+			| get-property caption -raw | not-eq "1/1"] {
+			wait 500
+			recur
+		}
+	}
+}
+
+get-view Applications | get-tree | get-items | foreach -do {
+    if -condition [ get-property caption -raw  | eq "mockupsQ7"] -else {
+       try -command {
+           trace [get-property caption -raw]
+           click
+           get-menu -path Stop | click
+       } -catch {}
+    }
+ }
+
+// invoke-AUT selfQ7Mockups -args "-nosplash" -vmargs "-Xmx512m"
+invoke-AUT mockupsQ7 -inject [site-injection [substitute-variables "${system_property:mockup_repository}"] ] -args "-nosplash" -vmargs "-Xmx512m"
+
+loop [val count 0] {
+	if [$count | lt 10] {
+		if [get-view Applications | get-tree | get-item mockupsQ7 | has-property "image.decorations[0].path"] {
+			try {
+				get-aut mockupsQ7 | eval {
+					clean-self-AUT
+				}
+			} -catch {
+				wait 5000
+				recur [$count | plus 1]
+			}
+		} -else {
+			wait 5000
+			recur [$count | plus 1]
+		}
+		try -command {
+			get-aut mockupsQ7 | eval {
+				get-menu -path "Window/Perspective/Open Perspective/Other..." | click
+				with [get-window "Open Perspective"] {
+					get-table | select "Q7 Quality"
+					get-button Open | click
+				}
+				get-menu -path "Window/Perspective/Reset Perspective..." | click
+				get-window "Reset Perspective" | get-button "Reset Perspective" | click
+			}
+		} -catch {
+			get-menu "Window/Show View/Other..." | click
+			with [get-window "Show View"] {
+				get-tree | select "General/Console" | double-click
+				trace [get-view Console | get-text-viewer | get-property -raw true -name text]
+			}
+			assert-true [bool false] "Failed to open mockup perspective"
+		}
+	} -else {
+		assert-true [bool false] "mockupsQ7 is not available"
+	}
+}
+------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998--

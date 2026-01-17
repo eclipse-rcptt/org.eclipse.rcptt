@@ -54,11 +54,6 @@ public class GroupExecutable extends Executable {
 		return kids;
 	}
 
-	@Override
-	public IStatus execute() throws InterruptedException {
-		return Status.OK_STATUS;
-	}
-
 	public String getName() {
 		if (name != null) {
 			return name;

@@ -20,9 +20,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -63,6 +64,7 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.core.workspace.WorkspaceFinder;
 import org.eclipse.rcptt.ecl.debug.core.DebuggerTransport;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.internal.launching.RetryExecutable.ThrowingFunction;
 import org.eclipse.rcptt.internal.launching.ecl.EclContextExecutable;
 import org.eclipse.rcptt.internal.launching.ecl.EclDebugContextExecutable;
 import org.eclipse.rcptt.internal.launching.ecl.EclDebugTestExecutable;
@@ -587,32 +589,34 @@ public class Q7LaunchManager {
 		}
 
 		private List<Executable> makeExecutionPlans(ITestCase test, IContext[] contexts,
-				IVerification[] verifications, List<List<String>> supportedVariants) {
-			if (contexts == null)
-				contexts = new IContext[0];
-			if (verifications == null)
-				verifications = new IVerification[0];
+				IVerification[] verifications, List<List<String>> supportedVariants) throws CoreException {
+			Objects.requireNonNull(verifications);
+			Objects.requireNonNull(contexts);
 			List<Executable> result = new ArrayList<Executable>();
 			for (ContextVariant variant : getContextVariants(Arrays.asList(contexts))) {
-				List<Executable> plan = new ArrayList<Executable>();
 				if (supportedVariants != null && !supportedVariants.contains(variant.name)) {
 					continue; // Skip variant if it is not required.
 				}
-				EclScenarioExecutable parent = debugger == null ? new EclScenarioExecutable(launch, test)
-						: new EclDebugTestExecutable(launch, test, debugger);
-				parent.setVariantName(Lists.newArrayList(variant.name));
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_START,
-						ExecutionPhase.START);
-				try {
-					addContextExecutables(plan, Lists.newArrayList(contexts), variant);
-				} catch (ModelException e) {
-					Q7LaunchingPlugin.log("Failed to populate contexts for executable: " + parent.getName(), e);
-				}
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_RUN, ExecutionPhase.RUN);
-				plan.add(parent);
-				addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_FINISH,
-						ExecutionPhase.FINISH);
-				result.add(plan.size() > 1 ? new GroupExecutable(parent, plan) : parent);
+				ThrowingFunction<String, Executable> attemptSupplier = (name) -> {
+					List<Executable> plan = new ArrayList<Executable>();
+					EclScenarioExecutable parent = debugger == null ? new EclScenarioExecutable(launch, test)
+							: new EclDebugTestExecutable(launch, test, debugger);
+					parent.setVariantName(Lists.newArrayList(variant.name));
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_START,
+							ExecutionPhase.START);
+					try {
+						addContextExecutables(plan, Lists.newArrayList(contexts), variant);
+					} catch (ModelException e) {
+						Q7LaunchingPlugin.log("Failed to populate contexts for executable: " + parent.getName(), e);
+					}
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_RUN, ExecutionPhase.RUN);
+					plan.add(parent);
+					addVerificationExecutables(plan, parent, verifications, VerificationType.PHASE_FINISH,
+							ExecutionPhase.FINISH);
+					Executable attempt = plan.size() > 1 ? new GroupExecutable(parent, plan) : parent;
+					return new PrepareExecutionWrapper(launch, attempt);
+				};
+				result.add(RetryExecutable.wrap(attemptSupplier));
 			}
 			return result;
 		}
@@ -677,11 +681,13 @@ public class Q7LaunchManager {
 				}
 
 			}
+			
 			for (int i = 0; i < executables.size(); i++) {
-				if (!(executables.get(i) instanceof TestSuiteExecutable)) {
-					executables.set(i, new PrepareExecutionWrapper(launch,
-							executables.get(i)));
+				Executable original = executables.get(i);
+				if (original instanceof TestSuiteExecutable || original instanceof RetryExecutable || original instanceof PrepareExecutionWrapper) {
+					continue;
 				}
+				executables.set(i, new PrepareExecutionWrapper(launch, original));
 			}
 			return executables.toArray(new Executable[executables.size()]);
 		}
