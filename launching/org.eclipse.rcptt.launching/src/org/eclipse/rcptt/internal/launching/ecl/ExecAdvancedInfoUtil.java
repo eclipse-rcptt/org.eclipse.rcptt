@@ -24,7 +24,7 @@ public class ExecAdvancedInfoUtil {
 	private static AdvancedInformation getAdvancedInfo(AutLaunch launch) throws Exception {
 		AdvancedInformation info = null;
 		final GetAdvancedInfo advInfoCmd = TeslaFactory.eINSTANCE.createGetAdvancedInfo();
-		final Object obj = launch.execute(advInfoCmd);
+		final Object obj = launch.execute(advInfoCmd, 11000);
 		if (obj instanceof AdvancedInformation) {
 			info = (AdvancedInformation) obj;
 		}
@@ -53,7 +53,15 @@ public class ExecAdvancedInfoUtil {
 	}
 
 	public static IStatus askForAdvancedInfo(AutLaunch launch, IStatus status) {
-		final ExecutionStatus resultStatus = new ExecutionStatus(status);
+		final ExecutionStatus resultStatus;
+		if (status instanceof ExecutionStatus) {
+			resultStatus = (ExecutionStatus) status;
+			if (resultStatus.getInfo() != null) {
+				return status;
+			}
+		} else {
+			resultStatus = new ExecutionStatus(status);
+		}
 		return setAdvancedInfo(launch, resultStatus);
 	}
 
