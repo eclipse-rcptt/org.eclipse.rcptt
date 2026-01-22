@@ -2,19 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Workbench Context Runtime
 Bundle-SymbolicName: org.eclipse.rcptt.ctx.workbench.impl;singleton:=true
-Bundle-Version: 2.7.3.qualifier
+Bundle-Version: 2.7.4.qualifier
 Bundle-Activator: org.eclipse.rcptt.ctx.workbench.impl.Activator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.rcptt.core;bundle-version="[2.7.3,3.0.0)";visibility:=reexport,
- org.eclipse.rcptt.tesla.swt;bundle-version="[2.7.3,3.0.0)",
- org.eclipse.rcptt.ctx.workbench;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.core;bundle-version="[2.7.4,3.0.0)";visibility:=reexport,
+ org.eclipse.rcptt.tesla.swt;bundle-version="[2.7.4,3.0.0)",
+ org.eclipse.rcptt.ctx.workbench;bundle-version="[2.7.4,3.0.0)",
  org.eclipse.ui,
- org.eclipse.rcptt.runtime.ui;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.runtime.ui;bundle-version="[2.7.4,3.0.0)",
  org.eclipse.ui.ide;x-installation:=greedy;resolution:=optional,
  org.eclipse.core.resources;x-installation:=greedy;resolution:=optional,
- org.eclipse.rcptt.tesla.core;bundle-version="[2.7.3,3.0.0)"
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.7.4,3.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.rcptt.ctx.workbench.impl

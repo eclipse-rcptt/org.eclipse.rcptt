@@ -19,14 +19,14 @@
         <dependency>
             <groupId>org.eclipse.rcptt.tests</groupId>
         	<artifactId>q7contexts.shared</artifactId>
-        	<version>2.7.3-SNAPSHOT</version>
+        	<version>2.7.4-SNAPSHOT</version>
             <type>rcpttTest</type>
         </dependency>
     </dependencies>
 	<parent>
 		<groupId>org.eclipse.rcptt.tests</groupId>
 		<artifactId>tests</artifactId>
-		<version>2.7.3-SNAPSHOT</version>
+		<version>2.7.4-SNAPSHOT</version>
 	</parent>
 	
 </project>

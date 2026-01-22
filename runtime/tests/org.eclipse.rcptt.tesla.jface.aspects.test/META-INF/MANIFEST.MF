@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tesla JFace Tests
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.jface.aspects.test
-Bundle-Version: 2.7.3.qualifier
+Bundle-Version: 2.7.4.qualifier
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit;bundle-version="4.8.2",
- org.eclipse.rcptt.tesla.jface.aspects;bundle-version="[2.7.3,3.0.0)",
+ org.eclipse.rcptt.tesla.jface.aspects;bundle-version="[2.7.4,3.0.0)",
  org.eclipse.jface,
  org.eclipse.core.runtime,
  org.eclipse.ui.workbench,

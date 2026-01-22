@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.eclipse.rcptt.its</groupId>
     <artifactId>its</artifactId>
-    <version>2.7.3-SNAPSHOT</version>
+    <version>2.7.4-SNAPSHOT</version>
   </parent>
   <artifactId>testSuite</artifactId>
   <description>Test suites should be found in any project, independently of project order</description>
