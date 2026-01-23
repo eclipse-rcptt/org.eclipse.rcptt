@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.rcptt.reporting.html.tests;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.reporting.html.FullSingleTestHtmlRenderer;
@@ -25,6 +28,10 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Screenshot;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Snaphot;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
+import org.eclipse.rcptt.verifications.status.EVerificationStatus;
+import org.eclipse.rcptt.verifications.status.StatusFactory;
+import org.eclipse.rcptt.verifications.status.VerificationStatusData;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -140,6 +147,36 @@ public class FullSingleTestHtmlRendererTest {
 		Assert.assertFalse("Header without row", stripped.contains("<table><th>"));
 		Assert.assertFalse("Cell without row", stripped.contains("<table><td>"));
 	}
+	
+	@Test
+	public void escapeVerificationsOnce() {
+		EVerificationStatus verificationStatus = StatusFactory.eINSTANCE.createEVerificationStatus();
+		VerificationStatusData data = StatusFactory.eINSTANCE.createVerificationStatusData();
+		verificationStatus.setSeverity(IStatus.ERROR);
+		verificationStatus.getData().add(data);
+		verificationStatus.setMessage("Math error");
+		data.setMessage("a > 2");
+		data = EcoreUtil.copy(data);
+		data.setMessage("b < 4");
+		verificationStatus.getData().add(EcoreUtil.copy(data));
+
+		Report report = createReport("2", IStatus.ERROR);
+		ReportHelper.getInfo(report.getRoot()).getResult().getChildren().add(verificationStatus);
+
+		String result = generate(report);
+		
+		assertThat(result, Matchers.stringContainsInOrder(
+			"Math error",
+			"<pre>",
+			"a &gt; 2",
+			"\n",
+			"b &lt; 4",
+			"</pre>",
+			"Details"
+		));
+	}
+
+	
 
 	private String generate(Report report) {
 		StringWriter stringWriter = new StringWriter();
