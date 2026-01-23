@@ -259,7 +259,7 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 
 	private static String EXPLICIT_Q7_KEY = "explicitRunnerLocation";
 
-	protected final File getQ7Dir(String platform) {
+	protected final File getQ7Dir() {
 		if (project.getProperties().containsKey(EXPLICIT_Q7_KEY)) {
 			return new File(project.getProperties().getProperty(EXPLICIT_Q7_KEY));
 		}
@@ -273,8 +273,8 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 		project.getProperties().setProperty(EXPLICIT_Q7_KEY, q7.getAbsolutePath());
 	}
 
-	protected File getResolvedQ7Dir(String platform) throws MojoFailureException {
-		return getResolvedRcpLocation(getQ7Dir(platform));
+	protected File getResolvedQ7Dir() throws MojoFailureException {
+		return getResolvedRcpLocation(getQ7Dir());
 	}
 
 	private File autWorkspacePrefix;
@@ -441,7 +441,7 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 	 * @throws MojoFailureException
 	 */
 	protected File getEquinoxJar() throws MojoFailureException {
-		File q7dir = getResolvedQ7Dir(getQ7Coords().getPlatform());
+		File q7dir = getResolvedQ7Dir();
 		File plugins = new File(q7dir, "plugins");
 		if (!plugins.exists() || !plugins.isDirectory()) {
 			throw new MojoFailureException("Invalid RCPTT location " + q7dir);
