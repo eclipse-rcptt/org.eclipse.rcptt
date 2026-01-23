@@ -97,7 +97,6 @@ import org.eclipse.rcptt.internal.core.model.Q7InternalVerification;
 import org.eclipse.rcptt.internal.launching.ExecutionStatus;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ecl.EclContextExecutable;
-import org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchListener;
 import org.eclipse.rcptt.launching.AutLaunchState;
@@ -964,11 +963,13 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 				return processResult;
 			});
 		} catch (CoreException e) {
-			if (e.getStatus().matches(IStatus.CANCEL)) {
-				return e.getStatus();
+			IStatus s = e.getStatus();
+			if (s.matches(IStatus.CANCEL)) {
+				return s;
 			}
-			return new MultiStatus(PLUGIN_ID, 0, new IStatus[] { ((CoreException) e).getStatus() },
-					"Failed to execute " + command, e);
+			ExecutionStatus result = askForAdvancedInfo(this, s);
+			result.add(Status.info("Command: " + command));
+			return result;
 		}
 	}
 
