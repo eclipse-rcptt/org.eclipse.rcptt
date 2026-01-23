@@ -51,11 +51,9 @@ import org.eclipse.rcptt.core.model.search.Q7SearchCore;
 import org.eclipse.rcptt.core.nature.RcpttNature;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
-import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -187,7 +185,7 @@ public class Q7NamedElementTest {
 		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
 			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
 		}
-		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		RcpttCore.create(TESTCASE_FILE);
 		Path fsPath = Path.of(TESTCASE_FILE.getRawLocation().toOSString());
 		PROJECT.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
 		PROJECT.close(null);
@@ -215,7 +213,6 @@ public class Q7NamedElementTest {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test(timeout=100_000)
 	public void existsIsNoiseResistant() throws CoreException, IOException {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
