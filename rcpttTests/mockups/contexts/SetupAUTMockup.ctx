@@ -5,8 +5,8 @@ Element-Name: SetupAUTMockup
 Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
-Runtime-Version: 2.8.0.qualifier
-Save-Time: 1/16/26, 3:18 PM
+Runtime-Version: 2.8.0.202601231339
+Save-Time: 1/23/26, 11:23 PM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -67,7 +67,9 @@ loop [val count 0] {
 					get-button Open | click
 				}
 				get-menu -path "Window/Perspective/Reset Perspective..." | click
-				get-window "Reset Perspective" | get-button "Reset Perspective" | click
+				try -times 10 -delay 5000 -command {
+					get-window "Reset Perspective" | get-button "Reset Perspective" | click
+				}
 			}
 		} -catch {
 			get-menu "Window/Show View/Other..." | click
