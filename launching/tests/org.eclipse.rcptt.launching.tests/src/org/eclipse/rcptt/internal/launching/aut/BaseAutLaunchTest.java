@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.core.ContextType;
 import org.eclipse.rcptt.core.ContextTypeManager;
 import org.eclipse.rcptt.core.ecl.context.ContextFactory;
@@ -45,6 +46,7 @@ import org.eclipse.rcptt.ecl.core.Global;
 import org.eclipse.rcptt.ecl.core.RestoreState;
 import org.eclipse.rcptt.ecl.core.SaveState;
 import org.eclipse.rcptt.ecl.core.Script;
+import org.eclipse.rcptt.ecl.core.SessionState;
 import org.eclipse.rcptt.ecl.gen.ast.AstExec;
 import org.eclipse.rcptt.ecl.internal.core.Pipe;
 import org.eclipse.rcptt.ecl.runtime.IPipe;
@@ -53,9 +55,12 @@ import org.eclipse.rcptt.ecl.runtime.ISession;
 import org.eclipse.rcptt.internal.launching.aut.BaseAutLaunch.Context;
 import org.eclipse.rcptt.launching.IQ7Launch;
 import org.eclipse.rcptt.tesla.core.TeslaFeatures;
+import org.eclipse.rcptt.tesla.core.info.InfoFactory;
+import org.eclipse.rcptt.tesla.ecl.model.GetAdvancedInfo;
 import org.eclipse.rcptt.tesla.ecl.model.SetupPlayer;
 import org.eclipse.rcptt.tesla.ecl.model.ShoutdownPlayer;
 import org.eclipse.rcptt.tesla.ecl.model.ShutdownAut;
+import org.eclipse.rcptt.tesla.ecl.model.TeslaFactory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -81,11 +86,6 @@ public class BaseAutLaunchTest {
 	private final IProcess process = Mockito.mock(IProcess.class);
 	{
 		try {
-			Answer returnRV = invocation -> {
-				IPipe output = (IPipe) invocation.getArguments()[2];
-				output.write(RV);
-				return process;
-			};
 			when(launch.getAttribute(IQ7Launch.ATTR_HOST)).thenReturn("127.0.0.1");
 			when(launch.getAttribute(IQ7Launch.ATTR_ECL_PORT)).thenReturn("9922");
 			when(session.createPipe()).thenAnswer(invocation -> {
@@ -95,22 +95,31 @@ public class BaseAutLaunchTest {
 			when(process.waitFor(anyLong(), any())).thenReturn(Status.OK_STATUS);
 			when(session.execute(isA(RestoreState.class))).thenReturn(process);
 			when(session.execute(isA(ShutdownAut.class), isNull(IPipe.class), isA(IPipe.class))).thenReturn(process);
-			when(session.execute(isA(ShoutdownPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(returnRV);
-			when(session.execute(isA(SaveState.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(invocation -> {
-				IPipe output = (IPipe) invocation.getArguments()[2];
-				if (output == null)
-					return null;
-				output.write(CoreFactory.eINSTANCE.createSessionState());
-				output.write(Status.OK_STATUS);
-				return process;
-			});
+			when(session.execute(isA(ShoutdownPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(RV));
+			when(session.execute(isA(SaveState.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(CoreFactory.eINSTANCE.createSessionState()));
 			when(session.execute(isA(AstExec.class))).thenReturn(process);
-			Mockito.doAnswer(returnRV).when(session).execute(isA(Global.class), ArgumentMatchers.any(), isA(IPipe.class));
-			when(session.execute(isA(SetupPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(returnRV);
+			Mockito.doAnswer(outputAnswer(RV)).when(session).execute(isA(Global.class), ArgumentMatchers.any(), isA(IPipe.class));
+			when(session.execute(isA(SetupPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(RV));
+			when(session.execute(isA(GetAdvancedInfo.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(InfoFactory.eINSTANCE.createAdvancedInformation() ));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
+
+
+
+	private Answer<?> outputAnswer(Object rv2) {
+		return (Answer<?>)invocation -> {
+			IPipe pipe = (IPipe) invocation.getArguments()[2];
+			if (pipe == null)
+				return null;
+			pipe.write(rv2);
+			pipe.write(Status.OK_STATUS);
+			return process;
+		};
+	}
+	
+	
 	
 	@Before 
 	public void before() {

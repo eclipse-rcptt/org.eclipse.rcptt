@@ -13,6 +13,7 @@ package org.eclipse.rcptt.internal.launching.aut;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin.PLUGIN_ID;
+import static org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil.askForAdvancedInfo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,7 +97,6 @@ import org.eclipse.rcptt.internal.core.model.Q7InternalVerification;
 import org.eclipse.rcptt.internal.launching.ExecutionStatus;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ecl.EclContextExecutable;
-import org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil;
 import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchListener;
 import org.eclipse.rcptt.launching.AutLaunchState;
@@ -310,14 +310,14 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 				context.isBuiltin() ? IProcess.INTERNAL_AUT_FAILURE : 0,
 				new IStatus[] {result},
 				"Failed to apply context " + context.getName(), null);
-		final IStatus statusWithAdvancedInfo = ExecAdvancedInfoUtil.askForAdvancedInfo(this, status);
+		final IStatus statusWithAdvancedInfo = askForAdvancedInfo(this, status);
 		return statusWithAdvancedInfo;
 	}
 
 	private IStatus createTimeoutStatus(final long timeout) {
 		final IStatus status = new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IProcess.TIMEOUT_CODE,
 				"Execution has timed out after " + (timeout / 1000.) + " seconds", new TimeoutException());
-		final IStatus statusWithAdvancedInfo = ExecAdvancedInfoUtil.askForAdvancedInfo(this, status);
+		final IStatus statusWithAdvancedInfo = askForAdvancedInfo(this, status);
 		return statusWithAdvancedInfo instanceof ExecutionStatus ? statusWithAdvancedInfo : status;
 	}
 
@@ -626,7 +626,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		ec.setData(context);
 		try {
 			final IStatus result = internalExecute(ec, TeslaLimits.getContextRunnableTimeout()+10000, monitor, null);
-			if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			if (result.matches(IStatus.ERROR)) {
 				IStatus status = createInternalAutFailStatus(contextElement,result);
 				throw new CoreException(status);
 			}
@@ -650,10 +650,10 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 		try {
 			final IStatus result = internalExecute(command, TeslaLimits.getContextRunnableTimeout(), monitor, null);
 			if (result.matches(IStatus.ERROR)) {
-				throw new CoreException(ExecAdvancedInfoUtil.askForAdvancedInfo(this, result));
+				throw new CoreException(askForAdvancedInfo(this, result));
 			}
 		} catch (InterruptedException e) {
-			throw new CoreException(ExecAdvancedInfoUtil.askForAdvancedInfo(this,
+			throw new CoreException(askForAdvancedInfo(this,
 					"Failed to apply verification: " + verificationElement.getElementName()));
 		}
 	}
@@ -775,7 +775,7 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			while (it.hasNext()) {
 				status = internalExecute(it.next(), stop - System.currentTimeMillis(), sm.newChild(1), properties);
 				if (!status.isOK()) {
-					throw new CoreException(status);
+					throw new CoreException(askForAdvancedInfo(this, status));
 				}
 				if (!it.hasNext()) {
 					break;
@@ -953,23 +953,23 @@ public class BaseAutLaunch implements AutLaunch, IBaseAutLaunchRetarget {
 			long stop = System.currentTimeMillis() + timeout;
 			TimeoutInterruption interruption = TimeoutInterruption.forTimeout(monitor, timeout, this);
 			return computeInNewSession(interruption, session -> {
-				ExecutionStatus result;
 				restoreState(session, properties);
 				Command commandCopy = command;
 				IProcess process = session.execute(commandCopy);
 				IStatus processResult = process.waitFor(stop - System.currentTimeMillis(), monitor);
-				result = new ExecutionStatus(processResult);
 				if (!interruption.isDone()) {
 					dumpState(session);
 				}
-				return result;
+				return processResult;
 			});
 		} catch (CoreException e) {
-			if (e.getStatus().matches(IStatus.CANCEL)) {
-				return e.getStatus();
+			IStatus s = e.getStatus();
+			if (s.matches(IStatus.CANCEL)) {
+				return s;
 			}
-			return new MultiStatus(PLUGIN_ID, 0, new IStatus[] { e.getStatus() },
-					"Failed to execute " + command, e);
+			ExecutionStatus result = askForAdvancedInfo(this, s);
+			result.add(Status.info("Command: " + command));
+			return result;
 		}
 	}
 

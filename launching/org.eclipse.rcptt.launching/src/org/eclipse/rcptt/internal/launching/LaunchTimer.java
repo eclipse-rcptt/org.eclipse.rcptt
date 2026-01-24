@@ -14,8 +14,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.rcptt.ecl.internal.core.CorePlugin;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
+import org.eclipse.rcptt.internal.launching.ecl.ExecAdvancedInfoUtil;
 import org.eclipse.rcptt.launching.IExecutable;
 import org.eclipse.rcptt.launching.IExecutionSession;
 import org.eclipse.rcptt.launching.ILaunchListener;
@@ -35,7 +38,8 @@ public class LaunchTimer extends Thread implements ILaunchListener {
 			if (executable.getStatus() == IExecutable.State.RUNNING
 					&& !executable.isDebug()) {
 				timer = new Timer(true);
-				int timeout = Q7Launcher.getLaunchTimeout();
+				// Some timeout handling is done in 
+				int timeout = Q7Launcher.getLaunchTimeout() + 30;
 				timer.schedule(new StopTask((Executable) executable, timeout),
 						timeout * 1000);
 			}
@@ -64,10 +68,14 @@ public class LaunchTimer extends Thread implements ILaunchListener {
 
 		@Override
 		public void run() {
-			executable.cancel(new Status(IStatus.ERROR, Q7LaunchingPlugin.PLUGIN_ID, IProcess.TIMEOUT_CODE, "Execution timed out after "
-					+ timeout + " seconds", null));
+			IStatus status = new Status(IStatus.ERROR,
+				getClass(), 
+				IProcess.TIMEOUT_CODE,
+				executable.getName() + " has timed out after " + + timeout + " seconds",
+				null);
+			status = ExecAdvancedInfoUtil.askForAdvancedInfo(executable.getAut(), status);
+			executable.cancel(status);
 		}
-
 	}
 
 }
