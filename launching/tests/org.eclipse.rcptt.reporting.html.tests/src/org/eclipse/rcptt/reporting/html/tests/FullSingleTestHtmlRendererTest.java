@@ -175,6 +175,21 @@ public class FullSingleTestHtmlRendererTest {
 			"Details"
 		));
 	}
+	
+	@Test
+	public void escapeExecutionStatus() {
+		Report report = createReport("2", IStatus.ERROR);
+		ReportHelper.getInfo(report.getRoot()).getResult().setMessage("expected:<wait 200\\n> but was:<wait 200>");
+
+		String result = generate(report);
+		
+		assertThat(result, Matchers.stringContainsInOrder(
+				"Failure Reason",
+				"expected:&lt;wait 200\\n&gt; but was:&lt;wait 200&gt;",
+				"Details",  
+				"expected:&lt;wait 200\\n&gt; but was:&lt;wait 200&gt;"
+		));
+	}
 
 	
 
