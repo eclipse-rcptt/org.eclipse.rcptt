@@ -1,0 +1,139 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.debug
+Debug-LaunchShortcutExceptions: selfQ7
+Debug-NoBreakpoints: true
+Debug-NoLaunchShortcuts: true
+Debug-NoLaunches: true
+Element-Name: LaunchContextFromTargetPlatform
+Element-Type: context
+Element-Version: 2.0
+Id: _NyEh4Ks5EeKWk6cOzG_MPA
+Runtime-Version: 2.8.0.202512070802
+Save-Time: 1/5/26, 11:16 AM
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_debug.launchtypes-7159add4-14d7-36f5-abc2-a36dec1fc18e
+Content-Type: q7/binary
+Entry-Name: debug.launchtypes
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAADtVUuL3EYQvvtXNAqE
+GLyafj8mXpt+gsGBhKzBV62mPSPQK5Jmd/bfp0ZiNz6EnJJL2DqUurqrvnq06O/9x0vXooc8zc3Q3xak
+xAXKfT0cmv54W3y5Sze6+PjhzfthOpa5bptxzuVUj8tS1sulPOT783H/uTr39enuaczo0jX7FzB6BQP4
+ft7D/m1xWpZxv9s9Pj6WQ3csAXL39ZdPzy7/kOEl9Pn8Grr67MBnt/oUqK+6fFvYcWybulqgAvSlP+QJ
+3eV5QT/9pt4WqDncFvXQlZdhyofyD1W2a+nQa5kvS4EOea6nZlzW8v0wPk3N8QTB9VtEMTbvQBOOvl6j
+0e/Dt+WxmjL61Neo6g9oWE7QefnjDxf7s21btMbOaMpznh4gHbo7NTMap+E4Vd0aAQGoqqGgseqfoAjU
+VUuemqqdV5AreFcdwOehatrqvs3ovHZ0jQPHbkbDt9WI21zQr+d7aB59burcg/kA17kiPZ6a+vSSqskz
+REEth2Zepub+fO333VoRbP6VrFrW4O+u7fv5t/lYtbs8tjcPBJenpWtX71X5od+Ah2nerzsI5G/mdoOa
+vlmgY1RPebs0KGM3TC/7h6E+d7lf1sMV6uZfFvgtuuoIv442AvPIFQ7YEost3iRwwzXngm4mwS9fjdm2
+ppoGnMRmgQYcLyBkO02raE0s8ZISQYwP3njrnVfeuOiMpy4555lT7rqicBQcs9FFqyxxWlNlrdRWM2uh
+mGiTTFKaqLj0FgsLkFx4wYyQTjLjlZDREhGEMFIxLWOKItIgQgwu0IiDDzSEYAIBWwUcqI/eJ6YIVyEI
+zXhwwjLwh/WmpZcsURySkEx5K2Aq2jBFoQdumdWJecYkpYHKEKUWEbQRKSmjdExcC01CkEqKbRr4VV7l
+VV7lfy0Sax0Cd5tFkwIW4VGw9B8KsI+1gumktqxaAn9xTgRX2ngZdNIOR02BpjyQhlE+EgmvvbjSFQfm
+EJwprNcamY/OW8qI5QmeehZ94vC+B02T1EpjSMKdwJ4my4BmkiYa0gWqTeIA7xmRxBFNSIzGC+mdBmxO
+BSEqcYYDM0xKnIJTjERgOgmEBwW55I0EclKREiYicywEkryVJHohAgXiE8nYGDCxwWEjgX6DSERKzYEL
+eTARfBUN0Qoqrx1gRSVPFAiO6kCiSUr4yGJkzzcFMxLA/dxGaBBrWuw+vPkTUEsHCCkM/iWCAwAAHAsA
+AFBLAQIUABQACAgIAAAAIQApDP4lggMAABwLAAAIAAkAAAAAAAAAAAAAAAAAAAAuY29udGVudFVUBQAB
+AAAAAFBLBQYAAAAAAQABAD8AAADBAwAAAAA=
+------=_debug.launchtypes-7159add4-14d7-36f5-abc2-a36dec1fc18e--
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae
+Content-Type: text/breakpoints
+Entry-Name: debug.breakpoints
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"/>
+
+------=_debug.breakpoints-5e4f72bb-803b-3bad-9f69-7f32fb7c3fae--
+------=_TargetAUT.debug.launchconfiguration-19da4a7e-6194-326f-8912-7bc611c72ec0
+Content-Type: text/launchconfiguration
+Entry-Name: TargetAUT.debug.launchconfiguration
+
+<?xml version="1.0" encoding="UTF-8"?>
+<org.eclipse.rcptt.ctx.debug:LaunchConfiguration xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.eclipse.rcptt.ctx.debug="http://eclipse.org/rcptt/ctx/debug" xmlns:org.eclipse.rcptt.ecl.core="http://www.eclipse.org/ecl/core.ecore" name="TargetAUT" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------" typeId="com.xored.q7.launching.ext">
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="append.args" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean" value="true"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="application" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.ui.ide.workbench"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="askclear" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean" value="true"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="aut-location" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${target_home}"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="aut-target-platform" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="AUT TargetAUT (Target Platform)"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="clearws" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="clearwslog" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="com.xored.launching.common.attrArch" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${target.arch}"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="location" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${workspace_loc}/../aut-TargetAUT"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.debug.core.capture_output" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean" value="true"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.debug.ui.ATTR_APPEND_TO_FILE" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean" value="true"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.debug.ui.ATTR_CAPTURE_IN_FILE" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${workspace_loc}\.metadata\.plugins\org.eclipse.pde.core\selfQ7\console.log"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.debug.ui.ATTR_CONSOLE_OUTPUT_ON" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.JRE_CONTAINER" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre7"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="-os ${target.os} -arch ${target.arch} -nl ${target.nl} -consoleLog -licenseUrl http://licensing.xored.com/pool/04fb850c-d95d-eec0-76f9-12313b043cf6 -data ${workspace_loc}/.metadata/.plugins/com.xored.q7.core/self_aut_1366627930667"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.VM_ARGUMENTS" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="-Xmx512m"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="org.eclipse.jdt.launching.WORKING_DIRECTORY" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="${target_home}"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="pde.version" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="3.3"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="product" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclString" value="org.eclipse.rcptt.platform.product"/>
+  </attributes>
+  <attributes xsi:type="org.eclipse.rcptt.ctx.debug:PrimitiveValue" name="useProduct" description="Copyright (c) 2009, 2019 Xored Software Inc and others.&#xA;All rights reserved. This program and the accompanying materials&#xA;are made available under the terms of the Eclipse Public License v2.0&#xA;which accompanies this distribution, and is available at&#xA;https://www.eclipse.org/legal/epl-v20.html&#xA;&#xA;Contributors:&#xA;    Xored Software Inc - initial creation and/or initial documentation&#xA;--------------------------------------------------------------------------------">
+    <value xsi:type="org.eclipse.rcptt.ecl.core:EclBoolean" value="true"/>
+  </attributes>
+</org.eclipse.rcptt.ctx.debug:LaunchConfiguration>
+
+------=_TargetAUT.debug.launchconfiguration-19da4a7e-6194-326f-8912-7bc611c72ec0--
+------=_debug.launches-be8ac185-ac72-3f40-ae87-94751ee91eea
+Content-Type: text/launch
+Entry-Name: debug.launches
+
+<?xml version="1.0" encoding="UTF-8"?>
+<org.eclipse.rcptt.ctx.debug:Launch xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:org.eclipse.rcptt.ctx.debug="http://eclipse.org/rcptt/ctx/debug" mode="run" configurationName="TargetAUT"/>
+
+------=_debug.launches-be8ac185-ac72-3f40-ae87-94751ee91eea--

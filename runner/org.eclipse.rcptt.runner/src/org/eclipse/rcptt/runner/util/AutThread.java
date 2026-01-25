@@ -53,6 +53,7 @@ import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.PrintStreamMonitor;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.eclipse.rcptt.util.StringUtils;
 
 import com.google.common.base.Strings;
@@ -227,13 +228,11 @@ public class AutThread extends Thread {
 				if (!haveAUT) {
 					// Let's search for configuration and update JVM if
 					// possible.
-					haveAUT = updateJVM(config, tpc.getTargetPlatform());
+					haveAUT = updateJVM(config);
 
 				}
 				if (!haveAUT) {
-					String errorMessage = "FAIL: AUT requires "
-							+ architecture
-							+ " Java VM. It is incompatible with " + tpc.getTargetPlatform().getIncompatibleExecutionEnvironments()
+					String errorMessage = "FAIL: AUT VM requirements: \n" + tpc.getCompatibility().explainJvmRequirements()
 							+ ". Such VM cannot be found.\nPlease specify -autVM {javaPath} command line argument to use different JVM.\nCurrent used JVM is: "
 							+ install.getInstallLocation().toString();
 					Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
@@ -259,24 +258,18 @@ public class AutThread extends Thread {
 		}
 	}
 
-
-	
-	private boolean updateJVM(ILaunchConfigurationWorkingCopy configuration, ITargetPlatformHelper target) {
+	private boolean updateJVM(ILaunchConfigurationWorkingCopy configuration) {
 		try {
-			StringBuilder error = new StringBuilder();
-			OSArchitecture autArch = target.detectArchitecture(error);
-			if (autArch == OSArchitecture.Unknown) {
-				throw new CoreException(Status.error("Failed to detect AUT architecture: " + error));
-			}
-			final VmInstallMetaData jvmInstall = VmInstallMetaData.all().filter(i -> i.arch.equals(autArch)).findFirst().orElse(null);
+			final VmInstallMetaData jvmInstall = tpc.getCompatibility().findVM().findFirst().orElse(null);
 			if (jvmInstall == null) {
 				return false;
 			}
-			return Q7ExternalLaunchDelegate.updateJVM(configuration, autArch, target);
+			Q7ExternalLaunchDelegate.updateJVM(configuration, jvmInstall.install);
+			return true;
 		} catch (Throwable e) {
 			RcpttPlugin.log(e);
+			return false;
 		}
-		return false;
 	}
 
 	void launchAut() {
@@ -353,6 +346,9 @@ public class AutThread extends Thread {
 			}
 
 			String errorMessage = String.format("AUT-%s: Launch failed. Reason: %s", autId, e.getMessage());
+			if (e instanceof CoreException c) {
+				errorMessage += "\n" + StatusUtil.format(c.getStatus());
+			}
 			System.out.println(errorMessage);
 			System.out.println(
 					String.format("AUT-%s: For more information check AUT output at '%s'", autId, outFilePath));

@@ -1,6 +1,0 @@
-click("1362377675892.png")
-doubleClick("Debug.png")
-wait("1362378062577.png")
-click("GJava.png")
-wait("1362378119740.png")
-click("Debug-1.png")
