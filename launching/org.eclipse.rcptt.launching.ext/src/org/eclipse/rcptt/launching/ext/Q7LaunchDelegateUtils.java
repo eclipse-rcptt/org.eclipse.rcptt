@@ -60,7 +60,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -313,15 +312,13 @@ public class Q7LaunchDelegateUtils {
 	}
 
 	public static List<String> getVMArgs(ITargetPlatformHelper aut, Collection<String> userArgs) {
-		String iniArgs = aut.getIniVMArgs();
+		List<String> iniArgs = aut.getIniVMArgs();
 		if (iniArgs == null) {
-			iniArgs = LaunchArgumentsHelper.getInitialVMArguments().trim();
+			iniArgs =   Lists.newArrayList(DebugPlugin.parseArguments(LaunchArgumentsHelper.getInitialVMArguments().trim()));
 		}
-		final String[] parsedIniArgs = DebugPlugin.parseArguments(Strings.nullToEmpty(iniArgs));
-		final List<String> args = Lists.newArrayList(parsedIniArgs);
 		if (userArgs != null)
-			args.addAll(userArgs);
-		return UpdateVMArgs.updateAttr(args);
+			iniArgs.addAll(userArgs);
+		return UpdateVMArgs.updateAttr(iniArgs);
 	}
 
 	/** Adds a key value pair, if this key is not already present */

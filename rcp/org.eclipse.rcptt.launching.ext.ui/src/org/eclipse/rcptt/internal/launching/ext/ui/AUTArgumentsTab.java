@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.Platform;
@@ -21,6 +23,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -85,12 +88,13 @@ public class AUTArgumentsTab extends JavaArgumentsTab implements IAUTListener {
 		};
 	}
 
+	@Override
 	public void update(ITargetPlatformHelper info) {
-		String vmArgs = info.getIniVMArgs();
-		if (vmArgs != null && vmArgs.trim().length() > 0) {
-			String attr = UpdateVMArgs.updateAttr(vmArgs);
+		List<String> vmArgs = info.getIniVMArgs();
+		if (vmArgs != null && !vmArgs.isEmpty()) {
+			List<String> attr = UpdateVMArgs.updateAttr(vmArgs);
 			if (attr != null) {
-				vmArguments.setText(attr);
+				vmArguments.setText(Q7LaunchDelegateUtils.joinCommandArgs(attr));
 			}
 		}
 	}
