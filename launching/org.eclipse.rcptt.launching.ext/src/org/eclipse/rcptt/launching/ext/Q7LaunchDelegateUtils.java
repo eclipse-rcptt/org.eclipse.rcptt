@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -346,11 +347,21 @@ public class Q7LaunchDelegateUtils {
 		if (args == null || args.isEmpty()) {
 			return "";
 		}
-		return Joiner.on(' ').join(Collections2.transform(args, UpdateVMArgs.ESCAPE));
+		return args.stream().map(Q7LaunchDelegateUtils::escapeCommandArg).collect(Collectors.joining(" "));
 	}
 
-	public static String escapeCommandArg(String arg) {
-		return UpdateVMArgs.escapeCommandArg(arg);
+	public static String escapeCommandArg(String argument) {
+        if (Platform.getOS().equals(Platform.OS_WIN32)) {
+            // https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
+            if (argument.isEmpty()) {
+                return "\"\"";
+            }
+
+            return "\"" + argument.replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\\\\$", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
+
+        } else {
+            return "\"" + argument.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
+        }
 	}
 
 	public static String joinCommandArgs(String[] args) {

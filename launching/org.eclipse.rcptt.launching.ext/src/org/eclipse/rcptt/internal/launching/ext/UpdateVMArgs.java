@@ -31,17 +31,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class UpdateVMArgs {
-	public static String escapeCommandArg(String arg) {
-		return escape(arg);
-	}
-
-	public static final Function<String, String> ESCAPE = new Function<String, String>() {
-
-		@Override
-		public String apply(String input) {
-			return escapeCommandArg(input);
-		}
-	};
 	public static void updateVMArgs(
 			ILaunchConfigurationWorkingCopy configuration) {
 
@@ -70,20 +59,6 @@ public class UpdateVMArgs {
 	public static String updateAttr(String arguments) {
 		return  Q7LaunchDelegateUtils.joinCommandArgs(updateAttr(Arrays.asList(DebugPlugin.parseArguments(arguments))).stream().toList());
 	}
-	
-    private static String escape(String argument) {
-        if (Platform.getOS().equals(Platform.OS_WIN32)) {
-            // https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
-            if (argument.isEmpty()) {
-                return "\"\"";
-            }
-
-            return "\"" + argument.replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\\\\$", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-
-        } else {
-            return "\"" + argument.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-        }
-    }
 
 	private static String addWeavingHook(String extensions, IPluginModelBase hook) {
 		Preconditions.checkNotNull(hook);
