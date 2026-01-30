@@ -10,7 +10,8 @@ on:
 
 env:
   downstream_release/2.6: release/2.7
-  downstream_release/2.7: master
+  downstream_release/2.7: release/2.8
+  downstream_release/2.8: master
   downstream_waitJob_195: waitJob_2.7_195
 
 run-name: Merge ${{ github.event.workflow_run.head_branch }} downstream 
