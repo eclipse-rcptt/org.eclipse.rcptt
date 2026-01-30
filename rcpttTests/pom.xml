@@ -38,7 +38,6 @@
     <rcptt-maven-version>2.8.0-SNAPSHOT</rcptt-maven-version>
     <rcptt-maven-plugin>rcptt-maven-plugin</rcptt-maven-plugin>
     <runner-version>2.8.0-SNAPSHOT</runner-version>
-    <rcpttRepo>http://download.eclipse.org/rcptt/nightly/2.8.0/latest/repository</rcpttRepo>
     <autRepository>file://${basedir}/../modules/repository/target/repository</autRepository>
     <runtimeRepository>file:/${user.dir}/runtime/updates/org.eclipse.rcptt.updates.runtime.e4x/q7</runtimeRepository>
     <mockup_repository>https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository/</mockup_repository>
