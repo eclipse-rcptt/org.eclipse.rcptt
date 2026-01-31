@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +39,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
@@ -59,7 +61,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -67,7 +68,7 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("restriction")
 public class Q7LaunchDelegateUtils {
 	
-	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor) {
+	public static IStatus validateForLaunch(ITargetPlatformHelper target, IProgressMonitor monitor, IVMInstall vm) {
 		SubMonitor sm = SubMonitor.convert(monitor, "Validating bundles", 3);
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
@@ -81,11 +82,7 @@ public class Q7LaunchDelegateUtils {
 			if (architecture == null || architecture == OSArchitecture.Unknown) {
 				return Status.error(message.toString());
 			}
-			if (!Q7ExternalLaunchDelegate.updateJVM(wc, architecture, target)) {
-				return Status.error(String.format(
-						"No compatible JRE is configured. Architecture: %s, incompatible environments: %s",
-						architecture, target.getIncompatibleExecutionEnvironments()));
-			}
+			Q7ExternalLaunchDelegate.updateJVM(wc, vm);
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
@@ -316,15 +313,13 @@ public class Q7LaunchDelegateUtils {
 	}
 
 	public static List<String> getVMArgs(ITargetPlatformHelper aut, Collection<String> userArgs) {
-		String iniArgs = aut.getIniVMArgs();
+		List<String> iniArgs = aut.getIniVMArgs();
 		if (iniArgs == null) {
-			iniArgs = LaunchArgumentsHelper.getInitialVMArguments().trim();
+			iniArgs =   Lists.newArrayList(DebugPlugin.parseArguments(LaunchArgumentsHelper.getInitialVMArguments().trim()));
 		}
-		final String[] parsedIniArgs = DebugPlugin.parseArguments(Strings.nullToEmpty(iniArgs));
-		final List<String> args = Lists.newArrayList(parsedIniArgs);
 		if (userArgs != null)
-			args.addAll(userArgs);
-		return UpdateVMArgs.updateAttr(args);
+			iniArgs.addAll(userArgs);
+		return UpdateVMArgs.updateAttr(iniArgs);
 	}
 
 	/** Adds a key value pair, if this key is not already present */
@@ -352,11 +347,21 @@ public class Q7LaunchDelegateUtils {
 		if (args == null || args.isEmpty()) {
 			return "";
 		}
-		return Joiner.on(' ').join(Collections2.transform(args, UpdateVMArgs.ESCAPE));
+		return args.stream().map(Q7LaunchDelegateUtils::escapeCommandArg).collect(Collectors.joining(" "));
 	}
 
-	public static String escapeCommandArg(String arg) {
-		return UpdateVMArgs.escapeCommandArg(arg);
+	public static String escapeCommandArg(String argument) {
+        if (Platform.getOS().equals(Platform.OS_WIN32)) {
+            // https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
+            if (argument.isEmpty()) {
+                return "\"\"";
+            }
+
+            return "\"" + argument.replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\\\\$", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
+
+        } else {
+            return "\"" + argument.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
+        }
 	}
 
 	public static String joinCommandArgs(String[] args) {
