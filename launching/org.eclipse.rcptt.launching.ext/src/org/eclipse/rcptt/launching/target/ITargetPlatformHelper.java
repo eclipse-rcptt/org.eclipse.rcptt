@@ -11,10 +11,10 @@
 package org.eclipse.rcptt.launching.target;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
@@ -120,7 +120,7 @@ public interface ITargetPlatformHelper {
 	/**
 	 * Get initial vmargs readed from eclipse.ini of target platform.
 	 */
-	String getIniVMArgs();
+	List<String> getIniVMArgs();
 
 	/** java.home configured in AUT's INI file **/
 	Optional<Path> getJavaHome();
@@ -152,5 +152,7 @@ public interface ITargetPlatformHelper {
 	Map<String, Version> getVersions() throws CoreException;
 
 	int size();
+
+	Map<String, String> systemProperties();
 
 }
