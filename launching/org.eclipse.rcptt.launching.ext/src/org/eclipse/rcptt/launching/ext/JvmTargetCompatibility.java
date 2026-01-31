@@ -195,6 +195,11 @@ public final class JvmTargetCompatibility {
 	}
 	
 	private String findCompatibilityProblems(Set<String> ids) {
+		if (ids.contains("JavaSE-25")) {
+			if (Objects.equals(target.systemProperties().get("java.security.manager"), "allow")) {
+				return "A configuration option (from eclipse.ini or configuration/config.ini) has attempted to allow or enable the Security Manager. Enabling a Security Manager is not supported since Java 25";
+			}
+		}
 		List<String> problems = target.getModels().map(Model::model).map(model -> isCompatible(model, ids)).filter(not(String::isEmpty)).limit(10).toList();
 		if (!problems.isEmpty()) {
 			return Joiner.on("\n").join(problems);
