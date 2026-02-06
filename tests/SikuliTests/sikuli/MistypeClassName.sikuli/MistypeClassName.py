@@ -1,6 +1,0 @@
-type("test 123")
-type(Key.BACKSPACE)
-type(Key.BACKSPACE)
-type(Key.BACKSPACE)
-type(Key.BACKSPACE)
-click("1362551068865.png")

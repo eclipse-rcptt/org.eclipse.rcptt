@@ -4,84 +4,84 @@
   <ius size='16'>
     <iu id='org.antlr.runtime' name='ANTLR Runtime' version='3.2.0.v201101311130'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.ajdt.feature.group' name='AspectJ Development Tools' version='2.2.4.e45x-20150206-1600'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/45/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/45/dev/update'/>
       </repositories>
     </iu>
     <iu id='epp.package.committers' name='Eclipse IDE for Eclipse Committers' version='4.5.0.20150507-0954'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.contribution.weaving.feature.group' name='Eclipse Weaving Service Feature' version='2.2.4.e45x-20150206-1600'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/45/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/45/dev/update'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.contribution.weaving.source.feature.group' name='Eclipse Weaving Service Source Code' version='2.2.4.e45x-20150206-1600'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/tools/ajdt/45/dev/update'/>
+        <repository location='https://download.eclipse.org/tools/ajdt/45/dev/update'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.sdk.feature.group' name='EMF - Eclipse Modeling Framework SDK' version='2.11.0.v20150504-0831'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.query.sdk.feature.group' name='EMF Model Query SDK' version='1.9.0.201505060133'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.transaction.sdk.feature.group' name='EMF Model Transaction SDK' version='1.9.0.201505060251'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.emf.validation.sdk.feature.group' name='EMF Validation Framework SDK' version='1.9.0.201503250348'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.gef.sdk.feature.group' name='Graphical Editing Framework GEF SDK' version='3.10.0.201505040206'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.zest.sdk.feature.group' name='Graphical Editing Framework Zest Visualization Toolkit SDK' version='1.6.0.201505040206'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.gmf.sdk.feature.group' name='Graphical Modeling Framework (GMF) Tooling SDK' version='3.2.0.201412171959'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.graphiti.sdk.feature.feature.group' name='Graphiti SDK (Incubation)' version='0.12.0.v20150325-0826'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='com.google.guava.source' name='Guava: Google Core Libraries for Java Source' version='15.0.0.v201403281430'>
       <repositories size='2'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
-        <repository location='http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.ocl.all.sdk.feature.group' name='OCL Classic SDK: Ecore/UML Parsers,Evaluator,Edit' version='5.1.0.v20150321-0925'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
     <iu id='org.eclipse.xsd.sdk.feature.group' name='XSD - XML Schema Definition SDK' version='2.11.0.v20150504-0831'>
       <repositories size='1'>
-        <repository location='http://download.eclipse.org/releases/mars'/>
+        <repository location='https://download.eclipse.org/releases/mars'/>
       </repositories>
     </iu>
   </ius>

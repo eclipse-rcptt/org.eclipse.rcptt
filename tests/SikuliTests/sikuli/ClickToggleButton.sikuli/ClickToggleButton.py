@@ -1,8 +1,0 @@
-click("1366877932549.png")
-click("1366877945831.png")
-click("1366877955448.png")
-click("1366877966436.png")
-click("ButtonNotPrs.png")
-click("ButtonPresse.png")
-click("ButtonDisabl.png")
-click("1366878017163.png")

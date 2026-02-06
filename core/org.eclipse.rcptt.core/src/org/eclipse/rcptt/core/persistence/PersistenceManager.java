@@ -459,7 +459,7 @@ public class PersistenceManager implements IPlainConstants {
 		for (IPersistenceModelFactory factory : factories) {
 			InputStream contents = null;
 			try {
-				contents = file.getContents();
+				contents = file.getContents(true);
 				IPath loc = file.getLocation();
 				if (loc != null && loc.toFile().exists()) {
 					if (factory.isSupported(loc.toFile())) {
