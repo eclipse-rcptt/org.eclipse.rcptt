@@ -183,7 +183,7 @@ public class AUTLocationBlock {
 			return createError("Please specify Application installation directory...");
 		}
 		if (info == null) {
-			return createError("Please specify correct Application installation directory...");
+			return status.getValue();
 		} else {
 			return info.getStatus();
 		}
@@ -217,6 +217,7 @@ public class AUTLocationBlock {
 					throws InvocationTargetException, InterruptedException {
 				try {
 					setTarget(updateTarget(monitor));
+					setStatus(Status.OK_STATUS);
 				} catch (CoreException e) {
 					setStatus(e.getStatus());
 				}
