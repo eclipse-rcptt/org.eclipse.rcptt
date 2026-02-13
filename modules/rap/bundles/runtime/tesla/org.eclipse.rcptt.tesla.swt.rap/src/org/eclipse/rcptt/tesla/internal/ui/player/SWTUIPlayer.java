@@ -740,13 +740,10 @@ public final class SWTUIPlayer {
 					currIdx++;
 				}
 			} catch (Exception e) {
-				// Skip brokeb parts.
+				// Skip broken parts.
 				TeslaCore.log(e);
 			}
 		}
-
-		TeslaCore.log("Can not find view by pattern \"" + pattern
-				+ "\". Activating views...");
 
 		// Not found, lets go with resolve of view parts, it will initialize
 		// titles.
@@ -766,6 +763,7 @@ public final class SWTUIPlayer {
 				currIdx++;
 			}
 		}
+		TeslaCore.log("Can not find view by pattern \"" + pattern + "\".");
 		return null;
 	}
 
