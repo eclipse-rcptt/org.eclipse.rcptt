@@ -297,16 +297,16 @@ public class JavaMembersHelper {
 	}
 
 	private static void collectMembers(Class<?> clazz, MembersContainer acc) {
-		for (Field field : clazz.getDeclaredFields()) {
-			if (checkField(field)) {
-				field.setAccessible(true);
-				acc.addField(field);
+		if ((clazz.getModifiers() & PUBLIC) != 0 || (isProtectedEnabled() && (clazz.getModifiers() & PROTECTED) != 0))  {
+			for (Field field : clazz.getDeclaredFields()) {
+				if (checkField(field) && field.trySetAccessible()) {
+					acc.addField(field);
+				}
 			}
-		}
-		for (Method method : clazz.getDeclaredMethods()) {
-			if (checkMethod(method)) {
-				method.setAccessible(true);
-				acc.addMethod(method);
+			for (Method method : clazz.getDeclaredMethods()) {
+				if (checkMethod(method) && method.trySetAccessible()) {
+					acc.addMethod(method);
+				}
 			}
 		}
 		Class<?> parent = clazz.getSuperclass();
@@ -525,7 +525,6 @@ public class JavaMembersHelper {
 			}
 			Field field = ReflectionUtil.findField(object.getClass(),
 					memberName);
-			field.setAccessible(true);
 			Object value = field.get(object);
 			return new PropertyValue(object, value, memberName, field.getType());
 		}
@@ -547,7 +546,6 @@ public class JavaMembersHelper {
 
 			Method method = ReflectionUtil.findMethod(object.getClass(),
 					memberName);
-			method.setAccessible(true);
 			Object value = method.invoke(object);
 			return new PropertyValue(object, value, memberName,
 					method.getReturnType());
