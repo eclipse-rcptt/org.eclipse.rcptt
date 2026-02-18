@@ -15,7 +15,7 @@ OPTIONS="-Ddash.batch=200 -Dtycho.localArtifacts=ignore $@"
 
 mvn clean verify -f releng/mirroring/pom.xml $OPTIONS || exit 100 
 
-./build_nodeps.sh $OPTIONS || exit $?
+./build_nodeps.sh $OPTIONS clean verify || exit $?
 
 ./build_runner.sh $OPTIONS || exit $?
 
