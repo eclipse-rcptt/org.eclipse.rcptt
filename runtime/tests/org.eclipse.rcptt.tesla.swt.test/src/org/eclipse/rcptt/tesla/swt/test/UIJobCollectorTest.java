@@ -358,11 +358,10 @@ public class UIJobCollectorTest {
 	private boolean shutdown(Job job, int timeoutInSeconds) throws InterruptedException {
 		long stop = System.currentTimeMillis() + timeoutInSeconds * 1000;
 		job.cancel();
-		while (job.getState() != Job.NONE && System.currentTimeMillis() < stop) {
-			job.cancel();
-			job.join(1, null);
-		}
-		return job.getState() == Job.NONE;
+		// Job should always be joined twice to skip cancellation event
+		// https://github.com/eclipse-platform/eclipse.platform/issues/2210#issuecomment-3448780992
+		job.join(stop - currentTimeMillis(), null);
+		return job.join(stop - currentTimeMillis(), null);
 	}
 	
 	
