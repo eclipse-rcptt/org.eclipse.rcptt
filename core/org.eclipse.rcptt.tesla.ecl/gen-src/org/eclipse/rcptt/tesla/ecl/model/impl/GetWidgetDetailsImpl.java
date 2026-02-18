@@ -72,6 +72,7 @@ public class GetWidgetDetailsImpl extends CommandImpl implements GetWidgetDetail
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Element getElement() {
 		if (element != null && element.eIsProxy()) {
 			InternalEObject oldElement = (InternalEObject)element;
@@ -98,6 +99,7 @@ public class GetWidgetDetailsImpl extends CommandImpl implements GetWidgetDetail
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setElement(Element newElement) {
 		Element oldElement = element;
 		element = newElement;

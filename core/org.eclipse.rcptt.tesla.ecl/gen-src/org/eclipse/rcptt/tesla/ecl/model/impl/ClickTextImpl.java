@@ -119,6 +119,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getStart() {
 		return start;
 	}
@@ -128,6 +129,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setStart(String newStart) {
 		String oldStart = start;
 		start = newStart;
@@ -140,6 +142,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getEnd() {
 		return end;
 	}
@@ -149,6 +152,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEnd(String newEnd) {
 		String oldEnd = end;
 		end = newEnd;
@@ -161,6 +165,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getButton() {
 		return button;
 	}
@@ -170,6 +175,7 @@ public class ClickTextImpl extends ControlCommandImpl implements ClickText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(String newButton) {
 		String oldButton = button;
 		button = newButton;

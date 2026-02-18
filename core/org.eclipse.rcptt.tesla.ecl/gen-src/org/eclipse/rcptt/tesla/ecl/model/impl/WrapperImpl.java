@@ -78,6 +78,7 @@ public class WrapperImpl extends EObjectImpl implements Wrapper {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Object getObject() {
 		return object;
 	}
@@ -87,6 +88,7 @@ public class WrapperImpl extends EObjectImpl implements Wrapper {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setObject(Object newObject) {
 		Object oldObject = object;
 		object = newObject;

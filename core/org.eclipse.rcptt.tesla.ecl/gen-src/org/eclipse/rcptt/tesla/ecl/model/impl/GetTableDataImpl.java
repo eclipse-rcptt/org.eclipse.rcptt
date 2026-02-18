@@ -94,6 +94,7 @@ public class GetTableDataImpl extends ControlCommandImpl implements GetTableData
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isIncludeChecked() {
 		return includeChecked;
 	}
@@ -103,6 +104,7 @@ public class GetTableDataImpl extends ControlCommandImpl implements GetTableData
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIncludeChecked(boolean newIncludeChecked) {
 		boolean oldIncludeChecked = includeChecked;
 		includeChecked = newIncludeChecked;
@@ -115,6 +117,7 @@ public class GetTableDataImpl extends ControlCommandImpl implements GetTableData
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isExcludeHidden() {
 		return excludeHidden;
 	}
@@ -124,6 +127,7 @@ public class GetTableDataImpl extends ControlCommandImpl implements GetTableData
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setExcludeHidden(boolean newExcludeHidden) {
 		boolean oldExcludeHidden = excludeHidden;
 		excludeHidden = newExcludeHidden;

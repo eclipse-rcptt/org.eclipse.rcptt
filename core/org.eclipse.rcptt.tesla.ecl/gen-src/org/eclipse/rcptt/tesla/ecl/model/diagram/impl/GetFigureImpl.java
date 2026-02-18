@@ -167,6 +167,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -176,6 +177,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -188,6 +190,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -214,6 +217,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -226,6 +230,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -235,6 +240,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -247,6 +253,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -273,6 +280,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -285,6 +293,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -294,6 +303,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -306,6 +316,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -315,6 +326,7 @@ public class GetFigureImpl extends CommandImpl implements GetFigure {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;

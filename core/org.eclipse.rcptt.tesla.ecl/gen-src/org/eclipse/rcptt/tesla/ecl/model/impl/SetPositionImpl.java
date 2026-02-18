@@ -76,6 +76,7 @@ public class SetPositionImpl extends ControlCommandImpl implements SetPosition {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getIndex() {
 		return index;
 	}
@@ -85,6 +86,7 @@ public class SetPositionImpl extends ControlCommandImpl implements SetPosition {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(int newIndex) {
 		int oldIndex = index;
 		index = newIndex;

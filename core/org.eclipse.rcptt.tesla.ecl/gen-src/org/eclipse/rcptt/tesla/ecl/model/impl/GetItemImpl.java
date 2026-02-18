@@ -187,6 +187,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -196,6 +197,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -208,6 +210,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -234,6 +237,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -246,6 +250,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -255,6 +260,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -267,6 +273,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -293,6 +300,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -305,6 +313,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -314,6 +323,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -326,6 +336,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -335,6 +346,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -347,6 +359,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getColumn() {
 		return column;
 	}
@@ -356,6 +369,7 @@ public class GetItemImpl extends CommandImpl implements GetItem {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(String newColumn) {
 		String oldColumn = column;
 		column = newColumn;

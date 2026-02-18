@@ -77,6 +77,7 @@ public class ClickLinkImpl extends ControlCommandImpl implements ClickLink {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getRef() {
 		return ref;
 	}
@@ -86,6 +87,7 @@ public class ClickLinkImpl extends ControlCommandImpl implements ClickLink {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRef(String newRef) {
 		String oldRef = ref;
 		ref = newRef;

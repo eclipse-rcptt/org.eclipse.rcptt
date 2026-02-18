@@ -142,6 +142,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getDefault() {
 		return default_;
 	}
@@ -151,6 +152,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDefault(String newDefault) {
 		String oldDefault = default_;
 		default_ = newDefault;
@@ -163,6 +165,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getWin() {
 		return win;
 	}
@@ -172,6 +175,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWin(String newWin) {
 		String oldWin = win;
 		win = newWin;
@@ -184,6 +188,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getLinux() {
 		return linux;
 	}
@@ -193,6 +198,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLinux(String newLinux) {
 		String oldLinux = linux;
 		linux = newLinux;
@@ -205,6 +211,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMacosx() {
 		return macosx;
 	}
@@ -214,6 +221,7 @@ public class GetByOsImpl extends CommandImpl implements GetByOs {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMacosx(String newMacosx) {
 		String oldMacosx = macosx;
 		macosx = newMacosx;
