@@ -27,6 +27,5 @@
     <module>org.eclipse.rcptt.watson.core</module>
     <module>org.eclipse.rcptt.watson-feature</module>
     <module>org.eclipse.rcptt.watson.jobs</module>
-    <module>org.eclipse.rcptt.watson.ui</module>
   </modules>
 </project>
