@@ -24,6 +24,159 @@ import org.eclipse.rcptt.tesla.core.protocol.ElementKind;
 import org.eclipse.rcptt.tesla.core.protocol.ProtocolPackage;
 import org.eclipse.rcptt.tesla.core.protocol.raw.RawPackage;
 import org.eclipse.rcptt.tesla.core.ui.UiPackage;
+import org.eclipse.rcptt.tesla.ecl.model.ActivateCellEdit;
+import org.eclipse.rcptt.tesla.ecl.model.ActivationEventType;
+import org.eclipse.rcptt.tesla.ecl.model.ApplyCellEdit;
+import org.eclipse.rcptt.tesla.ecl.model.BoundControlHandle;
+import org.eclipse.rcptt.tesla.ecl.model.Button;
+import org.eclipse.rcptt.tesla.ecl.model.CancelCellEdit;
+import org.eclipse.rcptt.tesla.ecl.model.CellEdit;
+import org.eclipse.rcptt.tesla.ecl.model.Check;
+import org.eclipse.rcptt.tesla.ecl.model.CheckDownloadResult;
+import org.eclipse.rcptt.tesla.ecl.model.Click;
+import org.eclipse.rcptt.tesla.ecl.model.ClickColumn;
+import org.eclipse.rcptt.tesla.ecl.model.ClickLink;
+import org.eclipse.rcptt.tesla.ecl.model.ClickRuler;
+import org.eclipse.rcptt.tesla.ecl.model.ClickText;
+import org.eclipse.rcptt.tesla.ecl.model.Close;
+import org.eclipse.rcptt.tesla.ecl.model.Collapse;
+import org.eclipse.rcptt.tesla.ecl.model.CollapseAll;
+import org.eclipse.rcptt.tesla.ecl.model.Contains;
+import org.eclipse.rcptt.tesla.ecl.model.ContainsImage;
+import org.eclipse.rcptt.tesla.ecl.model.ControlCommand;
+import org.eclipse.rcptt.tesla.ecl.model.ControlHandler;
+import org.eclipse.rcptt.tesla.ecl.model.ControlNotFound;
+import org.eclipse.rcptt.tesla.ecl.model.DeactivateCellEdit;
+import org.eclipse.rcptt.tesla.ecl.model.Decrypt;
+import org.eclipse.rcptt.tesla.ecl.model.DecryptResult;
+import org.eclipse.rcptt.tesla.ecl.model.DoubleClick;
+import org.eclipse.rcptt.tesla.ecl.model.DoubleClickRuler;
+import org.eclipse.rcptt.tesla.ecl.model.DoubleClickText;
+import org.eclipse.rcptt.tesla.ecl.model.DragAccept;
+import org.eclipse.rcptt.tesla.ecl.model.DragAction;
+import org.eclipse.rcptt.tesla.ecl.model.DragDetect;
+import org.eclipse.rcptt.tesla.ecl.model.DragEnd;
+import org.eclipse.rcptt.tesla.ecl.model.DragEnter;
+import org.eclipse.rcptt.tesla.ecl.model.DragExit;
+import org.eclipse.rcptt.tesla.ecl.model.DragOver;
+import org.eclipse.rcptt.tesla.ecl.model.DragSetData;
+import org.eclipse.rcptt.tesla.ecl.model.DragStart;
+import org.eclipse.rcptt.tesla.ecl.model.Drop;
+import org.eclipse.rcptt.tesla.ecl.model.Equals;
+import org.eclipse.rcptt.tesla.ecl.model.ExecWithOptions;
+import org.eclipse.rcptt.tesla.ecl.model.Expand;
+import org.eclipse.rcptt.tesla.ecl.model.ExpandAll;
+import org.eclipse.rcptt.tesla.ecl.model.FromRawKey;
+import org.eclipse.rcptt.tesla.ecl.model.GetAboutMenu;
+import org.eclipse.rcptt.tesla.ecl.model.GetAdvancedInfo;
+import org.eclipse.rcptt.tesla.ecl.model.GetBanner;
+import org.eclipse.rcptt.tesla.ecl.model.GetButton;
+import org.eclipse.rcptt.tesla.ecl.model.GetByOs;
+import org.eclipse.rcptt.tesla.ecl.model.GetCanvas;
+import org.eclipse.rcptt.tesla.ecl.model.GetCell;
+import org.eclipse.rcptt.tesla.ecl.model.GetCheckbox;
+import org.eclipse.rcptt.tesla.ecl.model.GetColorSelector;
+import org.eclipse.rcptt.tesla.ecl.model.GetColumnHeader;
+import org.eclipse.rcptt.tesla.ecl.model.GetCombo;
+import org.eclipse.rcptt.tesla.ecl.model.GetComboItems;
+import org.eclipse.rcptt.tesla.ecl.model.GetControl;
+import org.eclipse.rcptt.tesla.ecl.model.GetCoolbar;
+import org.eclipse.rcptt.tesla.ecl.model.GetDateTime;
+import org.eclipse.rcptt.tesla.ecl.model.GetEclipseWindow;
+import org.eclipse.rcptt.tesla.ecl.model.GetEditbox;
+import org.eclipse.rcptt.tesla.ecl.model.GetEditor;
+import org.eclipse.rcptt.tesla.ecl.model.GetGroup;
+import org.eclipse.rcptt.tesla.ecl.model.GetItem;
+import org.eclipse.rcptt.tesla.ecl.model.GetItems;
+import org.eclipse.rcptt.tesla.ecl.model.GetLabel;
+import org.eclipse.rcptt.tesla.ecl.model.GetLastMessageBox;
+import org.eclipse.rcptt.tesla.ecl.model.GetLeftRuler;
+import org.eclipse.rcptt.tesla.ecl.model.GetLink;
+import org.eclipse.rcptt.tesla.ecl.model.GetList;
+import org.eclipse.rcptt.tesla.ecl.model.GetMenu;
+import org.eclipse.rcptt.tesla.ecl.model.GetObject;
+import org.eclipse.rcptt.tesla.ecl.model.GetPreferencesMenu;
+import org.eclipse.rcptt.tesla.ecl.model.GetProperty;
+import org.eclipse.rcptt.tesla.ecl.model.GetPropertyNodes;
+import org.eclipse.rcptt.tesla.ecl.model.GetPropertyTab;
+import org.eclipse.rcptt.tesla.ecl.model.GetQuickAccess;
+import org.eclipse.rcptt.tesla.ecl.model.GetRegion;
+import org.eclipse.rcptt.tesla.ecl.model.GetRegionText;
+import org.eclipse.rcptt.tesla.ecl.model.GetRightRuler;
+import org.eclipse.rcptt.tesla.ecl.model.GetRulerColumn;
+import org.eclipse.rcptt.tesla.ecl.model.GetRuntimeTarget;
+import org.eclipse.rcptt.tesla.ecl.model.GetSection;
+import org.eclipse.rcptt.tesla.ecl.model.GetSlider;
+import org.eclipse.rcptt.tesla.ecl.model.GetTabFolder;
+import org.eclipse.rcptt.tesla.ecl.model.GetTabItem;
+import org.eclipse.rcptt.tesla.ecl.model.GetTable;
+import org.eclipse.rcptt.tesla.ecl.model.GetTableData;
+import org.eclipse.rcptt.tesla.ecl.model.GetTestCaseName;
+import org.eclipse.rcptt.tesla.ecl.model.GetText;
+import org.eclipse.rcptt.tesla.ecl.model.GetTextViewer;
+import org.eclipse.rcptt.tesla.ecl.model.GetToolbar;
+import org.eclipse.rcptt.tesla.ecl.model.GetTree;
+import org.eclipse.rcptt.tesla.ecl.model.GetVerticalRuler;
+import org.eclipse.rcptt.tesla.ecl.model.GetView;
+import org.eclipse.rcptt.tesla.ecl.model.GetWidgetDetails;
+import org.eclipse.rcptt.tesla.ecl.model.GetWindow;
+import org.eclipse.rcptt.tesla.ecl.model.HoverAtTextOffset;
+import org.eclipse.rcptt.tesla.ecl.model.HoverRuler;
+import org.eclipse.rcptt.tesla.ecl.model.HoverText;
+import org.eclipse.rcptt.tesla.ecl.model.IsDisabled;
+import org.eclipse.rcptt.tesla.ecl.model.IsDisposed;
+import org.eclipse.rcptt.tesla.ecl.model.IsEmpty;
+import org.eclipse.rcptt.tesla.ecl.model.KeyType;
+import org.eclipse.rcptt.tesla.ecl.model.Matches;
+import org.eclipse.rcptt.tesla.ecl.model.Maximize;
+import org.eclipse.rcptt.tesla.ecl.model.MessageBoxInfo;
+import org.eclipse.rcptt.tesla.ecl.model.Minimize;
+import org.eclipse.rcptt.tesla.ecl.model.Mouse;
+import org.eclipse.rcptt.tesla.ecl.model.OpenDeclaration;
+import org.eclipse.rcptt.tesla.ecl.model.Options;
+import org.eclipse.rcptt.tesla.ecl.model.PathSelector;
+import org.eclipse.rcptt.tesla.ecl.model.Recognize;
+import org.eclipse.rcptt.tesla.ecl.model.RecognizeResponse;
+import org.eclipse.rcptt.tesla.ecl.model.RestartAut;
+import org.eclipse.rcptt.tesla.ecl.model.Restore;
+import org.eclipse.rcptt.tesla.ecl.model.ReturnFromOsDialog;
+import org.eclipse.rcptt.tesla.ecl.model.Select;
+import org.eclipse.rcptt.tesla.ecl.model.SelectItem;
+import org.eclipse.rcptt.tesla.ecl.model.SelectRange;
+import org.eclipse.rcptt.tesla.ecl.model.Selector;
+import org.eclipse.rcptt.tesla.ecl.model.SetCaretPos;
+import org.eclipse.rcptt.tesla.ecl.model.SetDialogResult;
+import org.eclipse.rcptt.tesla.ecl.model.SetFocus;
+import org.eclipse.rcptt.tesla.ecl.model.SetPosition;
+import org.eclipse.rcptt.tesla.ecl.model.SetText;
+import org.eclipse.rcptt.tesla.ecl.model.SetTextOffset;
+import org.eclipse.rcptt.tesla.ecl.model.SetTextSelection;
+import org.eclipse.rcptt.tesla.ecl.model.SetValue;
+import org.eclipse.rcptt.tesla.ecl.model.SetWidth;
+import org.eclipse.rcptt.tesla.ecl.model.SetupPlayer;
+import org.eclipse.rcptt.tesla.ecl.model.ShoutdownPlayer;
+import org.eclipse.rcptt.tesla.ecl.model.ShowAlert;
+import org.eclipse.rcptt.tesla.ecl.model.ShowContentAssist;
+import org.eclipse.rcptt.tesla.ecl.model.ShowTabList;
+import org.eclipse.rcptt.tesla.ecl.model.ShutdownAut;
+import org.eclipse.rcptt.tesla.ecl.model.TakeScreenshot;
+import org.eclipse.rcptt.tesla.ecl.model.TeslaFactory;
+import org.eclipse.rcptt.tesla.ecl.model.TeslaPackage;
+import org.eclipse.rcptt.tesla.ecl.model.TeslaProcessStatus;
+import org.eclipse.rcptt.tesla.ecl.model.TextSelector;
+import org.eclipse.rcptt.tesla.ecl.model.ToControlHandle;
+import org.eclipse.rcptt.tesla.ecl.model.Trace;
+import org.eclipse.rcptt.tesla.ecl.model.TypeCommandKey;
+import org.eclipse.rcptt.tesla.ecl.model.TypeText;
+import org.eclipse.rcptt.tesla.ecl.model.Uncheck;
+import org.eclipse.rcptt.tesla.ecl.model.Unfocus;
+import org.eclipse.rcptt.tesla.ecl.model.Unsupported;
+import org.eclipse.rcptt.tesla.ecl.model.VerifyFalse;
+import org.eclipse.rcptt.tesla.ecl.model.VerifyHandler;
+import org.eclipse.rcptt.tesla.ecl.model.VerifyTrue;
+import org.eclipse.rcptt.tesla.ecl.model.Wait;
+import org.eclipse.rcptt.tesla.ecl.model.WaitUntilEclipseIsReady;
+import org.eclipse.rcptt.tesla.ecl.model.Wrapper;
 import org.eclipse.rcptt.tesla.ecl.model.*;
 import org.eclipse.rcptt.tesla.ecl.model.diagram.DiagramPackage;
 import org.eclipse.rcptt.tesla.ecl.model.diagram.impl.DiagramPackageImpl;
@@ -1186,6 +1339,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getWait() {
 		return waitEClass;
 	}
@@ -1195,6 +1349,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getWait_Ms() {
 		return (EAttribute)waitEClass.getEStructuralFeatures().get(0);
 	}
@@ -1204,6 +1359,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetupPlayer() {
 		return setupPlayerEClass;
 	}
@@ -1213,6 +1369,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getShoutdownPlayer() {
 		return shoutdownPlayerEClass;
 	}
@@ -1222,6 +1379,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTeslaProcessStatus() {
 		return teslaProcessStatusEClass;
 	}
@@ -1231,6 +1389,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getTeslaProcessStatus_Info() {
 		return (EReference)teslaProcessStatusEClass.getEStructuralFeatures().get(0);
 	}
@@ -1240,6 +1399,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getWrapper() {
 		return wrapperEClass;
 	}
@@ -1249,6 +1409,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getWrapper_Object() {
 		return (EAttribute)wrapperEClass.getEStructuralFeatures().get(0);
 	}
@@ -1258,6 +1419,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetProperty() {
 		return getPropertyEClass;
 	}
@@ -1267,6 +1429,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetProperty_Object() {
 		return (EReference)getPropertyEClass.getEStructuralFeatures().get(0);
 	}
@@ -1276,6 +1439,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetProperty_Name() {
 		return (EAttribute)getPropertyEClass.getEStructuralFeatures().get(1);
 	}
@@ -1285,6 +1449,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetProperty_Index() {
 		return (EAttribute)getPropertyEClass.getEStructuralFeatures().get(2);
 	}
@@ -1294,6 +1459,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetProperty_Raw() {
 		return (EAttribute)getPropertyEClass.getEStructuralFeatures().get(3);
 	}
@@ -1303,6 +1469,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getVerifyTrue() {
 		return verifyTrueEClass;
 	}
@@ -1312,6 +1479,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getVerifyTrue_Condition() {
 		return (EReference)verifyTrueEClass.getEStructuralFeatures().get(0);
 	}
@@ -1321,6 +1489,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getVerifyFalse() {
 		return verifyFalseEClass;
 	}
@@ -1330,6 +1499,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getVerifyFalse_Condition() {
 		return (EReference)verifyFalseEClass.getEStructuralFeatures().get(0);
 	}
@@ -1339,6 +1509,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getVerifyHandler() {
 		return verifyHandlerEClass;
 	}
@@ -1348,6 +1519,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getVerifyHandler_Element() {
 		return (EReference)verifyHandlerEClass.getEStructuralFeatures().get(0);
 	}
@@ -1357,6 +1529,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getVerifyHandler_Attribute() {
 		return (EAttribute)verifyHandlerEClass.getEStructuralFeatures().get(1);
 	}
@@ -1366,6 +1539,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getVerifyHandler_Value() {
 		return (EAttribute)verifyHandlerEClass.getEStructuralFeatures().get(2);
 	}
@@ -1375,6 +1549,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getVerifyHandler_Kind() {
 		return (EAttribute)verifyHandlerEClass.getEStructuralFeatures().get(3);
 	}
@@ -1384,6 +1559,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getVerifyHandler_Index() {
 		return (EAttribute)verifyHandlerEClass.getEStructuralFeatures().get(4);
 	}
@@ -1393,6 +1569,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getVerifyError() {
 		return verifyErrorEClass;
 	}
@@ -1402,6 +1579,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getVerifyError_Command() {
 		return (EReference)verifyErrorEClass.getEStructuralFeatures().get(0);
 	}
@@ -1411,6 +1589,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getEquals() {
 		return equalsEClass;
 	}
@@ -1420,6 +1599,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getEquals_Input() {
 		return (EReference)equalsEClass.getEStructuralFeatures().get(0);
 	}
@@ -1429,6 +1609,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getEquals_Value() {
 		return (EAttribute)equalsEClass.getEStructuralFeatures().get(1);
 	}
@@ -1438,6 +1619,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getContains() {
 		return containsEClass;
 	}
@@ -1447,6 +1629,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getContains_Input() {
 		return (EReference)containsEClass.getEStructuralFeatures().get(0);
 	}
@@ -1456,6 +1639,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getContains_Value() {
 		return (EAttribute)containsEClass.getEStructuralFeatures().get(1);
 	}
@@ -1465,6 +1649,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMatches() {
 		return matchesEClass;
 	}
@@ -1474,6 +1659,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getMatches_Input() {
 		return (EReference)matchesEClass.getEStructuralFeatures().get(0);
 	}
@@ -1483,6 +1669,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMatches_Value() {
 		return (EAttribute)matchesEClass.getEStructuralFeatures().get(1);
 	}
@@ -1492,6 +1679,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getIsEmpty() {
 		return isEmptyEClass;
 	}
@@ -1501,6 +1689,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getIsEmpty_Input() {
 		return (EReference)isEmptyEClass.getEStructuralFeatures().get(0);
 	}
@@ -1510,6 +1699,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getUnsupported() {
 		return unsupportedEClass;
 	}
@@ -1519,6 +1709,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getUnsupported_Desc() {
 		return (EAttribute)unsupportedEClass.getEStructuralFeatures().get(0);
 	}
@@ -1528,6 +1719,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getControlNotFound() {
 		return controlNotFoundEClass;
 	}
@@ -1537,6 +1729,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlNotFound_Id() {
 		return (EAttribute)controlNotFoundEClass.getEStructuralFeatures().get(0);
 	}
@@ -1546,6 +1739,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getControlHandler() {
 		return controlHandlerEClass;
 	}
@@ -1555,6 +1749,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Kind() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(0);
 	}
@@ -1564,6 +1759,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_CustomKindId() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(1);
 	}
@@ -1573,6 +1769,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Text() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(2);
 	}
@@ -1582,6 +1779,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Type() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(3);
 	}
@@ -1591,6 +1789,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Index() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(4);
 	}
@@ -1600,6 +1799,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Path() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(5);
 	}
@@ -1609,6 +1809,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Indexes() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(6);
 	}
@@ -1618,6 +1819,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getControlHandler_After() {
 		return (EReference)controlHandlerEClass.getEStructuralFeatures().get(7);
 	}
@@ -1627,6 +1829,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getControlHandler_Parent() {
 		return (EReference)controlHandlerEClass.getEStructuralFeatures().get(8);
 	}
@@ -1636,6 +1839,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getControlHandler_Resolved() {
 		return (EReference)controlHandlerEClass.getEStructuralFeatures().get(9);
 	}
@@ -1645,6 +1849,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Row() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(10);
 	}
@@ -1654,6 +1859,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Column() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(11);
 	}
@@ -1663,6 +1869,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_X() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(12);
 	}
@@ -1672,6 +1879,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_Y() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(13);
 	}
@@ -1681,6 +1889,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getControlHandler_RawImage() {
 		return (EAttribute)controlHandlerEClass.getEStructuralFeatures().get(14);
 	}
@@ -1690,6 +1899,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetEclipseWindow() {
 		return getEclipseWindowEClass;
 	}
@@ -1699,6 +1909,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSelector() {
 		return selectorEClass;
 	}
@@ -1708,6 +1919,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelector_Id() {
 		return (EAttribute)selectorEClass.getEStructuralFeatures().get(0);
 	}
@@ -1717,6 +1929,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSelector_After() {
 		return (EReference)selectorEClass.getEStructuralFeatures().get(1);
 	}
@@ -1726,6 +1939,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelector_Type() {
 		return (EAttribute)selectorEClass.getEStructuralFeatures().get(2);
 	}
@@ -1735,6 +1949,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelector_Index() {
 		return (EAttribute)selectorEClass.getEStructuralFeatures().get(3);
 	}
@@ -1744,6 +1959,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSelector_Parent() {
 		return (EReference)selectorEClass.getEStructuralFeatures().get(4);
 	}
@@ -1753,6 +1969,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getPathSelector() {
 		return pathSelectorEClass;
 	}
@@ -1762,6 +1979,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getPathSelector_Path() {
 		return (EAttribute)pathSelectorEClass.getEStructuralFeatures().get(0);
 	}
@@ -1771,6 +1989,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTextSelector() {
 		return textSelectorEClass;
 	}
@@ -1780,6 +1999,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTextSelector_Text() {
 		return (EAttribute)textSelectorEClass.getEStructuralFeatures().get(0);
 	}
@@ -1789,6 +2009,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetControl() {
 		return getControlEClass;
 	}
@@ -1798,6 +2019,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetControl_Kind() {
 		return (EAttribute)getControlEClass.getEStructuralFeatures().get(0);
 	}
@@ -1807,6 +2029,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetButton() {
 		return getButtonEClass;
 	}
@@ -1816,6 +2039,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetCanvas() {
 		return getCanvasEClass;
 	}
@@ -1825,6 +2049,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetCheckbox() {
 		return getCheckboxEClass;
 	}
@@ -1834,6 +2059,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetCombo() {
 		return getComboEClass;
 	}
@@ -1843,6 +2069,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetEditbox() {
 		return getEditboxEClass;
 	}
@@ -1852,6 +2079,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetGroup() {
 		return getGroupEClass;
 	}
@@ -1861,6 +2089,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetItem() {
 		return getItemEClass;
 	}
@@ -1870,6 +2099,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetItem_Path() {
 		return (EAttribute)getItemEClass.getEStructuralFeatures().get(0);
 	}
@@ -1879,6 +2109,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetItem_Column() {
 		return (EAttribute)getItemEClass.getEStructuralFeatures().get(1);
 	}
@@ -1888,6 +2119,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetLabel() {
 		return getLabelEClass;
 	}
@@ -1897,6 +2129,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetLink() {
 		return getLinkEClass;
 	}
@@ -1906,6 +2139,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetList() {
 		return getListEClass;
 	}
@@ -1915,6 +2149,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetMenu() {
 		return getMenuEClass;
 	}
@@ -1924,6 +2159,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTabFolder() {
 		return getTabFolderEClass;
 	}
@@ -1933,6 +2169,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTabItem() {
 		return getTabItemEClass;
 	}
@@ -1942,6 +2179,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTable() {
 		return getTableEClass;
 	}
@@ -1951,6 +2189,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetToolbar() {
 		return getToolbarEClass;
 	}
@@ -1960,6 +2199,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTree() {
 		return getTreeEClass;
 	}
@@ -1969,6 +2209,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetWindow() {
 		return getWindowEClass;
 	}
@@ -1978,6 +2219,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetWindow_Text() {
 		return (EAttribute)getWindowEClass.getEStructuralFeatures().get(0);
 	}
@@ -1987,6 +2229,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetWindow_From() {
 		return (EAttribute)getWindowEClass.getEStructuralFeatures().get(1);
 	}
@@ -1996,6 +2239,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetWindow_Class() {
 		return (EAttribute)getWindowEClass.getEStructuralFeatures().get(2);
 	}
@@ -2005,6 +2249,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetView() {
 		return getViewEClass;
 	}
@@ -2014,6 +2259,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetEditor() {
 		return getEditorEClass;
 	}
@@ -2023,6 +2269,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetSection() {
 		return getSectionEClass;
 	}
@@ -2032,6 +2279,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetBanner() {
 		return getBannerEClass;
 	}
@@ -2041,6 +2289,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetCoolbar() {
 		return getCoolbarEClass;
 	}
@@ -2050,6 +2299,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetColorSelector() {
 		return getColorSelectorEClass;
 	}
@@ -2059,6 +2309,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetCell() {
 		return getCellEClass;
 	}
@@ -2068,6 +2319,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetCell_Row() {
 		return (EAttribute)getCellEClass.getEStructuralFeatures().get(0);
 	}
@@ -2077,6 +2329,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetCell_Column() {
 		return (EAttribute)getCellEClass.getEStructuralFeatures().get(1);
 	}
@@ -2086,6 +2339,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClick() {
 		return clickEClass;
 	}
@@ -2095,6 +2349,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getClick_Control() {
 		return (EReference)clickEClass.getEStructuralFeatures().get(0);
 	}
@@ -2104,6 +2359,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClick_Nowait() {
 		return (EAttribute)clickEClass.getEStructuralFeatures().get(1);
 	}
@@ -2113,6 +2369,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClick_Default() {
 		return (EAttribute)clickEClass.getEStructuralFeatures().get(2);
 	}
@@ -2122,6 +2379,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClick_Arrow() {
 		return (EAttribute)clickEClass.getEStructuralFeatures().get(3);
 	}
@@ -2131,6 +2389,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClick_MetaKeys() {
 		return (EAttribute)clickEClass.getEStructuralFeatures().get(4);
 	}
@@ -2140,6 +2399,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDoubleClick() {
 		return doubleClickEClass;
 	}
@@ -2149,6 +2409,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetText() {
 		return getTextEClass;
 	}
@@ -2158,6 +2419,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetText_Control() {
 		return (EReference)getTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -2167,6 +2429,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getIsDisabled() {
 		return isDisabledEClass;
 	}
@@ -2176,6 +2439,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getIsDisabled_Control() {
 		return (EReference)isDisabledEClass.getEStructuralFeatures().get(0);
 	}
@@ -2185,6 +2449,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getIsDisposed() {
 		return isDisposedEClass;
 	}
@@ -2194,6 +2459,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getIsDisposed_Control() {
 		return (EReference)isDisposedEClass.getEStructuralFeatures().get(0);
 	}
@@ -2203,6 +2469,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTypeText() {
 		return typeTextEClass;
 	}
@@ -2212,6 +2479,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getTypeText_Control() {
 		return (EReference)typeTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -2221,6 +2489,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTypeText_Text() {
 		return (EAttribute)typeTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -2230,6 +2499,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTypeText_Display() {
 		return (EAttribute)typeTextEClass.getEStructuralFeatures().get(2);
 	}
@@ -2239,6 +2509,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getKeyType() {
 		return keyTypeEClass;
 	}
@@ -2248,6 +2519,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getKeyType_Control() {
 		return (EReference)keyTypeEClass.getEStructuralFeatures().get(0);
 	}
@@ -2257,6 +2529,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getKeyType_Key() {
 		return (EAttribute)keyTypeEClass.getEStructuralFeatures().get(1);
 	}
@@ -2266,6 +2539,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getKeyType_Char() {
 		return (EAttribute)keyTypeEClass.getEStructuralFeatures().get(2);
 	}
@@ -2275,6 +2549,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getKeyType_Display() {
 		return (EAttribute)keyTypeEClass.getEStructuralFeatures().get(3);
 	}
@@ -2284,6 +2559,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getKeyType_Times() {
 		return (EAttribute)keyTypeEClass.getEStructuralFeatures().get(4);
 	}
@@ -2293,6 +2569,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTypeCommandKey() {
 		return typeCommandKeyEClass;
 	}
@@ -2302,6 +2579,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getTypeCommandKey_Control() {
 		return (EReference)typeCommandKeyEClass.getEStructuralFeatures().get(0);
 	}
@@ -2311,6 +2589,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTypeCommandKey_CommandId() {
 		return (EAttribute)typeCommandKeyEClass.getEStructuralFeatures().get(1);
 	}
@@ -2320,6 +2599,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetText() {
 		return setTextEClass;
 	}
@@ -2329,6 +2609,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSetText_Control() {
 		return (EReference)setTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -2338,6 +2619,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetText_Text() {
 		return (EAttribute)setTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -2347,6 +2629,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetTextSelection() {
 		return setTextSelectionEClass;
 	}
@@ -2356,6 +2639,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSetTextSelection_Control() {
 		return (EReference)setTextSelectionEClass.getEStructuralFeatures().get(0);
 	}
@@ -2365,6 +2649,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextSelection_Offset() {
 		return (EAttribute)setTextSelectionEClass.getEStructuralFeatures().get(1);
 	}
@@ -2374,6 +2659,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextSelection_Length() {
 		return (EAttribute)setTextSelectionEClass.getEStructuralFeatures().get(2);
 	}
@@ -2383,6 +2669,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextSelection_StartLine() {
 		return (EAttribute)setTextSelectionEClass.getEStructuralFeatures().get(3);
 	}
@@ -2392,6 +2679,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextSelection_EndLine() {
 		return (EAttribute)setTextSelectionEClass.getEStructuralFeatures().get(4);
 	}
@@ -2401,6 +2689,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextSelection_EndOffset() {
 		return (EAttribute)setTextSelectionEClass.getEStructuralFeatures().get(5);
 	}
@@ -2410,6 +2699,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetTextOffset() {
 		return setTextOffsetEClass;
 	}
@@ -2419,6 +2709,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSetTextOffset_Control() {
 		return (EReference)setTextOffsetEClass.getEStructuralFeatures().get(0);
 	}
@@ -2428,6 +2719,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextOffset_Value() {
 		return (EAttribute)setTextOffsetEClass.getEStructuralFeatures().get(1);
 	}
@@ -2437,6 +2729,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetTextOffset_Line() {
 		return (EAttribute)setTextOffsetEClass.getEStructuralFeatures().get(2);
 	}
@@ -2446,6 +2739,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCheck() {
 		return checkEClass;
 	}
@@ -2455,6 +2749,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getCheck_Control() {
 		return (EReference)checkEClass.getEStructuralFeatures().get(0);
 	}
@@ -2464,6 +2759,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getUncheck() {
 		return uncheckEClass;
 	}
@@ -2473,6 +2769,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getUncheck_Control() {
 		return (EReference)uncheckEClass.getEStructuralFeatures().get(0);
 	}
@@ -2482,6 +2779,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSelect() {
 		return selectEClass;
 	}
@@ -2491,6 +2789,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSelect_Control() {
 		return (EReference)selectEClass.getEStructuralFeatures().get(0);
 	}
@@ -2500,6 +2799,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelect_Items() {
 		return (EAttribute)selectEClass.getEStructuralFeatures().get(1);
 	}
@@ -2509,6 +2809,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelect_All() {
 		return (EAttribute)selectEClass.getEStructuralFeatures().get(2);
 	}
@@ -2518,6 +2819,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelect_Column() {
 		return (EAttribute)selectEClass.getEStructuralFeatures().get(3);
 	}
@@ -2527,6 +2829,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCellEdit() {
 		return cellEditEClass;
 	}
@@ -2536,6 +2839,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getCellEdit_Control() {
 		return (EReference)cellEditEClass.getEStructuralFeatures().get(0);
 	}
@@ -2545,6 +2849,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getActivateCellEdit() {
 		return activateCellEditEClass;
 	}
@@ -2554,6 +2859,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getActivateCellEdit_Column() {
 		return (EAttribute)activateCellEditEClass.getEStructuralFeatures().get(0);
 	}
@@ -2563,6 +2869,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getActivateCellEdit_Type() {
 		return (EAttribute)activateCellEditEClass.getEStructuralFeatures().get(1);
 	}
@@ -2572,6 +2879,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getActivateCellEdit_Button() {
 		return (EAttribute)activateCellEditEClass.getEStructuralFeatures().get(2);
 	}
@@ -2581,6 +2889,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getApplyCellEdit() {
 		return applyCellEditEClass;
 	}
@@ -2590,6 +2899,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getApplyCellEdit_Deactivate() {
 		return (EAttribute)applyCellEditEClass.getEStructuralFeatures().get(0);
 	}
@@ -2599,6 +2909,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCancelCellEdit() {
 		return cancelCellEditEClass;
 	}
@@ -2608,6 +2919,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDeactivateCellEdit() {
 		return deactivateCellEditEClass;
 	}
@@ -2617,6 +2929,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClose() {
 		return closeEClass;
 	}
@@ -2626,6 +2939,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getClose_Control() {
 		return (EReference)closeEClass.getEStructuralFeatures().get(0);
 	}
@@ -2635,6 +2949,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getReturnFromOsDialog() {
 		return returnFromOsDialogEClass;
 	}
@@ -2644,6 +2959,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getReturnFromOsDialog_Kind() {
 		return (EAttribute)returnFromOsDialogEClass.getEStructuralFeatures().get(0);
 	}
@@ -2653,6 +2969,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getReturnFromOsDialog_Result() {
 		return (EAttribute)returnFromOsDialogEClass.getEStructuralFeatures().get(1);
 	}
@@ -2662,6 +2979,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getWaitUntilEclipseIsReady() {
 		return waitUntilEclipseIsReadyEClass;
 	}
@@ -2671,6 +2989,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getShowContentAssist() {
 		return showContentAssistEClass;
 	}
@@ -2680,6 +2999,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getShowContentAssist_Control() {
 		return (EReference)showContentAssistEClass.getEStructuralFeatures().get(0);
 	}
@@ -2689,6 +3009,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragAction() {
 		return dragActionEClass;
 	}
@@ -2698,6 +3019,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getDragAction_Control() {
 		return (EReference)dragActionEClass.getEStructuralFeatures().get(0);
 	}
@@ -2707,6 +3029,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_X() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(1);
 	}
@@ -2716,6 +3039,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_Y() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(2);
 	}
@@ -2725,6 +3049,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_Button() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(3);
 	}
@@ -2734,6 +3059,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_Mask() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(4);
 	}
@@ -2743,6 +3069,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_Detail() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(5);
 	}
@@ -2752,6 +3079,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDragAction_Operation() {
 		return (EAttribute)dragActionEClass.getEStructuralFeatures().get(6);
 	}
@@ -2761,6 +3089,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragStart() {
 		return dragStartEClass;
 	}
@@ -2770,6 +3099,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragEnd() {
 		return dragEndEClass;
 	}
@@ -2779,6 +3109,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragEnter() {
 		return dragEnterEClass;
 	}
@@ -2788,6 +3119,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragExit() {
 		return dragExitEClass;
 	}
@@ -2797,6 +3129,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragSetData() {
 		return dragSetDataEClass;
 	}
@@ -2806,6 +3139,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragAccept() {
 		return dragAcceptEClass;
 	}
@@ -2815,6 +3149,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragDetect() {
 		return dragDetectEClass;
 	}
@@ -2824,6 +3159,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDragOver() {
 		return dragOverEClass;
 	}
@@ -2833,6 +3169,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDrop() {
 		return dropEClass;
 	}
@@ -2842,6 +3179,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getRecognize() {
 		return recognizeEClass;
 	}
@@ -2851,6 +3189,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognize_Image() {
 		return (EAttribute)recognizeEClass.getEStructuralFeatures().get(0);
 	}
@@ -2860,6 +3199,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognize_X() {
 		return (EAttribute)recognizeEClass.getEStructuralFeatures().get(1);
 	}
@@ -2869,6 +3209,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognize_Y() {
 		return (EAttribute)recognizeEClass.getEStructuralFeatures().get(2);
 	}
@@ -2878,6 +3219,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognize_Width() {
 		return (EAttribute)recognizeEClass.getEStructuralFeatures().get(3);
 	}
@@ -2887,6 +3229,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognize_Height() {
 		return (EAttribute)recognizeEClass.getEStructuralFeatures().get(4);
 	}
@@ -2896,6 +3239,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getRecognizeResponse() {
 		return recognizeResponseEClass;
 	}
@@ -2905,6 +3249,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getRecognizeResponse_Text() {
 		return (EAttribute)recognizeResponseEClass.getEStructuralFeatures().get(0);
 	}
@@ -2914,6 +3259,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getContainsImage() {
 		return containsImageEClass;
 	}
@@ -2923,6 +3269,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getContainsImage_Control() {
 		return (EReference)containsImageEClass.getEStructuralFeatures().get(0);
 	}
@@ -2932,6 +3279,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getContainsImage_ImageURI() {
 		return (EAttribute)containsImageEClass.getEStructuralFeatures().get(1);
 	}
@@ -2941,6 +3289,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getContainsImage_RawImage() {
 		return (EAttribute)containsImageEClass.getEStructuralFeatures().get(2);
 	}
@@ -2950,6 +3299,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetRegionText() {
 		return getRegionTextEClass;
 	}
@@ -2959,6 +3309,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetRegionText_Control() {
 		return (EReference)getRegionTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -2968,6 +3319,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_X() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -2977,6 +3329,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_Y() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(2);
 	}
@@ -2986,6 +3339,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_Sx() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(3);
 	}
@@ -2995,6 +3349,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_Sy() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(4);
 	}
@@ -3004,6 +3359,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_Width() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(5);
 	}
@@ -3013,6 +3369,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegionText_Height() {
 		return (EAttribute)getRegionTextEClass.getEStructuralFeatures().get(6);
 	}
@@ -3022,6 +3379,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetRegion() {
 		return getRegionEClass;
 	}
@@ -3031,6 +3389,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegion_X() {
 		return (EAttribute)getRegionEClass.getEStructuralFeatures().get(0);
 	}
@@ -3040,6 +3399,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegion_Y() {
 		return (EAttribute)getRegionEClass.getEStructuralFeatures().get(1);
 	}
@@ -3049,6 +3409,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegion_ImageURI() {
 		return (EAttribute)getRegionEClass.getEStructuralFeatures().get(2);
 	}
@@ -3058,6 +3419,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRegion_RawImage() {
 		return (EAttribute)getRegionEClass.getEStructuralFeatures().get(3);
 	}
@@ -3067,6 +3429,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetAdvancedInfo() {
 		return getAdvancedInfoEClass;
 	}
@@ -3076,6 +3439,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetAboutMenu() {
 		return getAboutMenuEClass;
 	}
@@ -3085,6 +3449,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPreferencesMenu() {
 		return getPreferencesMenuEClass;
 	}
@@ -3094,6 +3459,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetDateTime() {
 		return getDateTimeEClass;
 	}
@@ -3103,6 +3469,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetSlider() {
 		return getSliderEClass;
 	}
@@ -3112,6 +3479,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetValue() {
 		return setValueEClass;
 	}
@@ -3121,6 +3489,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSetValue_Control() {
 		return (EReference)setValueEClass.getEStructuralFeatures().get(0);
 	}
@@ -3130,6 +3499,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetValue_Value() {
 		return (EAttribute)setValueEClass.getEStructuralFeatures().get(1);
 	}
@@ -3139,6 +3509,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMinimize() {
 		return minimizeEClass;
 	}
@@ -3148,6 +3519,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getMinimize_Control() {
 		return (EReference)minimizeEClass.getEStructuralFeatures().get(0);
 	}
@@ -3157,6 +3529,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMaximize() {
 		return maximizeEClass;
 	}
@@ -3166,6 +3539,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getMaximize_Control() {
 		return (EReference)maximizeEClass.getEStructuralFeatures().get(0);
 	}
@@ -3175,6 +3549,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getRestore() {
 		return restoreEClass;
 	}
@@ -3184,6 +3559,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getRestore_Control() {
 		return (EReference)restoreEClass.getEStructuralFeatures().get(0);
 	}
@@ -3193,6 +3569,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getShowTabList() {
 		return showTabListEClass;
 	}
@@ -3202,6 +3579,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getShowTabList_Control() {
 		return (EReference)showTabListEClass.getEStructuralFeatures().get(0);
 	}
@@ -3211,6 +3589,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getOptions() {
 		return optionsEClass;
 	}
@@ -3220,6 +3599,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getOptions_AllowStatusDialog() {
 		return (EAttribute)optionsEClass.getEStructuralFeatures().get(0);
 	}
@@ -3229,6 +3609,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getOptions_Command() {
 		return (EReference)optionsEClass.getEStructuralFeatures().get(1);
 	}
@@ -3238,6 +3619,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getExecWithOptions() {
 		return execWithOptionsEClass;
 	}
@@ -3247,6 +3629,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getExecWithOptions_Command() {
 		return (EReference)execWithOptionsEClass.getEStructuralFeatures().get(0);
 	}
@@ -3256,6 +3639,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getExecWithOptions_AllowStatusDialog() {
 		return (EAttribute)execWithOptionsEClass.getEStructuralFeatures().get(1);
 	}
@@ -3265,6 +3649,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getExecWithOptions_DisableJobWaiting() {
 		return (EAttribute)execWithOptionsEClass.getEStructuralFeatures().get(2);
 	}
@@ -3274,6 +3659,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getShutdownAut() {
 		return shutdownAutEClass;
 	}
@@ -3283,6 +3669,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetDialogResult() {
 		return setDialogResultEClass;
 	}
@@ -3292,6 +3679,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetDialogResult_Kind() {
 		return (EAttribute)setDialogResultEClass.getEStructuralFeatures().get(0);
 	}
@@ -3301,6 +3689,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetDialogResult_Result() {
 		return (EAttribute)setDialogResultEClass.getEStructuralFeatures().get(1);
 	}
@@ -3310,6 +3699,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPropertyNodes() {
 		return getPropertyNodesEClass;
 	}
@@ -3319,6 +3709,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetPropertyNodes_Element() {
 		return (EReference)getPropertyNodesEClass.getEStructuralFeatures().get(0);
 	}
@@ -3328,6 +3719,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetPropertyNodes_NodePath() {
 		return (EAttribute)getPropertyNodesEClass.getEStructuralFeatures().get(1);
 	}
@@ -3337,6 +3729,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetByOs() {
 		return getByOsEClass;
 	}
@@ -3346,6 +3739,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetByOs_Default() {
 		return (EAttribute)getByOsEClass.getEStructuralFeatures().get(0);
 	}
@@ -3355,6 +3749,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetByOs_Win() {
 		return (EAttribute)getByOsEClass.getEStructuralFeatures().get(1);
 	}
@@ -3364,6 +3759,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetByOs_Linux() {
 		return (EAttribute)getByOsEClass.getEStructuralFeatures().get(2);
 	}
@@ -3373,6 +3769,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetByOs_Macosx() {
 		return (EAttribute)getByOsEClass.getEStructuralFeatures().get(3);
 	}
@@ -3382,6 +3779,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getFromRawKey() {
 		return fromRawKeyEClass;
 	}
@@ -3391,6 +3789,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getFromRawKey_Mask() {
 		return (EAttribute)fromRawKeyEClass.getEStructuralFeatures().get(0);
 	}
@@ -3400,6 +3799,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getFromRawKey_KeyCode() {
 		return (EAttribute)fromRawKeyEClass.getEStructuralFeatures().get(1);
 	}
@@ -3409,6 +3809,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getFromRawKey_Meta() {
 		return (EAttribute)fromRawKeyEClass.getEStructuralFeatures().get(2);
 	}
@@ -3418,6 +3819,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getHoverAtTextOffset() {
 		return hoverAtTextOffsetEClass;
 	}
@@ -3427,6 +3829,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getHoverAtTextOffset_Control() {
 		return (EReference)hoverAtTextOffsetEClass.getEStructuralFeatures().get(0);
 	}
@@ -3436,6 +3839,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverAtTextOffset_Offset() {
 		return (EAttribute)hoverAtTextOffsetEClass.getEStructuralFeatures().get(1);
 	}
@@ -3445,6 +3849,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverAtTextOffset_Line() {
 		return (EAttribute)hoverAtTextOffsetEClass.getEStructuralFeatures().get(2);
 	}
@@ -3454,6 +3859,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTextViewer() {
 		return getTextViewerEClass;
 	}
@@ -3463,6 +3869,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSelectRange() {
 		return selectRangeEClass;
 	}
@@ -3472,6 +3879,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSelectRange_Control() {
 		return (EReference)selectRangeEClass.getEStructuralFeatures().get(0);
 	}
@@ -3481,6 +3889,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelectRange_Line() {
 		return (EAttribute)selectRangeEClass.getEStructuralFeatures().get(1);
 	}
@@ -3490,6 +3899,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelectRange_Column() {
 		return (EAttribute)selectRangeEClass.getEStructuralFeatures().get(2);
 	}
@@ -3499,6 +3909,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelectRange_EndLine() {
 		return (EAttribute)selectRangeEClass.getEStructuralFeatures().get(3);
 	}
@@ -3508,6 +3919,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSelectRange_EndColumn() {
 		return (EAttribute)selectRangeEClass.getEStructuralFeatures().get(4);
 	}
@@ -3517,6 +3929,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetCaretPos() {
 		return setCaretPosEClass;
 	}
@@ -3526,6 +3939,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getSetCaretPos_Control() {
 		return (EReference)setCaretPosEClass.getEStructuralFeatures().get(0);
 	}
@@ -3535,6 +3949,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetCaretPos_Line() {
 		return (EAttribute)setCaretPosEClass.getEStructuralFeatures().get(1);
 	}
@@ -3544,6 +3959,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetCaretPos_Column() {
 		return (EAttribute)setCaretPosEClass.getEStructuralFeatures().get(2);
 	}
@@ -3553,6 +3969,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getHoverText() {
 		return hoverTextEClass;
 	}
@@ -3562,6 +3979,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getHoverText_Control() {
 		return (EReference)hoverTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -3571,6 +3989,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverText_Line() {
 		return (EAttribute)hoverTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -3580,6 +3999,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverText_Column() {
 		return (EAttribute)hoverTextEClass.getEStructuralFeatures().get(2);
 	}
@@ -3589,6 +4009,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverText_With() {
 		return (EAttribute)hoverTextEClass.getEStructuralFeatures().get(3);
 	}
@@ -3598,6 +4019,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getOpenDeclaration() {
 		return openDeclarationEClass;
 	}
@@ -3607,6 +4029,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getOpenDeclaration_Control() {
 		return (EReference)openDeclarationEClass.getEStructuralFeatures().get(0);
 	}
@@ -3616,6 +4039,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetVerticalRuler() {
 		return getVerticalRulerEClass;
 	}
@@ -3625,6 +4049,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetLeftRuler() {
 		return getLeftRulerEClass;
 	}
@@ -3634,6 +4059,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetRulerColumn() {
 		return getRulerColumnEClass;
 	}
@@ -3643,6 +4069,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetRulerColumn_Text() {
 		return (EAttribute)getRulerColumnEClass.getEStructuralFeatures().get(0);
 	}
@@ -3652,6 +4079,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetRightRuler() {
 		return getRightRulerEClass;
 	}
@@ -3661,6 +4089,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClickRuler() {
 		return clickRulerEClass;
 	}
@@ -3670,6 +4099,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getClickRuler_Control() {
 		return (EReference)clickRulerEClass.getEStructuralFeatures().get(0);
 	}
@@ -3679,6 +4109,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickRuler_Line() {
 		return (EAttribute)clickRulerEClass.getEStructuralFeatures().get(1);
 	}
@@ -3688,6 +4119,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickRuler_Button() {
 		return (EAttribute)clickRulerEClass.getEStructuralFeatures().get(2);
 	}
@@ -3697,6 +4129,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickRuler_With() {
 		return (EAttribute)clickRulerEClass.getEStructuralFeatures().get(3);
 	}
@@ -3706,6 +4139,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDoubleClickRuler() {
 		return doubleClickRulerEClass;
 	}
@@ -3715,6 +4149,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getDoubleClickRuler_Control() {
 		return (EReference)doubleClickRulerEClass.getEStructuralFeatures().get(0);
 	}
@@ -3724,6 +4159,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDoubleClickRuler_Line() {
 		return (EAttribute)doubleClickRulerEClass.getEStructuralFeatures().get(1);
 	}
@@ -3733,6 +4169,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDoubleClickRuler_Button() {
 		return (EAttribute)doubleClickRulerEClass.getEStructuralFeatures().get(2);
 	}
@@ -3742,6 +4179,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDoubleClickRuler_With() {
 		return (EAttribute)doubleClickRulerEClass.getEStructuralFeatures().get(3);
 	}
@@ -3751,6 +4189,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getHoverRuler() {
 		return hoverRulerEClass;
 	}
@@ -3760,6 +4199,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getHoverRuler_Control() {
 		return (EReference)hoverRulerEClass.getEStructuralFeatures().get(0);
 	}
@@ -3769,6 +4209,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverRuler_Line() {
 		return (EAttribute)hoverRulerEClass.getEStructuralFeatures().get(1);
 	}
@@ -3778,6 +4219,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getHoverRuler_With() {
 		return (EAttribute)hoverRulerEClass.getEStructuralFeatures().get(2);
 	}
@@ -3787,6 +4229,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getControlCommand() {
 		return controlCommandEClass;
 	}
@@ -3796,6 +4239,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getControlCommand_Control() {
 		return (EReference)controlCommandEClass.getEStructuralFeatures().get(0);
 	}
@@ -3805,6 +4249,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClickLink() {
 		return clickLinkEClass;
 	}
@@ -3814,6 +4259,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickLink_Ref() {
 		return (EAttribute)clickLinkEClass.getEStructuralFeatures().get(0);
 	}
@@ -3823,6 +4269,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getExpand() {
 		return expandEClass;
 	}
@@ -3832,6 +4279,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCollapse() {
 		return collapseEClass;
 	}
@@ -3841,6 +4289,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetFocus() {
 		return setFocusEClass;
 	}
@@ -3850,6 +4299,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTableData() {
 		return getTableDataEClass;
 	}
@@ -3859,6 +4309,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetTableData_IncludeChecked() {
 		return (EAttribute)getTableDataEClass.getEStructuralFeatures().get(0);
 	}
@@ -3868,6 +4319,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetTableData_ExcludeHidden() {
 		return (EAttribute)getTableDataEClass.getEStructuralFeatures().get(1);
 	}
@@ -3877,6 +4329,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClickColumn() {
 		return clickColumnEClass;
 	}
@@ -3886,6 +4339,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickColumn_Name() {
 		return (EAttribute)clickColumnEClass.getEStructuralFeatures().get(0);
 	}
@@ -3895,6 +4349,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickColumn_Index() {
 		return (EAttribute)clickColumnEClass.getEStructuralFeatures().get(1);
 	}
@@ -3904,6 +4359,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTrace() {
 		return traceEClass;
 	}
@@ -3913,6 +4369,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTrace_Message() {
 		return (EAttribute)traceEClass.getEStructuralFeatures().get(0);
 	}
@@ -3922,6 +4379,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouse() {
 		return mouseEClass;
 	}
@@ -3931,6 +4389,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_Event() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(0);
 	}
@@ -3940,6 +4399,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_Button() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(1);
 	}
@@ -3949,6 +4409,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_With() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(2);
 	}
@@ -3958,6 +4419,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_Count() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(3);
 	}
@@ -3967,6 +4429,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_X() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(4);
 	}
@@ -3976,6 +4439,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouse_Y() {
 		return (EAttribute)mouseEClass.getEStructuralFeatures().get(5);
 	}
@@ -3985,6 +4449,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetObject() {
 		return getObjectEClass;
 	}
@@ -3994,6 +4459,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetObject_Object() {
 		return (EReference)getObjectEClass.getEStructuralFeatures().get(0);
 	}
@@ -4003,6 +4469,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetItems() {
 		return getItemsEClass;
 	}
@@ -4012,6 +4479,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getExpandAll() {
 		return expandAllEClass;
 	}
@@ -4021,6 +4489,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCollapseAll() {
 		return collapseAllEClass;
 	}
@@ -4030,6 +4499,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getTakeScreenshot() {
 		return takeScreenshotEClass;
 	}
@@ -4039,6 +4509,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getTakeScreenshot_Message() {
 		return (EAttribute)takeScreenshotEClass.getEStructuralFeatures().get(0);
 	}
@@ -4048,6 +4519,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSelectItem() {
 		return selectItemEClass;
 	}
@@ -4057,6 +4529,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetWidgetDetails() {
 		return getWidgetDetailsEClass;
 	}
@@ -4066,6 +4539,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGetWidgetDetails_Element() {
 		return (EReference)getWidgetDetailsEClass.getEStructuralFeatures().get(0);
 	}
@@ -4075,6 +4549,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getClickText() {
 		return clickTextEClass;
 	}
@@ -4084,6 +4559,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickText_Start() {
 		return (EAttribute)clickTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -4093,6 +4569,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickText_End() {
 		return (EAttribute)clickTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -4102,6 +4579,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getClickText_Button() {
 		return (EAttribute)clickTextEClass.getEStructuralFeatures().get(2);
 	}
@@ -4111,6 +4589,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetQuickAccess() {
 		return getQuickAccessEClass;
 	}
@@ -4120,6 +4599,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetColumnHeader() {
 		return getColumnHeaderEClass;
 	}
@@ -4129,6 +4609,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetPosition() {
 		return setPositionEClass;
 	}
@@ -4138,6 +4619,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetPosition_Index() {
 		return (EAttribute)setPositionEClass.getEStructuralFeatures().get(0);
 	}
@@ -4147,6 +4629,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getSetWidth() {
 		return setWidthEClass;
 	}
@@ -4156,6 +4639,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getSetWidth_Width() {
 		return (EAttribute)setWidthEClass.getEStructuralFeatures().get(0);
 	}
@@ -4165,6 +4649,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPropertyTab() {
 		return getPropertyTabEClass;
 	}
@@ -4174,6 +4659,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getShowAlert() {
 		return showAlertEClass;
 	}
@@ -4183,6 +4669,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getShowAlert_Message() {
 		return (EAttribute)showAlertEClass.getEStructuralFeatures().get(0);
 	}
@@ -4192,6 +4679,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDoubleClickText() {
 		return doubleClickTextEClass;
 	}
@@ -4201,6 +4689,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDoubleClickText_Position() {
 		return (EAttribute)doubleClickTextEClass.getEStructuralFeatures().get(0);
 	}
@@ -4210,6 +4699,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDoubleClickText_Button() {
 		return (EAttribute)doubleClickTextEClass.getEStructuralFeatures().get(1);
 	}
@@ -4219,6 +4709,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getToControlHandle() {
 		return toControlHandleEClass;
 	}
@@ -4228,6 +4719,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getToControlHandle_Widget() {
 		return (EAttribute)toControlHandleEClass.getEStructuralFeatures().get(0);
 	}
@@ -4237,6 +4729,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getBoundControlHandle() {
 		return boundControlHandleEClass;
 	}
@@ -4246,6 +4739,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getBoundControlHandle_WidgetId() {
 		return (EAttribute)boundControlHandleEClass.getEStructuralFeatures().get(0);
 	}
@@ -4255,6 +4749,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getUnfocus() {
 		return unfocusEClass;
 	}
@@ -4264,6 +4759,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDecrypt() {
 		return decryptEClass;
 	}
@@ -4273,6 +4769,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDecrypt_Value() {
 		return (EAttribute)decryptEClass.getEStructuralFeatures().get(0);
 	}
@@ -4282,6 +4779,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDecryptResult() {
 		return decryptResultEClass;
 	}
@@ -4291,6 +4789,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDecryptResult_Value() {
 		return (EAttribute)decryptResultEClass.getEStructuralFeatures().get(0);
 	}
@@ -4300,6 +4799,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getRestartAut() {
 		return restartAutEClass;
 	}
@@ -4309,6 +4809,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMessageBoxInfo() {
 		return messageBoxInfoEClass;
 	}
@@ -4318,6 +4819,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMessageBoxInfo_Title() {
 		return (EAttribute)messageBoxInfoEClass.getEStructuralFeatures().get(0);
 	}
@@ -4327,6 +4829,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMessageBoxInfo_Message() {
 		return (EAttribute)messageBoxInfoEClass.getEStructuralFeatures().get(1);
 	}
@@ -4336,6 +4839,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetLastMessageBox() {
 		return getLastMessageBoxEClass;
 	}
@@ -4345,6 +4849,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCheckDownloadResult() {
 		return checkDownloadResultEClass;
 	}
@@ -4354,6 +4859,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getCheckDownloadResult_ContentOnBase64() {
 		return (EAttribute)checkDownloadResultEClass.getEStructuralFeatures().get(0);
 	}
@@ -4363,6 +4869,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getCheckDownloadResult_FileName() {
 		return (EAttribute)checkDownloadResultEClass.getEStructuralFeatures().get(1);
 	}
@@ -4372,6 +4879,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetRuntimeTarget() {
 		return getRuntimeTargetEClass;
 	}
@@ -4381,6 +4889,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTestCaseName() {
 		return getTestCaseNameEClass;
 	}
@@ -4390,6 +4899,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetComboItems() {
 		return getComboItemsEClass;
 	}
@@ -4399,6 +4909,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EEnum getButton() {
 		return buttonEEnum;
 	}
@@ -4408,6 +4919,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EEnum getActivationEventType() {
 		return activationEventTypeEEnum;
 	}
@@ -4417,6 +4929,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EDataType getElementKind() {
 		return elementKindEDataType;
 	}
@@ -4426,6 +4939,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public TeslaFactory getTeslaFactory() {
 		return (TeslaFactory)getEFactoryInstance();
 	}
@@ -6505,7 +7019,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 		  (waitUntilEclipseIsReadyEClass,
 		   source,
 		   new String[] {
-			   "description", "Suspend execution until Eclipse is ready.",
+			   "description", "Suspend execution until Eclipse is ready. Can only be used in the top-most scope of a Test or ECL Context (no loops, conditionals, procedures, etc.). Should be used after every command that restarts the AUT (i.e.: ",
 			   "returns", "nothing",
 			   "recorded", "true",
 			   "example", "get-menu \"File/Restart\" | click\nwait-until-eclipse-is-ready\nget-view \"Q7 Explorer\" | get-tree | select Project"

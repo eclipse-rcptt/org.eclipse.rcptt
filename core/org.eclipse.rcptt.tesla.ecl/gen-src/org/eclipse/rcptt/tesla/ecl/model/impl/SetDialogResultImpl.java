@@ -96,6 +96,7 @@ public class SetDialogResultImpl extends CommandImpl implements SetDialogResult 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getKind() {
 		return kind;
 	}
@@ -105,6 +106,7 @@ public class SetDialogResultImpl extends CommandImpl implements SetDialogResult 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(String newKind) {
 		String oldKind = kind;
 		kind = newKind;
@@ -117,6 +119,7 @@ public class SetDialogResultImpl extends CommandImpl implements SetDialogResult 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<String> getResult() {
 		if (result == null) {
 			result = new EDataTypeUniqueEList<String>(String.class, this, TeslaPackage.SET_DIALOG_RESULT__RESULT);

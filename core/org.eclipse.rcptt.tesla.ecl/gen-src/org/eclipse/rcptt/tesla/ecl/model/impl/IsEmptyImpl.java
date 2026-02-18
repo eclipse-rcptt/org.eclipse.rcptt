@@ -71,6 +71,7 @@ public class IsEmptyImpl extends CommandImpl implements IsEmpty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EObject getInput() {
 		if (input != null && input.eIsProxy()) {
 			InternalEObject oldInput = (InternalEObject)input;
@@ -97,6 +98,7 @@ public class IsEmptyImpl extends CommandImpl implements IsEmpty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setInput(EObject newInput) {
 		EObject oldInput = input;
 		input = newInput;

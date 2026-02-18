@@ -197,6 +197,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -223,6 +224,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -235,6 +237,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getX() {
 		return x;
 	}
@@ -244,6 +247,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(Integer newX) {
 		Integer oldX = x;
 		x = newX;
@@ -256,6 +260,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getY() {
 		return y;
 	}
@@ -265,6 +270,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(Integer newY) {
 		Integer oldY = y;
 		y = newY;
@@ -277,6 +283,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getSx() {
 		return sx;
 	}
@@ -286,6 +293,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSx(Integer newSx) {
 		Integer oldSx = sx;
 		sx = newSx;
@@ -298,6 +306,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getSy() {
 		return sy;
 	}
@@ -307,6 +316,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSy(Integer newSy) {
 		Integer oldSy = sy;
 		sy = newSy;
@@ -319,6 +329,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getWidth() {
 		return width;
 	}
@@ -328,6 +339,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidth(Integer newWidth) {
 		Integer oldWidth = width;
 		width = newWidth;
@@ -340,6 +352,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getHeight() {
 		return height;
 	}
@@ -349,6 +362,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setHeight(Integer newHeight) {
 		Integer oldHeight = height;
 		height = newHeight;

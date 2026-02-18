@@ -71,6 +71,7 @@ public class VerifyErrorImpl extends CommandImpl implements org.eclipse.rcptt.te
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Command getCommand() {
 		if (command != null && command.eIsProxy()) {
 			InternalEObject oldCommand = (InternalEObject)command;
@@ -97,6 +98,7 @@ public class VerifyErrorImpl extends CommandImpl implements org.eclipse.rcptt.te
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCommand(Command newCommand) {
 		Command oldCommand = command;
 		command = newCommand;

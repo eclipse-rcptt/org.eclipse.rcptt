@@ -114,6 +114,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isAllowStatusDialog() {
 		return allowStatusDialog;
 	}
@@ -123,6 +124,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAllowStatusDialog(boolean newAllowStatusDialog) {
 		boolean oldAllowStatusDialog = allowStatusDialog;
 		allowStatusDialog = newAllowStatusDialog;
@@ -135,6 +137,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isDisableJobWaiting() {
 		return disableJobWaiting;
 	}
@@ -144,6 +147,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDisableJobWaiting(boolean newDisableJobWaiting) {
 		boolean oldDisableJobWaiting = disableJobWaiting;
 		disableJobWaiting = newDisableJobWaiting;
@@ -156,6 +160,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Command getCommand() {
 		if (command != null && command.eIsProxy()) {
 			InternalEObject oldCommand = (InternalEObject)command;
@@ -182,6 +187,7 @@ public class ExecWithOptionsImpl extends CommandImpl implements ExecWithOptions 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCommand(Command newCommand) {
 		Command oldCommand = command;
 		command = newCommand;

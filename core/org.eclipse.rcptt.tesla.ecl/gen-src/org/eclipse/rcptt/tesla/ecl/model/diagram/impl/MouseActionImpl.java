@@ -199,6 +199,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -225,6 +226,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -237,6 +239,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getX() {
 		return x;
 	}
@@ -246,6 +249,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(Integer newX) {
 		Integer oldX = x;
 		x = newX;
@@ -258,6 +262,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getY() {
 		return y;
 	}
@@ -267,6 +272,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(Integer newY) {
 		Integer oldY = y;
 		y = newY;
@@ -279,6 +285,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMask() {
 		return mask;
 	}
@@ -288,6 +295,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMask(String newMask) {
 		String oldMask = mask;
 		mask = newMask;
@@ -300,6 +308,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Button getButton() {
 		return button;
 	}
@@ -309,6 +318,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(Button newButton) {
 		Button oldButton = button;
 		button = newButton == null ? BUTTON_EDEFAULT : newButton;
@@ -321,6 +331,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getHeight() {
 		return height;
 	}
@@ -330,6 +341,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setHeight(Integer newHeight) {
 		Integer oldHeight = height;
 		height = newHeight;
@@ -342,6 +354,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getWidth() {
 		return width;
 	}
@@ -351,6 +364,7 @@ public class MouseActionImpl extends CommandImpl implements MouseAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidth(Integer newWidth) {
 		Integer oldWidth = width;
 		width = newWidth;

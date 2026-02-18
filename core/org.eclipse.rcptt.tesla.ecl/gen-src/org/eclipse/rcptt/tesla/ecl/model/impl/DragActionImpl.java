@@ -198,6 +198,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -224,6 +225,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -236,6 +238,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getX() {
 		return x;
 	}
@@ -245,6 +248,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(Integer newX) {
 		Integer oldX = x;
 		x = newX;
@@ -257,6 +261,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getY() {
 		return y;
 	}
@@ -266,6 +271,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(Integer newY) {
 		Integer oldY = y;
 		y = newY;
@@ -278,6 +284,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getDetail() {
 		return detail;
 	}
@@ -287,6 +294,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDetail(String newDetail) {
 		String oldDetail = detail;
 		detail = newDetail;
@@ -299,6 +307,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getOperation() {
 		return operation;
 	}
@@ -308,6 +317,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setOperation(Integer newOperation) {
 		Integer oldOperation = operation;
 		operation = newOperation;
@@ -320,6 +330,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMask() {
 		return mask;
 	}
@@ -329,6 +340,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMask(String newMask) {
 		String oldMask = mask;
 		mask = newMask;
@@ -341,6 +353,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Button getButton() {
 		return button;
 	}
@@ -350,6 +363,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(Button newButton) {
 		Button oldButton = button;
 		button = newButton == null ? BUTTON_EDEFAULT : newButton;

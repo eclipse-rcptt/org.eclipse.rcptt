@@ -19,7 +19,7 @@ import org.eclipse.rcptt.ecl.core.Command;
  *
  *
  * @see org.eclipse.rcptt.tesla.ecl.model.TeslaPackage#getWaitUntilEclipseIsReady()
- * @model annotation="http://www.eclipse.org/ecl/docs description='Suspend execution until Eclipse is ready.' returns='nothing' recorded='true' example='get-menu \"File/Restart\" | click\nwait-until-eclipse-is-ready\nget-view \"Q7 Explorer\" | get-tree | select Project'"
+ * @model annotation="http://www.eclipse.org/ecl/docs description='Suspend execution until Eclipse is ready. Can only be used in the top-most scope of a Test or ECL Context (no loops, conditionals, procedures, etc.). Should be used after every command that restarts the AUT (i.e.: ' returns='nothing' recorded='true' example='get-menu \"File/Restart\" | click\nwait-until-eclipse-is-ready\nget-view \"Q7 Explorer\" | get-tree | select Project'"
  * @generated
  */
 public interface WaitUntilEclipseIsReady extends Command {

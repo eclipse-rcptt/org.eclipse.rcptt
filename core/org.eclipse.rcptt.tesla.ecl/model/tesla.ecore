@@ -845,7 +845,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="WaitUntilEclipseIsReady" eSuperTypes="../../org.eclipse.rcptt.ecl.core/model/ecl.ecore#//Command">
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
-      <details key="description" value="Suspend execution until Eclipse is ready."/>
+      <details key="description" value="Suspend execution until Eclipse is ready. Can only be used in the top-most scope of a Test or ECL Context (no loops, conditionals, procedures, etc.). Should be used after every command that restarts the AUT (i.e.: "/>
       <details key="returns" value="nothing"/>
       <details key="recorded" value="true"/>
       <details key="example" value="get-menu &quot;File/Restart&quot; | click&#xA;wait-until-eclipse-is-ready&#xA;get-view &quot;Q7 Explorer&quot; | get-tree | select Project"/>
