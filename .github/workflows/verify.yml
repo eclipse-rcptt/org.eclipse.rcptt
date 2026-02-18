@@ -103,7 +103,7 @@ jobs:
       - name: VNC
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Build
-        run: ./build.sh -Decl-platform-repository=https://download.eclipse.org/releases/2025-12 -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -Decl-platform-repository=https://download.eclipse.org/releases/2026-03 -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
