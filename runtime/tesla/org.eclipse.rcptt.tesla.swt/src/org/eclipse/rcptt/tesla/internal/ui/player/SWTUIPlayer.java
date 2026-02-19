@@ -228,8 +228,7 @@ public final class SWTUIPlayer {
 				this.ignoreWindows[i++] = wrap(shell);
 			}
 		}
-		collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
+		collector = new UIJobCollector(Job.getJobManager());
 		timerListener = getTimerExecHelper();
 		TeslaTimerExecManager.getManager().addEventListener(timerListener);
 	}
@@ -2215,7 +2214,7 @@ public final class SWTUIPlayer {
 	}
 
 	private void shutdown() {
-		Job.getJobManager().removeJobChangeListener(collector);
+		collector.close();
 		BrowserManager.getInstance().clear();
 		TeslaTimerExecManager.getManager().removeEventListener(timerListener);
 	}

@@ -57,7 +57,6 @@ public abstract class UIRunnable<T> {
 	public static <T> T exec(final UIRunnable<T> runnable, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
 		final AtomicReference<RunningState> processed = new AtomicReference<RunningState>(RunningState.Starting);
 		CompletableFuture<T> result = new CompletableFuture<T>();
-		final UIJobCollector collector = new UIJobCollector();
 		long start = System.currentTimeMillis();
 		long stop = start + timeout_ms;
 		long halfWay = start + (timeout_ms / 2);
@@ -65,9 +64,11 @@ public abstract class UIRunnable<T> {
 		if (Display.getCurrent() != null) {
 			throw new IllegalStateException("Can't run in UI thread");
 		}
-		Job.getJobManager().addJobChangeListener(collector);
-		collector.enable();
-		final ITeslaEventListener listener = new ITeslaEventListener() {
+		ITeslaEventListener listener = null;
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
+			collector.enable();
+
+		listener = new ITeslaEventListener() {
 			@Override
 			public synchronized boolean doProcessing(
 					org.eclipse.rcptt.tesla.core.context.ContextManagement.Context currentContext) {
@@ -137,7 +138,7 @@ public abstract class UIRunnable<T> {
 			}
 		};
 		final IStatus[] dialogCloseStatus = new IStatus[1];  
-		try {
+
 			TeslaEventManager.getManager().addEventListener(listener);
 			while (!processed.get().equals(RunningState.Finished)) {
 				if (display.isDisposed()) {
@@ -216,7 +217,6 @@ public abstract class UIRunnable<T> {
 			throw new CoreException(createError(e));
 		} finally {
 			processed.set(RunningState.Done);
-			Job.getJobManager().removeJobChangeListener(collector);
 			TeslaEventManager.getManager().removeEventListener(listener);
 		}
 	}
