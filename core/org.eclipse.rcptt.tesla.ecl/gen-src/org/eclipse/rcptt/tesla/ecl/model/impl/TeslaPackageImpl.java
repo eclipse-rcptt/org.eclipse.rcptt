@@ -7019,7 +7019,7 @@ public class TeslaPackageImpl extends EPackageImpl implements TeslaPackage {
 		  (waitUntilEclipseIsReadyEClass,
 		   source,
 		   new String[] {
-			   "description", "Suspend execution until Eclipse is ready. Can only be used in the top-most scope of a Test or ECL Context (no loops, conditionals, procedures, etc.). Should be used after every command that restarts the AUT (i.e.: ",
+			   "description", "Suspend execution until Eclipse starts. Can only be used in the top-most scope of a Test or ECL Context (no loops, conditionals, procedures, etc.). Should be used after every command that restarts the AUT. Without this, next command would recognize AUT as unavailable and will fail the test.",
 			   "returns", "nothing",
 			   "recorded", "true",
 			   "example", "get-menu \"File/Restart\" | click\nwait-until-eclipse-is-ready\nget-view \"Q7 Explorer\" | get-tree | select Project"
