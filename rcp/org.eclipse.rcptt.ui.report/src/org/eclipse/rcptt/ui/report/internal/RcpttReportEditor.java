@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,17 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.stream.Stream;
 
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -26,7 +32,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -35,7 +40,8 @@ import org.eclipse.rcptt.ecl.internal.core.EMFConverterManager;
 import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.core.IQ7ReportConstants;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
+import org.eclipse.rcptt.reporting.util.IndexedExecutionReport;
+import org.eclipse.rcptt.reporting.util.ReportEntry;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.ui.report.Q7UIReportPlugin;
@@ -50,18 +56,64 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 
+import com.google.common.io.Closer;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
 public class RcpttReportEditor extends FormEditor {
-	private final WritableValue reportListObservable = new WritableValue(null, Q7ReportIterator.class);
+	private final Closer closer = Closer.create();
+	private final WritableValue<IndexedExecutionReport> reportListObservable = new WritableValue<>(null, IndexedExecutionReport.class) {
+		public void doSetValue(IndexedExecutionReport value) {
+			try (IndexedExecutionReport old = getValue()) {
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			super.doSetValue(value);
+		};	
+	};
 	private String initialWorkspaceLocation;
 
 	public RcpttReportEditor() {
+		closer.register(reportListObservable::dispose);
+		closer.register(this::closeList);
 	}
 
 	@Override
 	protected void addPages() {
 		try {
-			addPage(new ReportInformationPage(this, reportListObservable, "rcptt.report.info.page",
-					"General"));
+			DataBindingContext dbc = new DataBindingContext();
+			closer.register(dbc::dispose);
+			WritableValue<Iterable<ReportEntry>> reports = new WritableValue<>();
+			closer.register(reports::dispose);
+			UpdateValueStrategy<IndexedExecutionReport, Iterable<ReportEntry>> updateStrategy = new UpdateValueStrategy<>(UpdateValueStrategy.POLICY_UPDATE);
+			updateStrategy.setConverter(IConverter.<IndexedExecutionReport, Iterable<ReportEntry>>create(IndexedExecutionReport.class, Iterable.class, ier -> {
+				if (ier == null) {
+					return Collections.emptyList();
+				}
+				return () -> ier.read().map( t -> {
+					try {
+						return t.getEntry();
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				}).iterator();
+			}));
+			
+			dbc.bindValue(reports, reportListObservable, UpdateValueStrategy.never(), updateStrategy);
+			addPage(new ReportInformationPage(this, reports, "rcptt.report.info.page",
+					"General") {
+
+						@Override
+						protected Iterable<Report> getAllReports() {
+							return Stream.ofNullable(reportListObservable.getValue()).flatMap(IndexedExecutionReport::read).map(t -> {
+								try {
+									return t.getReport();
+								} catch (IOException e) {
+									throw new UncheckedIOException(e);
+								}
+							})::iterator;
+						}
+				
+			});
 		} catch (PartInitException e) {
 			Q7UIReportPlugin.log(e);
 		}
@@ -112,26 +164,17 @@ public class RcpttReportEditor extends FormEditor {
 					.getFullPath().removeLastSegments(1).toString();
 		}
 		closeList();
-		reportListObservable.setValue(new Q7ReportIterator(reportFile));
+		try {
+			reportListObservable.setValue(new IndexedExecutionReport(reportFile.toPath()));
+		} catch (IOException e) {
+			throw new UncheckedExecutionException(e);
+		}
 
 		setPartName(new Path(input.getName()).removeFileExtension().toString());
 	}
 
 	private void closeList() {
-		final Q7ReportIterator reportList = (Q7ReportIterator) reportListObservable.getValue();
 		reportListObservable.setValue(null);
-		if (reportList != null) {
-			new Job("Closing report file") {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					synchronized (reportList) {
-						reportList.close();
-					}
-					return Status.OK_STATUS;
-				}
-			};
-		}
 	}
 
 	public String getInitialWorkspaceLocation() {
@@ -140,9 +183,13 @@ public class RcpttReportEditor extends FormEditor {
 
 	@Override
 	public void dispose() {
-		closeList();
-		reportListObservable.dispose();
-		super.dispose();
+		try (var c = closer) {
+		 
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} finally {
+			super.dispose();
+		}
 	}
 
 	@Override
@@ -162,7 +209,7 @@ public class RcpttReportEditor extends FormEditor {
 		final ProgressMonitorDialog dialog = new ProgressMonitorDialog(
 				getSite().getShell());
 		try {
-			final Q7ReportIterator reportList = (Q7ReportIterator) reportListObservable.getValue();
+			final IndexedExecutionReport reportList = reportListObservable.getValue();
 			if (reportList == null)
 				return;
 			dialog.run(true, false, new IRunnableWithProgress() {
@@ -170,27 +217,25 @@ public class RcpttReportEditor extends FormEditor {
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Opening report...",
 							IProgressMonitor.UNKNOWN);
-					Iterator<Report> iterator = reportList.iterator();
-					while (iterator.hasNext()) {
-						monitor.worked(1);
-						final Report next = iterator.next();
-						Node root = next.getRoot();
-						EMap<String, EObject> properties = root.getProperties();
-						final Q7Info info = (Q7Info) properties
-								.get(IQ7ReportConstants.ROOT);
+					Report report;
+					try {
+						report = reportList.getById(id).getReport();
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+					Node root = report.getRoot();
+					EMap<String, EObject> properties = root.getProperties();
+					final Q7Info info = (Q7Info) properties
+							.get(IQ7ReportConstants.ROOT);
 
-						if (info != null) {
-							if (info.getId().equals(id)) {
-								dialog.getShell().getDisplay()
-										.asyncExec(new Runnable() {
-											public void run() {
-												openReportPage(id, title, next,
-														info);
-
-											}
-										});
-								return;
-							}
+					if (info != null) {
+						if (info.getId().equals(id)) {
+							dialog.getShell().getDisplay()
+									.asyncExec(() -> 
+											openReportPage(id, title, report,
+													info)
+									);
+							return;
 						}
 					}
 					monitor.done();
