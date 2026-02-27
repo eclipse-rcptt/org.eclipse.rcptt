@@ -34,7 +34,6 @@ import org.eclipse.rcptt.core.model.search.Q7SearchCore;
 import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.reporting.core.SimpleSeverity;
 import org.eclipse.rcptt.reporting.core.TimeFormatHelper;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
 import org.eclipse.rcptt.reporting.util.ReportEntry;
 import org.eclipse.rcptt.ui.actions.AbstractRunAction;
 import org.eclipse.rcptt.ui.actions.AbstractRunFailedAction;
@@ -60,6 +59,7 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 
 	private class ReportEntryLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			ReportEntry entry = (ReportEntry) element;
 			if (columnIndex == 0) {
@@ -81,6 +81,7 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 			return null;
 		}
 
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			ReportEntry entry = (ReportEntry) element;
 			switch (columnIndex) {
@@ -177,14 +178,17 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 
 
 
+	@Override
 	public String getName() {
 		return "Test cases";
 	}
 
+	@Override
 	public Image getImage() {
 		return Images.getImage(Images.FILE);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -220,6 +224,7 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 		viewer.setContentProvider(new ReportEntryContentProvider());
 
 		viewer.addOpenListener(new IOpenListener() {
+			@Override
 			public void open(OpenEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event
 						.getSelection();
@@ -230,6 +235,7 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 			}
 		});
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event
 						.getSelection();
@@ -250,11 +256,12 @@ public class TestCasesComposite extends AbstractEmbeddedComposite {
 
 	}
 
+	@Override
 	public Control getControl() {
 		return control;
 	}
 
-	public void setReports(final Q7ReportIterator iterator) {
+	public void setReports(final Iterable<ReportEntry> iterator) {
 		if (viewer.getControl().isDisposed())
 			return;
 		viewer.getControl().getDisplay().asyncExec(new Runnable() {

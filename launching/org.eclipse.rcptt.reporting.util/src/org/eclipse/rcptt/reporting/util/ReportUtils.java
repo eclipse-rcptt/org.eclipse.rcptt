@@ -13,6 +13,7 @@ package org.eclipse.rcptt.reporting.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,7 +38,6 @@ import org.eclipse.rcptt.reporting.Q7Statistics;
 import org.eclipse.rcptt.reporting.ReportingFactory;
 import org.eclipse.rcptt.reporting.core.IQ7ReportConstants;
 import org.eclipse.rcptt.reporting.core.SimpleSeverity;
-import org.eclipse.rcptt.reporting.util.internal.Plugin;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Event;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.EventSource;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
@@ -54,6 +54,7 @@ import org.eclipse.rcptt.verifications.status.VerificationStatusData;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 
 public class ReportUtils {
 
@@ -72,15 +73,13 @@ public class ReportUtils {
 
 	};
 
-	public static Q7Statistics calculateStatistics(Iterable<Report> iterator) {
-		return calculateStatistics(iterator.iterator());
+	public static Q7Statistics calculateStatisticsSlow(Iterator<Report> iterator) {
+		return calculateStatistics(Iterators.transform(iterator, ReportEntry::create));
 	}
 
-	public static Q7Statistics calculateStatistics(Iterator<Report> iterator) {
+	public static Q7Statistics calculateStatistics(Iterator<ReportEntry> iterator) {
 		Q7Statistics statistics = ReportingFactory.eINSTANCE.createQ7Statistics();
 
-		long startTime = Long.MAX_VALUE;
-		long endTime = Long.MIN_VALUE;
 		long totalTime = 0;
 		int total = 0;
 		int failed = 0;
@@ -88,19 +87,12 @@ public class ReportUtils {
 		int skipped = 0;
 
 		while (iterator.hasNext()) {
-			Report report = iterator.next();
+			ReportEntry report = iterator.next();
 			if (report == null) {
 				continue;
 			}
-			Node localRoot = report.getRoot();
-			if (localRoot == null) {
-				Plugin.UTILS.log(new NullPointerException("Report should always have root"));
-				continue;
-			}
-
 			total += 1;
-			Q7Info q7info = (Q7Info) localRoot.getProperties().get(IQ7ReportConstants.ROOT);
-			SimpleSeverity severity = SimpleSeverity.create(q7info);
+			SimpleSeverity severity = report.severity();
 			switch (severity) {
 			case CANCEL:
 				skipped++;
@@ -112,9 +104,8 @@ public class ReportUtils {
 				passed++;
 				break;
 			}
-			startTime = Math.min(startTime, localRoot.getStartTime());
-			endTime = Math.max(endTime, localRoot.getEndTime());
-			totalTime += (localRoot.getDuration());
+			
+			totalTime +=  Duration.between(report.getStart(),  report.getEnd()).toMillis();
 		}
 
 		statistics.setTime((int) totalTime);
