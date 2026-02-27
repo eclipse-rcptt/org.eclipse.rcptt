@@ -113,6 +113,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -139,6 +140,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -151,6 +153,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getOffset() {
 		return offset;
 	}
@@ -160,6 +163,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setOffset(Integer newOffset) {
 		Integer oldOffset = offset;
 		offset = newOffset;
@@ -172,6 +176,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getLine() {
 		return line;
 	}
@@ -181,6 +186,7 @@ public class HoverAtTextOffsetImpl extends CommandImpl implements HoverAtTextOff
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(Integer newLine) {
 		Integer oldLine = line;
 		line = newLine;

@@ -101,6 +101,7 @@ public class MessageBoxInfoImpl extends EObjectImpl implements MessageBoxInfo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getTitle() {
 		return title;
 	}
@@ -110,6 +111,7 @@ public class MessageBoxInfoImpl extends EObjectImpl implements MessageBoxInfo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTitle(String newTitle) {
 		String oldTitle = title;
 		title = newTitle;
@@ -122,6 +124,7 @@ public class MessageBoxInfoImpl extends EObjectImpl implements MessageBoxInfo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMessage() {
 		return message;
 	}
@@ -131,6 +134,7 @@ public class MessageBoxInfoImpl extends EObjectImpl implements MessageBoxInfo {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMessage(String newMessage) {
 		String oldMessage = message;
 		message = newMessage;

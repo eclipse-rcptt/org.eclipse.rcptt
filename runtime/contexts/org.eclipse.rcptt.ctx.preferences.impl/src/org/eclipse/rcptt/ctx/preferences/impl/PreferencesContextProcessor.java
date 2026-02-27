@@ -60,10 +60,8 @@ public class PreferencesContextProcessor implements IContextProcessor {
 	@Override
 	public void apply(final Context contextToApply, BooleanSupplier isCancelled) throws CoreException {
 		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
-		final UIJobCollector collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
 		SWTUIPlayer.disableMessageDialogs();
-		try {
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
 			UIRunnable.exec(new UIRunnable<Object>() {
 				@Override
 				public Object run() throws CoreException {
@@ -88,7 +86,6 @@ public class PreferencesContextProcessor implements IContextProcessor {
 			throw ee;
 		} finally {
 			SWTUIPlayer.enableMessageDialogs();
-			Job.getJobManager().removeJobChangeListener(collector);
 		}
 	}
 
