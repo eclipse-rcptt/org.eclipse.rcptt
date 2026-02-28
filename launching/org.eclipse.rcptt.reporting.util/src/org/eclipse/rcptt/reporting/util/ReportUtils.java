@@ -92,7 +92,7 @@ public class ReportUtils {
 				continue;
 			}
 			total += 1;
-			SimpleSeverity severity = report.severity();
+			SimpleSeverity severity = report.getSimpleSeverity();
 			switch (severity) {
 			case CANCEL:
 				skipped++;

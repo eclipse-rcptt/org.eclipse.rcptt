@@ -12,8 +12,6 @@ package org.eclipse.rcptt.reporting.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -32,10 +30,9 @@ public final class ReportEntry {
 	private final int status;
 	public int time;
 	public final String message;
-	private final SimpleSeverity severity;
 	private Instant start, end;
 
-	private ReportEntry(String name, String id, int status, String message, SimpleSeverity severity, Instant start, Instant end) {
+	private ReportEntry(String name, String id, int status, String message, Instant start, Instant end) {
 		super();
 		checkNotNull(name);
 		checkNotNull(id);
@@ -45,7 +42,6 @@ public final class ReportEntry {
 		this.name = name;
 		this.id = id;
 		this.status = status;
-		this.severity = checkNotNull(severity);
 		this.start = checkNotNull(start);
 		this.end = checkNotNull(end);
 		this.time = Math.toIntExact(Duration.between(start, end).toMillis());
@@ -67,18 +63,12 @@ public final class ReportEntry {
 	public static ReportEntry create(Report next) {
 		Node root = next.getRoot();
 		if (root == null) {
-			return new ReportEntry("Broken report", "Broken report", 0, "A report is missing RCPTT required metadata. This is likely coused by early termination of test runner.", SimpleSeverity.ERROR, Instant.EPOCH, Instant.EPOCH); 
+			return new ReportEntry("Broken report", "Broken report", 0, "A report is missing RCPTT required metadata. This is likely coused by early termination of test runner.", Instant.EPOCH, Instant.EPOCH); 
 		}
 		Q7Info info = ReportHelper.getInfo(root);
-		StringWriter writer = new StringWriter();
-		RcpttReportGenerator.writeResult(new PrintWriter(writer), 0, info.getResult());
 		ReportEntry entry = new ReportEntry(root.getName(), info.getId(), info.getResult().getSeverity(),
-				writer.toString(), SimpleSeverity.create(info), Instant.ofEpochMilli(root.getStartTime()), Instant.ofEpochMilli(root.getEndTime()));
+				ReportUtils.getFailMessage(root), Instant.ofEpochMilli(root.getStartTime()), Instant.ofEpochMilli(root.getEndTime()));
 		return entry;
-	}
-
-	public SimpleSeverity severity() {
-		return severity;
 	}
 
 	public Instant getStart() {
