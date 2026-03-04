@@ -104,13 +104,15 @@ public class RcpttReportEditor extends FormEditor {
 
 						@Override
 						protected Iterable<Report> getAllReports() {
-							return Stream.ofNullable(reportListObservable.getValue()).flatMap(IndexedExecutionReport::read).map(t -> {
+							IndexedExecutionReport[] r = new IndexedExecutionReport[1];
+							reportListObservable.getRealm().exec(() -> r[0] = reportListObservable.getValue());
+							return () -> Stream.ofNullable(r[0]).flatMap(IndexedExecutionReport::read).map(t -> {
 								try {
 									return t.getReport();
 								} catch (IOException e) {
 									throw new UncheckedIOException(e);
 								}
-							})::iterator;
+							}).iterator();
 						}
 				
 			});
