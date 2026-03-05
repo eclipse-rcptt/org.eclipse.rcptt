@@ -12,6 +12,8 @@ package org.eclipse.rcptt.tesla.internal.ui.player;
 
 import static java.util.Arrays.asList;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +35,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.logging.Q7LoggingManager;
@@ -57,7 +60,7 @@ import org.eclipse.ui.PlatformUI;
 /**
  * Manages jobs information and statuses.
  */
-public class UIJobCollector implements IJobChangeListener {
+public class UIJobCollector implements Closeable {
 	private static final boolean DEBUG = "true".equals(Platform.getDebugOption("org.eclipse.rcptt.tesla.swt/debug/jobCollector"));
 	private static final boolean DEBUG_REPORT_OUTPUT = "true".equals(Platform.getDebugOption("org.eclipse.rcptt.tesla.swt/debug/debugReportOutput"));
 	private static final PrintWriter DEBUG_WRITER = new PrintWriter(System.out);
@@ -246,6 +249,7 @@ public class UIJobCollector implements IJobChangeListener {
 	private boolean state;
 	private boolean needDisable = false;
 	private final IParameters parameters;
+	private final IJobManager jobManager;
 	
 
 	private final Job removeCompletedJob = new Job("Eliminate completed jobs") {
@@ -331,6 +335,7 @@ public class UIJobCollector implements IJobChangeListener {
 		}
 	}
 
+	private final IJobChangeListener jobListener = new IJobChangeListener() {
 	@Override
 	public void aboutToRun(IJobChangeEvent event) {
 	}
@@ -399,7 +404,18 @@ public class UIJobCollector implements IJobChangeListener {
 		event("scheduled", jobInfo);
 		jobInfo.poke();
 	}
+	@Override
+	public void sleeping(IJobChangeEvent event) {
+		Job job = event.getJob();
+		if (job.belongsTo(FAMILY)) {
+			return;
+		}
+		JobInfo info = getOrCreateJobInfo(job);
+		info.sleeping();
+		event("sleeping", info);
+	}
 
+	};
 	protected JobStatus calcJobStatus(Job job) {
 		JobStatus result = detectJobStatus(job);
 		if (result == null) {
@@ -468,7 +484,7 @@ public class UIJobCollector implements IJobChangeListener {
 		return status;
 	}
 	
-	public UIJobCollector() {
+	public UIJobCollector(IJobManager jobManager) {
 		this(new IParameters() {
 			@Override
 			public int stepInterval() {
@@ -494,24 +510,16 @@ public class UIJobCollector implements IJobChangeListener {
 			public int delayToWaitFor() {
 				return TeslaLimits.getJobWaitForDelayedTimeout();
 			}
-		});
+		}, jobManager);
 	}
 	
-	public UIJobCollector(IParameters parameters) {
+	public UIJobCollector(IParameters parameters, IJobManager jobManager) {
 		if (parameters == null)
 			throw new NullPointerException();
 		this.parameters = new NormalizedParameters(parameters);
-	}
-
-	@Override
-	public void sleeping(IJobChangeEvent event) {
-		Job job = event.getJob();
-		if (job.belongsTo(FAMILY)) {
-			return;
-		}
-		JobInfo info = getOrCreateJobInfo(job);
-		info.sleeping();
-		event("sleeping", info);
+		this.jobManager = jobManager;
+		jobManager.addJobChangeListener(jobListener);
+		
 	}
 
 	private static boolean isModal(Shell shell) {
@@ -892,6 +900,9 @@ public class UIJobCollector implements IJobChangeListener {
 	}
 
 	private boolean removeCompletedJobs() {
+		for (Job j: jobManager.find(null)) {
+			TeslaSWTAccess.waitListeners(j); // force jobs being scheduled to invoke their listeners
+		}
 		try {
 			if (!removeCompletedJob.join(1, null)) {
 				return false;
@@ -1102,5 +1113,11 @@ public class UIJobCollector implements IJobChangeListener {
 	
 	private static boolean shouldDebug(Job job) {
 		return DEBUG && !IGNORED_BY_DEFAULT.contains(job.getClass().getName());
+	}
+
+	@Override
+	public void close() {
+		disable();
+		jobManager.removeJobChangeListener(jobListener);
 	}
 }

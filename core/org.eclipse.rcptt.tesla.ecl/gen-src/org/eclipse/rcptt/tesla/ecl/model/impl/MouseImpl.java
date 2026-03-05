@@ -182,6 +182,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getEvent() {
 		return event;
 	}
@@ -191,6 +192,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEvent(String newEvent) {
 		String oldEvent = event;
 		event = newEvent;
@@ -203,6 +205,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getButton() {
 		return button;
 	}
@@ -212,6 +215,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(String newButton) {
 		String oldButton = button;
 		button = newButton;
@@ -224,6 +228,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getWith() {
 		return with;
 	}
@@ -233,6 +238,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWith(String newWith) {
 		String oldWith = with;
 		with = newWith;
@@ -245,6 +251,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getCount() {
 		return count;
 	}
@@ -254,6 +261,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCount(int newCount) {
 		int oldCount = count;
 		count = newCount;
@@ -266,6 +274,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getX() {
 		return x;
 	}
@@ -275,6 +284,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(int newX) {
 		int oldX = x;
 		x = newX;
@@ -287,6 +297,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getY() {
 		return y;
 	}
@@ -296,6 +307,7 @@ public class MouseImpl extends ControlCommandImpl implements Mouse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(int newY) {
 		int oldY = y;
 		y = newY;
