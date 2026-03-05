@@ -19,28 +19,28 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.rcptt.internal.ui.Messages;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.reporting.core.IReportRenderer;
 import org.eclipse.rcptt.reporting.core.IReportRenderer.IContentFactory;
 import org.eclipse.rcptt.reporting.core.ReportRendererManager.ReportRenderer;
 import org.eclipse.rcptt.reporting.util.FileContentFactory;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
+import org.eclipse.swt.widgets.MessageBox;
 
 public class ReportWizard extends Wizard {
 	private ReportMainPage mainPage;
-	private Q7ReportIterator report;
+	private Iterable<Report> report;
 	private String name;
 	private String[] disabled;
 	private String initialWorkspaceLocatio;
 
-	public ReportWizard(Q7ReportIterator report, String name) {
-		this.report = report;
+	public ReportWizard(Iterable<Report> iterable, String name) {
+		this.report = iterable;
 		this.name = name;
 	}
 
-	public Q7ReportIterator getReport() {
+	public Iterable<Report> getReport() {
 		return report;
 	}
 

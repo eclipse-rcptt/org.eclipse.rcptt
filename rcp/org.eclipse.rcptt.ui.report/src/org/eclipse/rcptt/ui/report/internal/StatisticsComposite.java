@@ -20,7 +20,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.reporting.Q7Statistics;
 import org.eclipse.rcptt.reporting.ReportingFactory;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
+import org.eclipse.rcptt.reporting.util.ReportEntry;
 import org.eclipse.rcptt.reporting.util.ReportUtils;
 import org.eclipse.rcptt.ui.controls.AbstractEmbeddedComposite;
 import org.eclipse.rcptt.ui.launching.StatisticPanel;
@@ -42,11 +42,11 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 			return family == StatisticsComposite.this;
 		}
 
-		private final Q7ReportIterator iterator;
+		private final Iterable<ReportEntry> iterator;
 
-		public UpdateJob(Q7ReportIterator iterator) {
+		public UpdateJob(Iterable<ReportEntry> iterator2) {
 			super("Calculating report statistics");
-			this.iterator = iterator;
+			this.iterator = iterator2;
 		}
 
 		@Override
@@ -80,20 +80,23 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 
 	}
 
-	void setReports(Q7ReportIterator iterator) {
+	void setReports(Iterable<ReportEntry> iterator) {
 		Job.getJobManager().cancel(this);
 		if (iterator != null)
 			new UpdateJob(iterator).schedule();
 	}
 
+	@Override
 	public String getName() {
 		return "Execution statistics";
 	}
 
+	@Override
 	public Image getImage() {
 		return Images.getImage(Images.FILE);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -130,6 +133,7 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 		});
 	}
 
+	@Override
 	public Control getControl() {
 		return control;
 	}
