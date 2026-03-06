@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class HtmlReporterTest {
 	}
 
 
-	private Report createReport(String name, int severity) {
+	public static Report createReport(String name, int severity) {
 		Report report = ReportFactory.eINSTANCE.createReport();
 		Node node = createNode(name, severity);
 		ReportHelper.getInfo(node).setId(name);
@@ -63,7 +63,7 @@ public class HtmlReporterTest {
 		return report;
 	}
 
-	private Node createNode(String name, int severity) {
+	private static Node createNode(String name, int severity) {
 		Node node = ReportFactory.eINSTANCE.createNode();
 		node.setName(name);
 		ReportHelper.getInfo(node).setResult(RcpttPlugin.createProcessStatus(severity, "No message"));

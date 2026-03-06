@@ -14,25 +14,43 @@ import static java.util.Collections.synchronizedMap;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Closeable;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.sherlock.core.streams.SherlockReportFormat;
 
+import com.google.common.io.Closer;
+
 /** A collection of reports from one execution session grouped in a ZIP file **/
 public final class IndexedExecutionReport implements Closeable {
-	private final ZipFile zipFile;
+	private final Path zipPath;
 	private final Map<String, Handle> idIndex = synchronizedMap(new HashMap<>());
 	private final Map<String, Handle> entryIndex = synchronizedMap(new HashMap<>());
+
+	private static final class ClosingInputStream extends FilterInputStream {
+		protected ClosingInputStream(InputStream in) {
+			super(in);
+		}
+		public Closer closer = Closer.create();
+		@Override
+		public void close() throws IOException {
+			closer.register(super::close);
+			closer.close();
+		}
+	}
 	public final class Handle {
 		private final ZipEntry zipEntry;
 		private ReportEntry reportEntry;
@@ -43,13 +61,40 @@ public final class IndexedExecutionReport implements Closeable {
 			return getEntry().id;
 		}
 		public Report getReport() throws IOException {
-			try (InputStream is = zipFile.getInputStream(zipEntry)) {
-				Report report = SherlockReportFormat.loadReport(is, true, true);
-				reportEntry = ReportEntry.create(report);
-				idIndex.put(reportEntry.id, this);
-				return report; 
+			try (var is = readEntry()) {
+				var result = populate(is);
+				assert reportEntry != null;
+				return result;
 			}
 		}
+		private Report populate(InputStream is) throws IOException {
+			Report report = SherlockReportFormat.loadReport(is, false, true);
+			reportEntry = ReportEntry.create(report);
+			idIndex.put(reportEntry.id, this);
+			return report;
+		}
+		private InputStream readEntry() throws IOException {
+			Closer closer = Closer.create();
+			InputStream result;
+			try { 
+				ZipFile zipFile = closer.register(new ZipFile(zipPath.toFile()));
+					result = zipFile.getInputStream(zipEntry);
+			} catch (ZipException e) {
+				String name = zipEntry.getName();
+				ZipInputStream zipInputStream = closer.register(new ZipInputStream(Files.newInputStream(zipPath)));
+				Stream<ZipEntry> entries = entries(zipInputStream);
+				closer.register(entries::close);
+				ZipEntry target = entries.filter(entry -> entry.getName().equals(name)).findAny().get();
+				result = zipInputStream;
+			} catch (Throwable e) {
+				closer.close();
+				throw e;
+			}
+			var closing = new ClosingInputStream(result);
+			closing.closer.register(closer);
+			return closing;
+		}
+		
 		public ReportEntry getEntry() throws IOException {
 			if (reportEntry == null) {
 				getReport();
@@ -59,18 +104,48 @@ public final class IndexedExecutionReport implements Closeable {
 		}
 	}
 	public IndexedExecutionReport(Path path) throws ZipException, IOException {
-		zipFile = new ZipFile(path.toFile());
+		zipPath = path;
+	}
+	private static final Stream<ZipEntry> entries(ZipInputStream zipInputStream) {
+		var result = Stream.generate(() -> {
+			try {
+				return zipInputStream.getNextEntry();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		})
+		.takeWhile(Objects::nonNull);
+		result.onClose(() -> {
+			try {
+				zipInputStream.close();
+			} catch (IOException e1) {
+				throw new UncheckedIOException(e1);
+			}
+		});
+		return result;
 	}
 	public Stream<Handle> read() {
-		if (zipFile.size() == entryIndex.size()) {
-			return entryIndex.values().stream();
+		ZipInputStream zipInputStream;
+		try {
+			zipInputStream = new ZipInputStream(Files.newInputStream(zipPath));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
-		return zipFile.stream().map(e -> entryIndex.computeIfAbsent(e.getName(), (ignored) -> new Handle(e)) );
+		return entries(zipInputStream).map(e -> {
+			var result = entryIndex.computeIfAbsent(e.getName(), (ignored) -> new Handle(e));
+			if (result.reportEntry == null) {
+				try {
+					result.populate(zipInputStream);
+				} catch (IOException e1) {
+					throw new UncheckedIOException(e1);
+				}
+			}
+			return result;
+		});
 	}
 	@Override
 	public void close() throws IOException {
 		idIndex.clear();
-		zipFile.close();
 	}
 	public Handle getById(String id) {
 		Handle result = idIndex.get(id);
