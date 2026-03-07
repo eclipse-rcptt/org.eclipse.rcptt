@@ -45,17 +45,24 @@ class ReportEntryContentProvider implements IStructuredContentProvider {
 				Iterable<ReportEntry> reportsLocal = reports;
 				if (reportsLocal != null) {
 					Iterator<ReportEntry> iterator = reportsLocal.iterator();
-					while (iterator.hasNext()) {
-						if (monitor.isCanceled())
+					try {
+						while (iterator.hasNext()) {
+							if (monitor.isCanceled())
+								return Status.CANCEL_STATUS;
+							ReportEntry next = iterator.next();
+							if (next == null) {
+								break;
+							}
+							monitor.subTask(next.name);
+							{
+								entries.add(next);
+							}
+						}
+					} catch (Exception e) {
+						if (monitor.isCanceled()) {
 							return Status.CANCEL_STATUS;
-						ReportEntry next = iterator.next();
-						if (next == null) {
-							break;
 						}
-						monitor.subTask(next.name);
-						{
-							entries.add(next);
-						}
+						throw e;
 					}
 				}
 			}
