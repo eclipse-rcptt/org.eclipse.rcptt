@@ -892,6 +892,9 @@ public class UIJobCollector implements IJobChangeListener {
 	}
 
 	private boolean removeCompletedJobs() {
+		for (Job j: Job.getJobManager().find(null)) {
+			TeslaSWTAccess.waitListeners(j); // force jobs being scheduled to invoke their listeners
+		}
 		try {
 			if (!removeCompletedJob.join(1, null)) {
 				return false;
