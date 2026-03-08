@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.report.internal;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Collections;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -27,7 +24,6 @@ import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -45,7 +41,6 @@ import org.eclipse.rcptt.reporting.util.ReportEntry;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.ui.report.Q7UIReportPlugin;
-import org.eclipse.rcptt.util.FileUtil;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.ui.IEditorInput;
@@ -69,14 +64,45 @@ public class RcpttReportEditor extends FormEditor {
 			}
 			super.doSetValue(value);
 		};	
+		@Override
+		public void dispose() {
+			try (IndexedExecutionReport old = getValue()) {
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			} finally {			
+				super.dispose();
+			}
+		}
 	};
 	private String initialWorkspaceLocation;
+	private final StreamIterableAdapter<ReportEntry> entryIterable = new StreamIterableAdapter<ReportEntry>() {
+		@SuppressWarnings("resource")
+		@Override
+		public Stream<ReportEntry> stream() {
+			var report = RealmExecutor.syncGetValue(reportListObservable); 
+			if (report == null) {
+				return Stream.empty();
+			}
+			return report.read().map( t -> {
+				try {
+					return t.getEntry();
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		}
+	};
+	private final java.nio.file.Path temp_file;
 
-	public RcpttReportEditor() {
+	@SuppressWarnings("resource")
+	public RcpttReportEditor() throws IOException {
+		temp_file = Files.createTempFile("report_", ".report");
+		closer.register(() -> Files.delete(temp_file));
 		closer.register(reportListObservable::dispose);
-		closer.register(this::closeList);
+		closer.register(entryIterable);
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	protected void addPages() {
 		try {
@@ -84,19 +110,9 @@ public class RcpttReportEditor extends FormEditor {
 			closer.register(dbc::dispose);
 			WritableValue<Iterable<ReportEntry>> reports = new WritableValue<>();
 			closer.register(reports::dispose);
+			
 			UpdateValueStrategy<IndexedExecutionReport, Iterable<ReportEntry>> updateStrategy = new UpdateValueStrategy<>(UpdateValueStrategy.POLICY_UPDATE);
-			updateStrategy.setConverter(IConverter.<IndexedExecutionReport, Iterable<ReportEntry>>create(IndexedExecutionReport.class, Iterable.class, ier -> {
-				if (ier == null) {
-					return Collections.emptyList();
-				}
-				return () -> ier.read().map( t -> {
-					try {
-						return t.getEntry();
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					}
-				}).iterator();
-			}));
+			updateStrategy.setConverter(IConverter.<IndexedExecutionReport, Iterable<ReportEntry>>create(IndexedExecutionReport.class, Iterable.class, (ignored) -> entryIterable::iterator));
 			
 			dbc.bindValue(reports, reportListObservable, UpdateValueStrategy.never(), updateStrategy);
 			addPage(new ReportInformationPage(this, reports, "rcptt.report.info.page",
@@ -121,42 +137,24 @@ public class RcpttReportEditor extends FormEditor {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	protected void setInput(IEditorInput input) {
 		super.setInput(input);
 
-		// Copy file into .metadata
-		IPath path = Q7UIReportPlugin.getDefault().getStateLocation()
-				.append("temporary");
-		path.toFile().mkdirs();
-
-		File reportFile = path.append("report_" + System.currentTimeMillis())
-				.toFile();
-		while (reportFile.exists()) {
-			reportFile = path.append("report_" + System.currentTimeMillis())
-					.toFile();
-		}
-
+		// Copy file
+		reportListObservable.setValue(null); // close previously opened file
 		if (input instanceof IStorageEditorInput) {
-			InputStream source;
-			try {
-				source = ((IStorageEditorInput) input).getStorage()
-						.getContents();
-				FileUtil.copy(new BufferedInputStream(source),
-						new BufferedOutputStream(new FileOutputStream(
-								reportFile)));
+			try (InputStream source = ((IStorageEditorInput) input).getStorage().getContents()) {
+				Files.copy(source, temp_file, StandardCopyOption.REPLACE_EXISTING);
 			} catch (Throwable e) {
 				Q7UIReportPlugin.log(e);
 			}
 		}
 		if (input instanceof IURIEditorInput) {
 			URI uri = ((IURIEditorInput) input).getURI();
-			InputStream stream;
-			try {
-				stream = uri.toURL().openStream();
-				FileUtil.copy(new BufferedInputStream(stream),
-						new BufferedOutputStream(new FileOutputStream(
-								reportFile)));
+			try (InputStream stream = uri.toURL().openStream()) {
+				Files.copy(stream, temp_file, StandardCopyOption.REPLACE_EXISTING);
 			} catch (Exception e) {
 				Q7UIReportPlugin.log(e);
 			}
@@ -165,18 +163,13 @@ public class RcpttReportEditor extends FormEditor {
 			initialWorkspaceLocation = ((IFileEditorInput) input).getFile()
 					.getFullPath().removeLastSegments(1).toString();
 		}
-		closeList();
 		try {
-			reportListObservable.setValue(new IndexedExecutionReport(reportFile.toPath()));
+			reportListObservable.setValue(new IndexedExecutionReport(temp_file));
 		} catch (IOException e) {
 			throw new UncheckedExecutionException(e);
 		}
 
 		setPartName(new Path(input.getName()).removeFileExtension().toString());
-	}
-
-	private void closeList() {
-		reportListObservable.setValue(null);
 	}
 
 	public String getInitialWorkspaceLocation() {
@@ -211,10 +204,12 @@ public class RcpttReportEditor extends FormEditor {
 		final ProgressMonitorDialog dialog = new ProgressMonitorDialog(
 				getSite().getShell());
 		try {
+			@SuppressWarnings("resource")
 			final IndexedExecutionReport reportList = reportListObservable.getValue();
 			if (reportList == null)
 				return;
 			dialog.run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("Opening report...",
