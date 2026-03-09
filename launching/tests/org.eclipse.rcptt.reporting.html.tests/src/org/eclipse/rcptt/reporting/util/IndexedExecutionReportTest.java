@@ -21,7 +21,6 @@ import java.util.zip.ZipException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.rcptt.sherlock.core.streams.SherlockReportOutputStream;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -55,6 +54,30 @@ public class IndexedExecutionReportTest {
 			assertEquals(IStatus.OK, subject.getById("a").getEntry().getStatusSeverity());
 			assertNotNull(subject.getById("a").getReport());
 			assertNotNull(subject.getById("b").getReport());
+		}
+	}
+	
+	
+	@SuppressWarnings("resource")
+	@Test
+	public void incompleteToCompleteArchive() throws ZipException, IOException {
+		File f = temporaryFolder.newFile();
+		IndexedExecutionReport subject = null;
+		try {
+			try (var output = new SherlockReportOutputStream(Files.newOutputStream(f.toPath()))) {
+				output.write(createReport("a", IStatus.OK));
+				output.write(createReport("b", IStatus.ERROR));
+				subject = new IndexedExecutionReport(f.toPath());
+				assertEquals("b",  subject.getById("b").getReport().getRoot().getName());
+			}
+			System.gc(); // Does not actually clean the cache, just documents intent
+			// To test in debugger, manually zero-out soft references
+			// Entry read from incomplete archive should not break when archive is complete
+			assertEquals("b",  subject.getById("b").getReport().getRoot().getName());
+		} finally {
+			if (subject != null) {
+				subject.close();
+			}
 		}
 	}
 }
