@@ -14,6 +14,7 @@ import static java.util.Collections.synchronizedMap;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,7 +135,7 @@ public final class IndexedExecutionReport implements Closeable {
 	public Stream<Handle> read() {
 		try {
 			Stream<Handle> resultStream = openZipFile().map(this::streamZipFile).orElseGet(this::streamZipInputStream);
-			return resultStream.takeWhile(Objects::nonNull);
+			return resultStream;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -173,6 +174,9 @@ public final class IndexedExecutionReport implements Closeable {
 					}
 					return result;
 				}
+			} catch (EOFException e) {
+				// Support unfinished reports from still active or aborted executions
+				return null;
 			} catch (IOException e) {
 				throw new UncheckedIOException(e); 
 			}
@@ -184,6 +188,7 @@ public final class IndexedExecutionReport implements Closeable {
 				throw new UncheckedIOException(e);
 			}
 		});
+		resultStream = resultStream.takeWhile(Objects::nonNull);
 		return resultStream;
 	}
 	@Override
