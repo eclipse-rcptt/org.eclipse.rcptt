@@ -121,6 +121,11 @@ public final class IndexedExecutionReport implements Closeable {
 			assert reportEntry != null;
 			return reportEntry;
 		}
+		
+		@Override
+		public String toString() {
+			return "" + zipEntry + (reportEntry == null ? "" : ", " + reportEntry.id);
+		}
 	}
 	public IndexedExecutionReport(Path path) throws ZipException, IOException {
 		zipPath = path;
