@@ -5,8 +5,8 @@ Element-Name: SetupAUTMockup
 Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
-Runtime-Version: 2.8.0.202601231339
-Save-Time: 1/23/26, 11:23 PM
+Runtime-Version: 2.8.0.202602281641
+Save-Time: 3/9/26, 10:05 AM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -58,6 +58,11 @@ loop [val count 0] {
 		} -else {
 			wait 5000
 			recur [$count | plus 1]
+		}
+		try -times 10 -delay 1500 -command {
+			get-aut mockupsQ7 | eval {
+				get-window // Wait for mockups to stop UI blocking procedures
+			}
 		}
 		try -command {
 			get-aut mockupsQ7 | eval {
