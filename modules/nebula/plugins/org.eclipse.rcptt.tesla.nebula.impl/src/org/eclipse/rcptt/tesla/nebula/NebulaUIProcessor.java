@@ -64,6 +64,7 @@ import org.eclipse.rcptt.tesla.ecl.nebula.NebulaGridItem;
 import org.eclipse.rcptt.tesla.internal.core.AbstractTeslaClient;
 import org.eclipse.rcptt.tesla.internal.ui.SWTElementMapper;
 import org.eclipse.rcptt.tesla.internal.ui.player.ISWTModelMapperExtension;
+import org.eclipse.rcptt.tesla.internal.ui.player.ItemUIElement;
 import org.eclipse.rcptt.tesla.internal.ui.player.PlayerWrapUtils;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTEvents;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTModelMapper;

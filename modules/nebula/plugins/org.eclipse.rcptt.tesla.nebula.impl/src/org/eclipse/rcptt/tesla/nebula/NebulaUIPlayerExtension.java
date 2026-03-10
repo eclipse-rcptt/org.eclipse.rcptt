@@ -13,6 +13,7 @@ package org.eclipse.rcptt.tesla.nebula;
 import org.eclipse.nebula.widgets.grid.Grid;
 import org.eclipse.nebula.widgets.grid.GridColumn;
 import org.eclipse.nebula.widgets.grid.GridItem;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.rcptt.tesla.core.protocol.ElementKind;
@@ -20,6 +21,7 @@ import org.eclipse.rcptt.tesla.core.protocol.GenericElementKind;
 import org.eclipse.rcptt.tesla.internal.ui.player.AbstractSWTUIPlayerExtension;
 import org.eclipse.rcptt.tesla.internal.ui.player.ChildrenCollectingSession;
 import org.eclipse.rcptt.tesla.internal.ui.player.IChildrenCollectingExtension;
+import org.eclipse.rcptt.tesla.internal.ui.player.ItemUIElement;
 import org.eclipse.rcptt.tesla.internal.ui.player.PlayerSelectionFilter;
 import org.eclipse.rcptt.tesla.internal.ui.player.PlayerWrapUtils;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTUIElement;
@@ -30,9 +32,12 @@ import org.eclipse.rcptt.tesla.nebula.grid.parts.GridPart;
 import org.eclipse.rcptt.tesla.nebula.grid.parts.ItemCell;
 import org.eclipse.rcptt.tesla.nebula.grid.parts.RowHeader;
 import org.eclipse.rcptt.tesla.nebula.viewers.NebulaViewers;
+import org.eclipse.rcptt.util.swt.Bounds;
+import org.eclipse.rcptt.util.swt.Events;
 
 public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 
+	@Override
 	public SWTUIElement wrap(Object s, SWTUIPlayer p) {
 		if (s instanceof Grid)
 			return new NebulaUIElement((Widget) s, p);
@@ -40,7 +45,24 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 			return new NebulaPartUIElement((GridPart) s, p);
 		return null;
 	}
+	
+	private static final class GridCell extends ItemUIElement {
 
+		public GridCell(GridItem w, SWTUIPlayer p, int column) {
+			super(w, p, column);
+		}
+		
+		@Override
+		public void click() {
+		}
+		
+		@Override
+		public GridItem unwrap() {
+			return (GridItem) super.unwrap();
+		}
+	}
+
+	@Override
 	public SWTUIElement select(SWTUIPlayer p, PlayerSelectionFilter f) {
 
 		switch (f.kind.kind) {
@@ -51,8 +73,10 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 			if (f.path != null && parentWidget instanceof Grid) {
 				GridItem item = (GridItem) NebulaViewers.searchGridItem(
 						(NebulaUIElement) f.parent, f.path);
-				if (item != null)
-					return p.wrap(item);
+				int column = f.indexes.length == 1 ? f.indexes[0] : 0;
+				if (item != null) {
+					return new GridCell(item, p, column);
+				}
 			}
 
 		case Custom:
@@ -68,7 +92,27 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 
 		return null;
 	}
+	
+	@Override
+	public boolean canClick(SWTUIElement widget, boolean isDefault, boolean doubleClick, boolean arrow) {
+		return widget instanceof GridCell;
+	}
+	
+	@Override
+	public void click(SWTUIElement widget, boolean isDefault, boolean doubleClick, boolean arrow, int stateMask) {
+		var gridCell = (GridCell)widget;
+		Grid grid = gridCell.unwrap().getParent();
+		final Event[] event = Events.createClick(Bounds.centerAbs(gridCell.unwrap().getBounds(gridCell.getColumn())));
+		widget.getPlayer().exec("Performing click on a Nebula Grid cell", new Runnable() {
+			@Override
+			public void run() {
+				widget.getPlayer().getEvents().sendAll(grid, event);
+			}
+		});				
 
+	}
+
+	@Override
 	public GenericElementKind getKind(Object w) {
 		if (w instanceof Grid)
 			return new GenericElementKind(NebulaElementKinds.GRID);
@@ -116,5 +160,6 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 		}
 		return null;
 	}
+	
 
 }
