@@ -111,7 +111,7 @@ public class PlayerTextUtils {
 		if (result == null) {
 			return null;
 		}
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+		if (Platform.getOS().equals(Platform.OS_WIN32) || Platform.getOS().equals(Platform.OS_MACOSX) ) {
 			return result.replaceAll("\r\n", "\n");
 		}
 		return result;
