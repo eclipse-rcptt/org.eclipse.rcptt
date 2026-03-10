@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.report.internal;
 
+import java.io.UncheckedIOException;
+import java.util.Collections;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -35,19 +38,15 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 	private StatisticPanel panel;
 	private Q7Statistics statistics = ReportingFactory.eINSTANCE.createQ7Statistics();
 
-	class UpdateJob extends Job {
+	Iterable<ReportEntry> iterator = Collections.<ReportEntry>emptyList();
+
+	private final Job updateJob = new Job("Calculating report statistics") {
 
 		@Override
 		public boolean belongsTo(Object family) {
 			return family == StatisticsComposite.this;
 		}
 
-		private final Iterable<ReportEntry> iterator;
-
-		public UpdateJob(Iterable<ReportEntry> iterator2) {
-			super("Calculating report statistics");
-			this.iterator = iterator2;
-		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -56,7 +55,7 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 				synchronized (iterator) {
 					statistics = ReportUtils.calculateStatistics(iterator.iterator());
 				}
-			} catch (NullPointerException e) { // indicates external iterruption
+			} catch (UncheckedIOException | NullPointerException e) { // indicates external iterruption
 				if (monitor.isCanceled())
 					return Status.CANCEL_STATUS;
 				throw e;
@@ -77,13 +76,19 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 	}
 
 	public StatisticsComposite() {
-
+	}
+	
+	@Override
+	public void dispose() {
+		updateJob.cancel();
+		super.dispose();
 	}
 
 	void setReports(Iterable<ReportEntry> iterator) {
-		Job.getJobManager().cancel(this);
+		updateJob.cancel();
+		this.iterator = iterator;
 		if (iterator != null)
-			new UpdateJob(iterator).schedule();
+			updateJob.schedule();
 	}
 
 	@Override
