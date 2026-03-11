@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
-import org.eclipse.rcptt.reporting.core.ReportManager;
-import org.eclipse.rcptt.sherlock.core.reporting.ReportBuilder;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.tesla.core.info.Q7WaitInfoRoot;
@@ -173,7 +171,7 @@ public abstract class UIRunnable<T> {
 				}
 				if (time > stop) {
 					// Lets also capture all thread dump.
-					storeTimeoutInReport(display, collector);
+					storeTimeoutInReport(display);
 					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout (" + timeout_ms + "ms) during execution of " + runnable, new RuntimeException()) {
 						{
 							setSeverity(ERROR);
@@ -195,7 +193,7 @@ public abstract class UIRunnable<T> {
 					}
 					
 					if (System.currentTimeMillis() > stop) {
-						storeTimeoutInReport(display, collector);
+						storeTimeoutInReport(display);
 						throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, IProcess.TIMEOUT_CODE, "Background jobs are running for too long", new RuntimeException()));
 					}
 					Thread.sleep(1);
@@ -225,14 +223,11 @@ public abstract class UIRunnable<T> {
 		return new Status(Status.ERROR, PLUGIN_ID, exception.getMessage(), exception);
 	}
 
-	private static int getTimeout() {
+	public static int getTimeout() {
 		return TeslaLimits.getContextRunnableTimeout();
 	}
 
-	private static void storeTimeoutInReport(final Display display,
-			UIJobCollector collector) throws InterruptedException {
-		final ReportBuilder currentBuilder = ReportManager.getBuilder();
-		final boolean infoCollected[] = { false };
+	private static void storeTimeoutInReport(final Display display) throws InterruptedException {
 		display.asyncExec(new Runnable() {
 			@Override
 			public void run() {
