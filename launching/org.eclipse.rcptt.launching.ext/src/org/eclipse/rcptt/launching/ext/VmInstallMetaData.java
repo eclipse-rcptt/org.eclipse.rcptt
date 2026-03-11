@@ -15,6 +15,7 @@ import static java.util.Arrays.stream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -85,6 +86,14 @@ public final class VmInstallMetaData {
 		return JDTUtils.installedVms().map(vm -> adapt(vm, environments.get(vm))).flatMap(Optional::stream);
 	}
 	
+	public static Stream<VmInstallMetaData> forEnvironment(String executionEnvironmentId) {
+		IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+		IExecutionEnvironment environment = manager.getEnvironment(executionEnvironmentId);
+		Collection<IExecutionEnvironment> environments = Collections.singletonList(environment);
+		return Stream.concat(Stream.ofNullable(environment.getDefaultVM()), Arrays.stream(environment.getCompatibleVMs())).distinct().flatMap(install -> adapt(install, environments).stream());
+	}
+
+	
 	private static Optional<VmInstallMetaData>  adapt(IVMInstall install, Collection<IExecutionEnvironment> environments) {
 		try {
 			OSArchitecture jvmArch = JDTUtils.detect(install);
@@ -102,4 +111,5 @@ public final class VmInstallMetaData {
 		IVMInstall install = JDTUtils.registerVM(location.toFile());
 		return adapt(install);
 	}
+
 }
