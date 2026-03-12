@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.internal.launching.ext.ui.wizards;
 
-import static java.util.Collections.disjoint;
 import static java.util.function.Predicate.isEqual;
 import static java.util.function.Predicate.not;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
@@ -66,9 +65,8 @@ import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.CheckedExceptionWrapper;
-import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
+import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
-import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.ui.WidgetUtils;
@@ -192,8 +190,14 @@ public class NewAUTPage extends WizardPage {
 					return status;
 				}
 				helper = platform;
+			} else {
+				IStatus status = helper.resolve(sm.split(1, SubMonitor.SUPPRESS_NONE));
+				if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+					return status;
+				}
 			}
-			IStatus status = validatePlatform(helper, sm.split(1, SubMonitor.SUPPRESS_NONE));
+			JvmTargetCompatibility compatibility = new JvmTargetCompatibility(helper);
+			IStatus status = validatePlatform(compatibility, sm.split(1, SubMonitor.SUPPRESS_NONE));
 			if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
 				helper.delete();
 				return status;
@@ -231,51 +235,16 @@ public class NewAUTPage extends WizardPage {
 		}
 	}
 
-	private IStatus validatePlatform(ITargetPlatformHelper helper, IProgressMonitor monitor) {
-		if (helper == null) {
+	private IStatus validatePlatform(JvmTargetCompatibility compatibility, IProgressMonitor monitor) {
+		if (compatibility == null) {
 			return cancel("Please specify correct Application installation directory...");
 		}
-		SubMonitor sm = SubMonitor.convert(monitor, 2);
-		IStatus status = helper.resolve(sm.split(1, SubMonitor.SUPPRESS_NONE));
-		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+		IStatus status = compatibility.validate(monitor);
+		if (status.matches(IStatus.CANCEL)) {
 			return status;
 		}
-
-		OSArchitecture architecture = helper.detectArchitecture(new StringBuilder());
-		if (OSArchitecture.Unknown.equals(architecture)) {
-			return Status.error("Unable to detect AUT's architecture.");
-		}
-		boolean haveArch = false;
-		try {
-			haveArch = findJVM(helper).isPresent();
-		} catch (CoreException e1) {
-			return e1.getStatus();
-		}
-		setValue(!haveArch, architectureError);
-
-		if (!haveArch) {
-			return error("The selected AUT requires " + architecture + " Java VM which cannot be found.");
-		}
-		
-		try {
-			return Q7LaunchDelegateUtils.validateForLaunch(helper, sm.split(1, SubMonitor.SUPPRESS_NONE));
-		} finally {
-			done(monitor);
-		}
-	}
-
-	private Optional<VmInstallMetaData> findJVM(ITargetPlatformHelper helper) throws CoreException {
-		StringBuilder message = new StringBuilder();
-		OSArchitecture arch = helper.detectArchitecture(message);
-		if (OSArchitecture.Unknown.equals(arch)) {
-			throw new CoreException(Status.error("Unable to detect AUT's architecture: " + message.toString()));
-		}
-
-		return VmInstallMetaData.all().filter(m -> m.arch.equals(arch)).filter(m -> isCompatible(helper, m)).findFirst();
-	}
-
-	private boolean isCompatible(ITargetPlatformHelper helper,  VmInstallMetaData m) {
-		return disjoint(m.compatibleEnvironments, helper.getIncompatibleExecutionEnvironments());
+		setValue(!compatibility.isCompatibleJvmPresent(), architectureError);
+		return status;
 	}
 	
 	private String computeUniqueName(String prefix) throws CoreException {
@@ -531,18 +500,16 @@ public class NewAUTPage extends WizardPage {
 
 	public IVMInstall getJVMInstall() throws CoreException {
 		try {
-			return Optional.ofNullable(info.getValue()).flatMap(CheckedExceptionWrapper.wrap(this::findJVM)).map(m -> m.install).orElse(null);
-		} catch(CheckedExceptionWrapper e) {
+			return Optional.ofNullable(info.getValue())
+					.map(CheckedExceptionWrapper.wrap(JvmTargetCompatibility::new))
+					.stream()
+					.flatMap(JvmTargetCompatibility::findVM)
+					.map(v -> v.install)
+					.findFirst()
+					.orElse(null);
+		} catch (CheckedExceptionWrapper e) {
 			e.rethrow(CoreException.class);
-			throw e;
-		}
-	}
-
-	public OSArchitecture getJVMArch() throws CoreException {
-		try {
-			return Optional.ofNullable(info.getValue()).flatMap(CheckedExceptionWrapper.wrap(this::findJVM)).map(m -> m.arch).orElse(null);
-		} catch(CheckedExceptionWrapper e) {
-			e.rethrow(CoreException.class);
+			e.rethrowUnchecked();
 			throw e;
 		}
 	}

@@ -34,7 +34,6 @@ public class ReflectionUtil {
 			return null;
 		}
 
-		method.setAccessible(true);
 		try {
 			return method.invoke(instance,
 					args.toArray(new Object[args.size()]));
@@ -103,7 +102,6 @@ public class ReflectionUtil {
 			}
 			return null;
 		}
-		field.setAccessible(true);
 		try {
 			return field.get(instance);
 		} catch (IllegalAccessException e) {
@@ -126,12 +124,16 @@ public class ReflectionUtil {
 			return null;
 		}
 		try {
-			return clazz.getDeclaredField(name);
+			Field result = clazz.getDeclaredField(name);
+			if (result.trySetAccessible()) {
+				return result;
+			}
 		} catch (SecurityException e) {
 			return null;
 		} catch (NoSuchFieldException e) {
-			return findField(clazz.getSuperclass(), name);
+			// check superclass
 		}
+		return findField(clazz.getSuperclass(), name);
 	}
 
 	public static Method findMethod(Class<?> clazz, String name) {
@@ -145,13 +147,17 @@ public class ReflectionUtil {
 		}
 
 		try {
-			return clazz.getDeclaredMethod(name,
+			Method result = clazz.getDeclaredMethod(name,
 					params.toArray(new Class<?>[params.size()]));
-		} catch (NoSuchMethodException e) {
-			return findMethod(clazz.getSuperclass(), name, params);
+			if (result.trySetAccessible()) {
+				return result;
+			}
 		} catch (SecurityException e) {
 			return null;
+		} catch (NoSuchMethodException e) {
+			// check superclass
 		}
+		return findMethod(clazz.getSuperclass(), name, params);
 	}
 
 }

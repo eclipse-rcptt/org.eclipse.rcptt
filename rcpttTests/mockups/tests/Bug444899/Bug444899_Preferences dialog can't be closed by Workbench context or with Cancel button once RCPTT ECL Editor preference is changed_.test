@@ -1,0 +1,73 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _V0104D8TEeSV5L6atfY6Ug,_qhWXcPLLEfCHIefTd4RlqA,_cQEZwD2QEeSxD9UFwnFS6w,_7FHY0Hl8EeSxJeam03ptGg
+Element-Name: Bug444899_Preferences dialog can't be closed by Workbench context or with Cancel button once RCPTT ECL Editor preference is changed.
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: https://bugs.eclipse.org/bugs/show_bug.cgi?id=444899
+Id: _2o--AHl3EeSxJeam03ptGg
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 1/16/26, 3:18 PM
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+TEST STEPS:
+
+1. Open a Dialog in selfAUT;
+2. Apply a workbench context;
+3. Verify that the context is failed and the corresponding error is shown.  
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+
+get-view "Test Explorer" | get-tree | select "Project/OpenDialog" | double-click
+get-editor OpenDialog | get-button Replay | click
+get-view "Test Explorer" | get-tree | select "Project/WbContext" | double-click
+
+set-q7-option -key "context.runnable.timeout" -value 10000
+get-editor WbContext | get-button Apply | click
+
+waitForTaskToComplete
+try {
+	with [get-view "Execution View"] {
+	  maximize
+	  get-editbox -after [get-label "Message:"] | get-property text 
+	    | equals "Failed to apply context WbContext.ctx\n"
+	    + "  Failed to execute context: WbContext Cause: Failed to close dialogs\n"
+	    + "    Failed to close dialogs\n"
+	    + "      Failed to close dialogs\n"
+	    + "        Shell with name My Title and class org.eclipse.swt.widgets.Shell is not disposed and visible" | verify-true
+	}
+} -finally {
+    
+get-aut "mockupsQ7" | eval {
+
+get-window "My Title" | get-button "First" | click
+
+}
+}
+get-view "Execution View" | get-button "Details..." | click
+with [get-window "Execution details"] {
+    with [get-button Next] {
+        click
+    }
+    take-screenshot
+    get-tab-folder | get-tab-item Description | click
+}
+get-window "Execution details" | get-editbox | get-property text | contains "ECL session execute: get-advanced-info" | verify-true
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

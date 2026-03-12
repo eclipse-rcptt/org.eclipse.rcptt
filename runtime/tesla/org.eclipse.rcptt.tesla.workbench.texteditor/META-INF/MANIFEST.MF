@@ -2,25 +2,25 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCPTT Runtime GMF Support
 Bundle-SymbolicName: org.eclipse.rcptt.tesla.workbench.texteditor;singleton:=true
-Bundle-Version: 2.7.4.qualifier
+Bundle-Version: 2.8.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.tesla.workbench.texteditor.WorkbenchTexteditorActivator
 Bundle-Vendor: Eclipse RCP Testing Tool Project
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.rcptt.tesla.workbench.texteditor;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.core;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.swt;bundle-version="[2.7.4,3.0.0)",
+ org.eclipse.rcptt.tesla.workbench.texteditor;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.swt;bundle-version="[2.8.0,3.0.0)",
  org.eclipse.emf.ecore,
  org.eclipse.swt,
  org.eclipse.ui.workbench.texteditor;bundle-version="1.1.0",
  org.eclipse.jface,
  org.eclipse.jface.text,
- org.eclipse.rcptt.tesla.jface.text;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.jface.text.aspects;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.ecl;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.util;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.util.swt;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.7.4,3.0.0)",
- org.eclipse.rcptt.tesla.recording.aspects.jface.text;bundle-version="[2.7.4,3.0.0)",
+ org.eclipse.rcptt.tesla.jface.text;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.jface.text.aspects;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.ecl;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.util;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.util.swt;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.aspects;bundle-version="[2.8.0,3.0.0)",
+ org.eclipse.rcptt.tesla.recording.aspects.jface.text;bundle-version="[2.8.0,3.0.0)",
  org.eclipse.core.resources,
  org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-17

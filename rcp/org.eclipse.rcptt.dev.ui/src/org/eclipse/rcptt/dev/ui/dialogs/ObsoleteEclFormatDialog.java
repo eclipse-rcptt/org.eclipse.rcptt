@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2025 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
-
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.ui.preferences.IPreferenceKeys;
@@ -31,8 +31,7 @@ public enum ObsoleteEclFormatDialog {
 		if (MessageDialogWithToggle.ALWAYS.equals(show)) {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					IWorkbenchWindow window = Q7UIPlugin.getDefault()
-							.getWorkbench().getActiveWorkbenchWindow();
+					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 					MessageDialogWithToggle dialog = MessageDialogWithToggle
 							.openInformation(window.getShell(), "Error",
 									"Oops! Test case \"" + scenario.getName()

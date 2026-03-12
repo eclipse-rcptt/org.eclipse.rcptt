@@ -47,6 +47,8 @@ import org.eclipse.rcptt.tesla.core.info.Q7WaitInfoRoot;
 import org.eclipse.rcptt.tesla.core.utils.AdvancedInformationGenerator;
 import org.eclipse.rcptt.util.StringUtils;
 
+import com.google.common.base.Joiner;
+
 public class RcpttReportGenerator {
 	private final SimpleReportGenerator simpleReportGenerator = new SimpleReportGenerator();
 	private final List<ImageEntry> images;
@@ -296,11 +298,16 @@ public class RcpttReportGenerator {
 		writeTabs(tabs);
 		if (q7Info != null) {
 			writer.append(kindToString(q7Info.getType(), infoNode.getName()));
-			writer.
-					append(" ")
-					.append("time: " +
-							TimeFormatHelper.format(infoNode.getDuration()))
-					.println();
+			if (!q7Info.getVariant().isEmpty()) {
+				writer
+				.append(" (")
+				.append(Joiner.on(", ").join(q7Info.getVariant()))
+				.append(")");
+			}
+			writer
+				.append(" time: ")
+				.append(TimeFormatHelper.format(infoNode.getDuration()))
+				.println();
 			writeResult(writer, tabs + 1, q7Info.getResult());
 		}
 	}

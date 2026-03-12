@@ -1,8 +1,0 @@
-b1=find("Button1-1.png")
-b2=find("Button.png")
-b3=find("Button3.png")
-b4=find("Button4.png")
-click(b1.find("1366796553460.png"))
-click(b2.find("1366795440490.png"))
-click(b3.find("1366795475322.png"))
-click(b4.find("1366796517598.png"))

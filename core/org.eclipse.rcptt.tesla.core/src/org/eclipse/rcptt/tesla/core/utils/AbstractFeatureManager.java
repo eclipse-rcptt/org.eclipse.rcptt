@@ -256,7 +256,7 @@ public class AbstractFeatureManager {
 		try {
 			prefs.flush();
 		} catch (BackingStoreException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e);
 		}
 	}
 

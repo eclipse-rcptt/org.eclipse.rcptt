@@ -11,18 +11,26 @@
 package org.eclipse.rcptt.internal.launching.ext;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
 import org.eclipse.pde.internal.core.TargetPlatformHelper;
+import org.eclipse.pde.internal.launching.PDEMessages;
 import org.eclipse.pde.internal.launching.launcher.BundleLauncherHelper;
+import org.eclipse.pde.internal.launching.launcher.VMHelper;
 
 @SuppressWarnings("restriction")
 public class PDEUtils {
 	
 	// Eclipse 4.8 doesn't contain this item.
 	public static final String BUNDLE_UPDATE_CONFIGURATOR = "org.eclipse.update.configurator"; //$NON-NLS-1$
+	public static final String NO_STARTUP_JAR_MESSAGE = PDEMessages.WorkbenchLauncherConfigurationDelegate_noStartup;
 	
 	public static void addBundleToMap(Map<Object, String> map,
 			IPluginModelBase bundle, String sl) {
@@ -56,6 +64,14 @@ public class PDEUtils {
 		} else {
 			map.put(bundle, sl);
 		}
-
 	}
+	
+	public static IVMInstall getVMInstall(ILaunchConfiguration configuration, Set<IPluginModelBase> plugins) throws CoreException {
+		return VMHelper.getVMInstall(configuration, plugins);
+	}
+	
+	public static Stream<String> startupPackageNames() {
+		return Stream.of(IPDEBuildConstants.BUNDLE_EQUINOX_LAUNCHER);
+	}
+
 }

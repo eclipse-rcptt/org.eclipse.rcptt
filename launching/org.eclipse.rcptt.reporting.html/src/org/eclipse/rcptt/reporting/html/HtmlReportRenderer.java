@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import static com.google.common.collect.Iterables.filter;
 import static org.eclipse.rcptt.reporting.html.internal.Plugin.UTILS;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -54,8 +55,8 @@ public class HtmlReportRenderer implements IReportRenderer {
 	}
 
 	static String loadAsString(String path) {
-		try {
-			byte[] content = FileUtil.getStreamContent(HtmlReportRenderer.class.getResourceAsStream(path));
+		try (InputStream is = HtmlReportRenderer.class.getResourceAsStream(path)) {
+			byte[] content = FileUtil.getStreamContent(is);
 			return new String(content, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load " + path);
@@ -65,28 +66,23 @@ public class HtmlReportRenderer implements IReportRenderer {
 	@Override
 	public IStatus generateReport(IContentFactory factory, String reportName,
 			Iterable<Report> reportList) {
-		PrintWriter writer = null;
-		try {
-			OutputStream stream = factory.createFileStream(reportName + ".html");
-			writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
+		try (
+				PrintWriter writer = new PrintWriter(new OutputStreamWriter(
+						factory.createFileStream(reportName + ".html"), StandardCharsets.UTF_8));) {
 			renderReport(writer, reportList, factory);
-		} catch (Exception e) {
-			return Plugin.UTILS.createError(e);
-		} finally {
-			FileUtil.safeClose(writer);
+		} catch (CoreException e) {
+			return e.getStatus();
 		}
 		return Status.OK_STATUS;
 	}
-
-
 
 	protected void renderReport(PrintWriter writer, Iterable<Report> reports, IContentFactory content)
 			throws CoreException {
 		writer.println("<html>");
 		renderHead(writer, null);
 		writer.println("<body onload=\"installDetailsWorkaround()\">");
-		Q7Statistics statistics = ReportUtils.calculateStatistics(reports.iterator());
-		renderSummary(writer, reports, statistics);
+		Q7Statistics statistics = ReportUtils.calculateStatisticsSlow(reports.iterator());
+		renderSummary(writer, statistics);
 		Iterable<Report> passedReports = filter(reports, compose(equalTo(IStatus.OK), reportStatus));
 		Iterable<Report> skippedReports = filter(reports, compose(matches(IStatus.CANCEL), reportStatus));
 		Iterable<Report> failedReports = filter(reports,
@@ -161,7 +157,7 @@ public class HtmlReportRenderer implements IReportRenderer {
 		renderer.render(report);
 	}
 
-	private void renderSummary(PrintWriter writer, Iterable<Report> reports, Q7Statistics statistics) {
+	private void renderSummary(PrintWriter writer, Q7Statistics statistics) {
 		renderStatistics(writer, statistics);
 	}
 
@@ -208,6 +204,7 @@ public class HtmlReportRenderer implements IReportRenderer {
 		}
 	}
 
+	@Override
 	public String[] getGeneratedFileNames(String reportName) {
 		return new String[] { reportName + ".html" };
 	}

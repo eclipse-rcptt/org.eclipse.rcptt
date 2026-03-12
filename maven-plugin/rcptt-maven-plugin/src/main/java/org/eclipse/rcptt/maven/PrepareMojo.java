@@ -34,14 +34,15 @@ import org.eclipse.rcptt.maven.util.CoordResolver;
  */
 public class PrepareMojo extends AbstractRCPTTMojo {
 
+	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (skipTests()) {
 			return;
 		}
 
 		unpackApps();
-		if (getQ7Dir(getQ7Coords().getPlatform()).exists()) {
-			installPlugins(getResolvedQ7Dir(getQ7Coords().getPlatform()), getQ7Coords().getPlugins());
+		if (getQ7Dir().exists()) {
+			installPlugins(getResolvedQ7Dir(), getQ7Coords().getPlugins());
 		}
 		copyProjectToTarget();
 		unpackDependencies();
@@ -117,7 +118,7 @@ public class PrepareMojo extends AbstractRCPTTMojo {
 		File autArchive = resolver.resolve("AUT", aut, remoteProjectRepos);
 		File q7Archive = resolver.resolve("RCPTT runner", getQ7Coords(), remotePluginRepos);
 		File autDir = getAutDir();
-		File q7Dir = getQ7Dir(getQ7Coords().getPlatform());
+		File q7Dir = getQ7Dir();
 		if (autArchive.isFile()) {
 			getLog().info(String.format("Extracting AUT to %s", autDir));
 			getArchiveUtil().extract(autArchive, getAutDir());
@@ -127,7 +128,7 @@ public class PrepareMojo extends AbstractRCPTTMojo {
 		}
 		if (q7Archive.isFile()) {
 			getLog().info(String.format("Extracting RCPTT runner from %s to %s", q7Archive, q7Dir));
-			getArchiveUtil().extract(q7Archive, getQ7Dir(getQ7Coords().getPlatform()));
+			getArchiveUtil().extract(q7Archive, getQ7Dir());
 		} else {
 			getLog().info(String.format("Using RCPTT Runner from %s", q7Archive));
 			setQ7Dir(q7Archive);

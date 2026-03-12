@@ -168,7 +168,7 @@ public abstract class BasePersistenceModel implements IPersistenceModel {
 				return null;
 			}
 			if (input == null) {
-				input = file.getContents();
+				input = file.getContents(true);
 			}
 			contents = new BufferedInputStream(input);
 		} catch (CoreException e) {
