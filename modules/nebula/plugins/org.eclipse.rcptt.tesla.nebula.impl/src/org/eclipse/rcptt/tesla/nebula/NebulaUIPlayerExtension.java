@@ -51,11 +51,7 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 		public GridCell(GridItem w, SWTUIPlayer p, int column) {
 			super(w, p, column);
 		}
-		
-		@Override
-		public void click() {
-		}
-		
+				
 		@Override
 		public GridItem unwrap() {
 			return (GridItem) super.unwrap();
@@ -101,8 +97,9 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 	@Override
 	public void click(SWTUIElement widget, boolean isDefault, boolean doubleClick, boolean arrow, int stateMask) {
 		var gridCell = (GridCell)widget;
-		Grid grid = gridCell.unwrap().getParent();
-		final Event[] event = Events.createClick(Bounds.centerAbs(gridCell.unwrap().getBounds(gridCell.getColumn())));
+		GridItem gridItem = gridCell.unwrap();
+		Grid grid = gridItem.getParent();
+		final Event[] event = Events.createClick(Bounds.centerAbs(gridItem.getBounds(gridCell.getColumn())));
 		widget.getPlayer().exec("Performing click on a Nebula Grid cell", new Runnable() {
 			@Override
 			public void run() {
