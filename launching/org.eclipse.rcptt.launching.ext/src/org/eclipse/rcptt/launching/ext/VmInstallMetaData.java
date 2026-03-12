@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.eclipse.rcptt.launching.ext;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.function.Function.identity;
+import static java.util.stream.Stream.generate;
+import static java.util.stream.Stream.ofNullable;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -79,18 +83,40 @@ public final class VmInstallMetaData {
 	}
 	
 	public static Stream<VmInstallMetaData> all() {
-		IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
-		Multimap<IVMInstall, IExecutionEnvironment> environments = HashMultimap.create();
-		stream(manager.getExecutionEnvironments())
-			.forEach(env -> stream(env.getCompatibleVMs()).forEach( vm -> environments.put(vm, env) ));
-		return JDTUtils.installedVms().map(vm -> adapt(vm, environments.get(vm))).flatMap(Optional::stream);
+		var compatibilities = new Compatibilities();
+		return JDTUtils.installedVms().map(compatibilities::adapt).flatMap(Optional::stream);
+
 	}
 	
 	public static Stream<VmInstallMetaData> forEnvironment(String executionEnvironmentId) {
 		IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
 		IExecutionEnvironment environment = manager.getEnvironment(executionEnvironmentId);
-		Collection<IExecutionEnvironment> environments = Collections.singletonList(environment);
-		return Stream.concat(Stream.ofNullable(environment.getDefaultVM()), Arrays.stream(environment.getCompatibleVMs())).distinct().flatMap(install -> adapt(install, environments).stream());
+		var compatibilities = new Compatibilities();
+		Stream<IVMInstall> currentJvm = generate(JDTUtils::registerCurrentJVM).limit(1).filter(install -> asList(environment.getCompatibleVMs()).contains(install));
+		return List.<Stream<IVMInstall>>of(ofNullable(environment.getDefaultVM()), stream(environment.getCompatibleVMs()), currentJvm)
+				.stream()
+				.flatMap(identity())
+				.distinct()
+				.map(compatibilities::adapt)
+				.flatMap(Optional::stream);
+	}
+	
+	private static class Compatibilities {
+		private Multimap<IVMInstall, IExecutionEnvironment> environments = HashMultimap.create();
+		private final IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+		{
+			stream(manager.getExecutionEnvironments())
+				.forEach(env -> stream(env.getCompatibleVMs()).forEach( vm -> environments.put(vm, env) ));
+		}
+		public Optional<VmInstallMetaData> adapt(IVMInstall install) {
+			Collection<IExecutionEnvironment> compatible = environments.get(install);
+			if (compatible.isEmpty()) {
+				compatible = stream(manager.getExecutionEnvironments()).filter(env -> asList(env.getCompatibleVMs()).contains(install)).toList();
+				assert !compatible.isEmpty() : install + " does not support any environments";
+				environments.putAll(install, compatible);
+			}
+			return VmInstallMetaData.adapt(install, compatible); 
+		}
 	}
 
 	

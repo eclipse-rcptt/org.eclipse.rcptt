@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.launching.ext;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
 import static org.eclipse.rcptt.internal.launching.ext.AJConstants.OSGI_FRAMEWORK_EXTENSIONS;
@@ -58,6 +59,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
@@ -168,6 +170,13 @@ public class Q7ExternalLaunchDelegate extends
 		return super.finalLaunchCheck(configuration, mode, monitor);
 	}
 
+	@Override
+    public IVMRunner getVMRunner(ILaunchConfiguration configuration, String mode) throws CoreException {
+		final CachedInfo info = LaunchInfoCache.getInfo(configuration);
+		final ITargetPlatformHelper platform = (ITargetPlatformHelper) requireNonNull(info.target); 
+		return getVMInstall(configuration, platform).getVMRunner(mode);
+    }
+	
 	@Override
 	public boolean preLaunchCheck(ILaunchConfiguration configuration,
 			String mode, IProgressMonitor monitor) throws CoreException {
