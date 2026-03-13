@@ -70,6 +70,7 @@ public class ShowAlertImpl extends CommandImpl implements ShowAlert {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMessage() {
 		return message;
 	}
@@ -78,6 +79,7 @@ public class ShowAlertImpl extends CommandImpl implements ShowAlert {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMessage(String newMessage) {
 		String oldMessage = message;
 		message = newMessage;
