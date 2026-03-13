@@ -42,8 +42,13 @@ public class GridScrollingHelper {
 		// TODO implement it for whole item selection case (e.g. select "Item #3")
 
 		if (parentWidget instanceof Grid grid) {
-			GridItem item = (GridItem) NebulaViewers.searchGridItem(
+			GridItem item;
+			if (data.getIndexes().size() == 2) {
+				item = grid.getItem(data.getIndexes().get(1));
+			} else {
+				item = (GridItem) NebulaViewers.searchGridItem(
 					(NebulaUIElement) parent, data.getPath());
+			}
 			if (!showItemIfHidden(item)) {
 				return false;
 			}

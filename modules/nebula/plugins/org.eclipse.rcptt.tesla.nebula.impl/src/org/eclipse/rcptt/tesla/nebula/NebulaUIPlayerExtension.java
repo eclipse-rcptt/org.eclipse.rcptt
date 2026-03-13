@@ -55,6 +55,11 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 		public GridItem unwrap() {
 			return (GridItem) super.unwrap();
 		}
+		
+		@Override
+		public String getText() {
+			return unwrap().getText(getColumn());
+		}
 	}
 
 	@Override
@@ -93,9 +98,9 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 				return ItemCell.select(p, f);
 			else if (f.kind.is(NebulaElementKinds.EMPTY_AREA))
 				return EmptyArea.select(p, f);
+		default:
+			return null;
 		}
-
-		return null;
 	}
 	
 	@Override
