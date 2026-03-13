@@ -497,7 +497,13 @@ public class ExecutionView extends ViewPart implements IExecutionSessionListener
 	private List<StyleRange> print(IStatus status, int level, StringBuilder buffer) {
 		String message = status.getMessage();
 		if (message == null || message.length() == 0) {
-			message = Messages.ExecutionView_ExecutionFailedMsg;
+			if (status.matches(IStatus.CANCEL)) {
+				message = "Execution is canceled.";
+			} else if (status.matches(IStatus.ERROR)) {
+				message = Messages.ExecutionView_ExecutionFailedMsg;
+			} else {
+				message = "Execution result is malformed.";
+			}
 		}
 		List<StyleRange> ranges = new ArrayList<StyleRange>();
 		

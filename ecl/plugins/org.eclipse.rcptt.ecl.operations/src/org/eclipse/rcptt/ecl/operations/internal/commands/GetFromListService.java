@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import static org.eclipse.rcptt.ecl.operations.internal.OperationsPlugin.createE
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.core.EclList;
 import org.eclipse.rcptt.ecl.core.Get;
@@ -43,7 +44,7 @@ public class GetFromListService implements IScriptletExtension {
 			return Status.OK_STATUS;
 		}
 
-		context.getOutput().write(list.getElements().get(index));
+		context.getOutput().write(EcoreUtil.copy(list.getElements().get(index)));
 		return Status.OK_STATUS;
 	}
 

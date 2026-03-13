@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.jface.aspects.test;
 
+import static org.osgi.framework.FrameworkUtil.getBundle;
+import static org.osgi.framework.Version.parseVersion;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
@@ -31,6 +34,8 @@ import org.eclipse.ui.PlatformUI;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.Version;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Closer;
@@ -38,9 +43,20 @@ import com.google.common.io.Closer;
 public class ImageSourcesTest {
 	private static final ISharedImages SHARED_IMAGES = PlatformUI.getWorkbench().getSharedImages();
 	private final Closer closer = Closer.create();
+	private static final String IMAGE_EXTENSION;
+	static {
+		// Version is not exact here, ideally it should be set to a version introducing SVG icons
+		Version workbenchVersion = getBundle(SHARED_IMAGES.getClass()).getVersion();
+		if (workbenchVersion.compareTo(parseVersion("3.130.0")) > 0) {
+			IMAGE_EXTENSION = ".svg";
+		} else {
+			IMAGE_EXTENSION = ".png";
+		}
+	}
 	
 	@Test
 	public void getImageData() {
+		String ext = IMAGE_EXTENSION;
 		Image folder = SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FOLDER);
 		ImageDescriptor[] overlays = new ImageDescriptor[IDecoration.BOTTOM_RIGHT + 1];
 		URL url = Platform.getBundle("org.eclipse.ui").getEntry("icons/full/ovr16/warning_ovr.png");
@@ -50,7 +66,7 @@ public class ImageSourcesTest {
 		Image iconImage = (Image)icon.createResource(Display.getCurrent());
 		try {
 			Assert.assertEquals(
-			ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj.png", "org.eclipse.ui/icons/full/ovr16/warning_ovr.png"), 
+			ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj" + ext, "org.eclipse.ui/icons/full/ovr16/warning_ovr.png"), 
 			extractStrings(iconImage));
 		} finally {
 			iconImage.dispose();
@@ -73,6 +89,7 @@ public class ImageSourcesTest {
 	
 	@Test
 	public void compositeOverComposite() {
+		String ext = IMAGE_EXTENSION;
 		ImageDescriptor folder = SHARED_IMAGES.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
 		ImageDescriptor file = SHARED_IMAGES.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
 		ImageDescriptor error = SHARED_IMAGES.getImageDescriptor(ISharedImages.IMG_DEC_FIELD_ERROR);
@@ -85,10 +102,10 @@ public class ImageSourcesTest {
 		try {
 			Assert.assertEquals(
 			ImmutableList.of(
-							"org.eclipse.ui/icons/full/obj16/fldr_obj.png",
-							"org.eclipse.ui/icons/full/ovr16/error_ovr.png",
-							"org.eclipse.ui/icons/full/obj16/file_obj.png",
-							"org.eclipse.ui/icons/full/ovr16/warning_ovr.png"
+							"org.eclipse.ui/icons/full/obj16/fldr_obj"+ext,
+							"org.eclipse.ui/icons/full/ovr16/error_ovr"+ext,
+							"org.eclipse.ui/icons/full/obj16/file_obj"+ext,
+							"org.eclipse.ui/icons/full/ovr16/warning_ovr"+ext
 			)
 			,
 			 extractStrings(target)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.ecl.core.EclException;
+import org.eclipse.rcptt.ecl.core.EclString;
 import org.eclipse.rcptt.ecl.core.ProcessStatus;
 import org.eclipse.rcptt.ecl.internal.core.ProcessStatusConverter;
 import org.eclipse.rcptt.reporting.Q7Info;
@@ -68,7 +69,7 @@ import com.google.common.html.HtmlEscapers;
 public class FullSingleTestHtmlRenderer {
 	private final PrintWriter writer;
 	private final NumberFormat durationFormat;
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 	private final Function<Screenshot, String> imageStorage;
 	private static final ILog LOG = Platform.getLog(FullSingleTestHtmlRenderer.class);
 
@@ -122,8 +123,21 @@ public class FullSingleTestHtmlRenderer {
 		closeDetails();
 	}
 
+	private void renderTime(long ms_since_epoch) {
+		writer.print("<span class=\"time\" epoch=\"");
+		writer.print(ms_since_epoch);
+		writer.print("\">");
+		writer.print(dateFormat.format(ms_since_epoch));
+		writer.print("</span>");
+		
+	}
 	private void renderNode(Node node) {
+		renderTime(node.getStartTime());
+		writer.print(" - ");
+		renderTime(node.getEndTime());
+		writer.println("<p>");
 		Q7Info info = ReportHelper.getInfo(node);
+		
 		renderResult(info.getResult());
 		EList<Node> children = node.getChildren();
 		Q7WaitInfoRoot waitInfo = ReportHelper.getWaitInfo(node, false);
@@ -146,10 +160,11 @@ public class FullSingleTestHtmlRenderer {
 				logs.append(logs2);
 		}
 		if (logs.length() > 2) {
-			renderHeader(2, "Logs", "");
+			openDetails(2, "Logs", "");
 			writer.println("<pre>");
 			writer.println(logs);
 			writer.println("</pre>");
+			closeDetails();
 		}
 	}
 
@@ -234,6 +249,10 @@ public class FullSingleTestHtmlRenderer {
 			renderAdvanced((AdvancedInformation) eObject);
 		} else if (eObject == null) {
 			writer.println("Event contains no data. This indicates a premature AUT termination.");
+		} else if (eObject instanceof EclString) {
+			writer.println("<pre>");
+			writer.println(escape(((EclString) eObject).getValue()));
+			writer.println("</pre>");
 		} else {
 			writer.println(eObject.eClass().getName());
 		}
@@ -242,7 +261,12 @@ public class FullSingleTestHtmlRenderer {
 	public void renderAdvanced(AdvancedInformation info) {
 		EList<InfoNode> nodes = info.getNodes();
 		for (InfoNode infoNode : nodes) {
+			if (infoNode.getChildren().isEmpty() && infoNode.getProperties().isEmpty()) {
+				continue;
+			}
+			openDetails(5, infoNode.getName(), "");
 			renderNode(infoNode);
+			closeDetails();
 		}
 		// Append job information
 		EList<JobEntry> jobs = info.getJobs();
@@ -261,17 +285,16 @@ public class FullSingleTestHtmlRenderer {
 		// Append thread information
 		EList<StackTraceEntry> threads = info.getThreads();
 		if (!threads.isEmpty()) {
-			renderHeader(5, "Thread information", "");
-			writer.println("<div class=\"childNode\">");
+			openDetails(5, "Thread information", "");
 			for (StackTraceEntry trace : threads) {
 				if (trace.getThreadClass().equals(
 						"org.eclipse.core.internal.jobs.Worker")
-						&& trace.getStackTrace().size() == 4) {
+						&& trace.getStackTrace().size() <= 5) {
 					// Skip Worker threads sleep state
 					continue;
 				}
 				renderHeader(5, trace.getThreadName(), "");
-				writer.println("class=" + trace.getThreadClass());
+				writer.append("class=").append(trace.getThreadClass()).println("<br>");
 				EList<String> list = trace.getStackTrace();
 				for (int i = 0; i < list.size(); i++) {
 					writer.append(Integer.toString(list.size() - i - 1))
@@ -279,12 +302,11 @@ public class FullSingleTestHtmlRenderer {
 							.println("<br>");
 				}
 			}
-			writer.println("</div>");
+			closeDetails();
 		}
 	}
 
 	private void renderNode(InfoNode infoNode) {
-		writer.println(infoNode.getName());
 		EList<NodeProperty> list = infoNode.getProperties();
 		EList<InfoNode> childs = infoNode.getChildren();
 		if (!list.isEmpty() || !childs.isEmpty()) {
@@ -298,6 +320,7 @@ public class FullSingleTestHtmlRenderer {
 			}
 			if (childs.size() != 0) {
 				for (InfoNode child : childs) {
+					writer.println(child.getName());
 					renderNode(child);
 				}
 			}
@@ -410,7 +433,9 @@ public class FullSingleTestHtmlRenderer {
 	private void renderMain(Node root) {
 		String message = ReportUtils.getFailMessage(root, HTML_DATUM_TO_MESSAGE);
 		writer.println("<table class=\"" + toFailureClass(root) + "\">");
-		titledRow("Failure Reason", message);
+		if (message != null) {
+			writer.println(String.format("<tr><th>Failure Reason</th><td>%s</td></tr>", message));
+		}
 		String tags = ReportUtils.getScenarioTags(root);
 		tags = replaceLineBreaks(tags).trim();
 		titledRow("Tags", Strings.emptyToNull(tags));

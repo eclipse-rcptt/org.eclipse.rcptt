@@ -14,6 +14,7 @@ import static org.eclipse.rcptt.tesla.jface.DescriptorInfo.getInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +25,8 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Assert;
 import org.junit.Test;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.Version;
 
 public class DescriptorInfoTest {
 
@@ -61,8 +64,14 @@ public class DescriptorInfoTest {
 
 	@Test
 	public void testFileClass() {
-		ImageDescriptor descriptor = ImageDescriptor.createFromFile(org.eclipse.jface.action.Separator.class, "images/stop.gif");
-		assertEquals("org.eclipse.jface.action.Separatorimages/stop.gif", getInfo(descriptor));
+		Version version = FrameworkUtil.getBundle(org.eclipse.jface.action.Separator.class).getVersion();
+		if (version.compareTo(Version.parseVersion("3.38.0")) < 0) { // not exact
+			ImageDescriptor descriptor = ImageDescriptor.createFromFile(org.eclipse.jface.action.Separator.class, "images/stop.gif");
+			assertEquals("org.eclipse.jface.action.Separatorimages/stop.gif", getInfo(descriptor));
+		} else {
+			ImageDescriptor descriptor = ImageDescriptor.createFromFile(org.eclipse.jface.action.Separator.class, "images/stop.svg");
+			assertEquals("org.eclipse.jface/org/eclipse/jface/action/images/stop.svg", getInfo(descriptor));
+		}
 	}
 	
 	@Test

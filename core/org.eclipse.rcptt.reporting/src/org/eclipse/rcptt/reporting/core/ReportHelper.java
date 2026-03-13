@@ -134,7 +134,10 @@ public class ReportHelper {
 				waitInfo[0] = getWaitInfo(node, true);
 			}
 		});
-		return waitInfo[0]; // Might be null at this point if no report is active
+		if (waitInfo[0] == null) { // Might be null at this point if no report is active
+			waitInfo[0] = InfoFactory.eINSTANCE.createQ7WaitInfoRoot();
+		}
+		return waitInfo[0]; 
 	}
 	
 	public static void setResult(INodeBuilder node, final IStatus status) {

@@ -11,7 +11,9 @@
 package org.eclipse.rcptt.launching.ext;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
+import static org.eclipse.core.runtime.Status.error;
 import static org.eclipse.rcptt.internal.launching.ext.AJConstants.OSGI_FRAMEWORK_EXTENSIONS;
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
 import static org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils.id;
@@ -25,7 +27,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,18 +35,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -56,32 +59,24 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.plugin.TargetPlatform;
-import org.eclipse.pde.core.target.ITargetLocation;
 import org.eclipse.pde.core.target.TargetBundle;
-import org.eclipse.pde.internal.build.IPDEBuildConstants;
-import org.eclipse.pde.internal.core.target.IUBundleContainer;
-import org.eclipse.pde.internal.launching.PDEMessages;
-import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
-import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache.CachedInfo;
 import org.eclipse.rcptt.internal.launching.ext.AJConstants;
 import org.eclipse.rcptt.internal.launching.ext.IBundlePoolConstansts;
-import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
-import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
+import org.eclipse.rcptt.internal.launching.ext.PDEUtils;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchMonitor;
 import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
 import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.internal.target.Q7Target;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
@@ -100,11 +95,10 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 
-@SuppressWarnings("restriction")
 public class Q7ExternalLaunchDelegate extends
 		EclipseApplicationLaunchConfiguration {
 
-	private static final String ATTR_D32 = "-d32";
+	private static final Pattern COMMA = Pattern.compile(",");
 
 	private static final String Q7_LAUNCHING_AUT = "RCPTT: Launching AUT: ";
 
@@ -124,15 +118,14 @@ public class Q7ExternalLaunchDelegate extends
 			super.launch(configuration, mode, launch, subm.split(1000));
 			waiter.wait(subm.split(1000), TeslaLimits.getAUTStartupTimeout() / 1000);
 		} catch (CoreException e) {
-			Q7ExtLaunchingPlugin.getDefault().log(
-					"RCPTT: Failed to Launch AUT: " + configuration.getName()
-							+ " cause " + e.getMessage(),
-					e);
-			waiter.handle(e);
-			// no need to throw exception in case of cancel
 			if (!e.getStatus().matches(IStatus.CANCEL)) {
-				throw e;
+				Q7ExtLaunchingPlugin.getDefault().log(
+						"RCPTT: Failed to Launch AUT: " + configuration.getName()
+								+ " cause " + e.getMessage(),
+						e);
 			}
+			waiter.handle(e);
+			throw e;
 		} catch (OperationCanceledException e) {
 			throw new CoreException(Status.CANCEL_STATUS);
 		} catch (RuntimeException e) {
@@ -161,6 +154,12 @@ public class Q7ExternalLaunchDelegate extends
 		}
 		return super.saveBeforeLaunch(configuration, mode, monitor);
 	}
+	
+	@Override
+	protected IProject[] getBuildOrder(ILaunchConfiguration configuration, String mode) throws CoreException {
+		// Do not let PDE scan workspace for plug-ins projects and resolve Target Platform
+		return new IProject[0];
+	}
 
 	@Override
 	public boolean finalLaunchCheck(ILaunchConfiguration configuration,
@@ -172,6 +171,13 @@ public class Q7ExternalLaunchDelegate extends
 	}
 
 	@Override
+    public IVMRunner getVMRunner(ILaunchConfiguration configuration, String mode) throws CoreException {
+		final CachedInfo info = LaunchInfoCache.getInfo(configuration);
+		final ITargetPlatformHelper platform = (ITargetPlatformHelper) requireNonNull(info.target); 
+		return getVMInstall(configuration, platform).getVMRunner(mode);
+    }
+	
+	@Override
 	public boolean preLaunchCheck(ILaunchConfiguration configuration,
 			String mode, IProgressMonitor monitor) throws CoreException {
 		if (monitor.isCanceled()) {
@@ -179,6 +185,7 @@ public class Q7ExternalLaunchDelegate extends
 		}
 		
 		SubMonitor sm = SubMonitor.convert(monitor, 100);
+		try {
 		
 		if (!isHeadless(configuration)
 				&& !super.preLaunchCheck(configuration, mode,
@@ -196,10 +203,18 @@ public class Q7ExternalLaunchDelegate extends
 			return true;
 		}
 
-		final ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
+		ITargetPlatformHelper target = Q7TargetPlatformManager.findTarget(configuration,
 				sm.split(1));
 		if (target == null) {
-			throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			target = Q7TargetPlatformManager.getTarget(configuration, sm.split(1, SubMonitor.SUPPRESS_NONE));
+			if (target == null) {
+				throw new CoreException(Status.error("RCPTT has been updated since AUT " + configuration.getName() + " was created. Edit the AUT to restore compatibility."));
+			}
+			ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+			assert target.getWeavingHook() != null;
+			Q7TargetPlatformManager.setHelper(wc, target);
+			wc.doSave();
+			assert Q7TargetPlatformManager.findTarget(configuration, sm.split(1)) == target;
 		}
 		
 
@@ -207,97 +222,65 @@ public class Q7ExternalLaunchDelegate extends
 			return false;
 		}
 
-		info.target = target;
 		final MultiStatus error = new MultiStatus(Q7ExtLaunchingPlugin.PLUGIN_ID, 0,
 				"Target platform initialization failed  for "
 						+ configuration.getName() + " edit the AUT to retry",
 				null);
-		error.add(target.resolve(sm.split(98)));
+		error.add(target.resolve(sm.split(97)));
 
-		if (!error.isOK()) {
-			Q7ExtLaunchingPlugin.log(error);
-		}
-
-		if (error.matches(IStatus.ERROR)) {
+		if (error.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			removeTargetPlatform(configuration);
 			if (monitor.isCanceled()) {
-				removeTargetPlatform(configuration);
 				return false;
 			}
-			removeTargetPlatform(configuration);
 			throw new CoreException(error);
 		}
+		info.target = target;
 
-		boolean jvmFound = false;
 
-		OSArchitecture configArch = null;
-		StringBuilder detectMsg = new StringBuilder();
-
-		OSArchitecture architecture = ((configArch == null) ? ((ITargetPlatformHelper) info.target)
-				.detectArchitecture(detectMsg) : configArch);
-
-		Q7ExtLaunchingPlugin.getDefault().info(
-				Q7_LAUNCHING_AUT + configuration.getName()
-						+ ": Detected AUT architecture is "
-						+ architecture.name() + ". " + detectMsg.toString());
-
-		IVMInstall install = VMHelper.getVMInstall(configuration);
-
-		OSArchitecture jvmArch = JDTUtils.detect(install);
-
-		Q7ExtLaunchingPlugin.getDefault().info(
-				Q7_LAUNCHING_AUT + configuration.getName()
-						+ ": Selected JVM is "
-						+ install.getInstallLocation().toString()
-						+ " detected architecture is " + jvmArch.name());
-
-		if (jvmArch.equals(architecture)) {
-			jvmFound = true;
+		try {
+			getVMInstall(configuration, target);
+		} catch (CoreException e) {
+			error.add(e.getStatus());
+			throw new CoreException(error);
+		}
+		
+		if (error.matches(IStatus.CANCEL)) {
+			return false;
+		}
+		
+		if (error.matches(IStatus.ERROR)) {
+			throw new CoreException(error);
+		}
+		} catch (OperationCanceledException e) {
+			return false;
+		} finally {
+			done(monitor);
 		}
 
-		if (!jvmFound
-				&& architecture != OSArchitecture.Unknown
-				&& target.detectArchitecture(new StringBuilder()) == OSArchitecture.Unknown) {
-			Q7ExtLaunchingPlugin
-					.getDefault()
-					.info("Cannot determine AUT architecture, sticking to architecture of selected JVM, which is "
-							+ jvmArch.name());
-			jvmFound = true;
-		}
-
-		Q7ExtLaunchingPlugin
-				.getDefault()
-				.info(Q7_LAUNCHING_AUT
-						+ configuration.getName()
-						+ ": JVM and AUT architectures are compatible: "
-						+ jvmFound
-						+ ".");
-		if (!jvmFound) {
-			// Let's search for configuration and update JVM if possible.
-			ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
-			jvmFound = updateJVM(workingCopy, architecture,  ((ITargetPlatformHelper) info.target));
-
-			if (jvmFound) {
-				workingCopy.doSave();
-				Q7ExtLaunchingPlugin
-						.getDefault()
-						.info(Q7_LAUNCHING_AUT
-								+ configuration.getName()
-								+ "JVM configuration is updated to compatible one: "
-								+ VMHelper.getVMInstall(configuration)
-										.getInstallLocation());
-			}
-
-		}
-		if (!jvmFound) {
-			String errorMessage = String.format("Select a compatible Runtime JRE. Architecture: %s, incompatible with: ", architecture, target.getIncompatibleExecutionEnvironments());
-			Q7ExtLaunchingPlugin.getDefault().log(errorMessage, null);
-			removeTargetPlatform(configuration);
-			throw new CoreException(new Status(IStatus.ERROR,
-					Q7ExtLaunchingPlugin.PLUGIN_ID, errorMessage, null));
-		}
-
-		monitor.done();
 		return true;
+	}
+
+	public static IVMInstall getVMInstall(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
+		JvmTargetCompatibility compatibility = new JvmTargetCompatibility(target);
+		IVMInstall pdeDerived = PDEUtils.getVMInstall(configuration, target.getModels().map(m -> m.model()).collect(Collectors.toSet()));
+		IStatus error = compatibility.checkCompatibilty(pdeDerived);
+		if (error.matches(IStatus.CANCEL)) {
+			throw new CoreException(error);
+		}
+		if (!error.matches(IStatus.ERROR)) {
+			return pdeDerived;
+		}
+		
+		Stream<VmInstallMetaData> byEnv = PDEUtils.getExecutionEnvironmentId(configuration).map(envId -> compatibility.findForEnvironment(envId)).orElse(Stream.empty());
+
+		return byEnv.findFirst().orElseThrow(() -> {
+			try {
+				return new CoreException(Status.error(compatibility.explainJvmRequirements()));
+			} catch (CoreException e) {
+				return e;
+			}
+		}).install;
 	}
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)
@@ -323,14 +306,8 @@ public class Q7ExternalLaunchDelegate extends
 		}
 	}
 
-	public static boolean updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
-			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
-		
-		VmInstallMetaData jvm = VmInstallMetaData.all().filter(m -> isCompatible(m, architecture, target.getIncompatibleExecutionEnvironments())).findFirst().orElse(null);
-		if (jvm == null) {
-			return false;
-		}
-		IVMInstall jvmInstall = jvm.install;
+	public static void updateJVM(ILaunchConfigurationWorkingCopy workingCopy,
+			IVMInstall jvmInstall) {
 		workingCopy
 				.setAttribute(
 						IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH,
@@ -338,11 +315,6 @@ public class Q7ExternalLaunchDelegate extends
 								"org.eclipse.jdt.launching.JRE_CONTAINER/%s/%s",
 								jvmInstall.getVMInstallType().getId(),
 								jvmInstall.getName()));
-		return true;
-	}
-
-	private static boolean isCompatible(VmInstallMetaData m, OSArchitecture architecture, Set<String> incompatibleExecutionEnvironments) {
-		return m.arch.equals(architecture) && Collections.disjoint(incompatibleExecutionEnvironments, m.compatibleEnvironments);
 	}
 
 	private static String getSubstitutedString(String text)
@@ -354,28 +326,22 @@ public class Q7ExternalLaunchDelegate extends
 		return mgr.performStringSubstitution(text);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String[] constructClasspath(ILaunchConfiguration configuration)
 			throws CoreException {
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
 
-		String jarPath = target
-				.getEquinoxStartupPath(IPDEBuildConstants.BUNDLE_EQUINOX_LAUNCHER);
+		String jarPath = PDEUtils.startupPackageNames().map(target::getEquinoxStartupPath).filter(Objects::nonNull).findFirst().orElse(null);
 
-		if (jarPath == null)
+		if (jarPath == null) {
 			return null;
-
-		ArrayList entries = new ArrayList();
-		entries.add(jarPath);
+		}
 
 		String bootstrap = configuration.getAttribute(
 				IPDELauncherConstants.BOOTSTRAP_ENTRIES, ""); //$NON-NLS-1$
-		StringTokenizer tok = new StringTokenizer(
-				getSubstitutedString(bootstrap), ","); //$NON-NLS-1$
-		while (tok.hasMoreTokens())
-			entries.add(tok.nextToken().trim());
-		return (String[]) entries.toArray(new String[entries.size()]);
+		
+		Stream<String> moreEntries = COMMA.splitAsStream(getSubstitutedString(bootstrap)).map(String::trim);
+		return Stream.concat(Stream.of(jarPath), moreEntries).toArray(String[]::new);
 
 	}
 
@@ -384,8 +350,7 @@ public class Q7ExternalLaunchDelegate extends
 			throws CoreException {
 		String[] classpath = constructClasspath(configuration);
 		if (classpath == null) {
-			String message = PDEMessages.WorkbenchLauncherConfigurationDelegate_noStartup;
-			throw new CoreException(Q7ExtLaunchingPlugin.status(message));
+			throw new CoreException(error(PDEUtils.NO_STARTUP_JAR_MESSAGE));
 		}
 		return classpath;
 	}
@@ -446,7 +411,7 @@ public class Q7ExternalLaunchDelegate extends
 					+ IPath.SEPARATOR + SECURE_STORAGE_FILE_NAME);
 		}
 
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+		IVMInstall install = getVMInstall(configuration, target);
 		programArgs.add("-vm");
 		programArgs.add(install.getInstallLocation().toString());
 		
@@ -522,7 +487,7 @@ public class Q7ExternalLaunchDelegate extends
 		args.clear();
 		args.addAll(UpdateVMArgs.addHook(argsCopy, hook, properties.getProperty(OSGI_FRAMEWORK_EXTENSIONS)));
 
-		args.addAll(vmSecurityArguments(config));
+		args.addAll(vmSecurityArguments(config, target));
 		
 		ArrayList<String> copy = new ArrayList<>(args);
 		args.clear();
@@ -531,10 +496,10 @@ public class Q7ExternalLaunchDelegate extends
 		args.add("-Declipse.vmargs=" + Joiner.on("\n").join(args) + "\n");
 	}
 	
-	public static List<String> vmSecurityArguments(ILaunchConfiguration configuration) throws CoreException {
+	public static List<String> vmSecurityArguments(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
 		// Magic constant from org.eclipse.jdt.internal.launching.environments.ExecutionEnvironmentAnalyzer
 		ArrayList<String> result = new ArrayList<>();
-		Set<String> envs = getMatchingEnvironments(configuration);
+		Set<String> envs = getMatchingEnvironments(configuration, target);
 		if (envs.contains("JavaSE-11")) {
 			result.addAll(Arrays.asList(
 					"--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -550,8 +515,8 @@ public class Q7ExternalLaunchDelegate extends
 		return result;
 	}
 	
-	private static Set<String> getMatchingEnvironments(ILaunchConfiguration configuration) throws CoreException {
-		IVMInstall install = VMHelper.getVMInstall(configuration);
+	private static Set<String> getMatchingEnvironments(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
+		IVMInstall install = getVMInstall(configuration, target);
 		if (install == null)
 			return Collections.emptySet();
 
@@ -566,10 +531,7 @@ public class Q7ExternalLaunchDelegate extends
 	protected void preLaunchCheck(final ILaunchConfiguration configuration,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		SubMonitor subm = SubMonitor.convert(monitor, 100);
-		super.preLaunchCheck(configuration, launch, subm.newChild(50));
-		if (monitor.isCanceled()) {
-			return;
-		}
+		super.preLaunchCheck(configuration, launch, subm.split(50));
 
 		CachedInfo info = LaunchInfoCache.getInfo(configuration);
 		ITargetPlatformHelper target = (ITargetPlatformHelper) info.target;
@@ -648,18 +610,6 @@ public class Q7ExternalLaunchDelegate extends
 		private final Map<IPluginModelBase, BundleStart> plugins = new HashMap<>();
 		private final Map<String, IPluginModelBase> latestVersions = new HashMap<>();
 		private final Set<UniquePluginModel> uniqueModels = new HashSet<>();
-	}
-
-	public static boolean isQ7BundleContainer(ITargetLocation container) {
-		if (!(container instanceof IUBundleContainer))
-			return false;
-		for (URI uri : ((IUBundleContainer) container).getRepositories()) {
-			if (!uri.getScheme().equals("platform")
-					|| !uri.getPath().startsWith("/plugin/org.eclipse.rcptt")) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public static boolean isAutConfigSimpleconfiguratorSet(Q7Target target) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2025 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,6 @@ import org.eclipse.rcptt.core.scenario.Verification;
 import org.eclipse.rcptt.core.workspace.Q7Utils;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.internal.ui.Images;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.ui.context.ContextUIManager;
 import org.eclipse.rcptt.ui.context.ContextViewer;
 import org.eclipse.rcptt.ui.editors.INamedElementEditor;
@@ -49,6 +48,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 public class ModelUtils {
@@ -232,8 +232,7 @@ public class ModelUtils {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					FileEditorInput input = new FileEditorInput(file);
-					IWorkbenchWindow window = Q7UIPlugin.getDefault().getWorkbench()
-							.getActiveWorkbenchWindow();
+					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 					if (window == null)
 						return;
 					IWorkbenchPage page = window.getActivePage();

@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
@@ -91,30 +90,25 @@ public class ErrorLogVerificationPlainExtension implements
 			ErrorLogVerification elv = (ErrorLogVerification) eObject;
 			OutputStream store = plainTextPersistenceModel
 					.store(ERROR_LOG_VERIFICATION_FILE);
+			OutputStreamWriter writer = new OutputStreamWriter(store, IPlainConstants.ENCODING_OBJECT);
 			try {
-				OutputStreamWriter writer = new OutputStreamWriter(store,
-						IPlainConstants.ENCODING);
-				try {
-					writer.write(INCLUDE_CONTEXTS + elv.isIncludeContexts() + "\n");
-					if (!elv.getRequired().isEmpty()) {
-						writer.write("REQUIRED:\n");
-						savePredicates(elv.getRequired(), writer);
-					}
-					if (!elv.getAllowed().isEmpty()) {
-						writer.write("ALLOWED:\n");
-						savePredicates(elv.getAllowed(), writer);
-					}
-					if (!elv.getDenied().isEmpty()) {
-						writer.write("DENIED:\n");
-						savePredicates(elv.getDenied(), writer);
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					FileUtil.safeClose(writer);
+				writer.write(INCLUDE_CONTEXTS + elv.isIncludeContexts() + "\n");
+				if (!elv.getRequired().isEmpty()) {
+					writer.write("REQUIRED:\n");
+					savePredicates(elv.getRequired(), writer);
 				}
-			} catch (UnsupportedEncodingException e) {
+				if (!elv.getAllowed().isEmpty()) {
+					writer.write("ALLOWED:\n");
+					savePredicates(elv.getAllowed(), writer);
+				}
+				if (!elv.getDenied().isEmpty()) {
+					writer.write("DENIED:\n");
+					savePredicates(elv.getDenied(), writer);
+				}
+			} catch (IOException e) {
 				throw new RuntimeException(e);
+			} finally {
+				FileUtil.safeClose(writer);
 			}
 		}
 	}
@@ -130,34 +124,29 @@ public class ErrorLogVerificationPlainExtension implements
 			if (stream == null) {
 				throw new RuntimeException("Can't read verification contents");
 			}
+			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, IPlainConstants.ENCODING_OBJECT));
 			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(stream, IPlainConstants.ENCODING));
-				try {
-					List<LogEntryPredicate> predicates = elv.getRequired();
-					while (reader.ready()) {
-						String line = reader.readLine();
-						if (line == null)
-							return;
-						else if (line.startsWith(INCLUDE_CONTEXTS))
-							elv.setIncludeContexts(Boolean.parseBoolean(line.substring(INCLUDE_CONTEXTS.length())));
-						else if (line.contentEquals("REQUIRED:"))
-							predicates = elv.getRequired();
-						else if (line.contentEquals("ALLOWED:"))
-							predicates = elv.getAllowed();
-						else if (line.contentEquals("DENIED:"))
-							predicates = elv.getDenied();
-						else if (!line.isEmpty()) {
-							predicates.add(parsePredicate(line));
-						}
+				List<LogEntryPredicate> predicates = elv.getRequired();
+				while (reader.ready()) {
+					String line = reader.readLine();
+					if (line == null)
+						return;
+					else if (line.startsWith(INCLUDE_CONTEXTS))
+						elv.setIncludeContexts(Boolean.parseBoolean(line.substring(INCLUDE_CONTEXTS.length())));
+					else if (line.contentEquals("REQUIRED:"))
+						predicates = elv.getRequired();
+					else if (line.contentEquals("ALLOWED:"))
+						predicates = elv.getAllowed();
+					else if (line.contentEquals("DENIED:"))
+						predicates = elv.getDenied();
+					else if (!line.isEmpty()) {
+						predicates.add(parsePredicate(line));
 					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					FileUtil.safeClose(reader);
 				}
-			} catch (UnsupportedEncodingException e1) {
-				throw new RuntimeException(e1);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				FileUtil.safeClose(reader);
 			}
 		}
 	}

@@ -13,6 +13,7 @@ package org.eclipse.rcptt.launching.ext;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -30,6 +31,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -37,7 +39,10 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -56,9 +61,9 @@ import org.eclipse.rcptt.launching.ext.tests.DownloadCache.Request;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
 import org.eclipse.rcptt.util.FileUtil;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -76,7 +81,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	@BeforeClass
 	public static void beforeClass() throws CoreException {
-		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home")));
+		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home"))).findFirst().get();
 		JavaRuntime.setDefaultVMInstall(install.install, null);
 	}
 	@SuppressWarnings("resource")
@@ -168,7 +173,6 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 	
 
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/200")
 	@Test
 	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
@@ -180,6 +184,32 @@ public class Q7ExternalLaunchDelegateTest {
 		Thread.sleep(1000); // Wait for last output
 		String output = consoleCapture.getOutput().substring(mark);
 		assertTrue(output, output.contains("Workbench is about to shut down"));
+	}
+	
+	@Test
+	public void autLaunchIsNotNull() throws InterruptedException, CoreException, IOException {
+		Path installDir = expandAut();
+		Aut aut = createAut(installDir, List.of("-consoleLog"));
+		int cancelCount =  0;
+		boolean success = false;
+		for (int i = 1; i < 100_000 && !success; i*=2) {
+			try {
+				IProgressMonitor monitor = new ExpiringProgressMonitor(i);
+				AutLaunch launch = aut.launch(monitor);
+				assertNotNull("Failed with delay " + i ,launch);
+				launch.terminate(); // Should not throw NPE
+				success = true;
+			} catch (CoreException e) {
+				if (!e.getStatus().matches(IStatus.CANCEL)) {
+					throw e;
+				}
+				cancelCount++;
+			} catch (OperationCanceledException e) {
+				cancelCount++;
+			}
+		}
+		Assert.assertNotEquals(0, cancelCount);
+		Assert.assertTrue(success);
 	}
 	
 	private String getSystemSummary(AutLaunch launch) throws CoreException, InterruptedException {
@@ -194,6 +224,7 @@ public class Q7ExternalLaunchDelegateTest {
 		Arrays.stream(output.split("\n")).forEach(line -> {
 			assertFalse(line, line.contains("Unresolved requirement"));
 			assertFalse(line, line.contains("org.osgi.framework.BundleException:"));
+			assertFalse(line, line.contains("IllegalStateException"));
 		});
 	}
 
@@ -211,6 +242,8 @@ public class Q7ExternalLaunchDelegateTest {
 	@SuppressWarnings("resource")
 	private AutLaunch startAut(Path installDir, List<String> commandLineArguments)
 			throws CoreException, IOException, InterruptedException {
+		commandLineArguments = new ArrayList<>(commandLineArguments);
+		commandLineArguments.add("-Dheadless.startup=true");
 		Aut aut = createAut(installDir, commandLineArguments);
 		AutLaunch launch = aut.launch(null);
 		closer.register(launch::terminate);
@@ -257,14 +290,14 @@ public class Q7ExternalLaunchDelegateTest {
 	private Path expandAut() throws IOException, InterruptedException {
 		Request request = switch (Platform.getOS()) {
 		case Platform.OS_MACOSX -> request(
-				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-macosx-cocoa-aarch64.dmg",
-				"77ae164c4b11d18f162b1ff97b088865469b2267033d45169e4f7f14694767bb98a25a3697b33233ed8bc5bb17eb18f214c59913581938f757887ff8bdef960b");
+				"https://ftp.yz.yamagata-u.ac.jp/pub/eclipse/eclipse/downloads/drops4/R-4.38-202512010920/eclipse-platform-4.38-macosx-cocoa-aarch64.dmg",
+				"80ed014319de547ead8f552ace8a469a0fa18a595bd316fa1cdedfcccf31315b58b5ec91232d59d6224398d930d092d5813efeac7b55a3271a3e6297bb6effad");
 		case Platform.OS_WIN32 -> request(
 				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-win32-x86_64.zip",
 				"e90eb939cef8caada36a058bbed3a3b14c53e496f5feb439abc2e53332a4c71d3d43c02b8d202d88356eb318395551bce32db9d8e5e2fd1fc9e152e378dc325f");
 		case Platform.OS_LINUX -> request(
-				"https://archive.eclipse.org/technology/epp/downloads/release/2024-03/R/eclipse-java-2024-03-R-linux-gtk-x86_64.tar.gz",
-				"973c94a0a029c29d717823a53c3a65f99fa53d51f605872c5dd854620e16cd4cb2c2ff8a5892cd550a70ab19e1a0a0d2e792661e936bd3d2bef4532bc533048b");
+				"https://ftp.yz.yamagata-u.ac.jp/pub/eclipse/eclipse/downloads/drops4/R-4.38-202512010920/eclipse-platform-4.38-linux-gtk-x86_64.tar.gz",
+				"e498da6b1203409a9902760d29d6d91f37fa0fa2622cb3b75af517c21ab8dec191439868a4da6a00e6c4829aba9c4f65ef61a6f629dd75e258f609e0de6ead7c");
 		default -> throw new IllegalStateException();
 		};
 		Path distribution = CACHE.download(request);
@@ -372,5 +405,16 @@ public class Q7ExternalLaunchDelegateTest {
 	
 	private void assertActive(String bundleId, String systemInformation) {
 		assertContains(bundleId+" [^\\n]+ \\[Active\\]", systemInformation);
+	}
+	
+	private static class ExpiringProgressMonitor extends NullProgressMonitor {
+		private final AtomicInteger checksLeft;
+		public ExpiringProgressMonitor(int maximumCheckCount) {
+			checksLeft = new AtomicInteger(maximumCheckCount);
+		}
+		@Override
+		public boolean isCanceled() {
+			return super.isCanceled() || checksLeft.getAndDecrement() <= 0;
+		}
 	}
 }

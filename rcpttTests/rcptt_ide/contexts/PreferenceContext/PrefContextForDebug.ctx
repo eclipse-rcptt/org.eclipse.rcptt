@@ -1,0 +1,42 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.preferences
+Element-Name: PrefContextForDebug
+Element-Type: context
+Element-Version: 2.0
+Id: _cNRdwDtvEeG8pezHWLcUvg
+Runtime-Version: 2.7.0.202509241400
+Save-Time: 10/3/25, 11:04 PM
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf
+Content-Type: q7/binary
+Entry-Name: .q7.content
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAAC9VduOokAQffcrSG/i
+m+DMvhivQcGdSbwQLzPzRnqaUjs23SzdiG7247cRRGfHrMnGzAspqFOnTp2iod3bh8zYQSyp4B30YNaR
+AZyIgPJ1ByVqVWugXrfSFvHaBMJoJMGMSaSUSdTejGJYQazxIJveOR4IrmCvjH1ImyX1Y0atm3HZ1M87
+aKNU1LSsNE1NEa5N3cB6Gz+XEPkRkn4/Ih7r9QcNG83JBkJco1wqrDueqm6qLDlPqIz0iLQ00rpAIoPj
+EDooG6uYZyhiB96TNTJo0EE+mcyC1FE7F340Ivj19Doiy51OEgaYe5c9VZwA6lYMo00yJq4K7lJ+lsuy
+G8oCWSQ/z5JQEwKqRCyzRFGkywKssKENa6pDdLXw71XNVazXm0l0dCkytnDooBDH2ykhyWn8HWaJZlth
+JgFZhUIrl3hLb5DZpPXeW2MG8LVnCvwQQm2kMK+1NY9reqGQ/jtbDlllqvXhIFR/JkK19GnIg/ORyO+X
+i2GtkYe9bvXb3mnpi93KaErycS7QuCqhP3NtZzBbjvu+M5t6zvR14tvLxdR33zx74hRtjt7nodU97eBu
+Zl4V5s3coT+yl5PBk++5s7nnDhbPL+78HlYZ2dseYCY4FEkuLkzM/WM44WTjafIIiKI7kFaevPv8OSCG
+wAGFKfMwv3jtHVjhhKlzqvnpye+v2YhMqSIbPzo74gvuy0Tf8aDUi1mKD/JrFDlU4ncG8y2NbMb6MeBt
+JChXcspHx+3d/njoOP8S6l+L9T//lm7lD1BLBwjUpf49QgIAALoGAABQSwECFAAUAAgICAAAACEA1KX+
+PUICAAC6BgAACAAJAAAAAAAAAAAAAAAAAAAALmNvbnRlbnRVVAUAAQAAAABQSwUGAAAAAAEAAQA/AAAA
+gQIAAAAA
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf--

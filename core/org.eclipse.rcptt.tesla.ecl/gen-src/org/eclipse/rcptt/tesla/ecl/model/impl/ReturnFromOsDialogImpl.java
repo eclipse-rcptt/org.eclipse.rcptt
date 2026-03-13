@@ -93,6 +93,7 @@ public class ReturnFromOsDialogImpl extends CommandImpl implements ReturnFromOsD
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getKind() {
 		return kind;
 	}
@@ -102,6 +103,7 @@ public class ReturnFromOsDialogImpl extends CommandImpl implements ReturnFromOsD
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(String newKind) {
 		String oldKind = kind;
 		kind = newKind;
@@ -114,6 +116,7 @@ public class ReturnFromOsDialogImpl extends CommandImpl implements ReturnFromOsD
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<String> getResult() {
 		if (result == null) {
 			result = new EDataTypeUniqueEList<String>(String.class, this, TeslaPackage.RETURN_FROM_OS_DIALOG__RESULT);

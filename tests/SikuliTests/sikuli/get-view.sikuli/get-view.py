@@ -1,1 +1,0 @@
-doubleClick("ProjectExpl.png")

@@ -20,7 +20,9 @@ import java.util.function.BooleanSupplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -30,6 +32,7 @@ import org.eclipse.rcptt.core.IContextProcessor;
 import org.eclipse.rcptt.core.scenario.Context;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
 import org.eclipse.rcptt.core.scenario.WorkbenchContext;
+import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.tesla.ecl.impl.UIRunnable;
@@ -126,10 +129,8 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 	@Override
 	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkbenchContext ctx = (WorkbenchContext) context;
-		final UIJobCollector collector = new UIJobCollector();
 		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
-		Job.getJobManager().addJobChangeListener(collector);
-		try {
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
 			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -139,11 +140,22 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 			if (ctx.isNoModalDialogs()) {
 				PlatformUI.getWorkbench().getDisplay().asyncExec(closeModalDialogsAsync);
 				PlatformUI.getWorkbench().getDisplay().asyncExec(closeModalDialogsAsync);
-				IStatus status = UIRunnable.exec(closeModalDialogs, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
+				IStatus status = Status.CANCEL_STATUS;
+				while (!isCancelled.getAsBoolean()) {
+					status = UIRunnable.exec(closeModalDialogs, Math.toIntExact(stop - currentTimeMillis()), isCancelled);
+					if (status.matches(IStatus.CANCEL)) {
+						throw new CoreException(status);
+					}
+					if (stop <= currentTimeMillis() ) {
+						throw new CoreException(new MultiStatus(getClass(), IProcess.TIMEOUT_CODE, new IStatus[] {status}, "Failed to close dialogs", null));
+					}
+					if (status.isOK()) {
+						break;
+					}
+				}
 				if (!status.isOK()) {
 					throw new CoreException(status);
 				}
-
 			}
 			UIRunnable.exec(closeIntro,  toIntExact(stop - currentTimeMillis()), isCancelled);
 			final IWorkbenchPage page = UIRunnable.exec(activatePerspective(ctx), toIntExact(stop - currentTimeMillis()), isCancelled);
@@ -193,8 +205,6 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));
 			RcpttPlugin.log(e);
 			throw ee;
-		} finally {
-			Job.getJobManager().removeJobChangeListener(collector);
 		}
 	}
 

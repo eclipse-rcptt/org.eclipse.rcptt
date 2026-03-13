@@ -51,18 +51,22 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 
 	private final IndexManager manager = ModelManager.getModelManager().getIndexManager();
 
+	@Override
 	public void request(IJob job) {
 		manager.request(job);
 	}
 
+	@Override
 	public void requestIfNotWaiting(IJob job) {
 		manager.requestIfNotWaiting(job);
 	}
 
+	@Override
 	public IndexManager getIndexManager() {
 		return manager;
 	}
 
+	@Override
 	public void indexProject(IQ7Project project) {
 		final ProjectRequest request = new ProjectRequest(this, project);
 		requestIfNotWaiting(request);
@@ -95,20 +99,24 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 		}
 	}
 
+	@Override
 	public void removeNamedElement(IQ7Project project, String path) {
 		request(new NamedElementRemoveRequest(this, project, path));
 	}
 
+	@Override
 	public void removeProject(IPath projectPath) {
 		requestIfNotWaiting(new RemoveIndexRequest(this, projectPath));
 	}
 
+	@Override
 	public boolean wantRefreshOnStart() {
 		return true;
 	}
 
 	private Set<IQ7NamedElement> indexingSet = new HashSet<IQ7NamedElement>();
 
+	@Override
 	public void indexNamedElement(Index index, IQ7NamedElement element) {
 		IQ7NamedElement originalElement = element;
 		final IIndexDocument document = new IndexDocument(element, index);
@@ -166,18 +174,14 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 	}
 
 	public void doIndexing(IIndexDocument document) {
+		IQ7NamedElement element = document.getElement();
 		try {
-			IQ7NamedElement element = document.getElement();
 			document.addKey(IQ7IndexConstants.ID, element.getID());
 			document.addKey(IQ7IndexConstants.NAME, element.getElementName());
 			if (element instanceof ITestCase) {
-				try {
-					document.addKey(IQ7IndexConstants.IS_EMPTY, Boolean
-							.toString(Scenarios.isEmpty((Scenario) element
-									.getNamedElement())));
-				} catch (Throwable e) {
-					RcpttPlugin.log(e);
-				}
+				document.addKey(IQ7IndexConstants.IS_EMPTY, Boolean
+						.toString(Scenarios.isEmpty((Scenario) element
+								.getNamedElement())));
 			}
 			String tags = element.getTags();
 			if (tags != null && tags.length() > 0) {
@@ -230,14 +234,24 @@ public class Q7ProjectIndexer implements IProjectIndexer, IProjectIndexer.Intern
 				iIndexer.index(document);
 			}
 		} catch (Throwable e) {
+			boolean known = false;
+			if (e instanceof ModelException) {
+				ModelException me = (ModelException) e;
+				if (me.getQ7Status().getStatusCode() == Q7StatusCode.NotPressent) {
+					known = true;
+				}
+			}
 			// could cause error dialog display, and hang
-			Status status = new Status(Status.WARNING, RcpttPlugin.PLUGIN_ID,
-					e.getMessage(), e);
-			RcpttPlugin.getDefault().getLog().log(status);
+			if (!known) {
+				Status status = new Status(Status.WARNING, RcpttPlugin.PLUGIN_ID,
+						e.getMessage(), e);
+				RcpttPlugin.getDefault().getLog().log(status);
+			}
 			document.remove();
 		}
 	}
 
+	@Override
 	public Index getProjectIndex(IQ7Project project) {
 		return getIndexManager().getIndex(project.getProject().getFullPath());
 	}

@@ -662,8 +662,6 @@ public class TeslaSWTAccess {
 		return 0;
 	}
 	
-	
-	
 	private static final Consumer<Job> waitListeners;
 	
 	static {

@@ -47,7 +47,7 @@ public class JDTUtils {
 	private static final String OS_ARCH = "os.arch";
 	private static final ILog LOG = Platform.getLog(JDTUtils.class);
 
-	private static IVMInstall registerCurrentJVM() {
+	public static IVMInstall registerCurrentJVM() {
 		try {
 			return registerVM(new File(System.getProperty("java.home")));
 		} catch (CoreException e) {
@@ -228,7 +228,7 @@ public class JDTUtils {
 		standin.setName(name);
 		IVMInstall result = standin.convertToRealVM();
 		try {
-			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocation);
+			assert result.getInstallLocation().getCanonicalFile().equals(jvmInstallationLocationCopy);
 		} catch (IOException e) {
 			throw new CoreException(Status.error("Can't register JVM from " + jvmInstallationLocation, e));
 		}
@@ -240,7 +240,6 @@ public class JDTUtils {
 		Stream<IVMInstall> preinstalled = registeredInstalls();
 		Stream<IVMInstall> currentJVM = Stream.generate(JDTUtils::registerCurrentJVM).limit(1);
 		return Stream.concat(preinstalled, currentJVM);
-		
 	}
 	
 	private static Stream<IVMInstall> registeredInstalls() {

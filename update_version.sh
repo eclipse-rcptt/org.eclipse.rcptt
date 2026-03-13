@@ -31,14 +31,15 @@ echo "================= Updating All Components ================="
 mvn $GOAL -f releng/pom.xml -P update-version $OPTIONS -B || exit 100
 
 echo "================== Updating Maven Plugin =================="
+mvn clean install -f maven-plugin/pom.xml || exit 109 # Ensure that previous version is vailable to resolve deps for "its"
 mvn $GOAL -f maven-plugin/pom.xml $OPTIONS -B || exit 101
+mvn $GOAL -f maven-plugin/its/pom.xml $OPTIONS -B || exit 108
 
 echo "================== Updating Maven Script =================="
 mvn versions:set -f clean-pom.xml -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 102
 
 echo "================== Updating RCPTT Tests =================="
-mvn versions:use-dep-version -f ./rcpttTests/ECL_IDE_module/pom.xml  -Dincludes=com.xored.q7:q7contexts.shared -DdepVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -DforceVersion=true -B || exit 103
-mvn versions:set -f ./rcpttTests/pom-base.xml -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 104
-mvn versions:set-property -f ./rcpttTests/pom-base.xml -Dproperty=rcptt-maven-version -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 105
-mvn versions:set-property -f ./rcpttTests/pom-base.xml -Dproperty=runner-version -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 106
-mvn versions:set-property -f ./rcpttTests/pom-base.xml -Dproperty=rcpttRepo -DnewVersion="http://download.eclipse.org/rcptt/nightly/$VERSION/latest/repository" -DgenerateBackupPoms=false -B || exit 107
+mvn versions:use-dep-version -f ./rcpttTests/rcptt_ide/ECL_IDE_module/pom.xml  -Dincludes=com.xored.q7:q7contexts.shared -DdepVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -DforceVersion=true -B || exit 103
+mvn versions:set --file ./rcpttTests -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 104
+mvn versions:set-property --file ./rcpttTests -Dproperty=rcptt-maven-version -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 105
+mvn versions:set-property --file ./rcpttTests -Dproperty=runner-version -DnewVersion=$VERSION_WITH_DECORATOR -DgenerateBackupPoms=false -B || exit 106

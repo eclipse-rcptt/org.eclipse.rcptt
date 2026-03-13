@@ -13,7 +13,7 @@ package org.eclipse.rcptt.compare;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -207,12 +207,7 @@ public class ScenarioStructureCreator implements IStructureCreator {
 		}
 
 		public InputStream getContents() {
-			try {
-				return new ByteArrayInputStream(fContents.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				return null;
-			}
+			return new ByteArrayInputStream(fContents.getBytes(StandardCharsets.UTF_8));
 		}
 
 		String getStringContents() {

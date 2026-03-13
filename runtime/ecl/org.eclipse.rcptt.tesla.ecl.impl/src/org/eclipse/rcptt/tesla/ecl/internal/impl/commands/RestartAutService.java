@@ -22,7 +22,6 @@ import org.eclipse.ui.PlatformUI;
 public class RestartAutService implements ICommandService {
 	@Override
 	public IStatus service(Command command, IProcess context) throws InterruptedException, CoreException {
-		ShutdownAutService.tryTerminateLaunches();
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {

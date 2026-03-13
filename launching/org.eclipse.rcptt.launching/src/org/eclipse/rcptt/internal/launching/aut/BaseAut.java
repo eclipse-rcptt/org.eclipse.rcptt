@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -33,24 +34,38 @@ public class BaseAut implements Aut {
 		this.executor = executor;
 	}
 
+	@Override
 	public ILaunchConfiguration getConfig() {
 		return config;
 	}
 
+	@Override
 	public String getName() {
 		return config.getName();
 	}
 
+	@Override
 	public List<AutLaunch> getLaunches() {
 		return BaseAutManager.INSTANCE.getLaunches(this);
 	}
 
+	@Override
 	public AutLaunch launch(IProgressMonitor monitor) throws CoreException {
 		ILaunch launch = executor.launch(ILaunchManager.RUN_MODE, config,
 				monitor);
-		return BaseAutManager.INSTANCE.getByLaunch(launch);
+		if (monitor != null && monitor.isCanceled()) {
+			assert BaseAutManager.INSTANCE.getByLaunch(launch) == null;
+			if (launch != null) {
+				launch.terminate();
+			}
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		assert launch.getProcesses().length > 0;
+		BaseAutLaunch result = BaseAutManager.INSTANCE.getByLaunch(launch);
+		return result;
 	}
 
+	@Override
 	public BaseAutLaunch getActiveLaunch() {
 		return BaseAutManager.INSTANCE.getCurrentLaunch(this);
 	}

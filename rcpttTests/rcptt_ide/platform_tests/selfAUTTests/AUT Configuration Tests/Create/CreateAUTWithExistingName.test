@@ -1,0 +1,80 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _ymiyse5IEeCU6db9MgIBkA,_ZQYygK2sEeCqBbDEJWufvQ
+Element-Name: CreateAUTWithExistingName
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: http://jira4.xored.com/browse/QS-1435
+Id: _dXS98Y3OEeGPGed2vA-uTQ
+Runtime-Version: 2.6.0.qualifier
+Save-Time: 6/27/25, 12:24 AM
+Tags: AUTConfiguration, selfAUT, Create
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+TEST STEPS
+
+1. Create AUT1 with Location1; 
+2. Press "New" button and select location2 for this new AUT; 
+3. Set its name as AUT1 too
+
+TEST RESULT
+
+"Application already exist" message occurs, "Finish" button is disabled, unable to save AUT1 with new location2.
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view Applications | get-tree | select selfQ7 | get-menu "Configure..." | click
+with [get-window "Edit Application Under Test"] {
+    with [get-editbox -after [get-label "Location:"]] {
+        key-type "M1+a"
+        key-type "M1+c"
+    }
+    get-button Cancel | click
+}
+get-view Applications | get-button "New..." | click
+get-window "New Application Under Test" | get-editbox -after [get-label "Location:"] | key-type "M1+v"
+with [get-window "New Application Under Test"] {
+ get-editbox -after [get-label "Location:"] | click-text 5
+    get-editbox -after [get-label "Location:"] | key-type Space -times 2
+    get-editbox -after [get-label "Location:"] | key-type BackSpace -times 2
+    get-editbox -after [get-label "Name:"] | set-text AUT1
+    set-q7-option jobHangTimeout 120000
+    get-button Finish | click
+}
+get-view Applications | get-button "New..." | click
+with [get-window "New Application Under Test"] {
+    get-editbox -after [get-label "Location:"] | key-type "M1+v"
+    get-editbox -after [get-label "Location:"] | click-text 5
+    get-editbox -after [get-label "Location:"] | key-type Space -times 2
+    get-editbox -after [get-label "Location:"] | key-type BackSpace -times 2
+    get-editbox -after [get-label "Name:"] | set-text AUT1
+}
+with [get-window "New Application Under Test"] {
+    get-editbox -after [get-label "New Application Under Test"] | get-property text 
+        | equals "Application AUT1 already exists. Please specify a different name." | verify-true
+    get-button Finish | get-property enablement | equals false | verify-true
+    get-button Cancel | get-property enablement | equals true | verify-true
+}
+get-window "New Application Under Test" | get-button Cancel | click
+with [get-view Applications | get-tree] {
+    get-property itemCount | equals 2 | verify-true
+    get-item selfQ7 | get-property caption | equals selfQ7 | verify-true
+    get-item AUT1 | get-property caption | equals AUT1 | verify-true
+}
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

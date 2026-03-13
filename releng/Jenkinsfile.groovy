@@ -16,7 +16,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
       image: basilevs/ubuntu-rcptt:3.7.3
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotPresent
       tty: true
       resources:
         limits:
@@ -90,6 +90,7 @@ class Build implements Serializable {
   private final String[] PLATFORMS=["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"];
 
   private final def script
+  private String mvn_args;
 
   String YAML_BUILD_AGENT="""
 apiVersion: v1
@@ -115,6 +116,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   Build(def script) {
     this.script = script
+    this.mvn_args = ""
   }
 
   void build_and_test(Boolean sign) {
@@ -169,9 +171,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void archive() {
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
   }
 
   private void sh_with_return(String command) {
@@ -233,10 +235,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 	          -DexplicitRunner=`readlink -f ${runner}` \
 	          ${args}"
 	    }
-	    this.script.sh "test -f ${dir}/target/results/tests.html"
     } finally {
-	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
-      this.script.junit "${dir}/target/*-reports/*.xml"
+	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/**/target/results/**/*, ${dir}/**/target/**/*log,${dir}/**/target/surefire-reports/**, **/*.hprof"
+      this.script.junit "${dir}/**/target/*-reports/*.xml"
     }
   }
 
@@ -361,6 +362,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       def classifiers = PLATFORMS
       def types = PLATFORMS.collect { "zip" }
       def files = PLATFORMS.collect { "`readlink -f ${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-${it}.zip`" }
+      mvn('-Dtycho.mode=maven -f maven-plugin/pom.xml clean versions:set -DnewVersion=' + version)
       mvn("deploy:deploy-file \
         -Dversion=$version \
         -Durl=https://repo.eclipse.org/content/repositories/rcptt-$repo/ \
@@ -383,7 +385,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + this.mvn_args + " " + arguments)
   } 
 
 }

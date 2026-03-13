@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.core.workspace;
 
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -159,10 +162,17 @@ public class RcpttCore {
 			if (contexts == null) {
 				contexts = scenario.getContexts();
 			}
-			return getContexts(scenario, Arrays.asList(contexts), finder, ignoreErrors, capability);
+			IContext[] result = getContexts(scenario, Arrays.asList(contexts), finder, ignoreErrors, capability);
+			assert Arrays.stream(result).map(t -> {
+				try {
+					return t.getID();
+				} catch (ModelException e) {
+					throw new IllegalStateException(e);
+				}
+			}).collect(Collectors.toSet()).containsAll(asList(contexts));
+			return result;
 		} catch (ModelException e) {
-			RcpttPlugin.log(e);
-			return new IContext[0];
+			throw new IllegalStateException(e);
 		}
 	}
 

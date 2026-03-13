@@ -22,33 +22,15 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
+import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class UpdateVMArgs {
-	public static String escapeCommandArg(String arg) {
-		if (arg == null || arg.length() == 0) {
-			return "\"\""; // empty string encoded
-		}
-		// escape backslashes and quotes
-		if (!Platform.getOS().equals(Platform.OS_WIN32))
-			arg = arg.replace("\\", "\\\\");
-		arg = arg.replace("\"", "\\\"");
-		return arg.contains(" ") ? String.format("\"%s\"", arg) : arg;
-	}
-
-	public static final Function<String, String> ESCAPE = new Function<String, String>() {
-
-		@Override
-		public String apply(String input) {
-			return escapeCommandArg(input);
-		}
-	};
 	public static void updateVMArgs(
 			ILaunchConfigurationWorkingCopy configuration) {
 
@@ -75,22 +57,8 @@ public class UpdateVMArgs {
 
 
 	public static String updateAttr(String arguments) {
-		return Joiner.on(" ").join(updateAttr(Arrays.asList(DebugPlugin.parseArguments(arguments))).stream().map(UpdateVMArgs::escape).iterator());
+		return  Q7LaunchDelegateUtils.joinCommandArgs(updateAttr(Arrays.asList(DebugPlugin.parseArguments(arguments))).stream().toList());
 	}
-	
-    private static String escape(String argument) {
-        if (Platform.getOS().equals(Platform.OS_WIN32)) {
-            // https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
-            if (argument.isEmpty()) {
-                return "\"\"";
-            }
-
-            return "\"" + argument.replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\\\\$", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-
-        } else {
-            return "\"" + argument.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-        }
-    }
 
 	private static String addWeavingHook(String extensions, IPluginModelBase hook) {
 		Preconditions.checkNotNull(hook);

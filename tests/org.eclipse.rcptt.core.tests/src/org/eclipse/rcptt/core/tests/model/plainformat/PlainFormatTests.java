@@ -18,7 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -148,9 +147,7 @@ public class PlainFormatTests {
 	private String toString(InputStream is) throws IOException {
 		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			FileUtil.copy(is, os);
-			return new String(os.toByteArray(), PlainReader.ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			throw new AssertionError(e);
+			return new String(os.toByteArray(), PlainReader.ENCODING_OBJECT);
 		}
 	}
 
