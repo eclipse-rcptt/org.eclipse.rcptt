@@ -82,7 +82,6 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 					}
 					return new GridCell(item, p, column);
 				}
-
 			}
 
 		case Custom:

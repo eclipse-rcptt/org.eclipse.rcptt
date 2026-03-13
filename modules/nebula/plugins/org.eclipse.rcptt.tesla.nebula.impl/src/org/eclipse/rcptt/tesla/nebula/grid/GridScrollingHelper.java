@@ -36,18 +36,29 @@ public class GridScrollingHelper {
 		showItemIfHidden(item);
 	}
 
-	public static void scrollGridFor(SelectData data, SWTUIElement parent) {
+	public static boolean scrollGridFor(SelectData data, SWTUIElement parent) {
 		Widget parentWidget = unwrapWidget(parent);
 
 		// TODO implement it for whole item selection case (e.g. select "Item #3")
 
-		if (parentWidget instanceof GridItem) {
-			GridItem item = (GridItem) unwrapWidget(parent);
-			showItemIfHidden(item);
+		if (parentWidget instanceof Grid grid) {
+			GridItem item = (GridItem) NebulaViewers.searchGridItem(
+					(NebulaUIElement) parent, data.getPath());
+			if (!showItemIfHidden(item)) {
+				return false;
+			}
+			if (data.getKind().contentEquals(NebulaElementKinds.ITEM_CELL)) {
+				ItemCell cell = ItemCell.from(data, item, data.getIndex());
+				return showColumnIfHidden(cell.column); // scroll horizontally to the column
+			}
+		} else if (parentWidget instanceof GridItem item) {
+			if (!showItemIfHidden(item)) {
+				return false;
+			}
 
 			if (data.getKind().contentEquals(NebulaElementKinds.ITEM_CELL)) {
 				ItemCell cell = ItemCell.from(data, item, data.getIndex());
-				showColumnIfHidden(cell.column); // scroll horizontally to the column
+				return showColumnIfHidden(cell.column); // scroll horizontally to the column
 			}
 		}
 		else if (data.getKind().contentEquals(NebulaElementKinds.EMPTY_AREA)) {
@@ -57,33 +68,39 @@ public class GridScrollingHelper {
 			if (!area.top) {
 				// scroll grid to bottom to see the empty area
 				grid.setTopIndex(grid.getItemCount() - 1);
+				return false;
 			}
 
 			// scroll horizontally
-			if (area.column != null)
-				showColumnIfHidden(area.column); // to see the column
+			if (area.column != null) 
+				return showColumnIfHidden(area.column); // to see the column
 			else if (!area.left)
-				grid.showColumn(NebulaViewers.getGridLastColumn(grid)); // to see an empty area on the right
+				return showColumnIfHidden(NebulaViewers.getGridLastColumn(grid)); // to see an empty area on the right
 		}
+		return true;
 	}
 
 	//
 
-	public static void showItemIfHidden(GridItem item) {
-		if (NebulaViewers.getItemBounds(item) == null) {
+	public static boolean showItemIfHidden(GridItem item) {
+		if (NebulaViewers.getItemBounds(item) == null || !item.isVisible()) {
 			Grid grid = item.getParent();
-
-			// scroll grid vertically to see the item
-			grid.setTopIndex(grid.getIndexOfItem(item));
+			grid.showItem(item);
+			return false;
 		}
+		
+		return true;
 	}
 
-	public static void showColumnIfHidden(GridColumn column) {
+	public static boolean showColumnIfHidden(GridColumn column) {
 		Grid grid = column.getParent();
 		Rectangle bounds = NebulaViewers.getColumnHeaderBounds(column);
 
-		if (bounds == null || bounds.x > grid.getBounds().width)
+		if (bounds == null || bounds.x > grid.getBounds().width) {
 			grid.showColumn(column);
+			return false;
+		}
+		return true;
 	}
 
 	public static void showPartIfHidden(ItemPart part) {

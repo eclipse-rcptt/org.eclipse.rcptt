@@ -141,7 +141,9 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 			SelectData data = ((SelectCommand) command).getData();
 			SWTUIElement parent = getMapper().get(data.getParent());
 
-			GridScrollingHelper.scrollGridFor(data, parent);
+			if (!GridScrollingHelper.scrollGridFor(data, parent)) {
+				return new PreExecuteStatus(false);
+			}
 		}
 		// for SetSelectionEx see SelectingParts.mouseActions
 		else if (command instanceof SetSelectionRange) {
