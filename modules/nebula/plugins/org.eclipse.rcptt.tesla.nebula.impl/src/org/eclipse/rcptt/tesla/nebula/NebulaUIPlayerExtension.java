@@ -13,9 +13,6 @@ package org.eclipse.rcptt.tesla.nebula;
 import org.eclipse.nebula.widgets.grid.Grid;
 import org.eclipse.nebula.widgets.grid.GridColumn;
 import org.eclipse.nebula.widgets.grid.GridItem;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Widget;
-
 import org.eclipse.rcptt.tesla.core.protocol.ElementKind;
 import org.eclipse.rcptt.tesla.core.protocol.GenericElementKind;
 import org.eclipse.rcptt.tesla.internal.ui.player.AbstractSWTUIPlayerExtension;
@@ -34,6 +31,8 @@ import org.eclipse.rcptt.tesla.nebula.grid.parts.RowHeader;
 import org.eclipse.rcptt.tesla.nebula.viewers.NebulaViewers;
 import org.eclipse.rcptt.util.swt.Bounds;
 import org.eclipse.rcptt.util.swt.Events;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Widget;
 
 public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 
@@ -66,13 +65,24 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 			return selectColumnHeader(p, f);
 		case Item:
 			Widget parentWidget = f.parent.unwrap();
-			if (f.path != null && parentWidget instanceof Grid) {
-				GridItem item = (GridItem) NebulaViewers.searchGridItem(
-						(NebulaUIElement) f.parent, f.path);
-				int column = f.indexes.length == 1 ? f.indexes[0] : 0;
-				if (item != null) {
+			if(parentWidget instanceof Grid grid) {
+				if (f.path != null) {
+					GridItem item = (GridItem) NebulaViewers.searchGridItem(
+							(NebulaUIElement) f.parent, f.path);
+					if (item != null) {					
+						return new GridCell(item, p, 0);
+					}
+				}
+				if (f.indexes.length == 2) {
+					int column = f.indexes[0];
+					int row = f.indexes[1];
+					var item = grid.getItem(row);
+					if (item == null) {
+						return null;
+					}
 					return new GridCell(item, p, column);
 				}
+
 			}
 
 		case Custom:
@@ -96,7 +106,7 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 	
 	@Override
 	public void click(SWTUIElement widget, boolean isDefault, boolean doubleClick, boolean arrow, int stateMask) {
-		var gridCell = (GridCell)widget;
+		GridCell gridCell = (GridCell)widget;
 		GridItem gridItem = gridCell.unwrap();
 		Grid grid = gridItem.getParent();
 		final Event[] event = Events.createClick(Bounds.centerAbs(gridItem.getBounds(gridCell.getColumn())));
