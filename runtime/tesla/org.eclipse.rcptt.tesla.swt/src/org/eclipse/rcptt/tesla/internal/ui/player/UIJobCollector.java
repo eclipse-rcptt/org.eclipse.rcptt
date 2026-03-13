@@ -13,7 +13,6 @@ package org.eclipse.rcptt.tesla.internal.ui.player;
 import static java.util.Arrays.asList;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;

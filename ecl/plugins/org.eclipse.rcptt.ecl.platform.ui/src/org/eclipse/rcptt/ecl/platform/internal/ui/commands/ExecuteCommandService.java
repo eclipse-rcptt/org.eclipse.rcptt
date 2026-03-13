@@ -60,7 +60,8 @@ public class ExecuteCommandService implements ICommandService {
 			}
 		});
 		try {
-			return result.get(1, TimeUnit.SECONDS);
+			// Garbage collection may take more than a second on Eclipse CI
+			return result.get(2, TimeUnit.SECONDS);
 		} catch (TimeoutException e) {
 			return error("UI thread has timed out");
 		} catch (java.util.concurrent.ExecutionException e) {

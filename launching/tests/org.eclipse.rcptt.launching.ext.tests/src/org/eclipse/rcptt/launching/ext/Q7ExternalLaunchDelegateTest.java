@@ -143,32 +143,35 @@ public class Q7ExternalLaunchDelegateTest {
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
 		launch.ping();
 		Command command = parse("restart-aut");
-		launch.execute(command);
-		for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
+		int attemptCount = Integer.getInteger(Q7ExternalLaunchDelegateTest.class.getName() + ".restartAttempts", 3);
+		for (int i = 0; i < attemptCount; i++) {
+			launch.execute(command);
+			for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
+				try {
+					launch.ping();
+					Thread.yield();
+				} catch (CoreException e) {
+					break;
+				}
+			}
+			
 			try {
 				launch.ping();
-				Thread.yield();
+				fail("AUT should be temporarily unavailable");
 			} catch (CoreException e) {
-				break;
 			}
-		}
-		
-		try {
+			
+			for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
+				try {
+					launch.ping();
+					Thread.yield();
+					break;
+				} catch (CoreException e) {
+					// Expected for a while
+				}
+			}
 			launch.ping();
-			fail("AUT should be temporarily unavailable");
-		} catch (CoreException e) {
 		}
-		
-		for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
-			try {
-				launch.ping();
-				Thread.yield();
-				break;
-			} catch (CoreException e) {
-				// Expected for a while
-			}
-		}
-		launch.ping();
 		assertNoErrorsInOutput();
 	}
 	
