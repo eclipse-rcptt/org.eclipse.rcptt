@@ -29,6 +29,8 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
 
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 public class EclEditorToolkit extends EditorToolkit {
 
@@ -58,7 +60,9 @@ public class EclEditorToolkit extends EditorToolkit {
 
 	@Override
 	public IPreferenceStore getPreferenceStore() {
-		return Q7UIPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore generalTextStore = EditorsUI.getPreferenceStore();
+		var fCombinedPreferenceStore = new ChainedPreferenceStore(new IPreferenceStore[] { Q7UIPlugin.getDefault().getPreferenceStore(), generalTextStore });
+		return fCombinedPreferenceStore;
 	}
 
 	@Override

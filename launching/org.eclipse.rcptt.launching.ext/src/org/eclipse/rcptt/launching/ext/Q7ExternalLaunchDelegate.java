@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.launching.ext;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.core.runtime.IProgressMonitor.done;
 import static org.eclipse.core.runtime.Status.error;
 import static org.eclipse.rcptt.internal.launching.ext.AJConstants.OSGI_FRAMEWORK_EXTENSIONS;
@@ -58,6 +59,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
@@ -169,6 +171,13 @@ public class Q7ExternalLaunchDelegate extends
 	}
 
 	@Override
+    public IVMRunner getVMRunner(ILaunchConfiguration configuration, String mode) throws CoreException {
+		final CachedInfo info = LaunchInfoCache.getInfo(configuration);
+		final ITargetPlatformHelper platform = (ITargetPlatformHelper) requireNonNull(info.target); 
+		return getVMInstall(configuration, platform).getVMRunner(mode);
+    }
+	
+	@Override
 	public boolean preLaunchCheck(ILaunchConfiguration configuration,
 			String mode, IProgressMonitor monitor) throws CoreException {
 		if (monitor.isCanceled()) {
@@ -229,11 +238,13 @@ public class Q7ExternalLaunchDelegate extends
 		info.target = target;
 
 
-		JvmTargetCompatibility compatibility = new JvmTargetCompatibility(target);
-
-		IVMInstall configuredJvm = getVMInstall(configuration, target);
+		try {
+			getVMInstall(configuration, target);
+		} catch (CoreException e) {
+			error.add(e.getStatus());
+			throw new CoreException(error);
+		}
 		
-		error.add(compatibility.checkCompatibilty(configuredJvm));
 		if (error.matches(IStatus.CANCEL)) {
 			return false;
 		}
@@ -251,7 +262,25 @@ public class Q7ExternalLaunchDelegate extends
 	}
 
 	public static IVMInstall getVMInstall(ILaunchConfiguration configuration, ITargetPlatformHelper target) throws CoreException {
-		return PDEUtils.getVMInstall(configuration, target.getModels().map(m -> m.model()).collect(Collectors.toSet()));
+		JvmTargetCompatibility compatibility = new JvmTargetCompatibility(target);
+		IVMInstall pdeDerived = PDEUtils.getVMInstall(configuration, target.getModels().map(m -> m.model()).collect(Collectors.toSet()));
+		IStatus error = compatibility.checkCompatibilty(pdeDerived);
+		if (error.matches(IStatus.CANCEL)) {
+			throw new CoreException(error);
+		}
+		if (!error.matches(IStatus.ERROR)) {
+			return pdeDerived;
+		}
+		
+		Stream<VmInstallMetaData> byEnv = PDEUtils.getExecutionEnvironmentId(configuration).map(envId -> compatibility.findForEnvironment(envId)).orElse(Stream.empty());
+
+		return byEnv.findFirst().orElseThrow(() -> {
+			try {
+				return new CoreException(Status.error(compatibility.explainJvmRequirements()));
+			} catch (CoreException e) {
+				return e;
+			}
+		}).install;
 	}
 
 	private void removeTargetPlatform(ILaunchConfiguration configuration)

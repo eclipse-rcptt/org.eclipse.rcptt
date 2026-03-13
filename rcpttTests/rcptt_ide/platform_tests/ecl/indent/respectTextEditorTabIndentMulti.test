@@ -1,0 +1,21 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _2QyEIBx6EfGbha--mGlZ2A,_p0Dy0Bx8EfGbha--mGlZ2A,_2PDwYBx7EfGbha--mGlZ2A
+Element-Name: respectTextEditorTabIndentMulti
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/270
+Id: _w8tQgBx8EfGbha--mGlZ2A
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 3/10/26, 4:31 PM
+Testcase-Type: ecl
+
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+with [get-editor multiline | get-section Script | get-text-viewer] {
+    key-type "M1+a"
+    key-type Tab
+}
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

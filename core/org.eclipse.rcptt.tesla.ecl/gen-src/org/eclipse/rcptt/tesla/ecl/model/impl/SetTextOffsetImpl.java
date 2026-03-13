@@ -113,6 +113,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -139,6 +140,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -151,6 +153,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getValue() {
 		return value;
 	}
@@ -160,6 +163,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setValue(Integer newValue) {
 		Integer oldValue = value;
 		value = newValue;
@@ -172,6 +176,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getLine() {
 		return line;
 	}
@@ -181,6 +186,7 @@ public class SetTextOffsetImpl extends CommandImpl implements SetTextOffset {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(Integer newLine) {
 		Integer oldLine = line;
 		line = newLine;
