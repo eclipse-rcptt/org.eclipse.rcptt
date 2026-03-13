@@ -24,8 +24,6 @@ documentation -->
 
 	<properties>
 		<coreRepository>${buildUrl}/repository/core/target/repository</coreRepository>
-		<orbitRepository>
-			https://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbitRepository>
 	</properties>
 
 	<repositories>
@@ -38,9 +36,9 @@ documentation -->
 			<url>${coreRepository}</url>
 		</repository>
 		<repository>
-			<id>orbit</id>
+			<id>dependencies_extra</id>
 			<layout>p2</layout>
-			<url>${orbitRepository}</url>
+			<url>${buildUrl}/dependencies/bundles/org.eclipse.rcptt.updates.extra/dependencies</url>
 		</repository>
 	</repositories>
 
