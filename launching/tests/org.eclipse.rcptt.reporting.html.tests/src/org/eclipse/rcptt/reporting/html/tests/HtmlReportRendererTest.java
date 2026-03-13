@@ -19,6 +19,7 @@ import java.util.Collections;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.reporting.Q7Info;
 import org.eclipse.rcptt.reporting.core.ReportHelper;
 import org.eclipse.rcptt.reporting.html.HtmlReportRenderer;
 import org.eclipse.rcptt.reporting.util.FileContentFactory;
@@ -65,7 +66,9 @@ public class HtmlReportRendererTest {
 	private Node createNode(String name, int severity) {
 		Node node = ReportFactory.eINSTANCE.createNode();
 		node.setName(name);
-		ReportHelper.getInfo(node).setResult(RcpttPlugin.createProcessStatus(severity, "No message"));
+		Q7Info info = ReportHelper.getInfo(node);
+		info.setResult(RcpttPlugin.createProcessStatus(severity, "No message"));
+		info.setId(name);
 		return node;
 	}
 
@@ -85,7 +88,7 @@ public class HtmlReportRendererTest {
 	private String generate(Iterable<Report> reports) {
 		renderer.generateReport(contentFactory, "1", reports);
 		String result = contentFactory.read("1.html");
-		Assert.assertTrue("Whole report should be generated", result.contains("Passed Tests ("));
+		Assert.assertTrue("Whole report should be generated:\n" + result, result.contains("Passed Tests ("));
 		return result;
 	}
 

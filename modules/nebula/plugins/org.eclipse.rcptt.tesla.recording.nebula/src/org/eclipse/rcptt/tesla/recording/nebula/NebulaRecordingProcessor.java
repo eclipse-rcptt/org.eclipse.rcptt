@@ -65,6 +65,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 		getLocator().addExtension(new NebulaWidgetLocatorExtension(getLocator()));
 	}
 
+	@Override
 	public void recordEvent(Widget widget, int type, Event event) {
 		// ignoring not interesting events,
 		// it is essential to filter some event types like focusing
@@ -122,12 +123,14 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 
 	// IRecordingProcessor implementation
 
+	@Override
 	public void initialize(TeslaRecorder teslaRecorder) {
 		CommandPostProcessor.addRule(new RemoveSetSelectionBeforeSetSelectionRange());
 		CommandPostProcessor.addRule(new RemoveRedundantSetSelectionsBeforeActivateCellEditor());
 		CommandPostProcessor.addRule(new RemoveRedundantEnterAfterApplyCellEditor());
 	}
 
+	@Override
 	public void clear() {
 		lastEvent = null;
 		NebulaRecordingHelper.getHelper().clear();
@@ -136,16 +139,20 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 		getLocator().cleanMenuSources();
 	}
 
+	@Override
 	public void setFreeze(boolean value, SetMode command) {
 	}
 
+	@Override
 	public void resetAssertSelection() {
 	}
 
+	@Override
 	public IRecordingHelper<?> getHelper() {
 		return NebulaRecordingHelper.getHelper();
 	}
 
+	@Override
 	public boolean isExclusiveEventHandle(Widget widget, int type, Event event) {
 		if (widget instanceof Grid
 				&& type != SWT.KeyDown && type != SWT.KeyUp) // let SWTEventRecorder handle them
@@ -157,6 +164,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 		return false;
 	}
 
+	@Override
 	public int getInitLevel() {
 		return 20;
 	}
@@ -164,6 +172,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 	//
 
 
+	@Override
 	public org.eclipse.rcptt.tesla.core.ui.Widget mapExtraValues(SWTUIElement element,
 			org.eclipse.rcptt.tesla.core.ui.Widget result) {
 		return mapWidget(element, result);
@@ -177,6 +186,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 
 	// ICellEditsProcessor implementation methods
 
+	@Override
 	public boolean activateCellEdit(Object oeditor, Object oevent) {
 		CellEditor editor = (CellEditor) oeditor;
 		ColumnViewerEditorActivationEvent event = (ColumnViewerEditorActivationEvent) oevent;
@@ -213,6 +223,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 		return true;
 	}
 
+	@Override
 	public boolean applyCellEdit(Object oeditor) {
 		CellEditor editor = (CellEditor) oeditor;
 		Control control = editor.getControl();
@@ -235,6 +246,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 		return true;
 	}
 
+	@Override
 	public boolean cancelCellEdit(Object oeditor) {
 		CellEditor editor = (CellEditor) oeditor;
 		Control control = editor.getControl();
@@ -256,6 +268,7 @@ public class NebulaRecordingProcessor extends NebulaRecordingDoodah
 
 		return true;
 	}
+	@Override
 	public boolean deactivateCellEdit(Object oeditor) {
 		CellEditor editor = (CellEditor) oeditor;
 		Control control = editor.getControl();

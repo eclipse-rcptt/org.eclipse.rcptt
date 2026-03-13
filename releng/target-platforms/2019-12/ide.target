@@ -13,14 +13,14 @@
 <unit id="com.sun.xml.bind" version="0.0.0"/>
 <unit id="javax.activation" version="0.0.0"/>
 <unit id="javax.xml" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.nebula.widgets.grid.feature.feature.group" version="0.0.0"/>
 <repository location="https://download.eclipse.org/nebula/archive/releases/2.7.2/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<repository location="http://download.eclipse.org/releases/2019-12"/>
+<repository location="https://download.eclipse.org/releases/2019-12"/>
 <unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.platform.sdk" version="0.0.0"/>
 </location>
@@ -32,14 +32,14 @@
 <unit id="org.eclipse.emf.transaction.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.gmf.feature.group" version="0.0.0"/>
 <unit id="org.jsoup" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/2019-12"/>
+<repository location="https://download.eclipse.org/releases/2019-12"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.aspectj.runtime" version="0.0.0"/>
 <unit id="org.aspectj.weaver" version="0.0.0"/>
 <unit id="org.eclipse.equinox.weaving.aspectj" version="0.0.0"/>
 <unit id="org.eclipse.equinox.weaving.hook" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/ajdt/410/dev/update"/>
+<repository location="https://download.eclipse.org/tools/ajdt/410/dev/update"/>
 </location>
 </locations>
 	<environment>

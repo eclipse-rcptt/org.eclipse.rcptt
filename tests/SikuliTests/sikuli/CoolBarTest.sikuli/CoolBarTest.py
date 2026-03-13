@@ -1,1 +1,0 @@
-click("IAAAAAAAAAAA.png")

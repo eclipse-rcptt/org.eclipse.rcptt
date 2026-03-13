@@ -76,6 +76,7 @@ public class VolatileContentFactory implements IContentFactory {
 	}
 
 	public String read(String path) {
-		return new String(data.get(createKey(path)), StandardCharsets.UTF_8);
+		byte[] bytes = data.get(createKey(path));
+		return new String(bytes, StandardCharsets.UTF_8);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
+import org.eclipse.rcptt.reporting.util.ReportEntry;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.ui.controls.SectionWithToolbar;
 import org.eclipse.rcptt.ui.report.ReportWizard;
 import org.eclipse.swt.SWT;
@@ -49,14 +50,14 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.internal.forms.widgets.FormImages;
 
 @SuppressWarnings("restriction")
-public class ReportInformationPage extends FormPage {
+public abstract class ReportInformationPage extends FormPage {
 	DataBindingContext dbc = new DataBindingContext();
 	private Label nameLabel;
 	private Text nameText;
 	private Section descriptionSection;
-	private final IObservableValue reportIterator;
+	private final IObservableValue<Iterable<ReportEntry>> reportIterator;
 
-	public ReportInformationPage(FormEditor editor, IObservableValue reportIterator, String id, String title) {
+	public ReportInformationPage(FormEditor editor, IObservableValue<Iterable<ReportEntry>> reportIterator, String id, String title) {
 		super(editor, id, title);
 		this.reportIterator = reportIterator;
 	}
@@ -105,13 +106,12 @@ public class ReportInformationPage extends FormPage {
 		new SectionWithToolbar(detailsComposite, Section.TITLE_BAR).create(
 				composite2, toolkit);
 		composite2.setWeights(new int[] { 60, 40 });
-		reportIterator.addValueChangeListener(new IValueChangeListener() {
-			
+		reportIterator.addValueChangeListener(new IValueChangeListener<Iterable<ReportEntry>>() {
 			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				final Q7ReportIterator iterator = (Q7ReportIterator) event.diff.getNewValue();
-				statistics.setReports(iterator);
-				testCases.setReports(iterator);
+			public void handleValueChange(ValueChangeEvent<? extends Iterable<ReportEntry>> event) {
+				final Iterable<ReportEntry> value = (Iterable<ReportEntry>)event.diff.getNewValue();
+				testCases.setReports(value);
+				statistics.setReports(value);
 			}
 		});
 		reportIterator.addDisposeListener(new IDisposeListener() {
@@ -126,9 +126,9 @@ public class ReportInformationPage extends FormPage {
 
 			@Override
 			public void run() {
-				final Q7ReportIterator iterator = (Q7ReportIterator) reportIterator.getValue();
-				statistics.setReports(iterator);
+				final Iterable<ReportEntry> iterator = reportIterator.getValue();
 				testCases.setReports(iterator);
+				statistics.setReports(iterator);
 			}
 		});
 	}
@@ -189,13 +189,14 @@ public class ReportInformationPage extends FormPage {
 		Rectangle bounds = label.getBounds();
 		bounds.x = 0;
 		bounds.width = 1;
-		final Image image = new Image(label.getDisplay(), bounds);
+		final Image image = new Image(label.getDisplay(), bounds.width, bounds.height);
 		GC gc = new GC(image);
 		gc.drawImage(backgroundImage, bounds.x, bounds.y, bounds.width,
 				bounds.height, 0, 0, bounds.width, bounds.height);
 		gc.dispose();
 		label.setBackgroundImage(image);
 		label.addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				image.dispose();
 			}
@@ -246,11 +247,7 @@ public class ReportInformationPage extends FormPage {
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Q7ReportIterator iterator = (Q7ReportIterator) reportIterator.getValue();
-				if (iterator == null)
-					return;
-				ReportWizard wizard = new ReportWizard(new Q7ReportIterator(
-						iterator.getReportFile()),
+				ReportWizard wizard = new ReportWizard(getAllReports(),
 						new Path(getEditorInput().getName())
 								.removeFileExtension().toString());
 				wizard.setDisabledReports("report");
@@ -265,6 +262,8 @@ public class ReportInformationPage extends FormPage {
 		});
 		return button;
 	}
+
+	protected abstract Iterable<Report> getAllReports();
 
 	private RcpttReportEditor getReportEditor() {
 		return ((RcpttReportEditor) getEditor());

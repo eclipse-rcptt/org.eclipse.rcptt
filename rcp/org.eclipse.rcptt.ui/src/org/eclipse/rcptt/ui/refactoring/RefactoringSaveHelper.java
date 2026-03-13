@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2025 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -27,10 +27,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 
 import org.eclipse.rcptt.internal.ui.Messages;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 
 public class RefactoringSaveHelper {
 
@@ -66,8 +66,7 @@ public class RefactoringSaveHelper {
 
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				IWorkbenchWindow window = Q7UIPlugin.getDefault()
-						.getWorkbench().getActiveWorkbenchWindow();
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				if (window == null)
 					return;
 				IWorkbenchPage page = window.getActivePage();
