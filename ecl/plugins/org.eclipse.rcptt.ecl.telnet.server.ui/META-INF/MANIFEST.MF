@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ECL Telnet UI configuration
 Bundle-SymbolicName: org.eclipse.rcptt.ecl.telnet.server.ui;singleton:=true
-Bundle-Version: 2.8.0.qualifier
+Bundle-Version: 2.9.0.qualifier
 Bundle-Activator: org.eclipse.rcptt.ecl.telnet.server.ui.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.rcptt.ecl.telnet.server;bundle-version="[2.8.0,3.0.0)"
+ org.eclipse.rcptt.ecl.telnet.server;bundle-version="[2.9.0,3.0.0)"
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

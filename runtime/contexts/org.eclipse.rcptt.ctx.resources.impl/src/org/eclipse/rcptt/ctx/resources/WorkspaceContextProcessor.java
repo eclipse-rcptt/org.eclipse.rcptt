@@ -75,10 +75,7 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 		final WorkspaceContext wc = (WorkspaceContext) context;
 		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
 		// Smart cancel/close jobs with showed UI interactions.
-		final UIJobCollector collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
-
-		try {
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())){
 			final IWorkspace ws = ResourcesPlugin.getWorkspace();
 
 			disableMessageDialogsAndEnableCollector(collector);
@@ -116,7 +113,6 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 			throw ee;
 		} finally {
 			SWTUIPlayer.enableMessageDialogs();
-			Job.getJobManager().removeJobChangeListener(collector);
 		}
 	}
 

@@ -157,6 +157,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Element getElement() {
 		if (element != null && element.eIsProxy()) {
 			InternalEObject oldElement = (InternalEObject)element;
@@ -183,6 +184,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setElement(Element newElement) {
 		Element oldElement = element;
 		element = newElement;
@@ -195,6 +197,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getAttribute() {
 		return attribute;
 	}
@@ -204,6 +207,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAttribute(String newAttribute) {
 		String oldAttribute = attribute;
 		attribute = newAttribute;
@@ -216,6 +220,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getValue() {
 		return value;
 	}
@@ -225,6 +230,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setValue(String newValue) {
 		String oldValue = value;
 		value = newValue;
@@ -237,6 +243,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public AssertKind getKind() {
 		return kind;
 	}
@@ -246,6 +253,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(AssertKind newKind) {
 		AssertKind oldKind = kind;
 		kind = newKind == null ? KIND_EDEFAULT : newKind;
@@ -258,6 +266,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -267,6 +276,7 @@ public class VerifyHandlerImpl extends EObjectImpl implements VerifyHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
