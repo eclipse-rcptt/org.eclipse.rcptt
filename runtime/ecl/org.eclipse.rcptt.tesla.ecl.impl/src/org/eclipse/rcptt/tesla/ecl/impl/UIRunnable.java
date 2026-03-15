@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
-import org.eclipse.rcptt.reporting.core.ReportManager;
-import org.eclipse.rcptt.sherlock.core.reporting.ReportBuilder;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.tesla.core.info.Q7WaitInfoRoot;
@@ -57,7 +55,6 @@ public abstract class UIRunnable<T> {
 	public static <T> T exec(final UIRunnable<T> runnable, int timeout_ms, BooleanSupplier isCancelled) throws CoreException {
 		final AtomicReference<RunningState> processed = new AtomicReference<RunningState>(RunningState.Starting);
 		CompletableFuture<T> result = new CompletableFuture<T>();
-		final UIJobCollector collector = new UIJobCollector();
 		long start = System.currentTimeMillis();
 		long stop = start + timeout_ms;
 		long halfWay = start + (timeout_ms / 2);
@@ -65,9 +62,11 @@ public abstract class UIRunnable<T> {
 		if (Display.getCurrent() != null) {
 			throw new IllegalStateException("Can't run in UI thread");
 		}
-		Job.getJobManager().addJobChangeListener(collector);
-		collector.enable();
-		final ITeslaEventListener listener = new ITeslaEventListener() {
+		ITeslaEventListener listener = null;
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
+			collector.enable();
+
+		listener = new ITeslaEventListener() {
 			@Override
 			public synchronized boolean doProcessing(
 					org.eclipse.rcptt.tesla.core.context.ContextManagement.Context currentContext) {
@@ -137,7 +136,7 @@ public abstract class UIRunnable<T> {
 			}
 		};
 		final IStatus[] dialogCloseStatus = new IStatus[1];  
-		try {
+
 			TeslaEventManager.getManager().addEventListener(listener);
 			while (!processed.get().equals(RunningState.Finished)) {
 				if (display.isDisposed()) {
@@ -172,8 +171,8 @@ public abstract class UIRunnable<T> {
 				}
 				if (time > stop) {
 					// Lets also capture all thread dump.
-					storeTimeoutInReport(display, collector);
-					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout during execution of " + runnable, new RuntimeException()) {
+					storeTimeoutInReport(display);
+					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout (" + timeout_ms + "ms) during execution of " + runnable, new RuntimeException()) {
 						{
 							setSeverity(ERROR);
 						}
@@ -194,7 +193,7 @@ public abstract class UIRunnable<T> {
 					}
 					
 					if (System.currentTimeMillis() > stop) {
-						storeTimeoutInReport(display, collector);
+						storeTimeoutInReport(display);
 						throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, IProcess.TIMEOUT_CODE, "Background jobs are running for too long", new RuntimeException()));
 					}
 					Thread.sleep(1);
@@ -216,7 +215,6 @@ public abstract class UIRunnable<T> {
 			throw new CoreException(createError(e));
 		} finally {
 			processed.set(RunningState.Done);
-			Job.getJobManager().removeJobChangeListener(collector);
 			TeslaEventManager.getManager().removeEventListener(listener);
 		}
 	}
@@ -225,14 +223,11 @@ public abstract class UIRunnable<T> {
 		return new Status(Status.ERROR, PLUGIN_ID, exception.getMessage(), exception);
 	}
 
-	private static int getTimeout() {
+	public static int getTimeout() {
 		return TeslaLimits.getContextRunnableTimeout();
 	}
 
-	private static void storeTimeoutInReport(final Display display,
-			UIJobCollector collector) throws InterruptedException {
-		final ReportBuilder currentBuilder = ReportManager.getBuilder();
-		final boolean infoCollected[] = { false };
+	private static void storeTimeoutInReport(final Display display) throws InterruptedException {
 		display.asyncExec(new Runnable() {
 			@Override
 			public void run() {

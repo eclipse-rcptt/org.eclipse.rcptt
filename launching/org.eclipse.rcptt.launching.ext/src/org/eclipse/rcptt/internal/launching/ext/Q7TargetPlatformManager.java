@@ -93,7 +93,7 @@ public class Q7TargetPlatformManager {
 	public synchronized static ITargetPlatformHelper getTarget(
 			ILaunchConfiguration config, IProgressMonitor monitor)
 			throws CoreException {
-		SubMonitor sm = SubMonitor.convert(monitor, "Initialize target platform...", 2);
+		SubMonitor sm = SubMonitor.convert(monitor, "Initialize target platform...", 4);
 		String location = config.getAttribute(IQ7Launch.AUT_LOCATION, "");
 
 		if (!PDELocationUtils.validateProductLocation(location).isOK()) {
@@ -102,8 +102,11 @@ public class Q7TargetPlatformManager {
 		
 		ITargetPlatformHelper result = findTarget(config, sm.split(1));
 		if (result != null) {
-			throwOnError(result.resolve(sm.split(1)));
-			return result;
+			if (result.resolve(sm.split(1)).matches(IStatus.ERROR)) {
+				result.delete();
+			} else {
+				return result;
+			}
 		}
 
 		result = newTargetPlatform(sm.split(1), location);

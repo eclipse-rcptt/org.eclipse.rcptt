@@ -53,6 +53,7 @@ import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.PrintStreamMonitor;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
 import org.eclipse.rcptt.runner.ScenarioRunnable;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.eclipse.rcptt.util.StringUtils;
 
 import com.google.common.base.Strings;
@@ -200,7 +201,9 @@ public class AutThread extends Thread {
 
 			Optional<VmInstallMetaData> autVM = manager.getAutVm();
 			if (autVM.isPresent()) {
-				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, autVM.get().formatVmContainerPath());
+				VmInstallMetaData resolved = autVM.get();
+				assert resolved.install.getVMInstallType().findVMInstallByName(resolved.install.getName()) != null;
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, resolved.formatVmContainerPath());
 				config.setAttribute(IPDEConstants.APPEND_ARGS_EXPLICITLY, true);
 			}
 
@@ -343,6 +346,9 @@ public class AutThread extends Thread {
 			}
 
 			String errorMessage = String.format("AUT-%s: Launch failed. Reason: %s", autId, e.getMessage());
+			if (e instanceof CoreException c) {
+				errorMessage += "\n" + StatusUtil.format(c.getStatus());
+			}
 			System.out.println(errorMessage);
 			System.out.println(
 					String.format("AUT-%s: For more information check AUT output at '%s'", autId, outFilePath));

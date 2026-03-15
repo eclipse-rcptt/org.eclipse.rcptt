@@ -1,0 +1,45 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _V0104D8TEeSV5L6atfY6Ug,_cQEZwD2QEeSxD9UFwnFS6w
+Element-Name: EmptyWindowInAssertionMode
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _Hgh7cLN3EeSIB87DbOtJCQ
+Runtime-Version: 2.8.0.202602281641
+Save-Time: 3/10/26, 9:28 PM
+Testcase-Type: ecl
+
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-aut "mockupsQ7" | eval {
+	get-button "Open Perspective" | click
+	//get-menu "Other..." | click
+	get-window "Open Perspective" | get-table | select "Q7 Quality" | double-click
+	get-menu "Window/Show View/Other..." | click
+	with [get-window "Show View"] {
+    get-tree | select "Q7 Quality/Q7 Quality Mockups"
+    get-button Open | click
+}
+	get-tree | select "issues/RCPTT-211 - Empty window in Assertion mode if tree or table column is unnamed"
+}
+
+get-view Applications | click
+get-button "Record a Snippet" | click
+
+with [get-window "Control Panel - mockupsQ7 [Recording]"] {
+    get-button "Switch to Assertion Mode" | click
+}
+
+get-aut "mockupsQ7" | eval {
+    get-group "RCPTT-211 - Empty window in Assertion mode if tree or table column is unnamed" 
+    | get-tree | select TreeItem1 | click
+}
+
+try -times 10 -delay 10000 -command {
+    get-window "Control Panel - mockupsQ7 [Asserting]" | get-window "Assertion and Verification" | get-tree 
+        | get-item "TreeItem \\(Basic Properties\\)/caption" | get-property "getText()" | equals caption | verify-true
+}
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

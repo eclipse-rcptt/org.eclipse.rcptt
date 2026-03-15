@@ -1,7 +1,0 @@
-click("1362559503778.png")
-click("1362559557652.png")
-r=find("1363078489651.png")
-b=r.find("1362559620602.png")
-click(b)
-wait(2)
-click("1FileSearch.png")

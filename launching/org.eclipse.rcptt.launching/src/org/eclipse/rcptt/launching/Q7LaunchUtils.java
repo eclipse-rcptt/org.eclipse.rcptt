@@ -12,7 +12,6 @@ package org.eclipse.rcptt.launching;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.InetAddress;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,9 +31,6 @@ import org.eclipse.rcptt.ecl.runtime.ISession;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.util.FileUtil;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 
 public final class Q7LaunchUtils {
 
@@ -146,45 +142,5 @@ public final class Q7LaunchUtils {
 		if (value != null)
 			features.getFeatures().add(
 					String.format("%s%s=%s", Q7_VARIABLES_KEY, name, value));
-	}
-	
-	public static String format(IStatus status) {
-		try (StringWriter string = new StringWriter()) {
-			print("", status, string);
-			string.flush();
-			return string.toString();
-		} catch (IOException e) {
-			throw new AssertionError("Impossible error, no IO is done", e);
-		}
-	}
-	
-	public static void print(String indent, IStatus status, Appendable output) throws IOException {
-		output.append(indent).append(severityString(status));
-		String message = status.getMessage();
-		String childIndent = indent + "  ";
-		if (!Strings.isNullOrEmpty(message)) {
-			output.append(": ");
-			output.append(Joiner.on("\n"+childIndent).join(message.split("\n")));
-			output.append("\n");
-		}
-		for (IStatus child: status.getChildren()) {
-			print(childIndent, child, output);
-		}
-	}
-	
-	private static String severityString(IStatus status) {
-		if (status.matches(IStatus.CANCEL)) {
-			return "CANCEL";
-		}
-		if (status.matches(IStatus.ERROR)) {
-			return "ERROR";
-		}
-		if (status.matches(IStatus.WARNING)) {
-			return "WARNING";
-		}
-		if (status.matches(IStatus.INFO)) {
-			return "INFO";
-		}
-		return "OK";
 	}
 }

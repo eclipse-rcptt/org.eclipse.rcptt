@@ -69,8 +69,8 @@
         <setEntry value="org.apache.httpcomponents.core5.httpcore5-h2@default:default"/>
         <setEntry value="org.apache.httpcomponents.core5.httpcore5@default:default"/>
         <setEntry value="org.apache.lucene.core@default:default"/>
-        <setEntry value="org.apache.poi.ooxml@default:default"/>
-        <setEntry value="org.apache.poi@default:default"/>
+        <setEntry value="org.apache.poi*5.5.1.v20251201-1000@default:default"/>
+        <setEntry value="org.apache.poi.ooxml*5.5.1.v20251201-1000@default:default"/>
         <setEntry value="org.apache.xmlgraphics@default:default"/>
         <setEntry value="org.aspectj.runtime@default:default"/>
         <setEntry value="org.aspectj.weaver@1:true"/>
@@ -326,7 +326,6 @@
         <setEntry value="org.eclipse.pde.ui.templates@default:default"/>
         <setEntry value="org.eclipse.pde.ui@default:default"/>
         <setEntry value="org.eclipse.pde@default:default"/>
-        <setEntry value="org.eclipse.platform.doc.isv@default:default"/>
         <setEntry value="org.eclipse.platform.doc.user@default:default"/>
         <setEntry value="org.eclipse.platform@default:default"/>
         <setEntry value="org.eclipse.rcp@default:default"/>
@@ -379,6 +378,7 @@
         <setEntry value="org.tukaani.xz@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
+        <setEntry value="com.xored.q7.quality.mockups.nebula@default:default"/>
         <setEntry value="com.xored.q7.quality.mockups.platform@default:default"/>
         <setEntry value="com.xored.q7.quality.mockups.swt@default:default"/>
         <setEntry value="com.xored.q7.quality.mockups.ui@default:default"/>
@@ -499,6 +499,10 @@
         <setEntry value="org.eclipse.rcptt.tesla.jface.text.reconciler.aspects@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.jface.text@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.jobs.aspects@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.ecl.impl@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.ecl@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula.impl@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.nebula@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.properties.view@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.draw2d@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.aspects.forms@default:default"/>
@@ -513,6 +517,8 @@
         <setEntry value="org.eclipse.rcptt.tesla.recording.core@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.draw2d@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.jface.text@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.nebula.ecl@default:default"/>
+        <setEntry value="org.eclipse.rcptt.tesla.recording.nebula@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.swt@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.recording.workbench.texteditor@default:default"/>
         <setEntry value="org.eclipse.rcptt.tesla.swt.aspects.test@default:default"/>
@@ -555,7 +561,6 @@
         <setEntry value="org.eclipse.rcptt.watson.core@default:default"/>
         <setEntry value="org.eclipse.rcptt.watson.jface@default:default"/>
         <setEntry value="org.eclipse.rcptt.watson.jobs@default:default"/>
-        <setEntry value="org.eclipse.rcptt.watson.ui@default:default"/>
         <setEntry value="org.eclipse.rcptt@default:default"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>

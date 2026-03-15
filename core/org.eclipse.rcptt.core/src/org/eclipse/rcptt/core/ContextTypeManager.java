@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -63,7 +64,14 @@ public class ContextTypeManager {
 
 	public ContextType getTypeByContext(Context context) {
 		init();
-		return classToType.get(context.eClass());
+		ContextType result = classToType.get(context.eClass());
+		if (result == null) {
+			String message = String.format("Unknown context type: %s. Known types are:\n%s",
+					context.eClass().getName(),
+					classToType.keySet().stream().map(EClass::getName).collect(Collectors.joining("\n")));
+			throw new IllegalStateException(message);
+		}
+		return result;
 	}
 
 	public ContextType getTypeById(String id) {

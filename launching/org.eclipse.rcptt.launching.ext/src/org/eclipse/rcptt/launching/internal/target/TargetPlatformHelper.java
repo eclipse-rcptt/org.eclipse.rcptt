@@ -40,12 +40,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Spliterators;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -53,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -74,7 +77,6 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IFileArtifactRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.target.ITargetDefinition;
 import org.eclipse.pde.core.target.ITargetLocation;
@@ -92,7 +94,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.launching.ext.AUTInformation;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
-import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.StartLevelSupport;
 import org.eclipse.rcptt.launching.injection.Directory;
 import org.eclipse.rcptt.launching.injection.Entry;
@@ -106,6 +107,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -747,10 +749,10 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return result;
 	}
 
-	public String getIniVMArgs() {
+	public List<String> getIniVMArgs() {
 		List<File> iniFiles = getAppIniFiles();
 		for (File file : iniFiles) {
-			String vmArgs = readVMArgsFromIniFile(file);
+			List<String> vmArgs = readVMArgsFromIniFile(file);
 			if (vmArgs != null) {
 				return vmArgs;
 			}
@@ -897,7 +899,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		return envs;
 	}
 
-	private String readVMArgsFromIniFile(File eclipseIniFile) {
+	private List<String> readVMArgsFromIniFile(File eclipseIniFile) {
 		if (!eclipseIniFile.exists()) {
 			return null;
 		}
@@ -920,7 +922,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		removeUnsupportedVMArgs(lines);
 		addUnresolvedVMArgs(lines);
 
-		return Q7LaunchDelegateUtils.joinCommandArgs(lines);
+		return lines;
 	}
 
 	private static final String VMARG_ADD_MODULES = "--add-modules";
@@ -1705,6 +1707,29 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return Optional.of(matcher.group(1));
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public Map<String, String> systemProperties() {
+		Map<String, String> result = new LinkedHashMap<String, String>();
+		OriginalOrderProperties config = getConfigIniProperties();
+		StreamSupport.stream(Spliterators.spliteratorUnknownSize(config.keys().asIterator(), 0), false).forEach(key -> {
+			if (key instanceof String s) {
+				result.put(s, config.getProperty(s));
+			}
+		});
+		for (String argument: MoreObjects.<List<String>>firstNonNull(getIniVMArgs(), Collections.emptyList())) {
+			if (argument.startsWith("-D")) {
+				argument = argument.substring(2);
+				String[] fields = argument.split("=", 2);
+				String value = "";
+				if (fields.length > 1) {
+					value = fields[1];
+				}
+				result.put(fields[0], value);
+			}
+		}
+		return result;
 	}
 	
 }

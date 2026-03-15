@@ -28,7 +28,7 @@ import org.eclipse.emf.ecore.EObject;
  * </ul>
  *
  * @see org.eclipse.rcptt.ecl.core.CorePackage#getCase()
- * @model annotation="http://www.eclipse.org/ecl/docs description='Corresponds command from &lt;code&gt;then&lt;/code&gt; branch if an object from the &lt;code&gt;input&lt;/code&gt; matches the &lt;code&gt;condition&lt;/code&gt; object.' returns='An internal object describing the case.' example='list 1 2 3 | get 0 | switch [case 1 {\r\n\tlog -message \"First item is 1\"\r\n}] [case 2 {\n\tlog -message \"First item is 2\"\n}]'"
+ * @model annotation="http://www.eclipse.org/ecl/docs description='Corresponds command from &lt;code&gt;then&lt;/code&gt; branch if an object from the &lt;code&gt;input&lt;/code&gt; matches the &lt;code&gt;condition&lt;/code&gt; object.' returns='An internal object describing the case. Can only be used by a containing &lt;code&gt;switch&lt;/code&gt; command.' example='list 1 2 3 | get 0 | switch [case 1 {\r\n\tlog -message \"First item is 1\"\r\n}] [case 2 {\n\tlog -message \"First item is 2\"\n}]'"
  * @generated
  */
 public interface Case extends Command {
@@ -71,7 +71,7 @@ public interface Case extends Command {
 	 * @see #setThen(Command)
 	 * @see org.eclipse.rcptt.ecl.core.CorePackage#getCase_Then()
 	 * @model containment="true"
-	 *        annotation="http://www.eclipse.org/ecl/docs description='Branch being executed when &lt;code&gt;input&lt;/code&gt; matches the object specified in &lt;code&gt;condition&lt;/code&gt;'"
+	 *        annotation="http://www.eclipse.org/ecl/docs description='Code to execute. &lt;code&gt;input&lt;/code&gt; is propagated from the command to this branch code.'"
 	 * @generated
 	 */
 	Command getThen();

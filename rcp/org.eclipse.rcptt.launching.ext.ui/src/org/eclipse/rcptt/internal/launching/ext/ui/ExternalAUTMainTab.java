@@ -11,7 +11,6 @@
 package org.eclipse.rcptt.internal.launching.ext.ui;
 
 import static org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin.log;
-import static org.eclipse.rcptt.launching.Q7LaunchUtils.format;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -31,6 +30,7 @@ import org.eclipse.pde.ui.launcher.MainTab;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.ext.JvmTargetCompatibility;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
+import org.eclipse.rcptt.util.StatusUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
@@ -135,7 +135,7 @@ public class ExternalAUTMainTab extends MainTab {
 				}
 				
 				if (result.matches(IStatus.ERROR | IStatus.CANCEL)) {
-					return format(result);
+					return StatusUtil.format(result);
 				}
 				return null;
 			}

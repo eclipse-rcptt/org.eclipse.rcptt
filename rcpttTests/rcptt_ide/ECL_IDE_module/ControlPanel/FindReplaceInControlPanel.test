@@ -1,0 +1,99 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _ymiyse5IEeCU6db9MgIBkA,_ZQYygK2sEeCqBbDEJWufvQ,_XltvoIKaEeC_2txVMvPWLQ
+Element-Name: FindReplaceInControlPanel
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _mC6dYPMGEeCE19s6EOk3LA
+Runtime-Version: 2.8.0.202602280643
+Save-Time: 2/28/26, 8:16 PM
+Tags: selfAUT, ControlPanel
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+TEST STEPS
+
+1. Have non-empty test case;
+2. Start recording from this test case editor to open control panel;
+3. Press Ctrl+F;
+4. Make sure that "Replace with" field is disabled;
+5. Stop recording;
+6. Enter some text key and replace text;
+7. Press OK. Make sure that searched text has been replaced with your entered text. 
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view "Test Explorer" | get-tree | select "TestQ7Prj/Test scenario" | double-click -nowait
+with [get-editor "Test scenario"] {
+    with [get-section Script | get-editbox] {
+        type-text "wait 200"
+        key-type "M1+s"
+    }
+    get-button Record | click
+}
+//wait 200
+
+try -times 10 -delay 10000 -command {
+    get-window "Control Panel.*\\[Recording\\]" 
+}
+get-window "Control Panel.*" | get-editbox | set-text-offset 8 0
+with [get-window "Control Panel.*"] {
+    get-editbox | key-type "M1+f"
+    get-window "Find/Replace" | get-combo -after [get-label "Find:"] | set-text wait
+}
+with [get-window "Control Panel.*" | get-window "Find/Replace"] {
+    get-combo -after [get-label "Replace with:"] | get-property enablement | equals false | verify-true
+    // Editing is disabled during recording:
+    get-button Replace | get-property enablement | equals false | verify-true
+    get-button "Replace/Find" | get-property enablement | equals false | verify-true
+    get-button "Replace All" | get-property enablement | equals false | verify-true
+    get-button Find | get-property enablement | equals true | verify-true
+}
+with [get-window "Control Panel.*"] {
+    get-window "Find/Replace" | get-button Close | click
+    get-button Stop | click
+}
+with [get-window "Control Panel.*"] {
+    with [get-editbox] {
+        set-text-offset 8 0
+        key-type "M1+f"
+    }
+    get-window "Find/Replace" | get-combo -after [get-label "Replace with:"] | set-text go
+}
+with [get-window "Control Panel.*" | get-window "Find/Replace"] {
+    get-button Find | get-property enablement | equals true | verify-true
+    get-button "Replace/Find" | get-property enablement | equals false | verify-true
+    get-button Replace | get-property enablement | equals false | verify-true
+    get-button "Replace All" | get-property enablement | equals true | verify-true
+}
+get-window "Control Panel.*" | get-window "Find/Replace" | get-button Find | click
+with [get-window "Control Panel - Test scenario (TestQ7Prj) - selfQ7" | get-window "Find/Replace"] {
+    get-button Find | get-property enablement | equals true | verify-true
+    get-button "Replace/Find" | get-property enablement | equals true | verify-true
+    get-button Replace | get-property enablement | equals true | verify-true
+    get-button "Replace All" | get-property enablement | equals true | verify-true
+}
+with [get-window "Control Panel.*" | get-window "Find/Replace"] {
+    get-button "Replace All" | click
+    get-button Close | click
+}
+get-window "Control Panel.*" | get-editbox | get-property rawValue 
+    | equals "go 200" | verify-true
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--
