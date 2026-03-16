@@ -1,8 +1,0 @@
-click("1363156853473.png")
-r=find("PackageExplo.png")
-c=r.find("1362464975579.png")
-rightClick(c)
-hover("OpenWith.png")
-click("TextEditor.png")
-click("Classljava.png")
-click("Classljava-2.png")

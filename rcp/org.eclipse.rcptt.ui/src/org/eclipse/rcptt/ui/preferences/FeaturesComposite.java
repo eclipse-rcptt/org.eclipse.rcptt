@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.preferences;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -122,15 +124,18 @@ public class FeaturesComposite {
 		for (Map.Entry<Option, Control> opt : optionFields.entrySet()) {
 			value = opt.getValue();
 			option = opt.getKey();
-
-			if (value instanceof Button) {
-				((Button) value).setSelection("true".equals(option.getDefaultValue()));
-			} else if (value instanceof Spinner) {
-				((Spinner) value).setSelection(Integer.parseInt(option.getDefaultValue()));
-			} else if (value instanceof Combo) {
-				((Combo) value).setText(option.getDefaultValue());
-			} else if (value instanceof Text) {
-				((Text) value).setText(option.getDefaultValue());
+			try {
+				if (value instanceof Button) {
+					((Button) value).setSelection("true".equals(option.getDefaultValue()));
+				} else if (value instanceof Spinner) {
+					((Spinner) value).setSelection(Integer.parseInt(option.getDefaultValue()));
+				} else if (value instanceof Combo) {
+					((Combo) value).setText(option.getDefaultValue());
+				} else if (value instanceof Text) {
+					((Text) value).setText(option.getDefaultValue());
+				}
+			} catch (Exception e) {
+				throw new IllegalStateException(format("Failed to process option %s, value %s", option.getName(), value), e);
 			}
 		}
 	}

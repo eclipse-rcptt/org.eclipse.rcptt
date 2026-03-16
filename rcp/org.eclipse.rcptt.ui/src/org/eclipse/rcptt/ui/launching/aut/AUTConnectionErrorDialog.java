@@ -26,6 +26,7 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.Q7LaunchUtils;
+import org.eclipse.rcptt.util.StatusUtil;
 
 public class AUTConnectionErrorDialog extends MessageDialog {
 
@@ -62,7 +63,7 @@ public class AUTConnectionErrorDialog extends MessageDialog {
 		String message = DEFAULT_ERROR_MESSAGE;
 		if (status != null && !status.isOK()
 				&& !status.equals(Status.CANCEL_STATUS)) {
-			message = status.getMessage();
+			message = StatusUtil.format(status);
 		}
 		if (status == null
 				|| (!status.isOK() && !status.equals(Status.CANCEL_STATUS))) {

@@ -1,6 +1,0 @@
-r = find("Eissues.png").left()
-b = r.find("1362117567532.png")
-click(b)
-click("lQS2167DateT.png")
-click("clickhere.png")
-doubleClick("14.png")

@@ -16,6 +16,7 @@ import static org.eclipse.rcptt.verifications.log.tools.ErrorLogUtil.describe;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -57,7 +58,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 		}
 	}
 
-	private final List<LogEntry> testLog = new ArrayList<LogEntry>();
+	private final List<LogEntry> testLog = Collections.synchronizedList(new ArrayList<LogEntry>());
 
 	public ErrorLogVerificationProcessor() {
 		Platform.addLogListener(this);
@@ -76,12 +77,16 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 
 	@Override
 	public void finish(Verification verification, Object data, IProcess process) throws CoreException {
-		ErrorList errors = findErrors((ErrorLogVerification) verification);
+		ArrayList<LogEntry> copy;
+		synchronized (testLog) {
+			copy = new ArrayList<>(testLog);
+		}
+		ErrorList errors = findErrors((ErrorLogVerification) verification, copy);
 		errors.throwIfAny(String.format("Error log verification '%s' failed:", verification.getName()), this.getClass()
 				.getPackage().getName(), verification.getId());
 	}
 
-	private ErrorList findErrors(ErrorLogVerification logVerification) {
+	private ErrorList findErrors(ErrorLogVerification logVerification, List<LogEntry> testLog) {
 		List<LogEntryPredicate> whiteList = new ArrayList<>();
 		whiteList.addAll(logVerification.getAllowed());
 		whiteList.addAll(logVerification.getRequired());

@@ -200,7 +200,7 @@ public class TeslaFeatures extends AbstractFeatureManager {
 				.showIn(TeslaFeatures.ADV_OPTIONS, TeslaFeatures.CP_OPTIONS);
 
 		option(ENABLE_PROTECTED_MEMBERS)
-				.name("Use protected members in Advanced properties")
+				.name("Use protected members in Advanced properties (deprecated)")
 				.description(
 						"Enable assertions for protected fields and methods")
 				.value("false").defaultValue("false").values(BOOLEAN_VALUES)

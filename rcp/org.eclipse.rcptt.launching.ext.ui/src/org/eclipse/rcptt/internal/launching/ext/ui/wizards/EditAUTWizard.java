@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -31,8 +30,6 @@ import org.eclipse.pde.internal.launching.launcher.LaunchConfigurationHelper;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.launching.aut.BaseAutManager;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
-import org.eclipse.rcptt.internal.launching.ext.OSArchitecture;
-import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.launching.Aut;
@@ -40,10 +37,9 @@ import org.eclipse.rcptt.launching.AutLaunch;
 import org.eclipse.rcptt.launching.AutLaunchState;
 import org.eclipse.rcptt.launching.AutManager;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
+import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.Q7LaunchingUtil;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.launching.utils.AUTLaunchArgumentsHelper;
 import org.eclipse.rcptt.ui.launching.LaunchUtils;
 import org.eclipse.rcptt.ui.launching.aut.IAUTConfigWizard;
@@ -63,6 +59,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 		setWindowTitle("Edit Application Under Test");
 	}
 
+	@Override
 	public void setLaunchConfiguration(ILaunchConfiguration configuration) {
 		this.configuration = configuration;
 	}
@@ -80,6 +77,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 					IQ7Launch.AUT_LOCATION, "");
 			page.initializeExisting(configName, autLocation, this.configuration);
 			page.addAdvancedHandler(new Runnable() {
+				@Override
 				public void run() {
 					Shell shell = PlatformUI.getWorkbench()
 							.getActiveWorkbenchWindow().getShell();
@@ -108,6 +106,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 		return super.performCancel();
 	}
 
+	@Override
 	public boolean performFinish() {
 		ITargetPlatformHelper target = page.getTarget();
 		if (!target.getStatus().isOK()) {
@@ -132,27 +131,15 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 			target.save();
 
 			workingCopy.rename(page.getTargetName());
-			OSArchitecture autArch = page.getArchitecture();
-			workingCopy.setAttribute(Q7LaunchingCommon.ATTR_ARCH,
-					autArch.name());
-			OSArchitecture jvmArch = page.getJVMArch();
 			String vmArgs = workingCopy.getAttribute(
 					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-					target.getIniVMArgs());
+					Q7LaunchDelegateUtils.joinCommandArgs(target.getIniVMArgs()));
 			if (vmArgs == null) {
 				// Lets use current runner vm arguments
 				vmArgs = LaunchArgumentsHelper.getInitialVMArguments()
 						.trim();
 			} else {
 				vmArgs = vmArgs.trim();
-			}
-			if (!autArch.equals(jvmArch)
-					&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-				if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-					vmArgs += " " + ATTR_D32;
-				} else {
-					vmArgs = ATTR_D32;
-				}
 			}
 			if (vmArgs != null && vmArgs.length() > 0) {
 				vmArgs = UpdateVMArgs.updateAttr(vmArgs);
@@ -182,7 +169,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 						.getAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
 								AUTLaunchArgumentsHelper
-									.getInitialProgramArguments(autArch.name()));
+									.getInitialProgramArguments(page.getArchitecture().name()));
 				workingCopy
 						.setAttribute(
 								IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS,
@@ -256,6 +243,7 @@ public class EditAUTWizard extends Wizard implements IAUTConfigWizard {
 		return "${workspace_loc}/../aut-" + uniqueName.replaceAll("\\s", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	@Override
 	public void setWizardDialog(WizardDialog dialog) {
 		this.wizardDialog = dialog;
 	}

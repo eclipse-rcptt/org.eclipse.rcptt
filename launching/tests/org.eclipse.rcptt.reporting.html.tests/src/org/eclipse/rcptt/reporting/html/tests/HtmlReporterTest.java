@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
-import org.eclipse.rcptt.util.FileUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,13 +55,15 @@ public class HtmlReporterTest {
 	}
 
 
-	private Report createReport(String name, int severity) {
+	public static Report createReport(String name, int severity) {
 		Report report = ReportFactory.eINSTANCE.createReport();
-		report.setRoot(createNode(name, severity));
+		Node node = createNode(name, severity);
+		ReportHelper.getInfo(node).setId(name);
+		report.setRoot(node);
 		return report;
 	}
 
-	private Node createNode(String name, int severity) {
+	private static Node createNode(String name, int severity) {
 		Node node = ReportFactory.eINSTANCE.createNode();
 		node.setName(name);
 		ReportHelper.getInfo(node).setResult(RcpttPlugin.createProcessStatus(severity, "No message"));
@@ -84,7 +85,10 @@ public class HtmlReporterTest {
 	}
 
 	private String generate(Iterable<Report> reports) {
-		renderer.generateReport(contentFactory, "1", reports);
+		IStatus status = renderer.generateReport(contentFactory, "1", reports);
+		if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
+			throw new AssertionError(status.toString(), status.getException());
+		}
 		String result = contentFactory.read("1.html");
 		Assert.assertTrue("Whole report should be generated", result.contains("Passed Tests ("));
 		return result;
@@ -143,11 +147,8 @@ public class HtmlReporterTest {
 
 	// @Test
 	public void renderZip() {
-		Q7ReportIterator iterator = new Q7ReportIterator(new File("C:\\Users\\vasili\\Downloads\\tests.report"));
-		try {
+		try (Q7ReportIterator iterator = new Q7ReportIterator(new File("C:\\Users\\vasili\\Downloads\\tests.report"))) {
 			renderer.generateReport(new FileContentFactory(new File("C:\\temp\\reportHtmlTest")), "Name", iterator);
-		} finally {
-			FileUtil.safeClose(iterator);
 		}
 	}
 }

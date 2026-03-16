@@ -16,7 +16,7 @@ class Build implements Serializable {
   private final String BUILD_CONTAINER="""
     - name: $BUILD_CONTAINER_NAME
       image: basilevs/ubuntu-rcptt:3.7.3
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotPresent
       tty: true
       resources:
         limits:
@@ -171,9 +171,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   void archive() {
+    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
     this.script.junit "**/target/*-reports/*.xml"
     this.script.fingerprint "$RUNTIME_DIR/org.eclipse.rcptt.updates.runtime*/q7/**/*.*"
-    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "**/*.hrpof, repository/**/target/repository/**/*, $PRODUCTS_DIR/*, $RUNNER_DIR/*.zip, maven-plugin/rcptt-maven-*/target/rcptt-maven-*.jar, $DOC_DIR/target/doc/**/*, **/target/**/*.log, **/target/dash/*summary, **/target/**/bundles.info, **/target/**/*.ini"
   }
 
   private void sh_with_return(String command) {
@@ -235,10 +235,9 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 	          -DexplicitRunner=`readlink -f ${runner}` \
 	          ${args}"
 	    }
-	    this.script.sh "test -f ${dir}/target/results/tests.html"
     } finally {
-	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/target/results/**/*, ${dir}/target/**/*log,${dir}/target/surefire-reports/**, **/*.hprof"
-      this.script.junit "${dir}/target/*-reports/*.xml"
+	    this.script.archiveArtifacts allowEmptyArchive: false, artifacts: "${dir}/**/target/results/**/*, ${dir}/**/target/**/*log,${dir}/**/target/surefire-reports/**, **/*.hprof"
+      this.script.junit "${dir}/**/target/*-reports/*.xml"
     }
   }
 

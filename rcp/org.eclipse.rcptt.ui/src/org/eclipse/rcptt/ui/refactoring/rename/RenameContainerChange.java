@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2025 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -29,9 +29,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.rcptt.internal.ui.Messages;
-import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.ui.editors.NamedElementEditor;
 
 public class RenameContainerChange extends ResourceChange {
@@ -194,8 +193,7 @@ public class RenameContainerChange extends ResourceChange {
 	private void updateEditorInputs(final IPath newPath) {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				IWorkbenchWindow window = Q7UIPlugin.getDefault()
-						.getWorkbench().getActiveWorkbenchWindow();
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				if (window == null)
 					return;
 				IWorkbenchPage page = window.getActivePage();

@@ -166,7 +166,7 @@ public class TestEngineManager {
 
 	private void applyDefaultConfig(ExecutionSession session) {
 		try {
-			final Launch launch = (Launch) session.getLaunch();
+			final Launch launch = session.getLaunch();
 			if (launch != null) {
 				final ILaunchConfiguration configuration = launch.getLaunchConfiguration();
 				this.engineStatuses = configuration.getAttribute(IQ7Launch.ATTR_TEST_ENGINES,
