@@ -12,10 +12,7 @@ package org.eclipse.rcptt.launching.ext;
 
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +26,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,6 +139,8 @@ public class Q7ExternalLaunchDelegateTest {
 	public void surviveRestart() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		ILaunchConfiguration originalConfiguration = launch.getAut().getConfig();
+		var originalAttributes = new HashMap<>(originalConfiguration.getAttributes());
 		launch.ping();
 		Command command = parse("restart-aut");
 		int attemptCount = Integer.getInteger(Q7ExternalLaunchDelegateTest.class.getName() + ".restartAttempts", 3);
@@ -171,6 +171,7 @@ public class Q7ExternalLaunchDelegateTest {
 				}
 			}
 			launch.ping();
+			assertEquals(originalAttributes, originalConfiguration.getAttributes());
 		}
 		assertNoErrorsInOutput();
 	}
