@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _Hgh7cLN3EeSIB87DbOtJCQ
-Runtime-Version: 2.8.0.202602281641
-Save-Time: 3/10/26, 9:28 PM
+Runtime-Version: 2.9.0.qualifier
+Save-Time: 3/17/26, 9:51 AM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
@@ -28,6 +28,8 @@ get-aut "mockupsQ7" | eval {
 
 get-view Applications | click
 get-button "Record a Snippet" | click
+
+try { get-window "Control Panel - mockupsQ7 [Recording]" } -times 10 -delay 5000
 
 with [get-window "Control Panel - mockupsQ7 [Recording]"] {
     get-button "Switch to Assertion Mode" | click
