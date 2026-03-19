@@ -315,12 +315,12 @@ public class FullSingleTestHtmlRenderer {
 			// Out properties
 			if (list.size() != 0) {
 				for (NodeProperty nodeProperty : list) {
-					writer.println(nodeProperty.getName() + "=" + nodeProperty.getValue() + " <br>");
+					writer.println(escape(nodeProperty.getName()) + "=" + escape(nodeProperty.getValue()) + " <br>");
 				}
 			}
 			if (childs.size() != 0) {
 				for (InfoNode child : childs) {
-					writer.println(child.getName());
+					writer.println(escape(child.getName()));
 					renderNode(child);
 				}
 			}
