@@ -121,6 +121,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getMask() {
 		return mask;
 	}
@@ -130,6 +131,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMask(Integer newMask) {
 		Integer oldMask = mask;
 		mask = newMask;
@@ -142,6 +144,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getKeyCode() {
 		return keyCode;
 	}
@@ -151,6 +154,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKeyCode(Integer newKeyCode) {
 		Integer oldKeyCode = keyCode;
 		keyCode = newKeyCode;
@@ -163,6 +167,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getMeta() {
 		return meta;
 	}
@@ -172,6 +177,7 @@ public class FromRawKeyImpl extends CommandImpl implements FromRawKey {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMeta(Integer newMeta) {
 		Integer oldMeta = meta;
 		meta = newMeta;
