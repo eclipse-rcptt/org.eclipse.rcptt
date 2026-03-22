@@ -69,8 +69,8 @@
         <setEntry value="org.apache.httpcomponents.core5.httpcore5-h2@default:default"/>
         <setEntry value="org.apache.httpcomponents.core5.httpcore5@default:default"/>
         <setEntry value="org.apache.lucene.core@default:default"/>
-        <setEntry value="org.apache.poi*5.5.1.v20251201-1000@default:default"/>
-        <setEntry value="org.apache.poi.ooxml*5.5.1.v20251201-1000@default:default"/>
+        <setEntry value="org.apache.poi.ooxml@default:default"/>
+        <setEntry value="org.apache.poi@default:default"/>
         <setEntry value="org.apache.xmlgraphics@default:default"/>
         <setEntry value="org.aspectj.runtime@default:default"/>
         <setEntry value="org.aspectj.weaver@1:true"/>

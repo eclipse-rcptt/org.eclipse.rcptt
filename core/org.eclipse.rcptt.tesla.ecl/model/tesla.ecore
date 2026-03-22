@@ -1105,7 +1105,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Maximize" eSuperTypes="../../org.eclipse.rcptt.ecl.core/model/ecl.ecore#//Command">
     <eAnnotations source="http://www.eclipse.org/ecl/docs">
-      <details key="description" value="Maximize the tab folder.&#xA;See more details about &lt;a href=&quot;http://xored.freshdesk.com/solution/categories/58375/folders/95402/articles/3000008200-resize-a&quot;>How to resize a window.&lt;/a>"/>
+      <details key="description" value="Maximize a tab folder or a window.&#xA;See more details about &lt;a href=&quot;http://xored.freshdesk.com/solution/categories/58375/folders/95402/articles/3000008200-resize-a&quot;>How to resize a window.&lt;/a>"/>
       <details key="returns" value="value of &lt;code>control&lt;/code> parameter"/>
       <details key="example" value="get-window &quot;New Project&quot; | maximize&#xA;&#xA;"/>
     </eAnnotations>
