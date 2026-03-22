@@ -18,6 +18,7 @@ import java.io.IOException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,9 +52,6 @@ public class ExcelFileService {
 		} catch (FileNotFoundException e) {
 			throw new CoreException(EclDataApachePOIImplPlugin.createErr(
 					e, "File not found %s", file.toURI()));
-		} catch (InvalidFormatException e) {
-			throw new CoreException(EclDataApachePOIImplPlugin.createErr(
-					"Invalid format of file %s", file.toURI()));
 		} catch (IOException e) {
 			throw new CoreException(EclDataApachePOIImplPlugin.createErr(
 					e, "Error reading file %s", file.toURI()));
@@ -77,15 +75,15 @@ public class ExcelFileService {
 			return "";
 		}
 		switch (cell.getCellType()) {
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			return cell.getStringCellValue();
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			String number = String.valueOf(cell.getNumericCellValue());
 			number = number.replaceAll(".0$", "");
 			return number;
-		case Cell.CELL_TYPE_BOOLEAN:
+		case BOOLEAN:
 			return String.valueOf(cell.getBooleanCellValue());
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 			return "=" + cell.getCellFormula();
 		default:
 			return "";
