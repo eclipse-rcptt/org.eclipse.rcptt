@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,16 @@ package org.eclipse.rcptt.core.ecl.formatter.test;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.rcptt.core.ecl.formatter.EclFormatter;
 import org.eclipse.rcptt.core.ecl.formatter.EclFormatterOptions;
+import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class FormatterTest {
+	@Rule
+	public final SessionRule session = new SessionRule();
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNull() {
@@ -50,6 +55,18 @@ public class FormatterTest {
 				new EclFormatterOptions().wrapAt(80));
 		assertEquals("cmd-a | cmd-b", f.format("cmd-a | cmd-b"));
 	}
+
+	@Test
+	public void testWrapEscaped() throws CoreException {
+		testWrapping("""
+			echo "\\\\ \\\\ \\\\\\\\ \\\\ \\\\ \\\\\\\\ \\\\ \\\\"
+		""");
+		testWrapping("""
+			echo "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+		""");
+	}
+	
+	
 
 	@Test()
 	public void testBoolArgs() {
@@ -92,4 +109,13 @@ public class FormatterTest {
 		assertEquals("cmd-a\n\t\t\t\t| cmd-b\n\t\t\t\t| cmd-c", f.format("cmd-a | cmd-b | cmd-c"));
 	}
 
+	public void testWrapping(String input) throws CoreException {
+		Object expected = session.runScript(input);
+		for (int i = 5; i < 20; i++) {
+			EclFormatter subject = new EclFormatter(new EclFormatterOptions().wrapAt(i));
+			String output = subject.format(input);
+			Object actual = session.runScript(output);
+			Assert.assertEquals(expected, actual);
+		}
+	}
 }
