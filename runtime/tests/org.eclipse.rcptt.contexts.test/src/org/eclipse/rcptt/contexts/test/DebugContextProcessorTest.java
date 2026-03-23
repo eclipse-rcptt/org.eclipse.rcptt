@@ -22,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -112,9 +114,18 @@ public class DebugContextProcessorTest {
 
 	public static void waitFor(CompletableFuture<Void> result, int timeout_ms)
 			throws AssertionError{
+		Display display = Display.getCurrent();
+		
+		Job displayKillJob = new Job("Wakeup Display") {
+			@Override
+			protected org.eclipse.core.runtime.IStatus run(org.eclipse.core.runtime.IProgressMonitor monitor) {
+				display.syncExec(display::close);
+				return Status.OK_STATUS;
+			}
+		};
 		try {
-			Display display = Display.getCurrent();
 			long stop = currentTimeMillis() + timeout_ms;
+			displayKillJob.schedule(timeout_ms + 1000);
 			while (!result.isDone()) {
 				if (currentTimeMillis() > stop) {
 					Thread.getAllStackTraces().forEach((thread, elements) -> {
@@ -137,6 +148,7 @@ public class DebugContextProcessorTest {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new AssertionError(e);
 		} finally {
+			displayKillJob.cancel();
 			result.cancel(true);
 		}
 	}
