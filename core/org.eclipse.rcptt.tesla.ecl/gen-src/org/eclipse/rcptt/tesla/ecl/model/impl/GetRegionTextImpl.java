@@ -61,7 +61,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Integer X_EDEFAULT = new Integer(0);
+	protected static final Integer X_EDEFAULT = Integer.valueOf(0);
 
 	/**
 	 * The cached value of the '{@link #getX() <em>X</em>}' attribute.
@@ -81,7 +81,7 @@ public class GetRegionTextImpl extends CommandImpl implements GetRegionText {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Integer Y_EDEFAULT = new Integer(0);
+	protected static final Integer Y_EDEFAULT = Integer.valueOf(0);
 
 	/**
 	 * The cached value of the '{@link #getY() <em>Y</em>}' attribute.
