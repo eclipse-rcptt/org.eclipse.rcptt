@@ -157,7 +157,7 @@ public class FullSingleTestHtmlRenderer {
 		for (LoggingCategory logCategory : LoggingCategory.VALUES) {
 			String logs2 = ReportBuilder.getLogs(node, logCategory);
 			if (logs2 != null)
-				logs.append(logs2);
+				logs.append(escape(logs2));
 		}
 		if (logs.length() > 2) {
 			openDetails(2, "Logs", "");
