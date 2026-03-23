@@ -64,7 +64,10 @@ public class ReportUtils {
 			if (input instanceof VerificationStatusData) {
 				return ((VerificationStatusData) input).getMessage();
 			}
-			return "";
+			if (input instanceof ProcessStatus s) {
+				return s.getMessage();
+			}
+			return input.toString();
 		}
 
 	};
@@ -328,7 +331,7 @@ public class ReportUtils {
 
 	public static String getDirectFailMessage(ProcessStatus result,
 			Function<EObject, String> datumToMessage) {
-		StringBuilder sb = new StringBuilder(result.getMessage());
+		StringBuilder sb = new StringBuilder(datumToMessage.apply(result));
 		if (result instanceof EVerificationStatus) {
 			EVerificationStatus vs = (EVerificationStatus) result;
 			sb.append("\n");

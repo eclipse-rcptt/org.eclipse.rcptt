@@ -415,7 +415,9 @@ public class FullSingleTestHtmlRenderer {
 	private void renderMain(Node root) {
 		String message = ReportUtils.getFailMessage(root, HTML_DATUM_TO_MESSAGE);
 		writer.println("<table class=\"" + toFailureClass(root) + "\">");
-		titledRow("Failure Reason", message);
+		if (message != null) {
+			writer.println(String.format("<tr><th>Failure Reason</th><td>%s</td></tr>", message));
+		}
 		String tags = ReportUtils.getScenarioTags(root);
 		tags = replaceLineBreaks(tags).trim();
 		titledRow("Tags", Strings.emptyToNull(tags));

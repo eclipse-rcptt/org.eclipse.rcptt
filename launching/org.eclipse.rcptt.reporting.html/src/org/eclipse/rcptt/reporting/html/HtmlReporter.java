@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -24,7 +25,6 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.util.FileUtil;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 
 public class HtmlReporter extends HtmlReportRenderer {
@@ -76,7 +76,7 @@ public class HtmlReporter extends HtmlReportRenderer {
 		PrintWriter childWriter = null;
 		try {
 			OutputStream os = content.createFileStream(fileName);
-			childWriter = new PrintWriter(new OutputStreamWriter(os, Charsets.UTF_8));
+			childWriter = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
 			childWriter.println("<html>");
 			renderHead(childWriter, root.getName());
 			childWriter.println("<body onload=\"installDetailsWorkaround()\">");

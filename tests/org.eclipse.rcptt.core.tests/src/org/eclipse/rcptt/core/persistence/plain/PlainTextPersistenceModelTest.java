@@ -14,11 +14,16 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -94,6 +99,7 @@ public class PlainTextPersistenceModelTest {
 		});
 		noise.setPriority(Job.INTERACTIVE);
 		noise.schedule(0);
+		long iteration = 0;
 		try {
 			for (long stop = currentTimeMillis() + 1000; currentTimeMillis() < stop;) {
 				IPersistenceModel model = PersistenceManager.getInstance().getModel(resource);
@@ -101,6 +107,49 @@ public class PlainTextPersistenceModelTest {
 					model.updateMetadata(); // should not throw
 				}
 			}
+		} catch (Throwable e) {
+			throw new AssertionError("Failed on iteration " + iteration, e);
+		} finally {
+			noise.cancel();
+		}
+	}
+
+	/**
+	 * @see https://github.com/eclipse-platform/eclipse.platform/discussions/2242
+	 */
+	@Test
+	public void ensureResourcesSurviveConcurrency() throws IOException, CoreException {
+		IProject project = WORKSPACE.getRoot().getProject("project");
+		project.create(null);
+		project.open(null);
+		IFile file = project.getFile("file.txt");
+		file.create(new ByteArrayInputStream("content".getBytes()), 0, null);
+		Job noise = Job.create("Delete/create", (ICoreRunnable) monitor -> {
+			int i = 0;
+			while (!monitor.isCanceled()) {
+				file.delete(true, monitor);
+				file.create(new ByteArrayInputStream(("content " + i).getBytes()), IResource.FORCE, null);
+			}
+		});
+		
+		noise.setPriority(Job.INTERACTIVE);
+		noise.schedule();
+		long iteration = 0;
+		try {
+			for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; iteration++) {
+				try (InputStream stream = file.getContents(true)) {
+						stream.readAllBytes();
+				} catch (CoreException e) {
+					// Ignore file not found exception
+					int code = e.getStatus().getCode();
+					if (code == IResourceStatus.RESOURCE_NOT_LOCAL || code == IResourceStatus.RESOURCE_NOT_FOUND || code == IResourceStatus.FAILED_READ_LOCAL) {
+						continue; // File does not exist errors are expected
+					}
+					throw new AssertionError("Error code: " + code, e);
+				}
+			}
+		} catch (Throwable e) {
+			throw new AssertionError("Failed on iteration " + iteration, e);
 		} finally {
 			noise.cancel();
 		}

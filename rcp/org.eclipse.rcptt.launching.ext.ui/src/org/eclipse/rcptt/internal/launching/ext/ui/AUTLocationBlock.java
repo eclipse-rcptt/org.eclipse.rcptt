@@ -190,7 +190,7 @@ public class AUTLocationBlock {
 			return createError("Please specify Application installation directory...");
 		}
 		if (info == null) {
-			return createError("Please specify correct Application installation directory...");
+			return status.getValue();
 		} else {
 			return info.getStatus();
 		}
@@ -224,14 +224,17 @@ public class AUTLocationBlock {
 				try {
 					SubMonitor sm = SubMonitor.convert(monitor, 2);
 					ITargetPlatformHelper temp = Q7TargetPlatformManager.getTarget(original, sm.split(1));
-					if (!temp.getStatus().matches(IStatus.ERROR|IStatus.CANCEL)) {
-						IStatus result = Q7LaunchDelegateUtils.validateForLaunch(temp, sm.split(1));
-						if (result.matches(IStatus.ERROR|IStatus.CANCEL)) {
-							temp.delete();
-							throw new CoreException(result);
-						}
-						info = temp;
+					IStatus s = temp.getStatus();
+					if (s.matches(IStatus.ERROR|IStatus.CANCEL)) {
+						throw new CoreException(s);
 					}
+					IStatus result = Q7LaunchDelegateUtils.validateForLaunch(temp, sm.split(1));
+					if (result.matches(IStatus.ERROR|IStatus.CANCEL)) {
+						temp.delete();
+						throw new CoreException(result);
+					}
+					info = temp;
+					setStatus(Status.OK_STATUS);
 				} catch (CoreException e) {
 					setStatus(e.getStatus());
 				}

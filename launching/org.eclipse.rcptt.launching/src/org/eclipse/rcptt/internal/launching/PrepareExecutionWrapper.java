@@ -57,8 +57,11 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.LoggingCategory;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Node;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportContainer;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
+import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Snaphot;
 import org.eclipse.rcptt.sherlock.core.streams.SherlockReportSession;
 import org.eclipse.rcptt.tesla.core.TeslaFeatures;
+import org.eclipse.rcptt.tesla.core.info.AdvancedInformation;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -285,6 +288,15 @@ public class PrepareExecutionWrapper extends Executable {
 					return result;
 				}
 				rootInfo.setResult(ProcessStatusConverter.toProcessStatus(status));
+				if (status instanceof ExecutionStatus es) {
+					AdvancedInformation inf = es.getInfo();
+					if (inf != null) {
+						Snaphot snapshot = ReportFactory.eINSTANCE.createSnaphot();
+						snapshot.setTime(System.currentTimeMillis());
+						snapshot.setData(inf);
+						root.getSnapshots().add(snapshot);
+					}
+				}
 				closeAllNodes(root.getStartTime() + getTime(), root);
 				if (status.isOK() && SimpleSeverity.create(rootInfo) != SimpleSeverity.OK) {
 					status = ProcessStatusConverter.toIStatus(rootInfo.getResult());

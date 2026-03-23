@@ -80,17 +80,13 @@ public class EclContextExecutable extends ContextExecutable {
 		} catch (CoreException e) {
 			resultStatus = e.getStatus();
 		}
-		if (resultStatus.getSeverity() == IStatus.CANCEL) {
-			// Cancel is called, lets collect correct message
-			String message = "Context execution is terminated";
-			if (getResultStatus().matches(IStatus.CANCEL)) {
-				message = "Context is terminated by user request";
-			} else if (!getResultStatus().isOK()) {
-				message = "Timeout during context execution";
-			}
-			resultStatus = ExecAdvancedInfoUtil.askForAdvancedInfo(launch,
-					message);
+		if (resultStatus.isOK()) {
+			return resultStatus;
 		}
+		if (getResultStatus().matches(IStatus.CANCEL)) {
+			return Status.CANCEL_STATUS;
+		}
+		resultStatus = ExecAdvancedInfoUtil.askForAdvancedInfo(launch, resultStatus);
 		return resultStatus;
 	}
 

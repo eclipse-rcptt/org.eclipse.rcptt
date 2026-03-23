@@ -13,11 +13,15 @@
 package org.eclipse.rcptt.internal.launching.aut;
 
 import static org.eclipse.rcptt.ecl.core.util.Statuses.hasCode;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,9 +33,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.core.ContextType;
+import org.eclipse.rcptt.core.ContextTypeManager;
 import org.eclipse.rcptt.core.ecl.context.ContextFactory;
 import org.eclipse.rcptt.core.ecl.context.EclContext;
+import org.eclipse.rcptt.core.ecl.core.model.EnterContext;
 import org.eclipse.rcptt.core.ecl.core.model.ExecutionPhase;
 import org.eclipse.rcptt.core.model.IContext;
 import org.eclipse.rcptt.ecl.core.CoreFactory;
@@ -39,6 +46,7 @@ import org.eclipse.rcptt.ecl.core.Global;
 import org.eclipse.rcptt.ecl.core.RestoreState;
 import org.eclipse.rcptt.ecl.core.SaveState;
 import org.eclipse.rcptt.ecl.core.Script;
+import org.eclipse.rcptt.ecl.core.SessionState;
 import org.eclipse.rcptt.ecl.gen.ast.AstExec;
 import org.eclipse.rcptt.ecl.internal.core.Pipe;
 import org.eclipse.rcptt.ecl.runtime.IPipe;
@@ -46,30 +54,38 @@ import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.ecl.runtime.ISession;
 import org.eclipse.rcptt.internal.launching.aut.BaseAutLaunch.Context;
 import org.eclipse.rcptt.launching.IQ7Launch;
+import org.eclipse.rcptt.tesla.core.TeslaFeatures;
+import org.eclipse.rcptt.tesla.core.info.InfoFactory;
+import org.eclipse.rcptt.tesla.ecl.model.GetAdvancedInfo;
 import org.eclipse.rcptt.tesla.ecl.model.SetupPlayer;
 import org.eclipse.rcptt.tesla.ecl.model.ShoutdownPlayer;
 import org.eclipse.rcptt.tesla.ecl.model.ShutdownAut;
+import org.eclipse.rcptt.tesla.ecl.model.TeslaFactory;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 public class BaseAutLaunchTest {
-	private static final Object RV = new Object(); 
+	private static final Object RV = new Object();
+	@Rule
+	public final MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 	private final ILaunch launch = Mockito.mock(ILaunch.class);
 	private final Context context = Mockito.mock(Context.class);
 	private final ISession session = Mockito.mock(ISession.class);
 	private final IProcess process = Mockito.mock(IProcess.class);
 	{
 		try {
-			Answer returnRV = invocation -> {
-				IPipe output = (IPipe) invocation.getArguments()[2];
-				output.write(RV);
-				return process;
-			};
 			when(launch.getAttribute(IQ7Launch.ATTR_HOST)).thenReturn("127.0.0.1");
 			when(launch.getAttribute(IQ7Launch.ATTR_ECL_PORT)).thenReturn("9922");
 			when(session.createPipe()).thenAnswer(invocation -> {
@@ -79,21 +95,35 @@ public class BaseAutLaunchTest {
 			when(process.waitFor(anyLong(), any())).thenReturn(Status.OK_STATUS);
 			when(session.execute(isA(RestoreState.class))).thenReturn(process);
 			when(session.execute(isA(ShutdownAut.class), isNull(IPipe.class), isA(IPipe.class))).thenReturn(process);
-			when(session.execute(isA(ShoutdownPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(returnRV);
-			when(session.execute(isA(SaveState.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(invocation -> {
-				IPipe output = (IPipe) invocation.getArguments()[2];
-				if (output == null)
-					return null;
-				output.write(CoreFactory.eINSTANCE.createSessionState());
-				output.write(Status.OK_STATUS);
-				return process;
-			});
+			when(session.execute(isA(ShoutdownPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(RV));
+			when(session.execute(isA(SaveState.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(CoreFactory.eINSTANCE.createSessionState()));
 			when(session.execute(isA(AstExec.class))).thenReturn(process);
-			Mockito.doAnswer(returnRV).when(session).execute(isA(Global.class), ArgumentMatchers.any(), isA(IPipe.class));
-			when(session.execute(isA(SetupPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(returnRV);
+			Mockito.doAnswer(outputAnswer(RV)).when(session).execute(isA(Global.class), ArgumentMatchers.any(), isA(IPipe.class));
+			when(session.execute(isA(SetupPlayer.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(RV));
+			when(session.execute(isA(GetAdvancedInfo.class), isNull(IPipe.class), isA(IPipe.class))).thenAnswer(outputAnswer(InfoFactory.eINSTANCE.createAdvancedInformation() ));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+
+
+	private Answer<?> outputAnswer(Object rv2) {
+		return (Answer<?>)invocation -> {
+			IPipe pipe = (IPipe) invocation.getArguments()[2];
+			if (pipe == null)
+				return null;
+			pipe.write(rv2);
+			pipe.write(Status.OK_STATUS);
+			return process;
+		};
+	}
+	
+	
+	
+	@Before 
+	public void before() {
+		setRunnableTimeout(100_000);
 	}
 	
 	@Test
@@ -128,9 +158,9 @@ public class BaseAutLaunchTest {
 		IContext context = Mockito.mock(IContext.class);
 		when(context.exists()).thenReturn(true);
 		when(context.getModifiedNamedElement()).thenReturn(eclContext);
-		ContextType type = Mockito.mock(ContextType.class);
+		ContextType type = ContextTypeManager.getInstance().getTypeById("org.eclipse.rcptt.ctx.ecl");
 		when(context.getType()).thenReturn(type);
-		when(type.getId()).thenReturn("org.eclipse.rcptt.ctx.ecl");
+
 		subject.run(context, 20000, null, ExecutionPhase.START);
 		Mockito.verify(session).execute(isA(RestoreState.class));
 		ArgumentCaptor<AstExec> command = ArgumentCaptor.forClass(AstExec.class); 
@@ -214,15 +244,33 @@ public class BaseAutLaunchTest {
 		verify(launch).terminate();
 	}
 	
+	@Test
+	public void collectContextErrorOnTimeout() throws CoreException, InterruptedException {
+		setRunnableTimeout(1000);
+		EclContext eclContext = ContextFactory.eINSTANCE.createEclContext();
+		BaseAutLaunch subject = createSubject();
+		IContext context = Mockito.mock(IContext.class);
+		when(context.exists()).thenReturn(true);
+		when(context.getModifiedNamedElement()).thenReturn(eclContext);
+		ContextType type = ContextTypeManager.getInstance().getTypeById("org.eclipse.rcptt.ctx.workbench");
+		when(context.getType()).thenReturn(type);
+		when(session.execute(isA(EnterContext.class))).thenReturn(process);
+		
+		subject.run(context, 20_000, null, ExecutionPhase.START);
+		
+		ArgumentCaptor<Long> timeout = ArgumentCaptor.forClass(Long.class); 
+		
+		verify(process, times(2)).waitFor(timeout.capture(), any());
+		assertThat(timeout.getAllValues(), everyItem(greaterThan(1100L)));
+	}
+	
+	private void setRunnableTimeout(int milliseconds) {
+		TeslaFeatures.getInstance().getOption("context.runnable.timeout").setValue("" + milliseconds);
+	}
+
 
 	private BaseAutLaunch createSubject() {
 		return new BaseAutLaunch(launch,null, context);
 	}
-	
-	@After
-	public void after() {
-		Mockito.validateMockitoUsage();
-	}
-
 
 }

@@ -101,6 +101,10 @@ public class JUnitXMLReportGenerator {
 			break;
 		case CANCEL:
 			writer.writeAttribute("incomplete", "true");
+			writer.writeStartElement("skipped");
+			writer.writeAttribute("type", "testcase");
+			writer.writeAttribute("message",  ReportUtils.getFailMessage(item));
+			writer.writeEndElement();
 			break;
 		case ERROR:
 			writer.writeStartElement("failure");

@@ -12,10 +12,7 @@ package org.eclipse.rcptt.launching.ext;
 
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.Files.isDirectory;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +26,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,34 +139,40 @@ public class Q7ExternalLaunchDelegateTest {
 	public void surviveRestart() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
+		ILaunchConfiguration originalConfiguration = launch.getAut().getConfig();
+		var originalAttributes = new HashMap<>(originalConfiguration.getAttributes());
 		launch.ping();
 		Command command = parse("restart-aut");
-		launch.execute(command);
-		for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
+		int attemptCount = Integer.getInteger(Q7ExternalLaunchDelegateTest.class.getName() + ".restartAttempts", 3);
+		for (int i = 0; i < attemptCount; i++) {
+			launch.execute(command);
+			for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
+				try {
+					launch.ping();
+					Thread.yield();
+				} catch (CoreException e) {
+					break;
+				}
+			}
+			
 			try {
 				launch.ping();
-				Thread.yield();
+				fail("AUT should be temporarily unavailable");
 			} catch (CoreException e) {
-				break;
 			}
-		}
-		
-		try {
+			
+			for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
+				try {
+					launch.ping();
+					Thread.yield();
+					break;
+				} catch (CoreException e) {
+					// Expected for a while
+				}
+			}
 			launch.ping();
-			fail("AUT should be temporarily unavailable");
-		} catch (CoreException e) {
+			assertEquals(originalAttributes, originalConfiguration.getAttributes());
 		}
-		
-		for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
-			try {
-				launch.ping();
-				Thread.yield();
-				break;
-			} catch (CoreException e) {
-				// Expected for a while
-			}
-		}
-		launch.ping();
 		assertNoErrorsInOutput();
 	}
 	
@@ -222,6 +226,7 @@ public class Q7ExternalLaunchDelegateTest {
 		Arrays.stream(output.split("\n")).forEach(line -> {
 			assertFalse(line, line.contains("Unresolved requirement"));
 			assertFalse(line, line.contains("org.osgi.framework.BundleException:"));
+			assertFalse(line, line.contains("IllegalStateException"));
 		});
 	}
 

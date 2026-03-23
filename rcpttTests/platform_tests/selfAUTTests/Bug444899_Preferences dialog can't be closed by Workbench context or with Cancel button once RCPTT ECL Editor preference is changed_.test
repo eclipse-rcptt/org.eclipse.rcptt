@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: https://bugs.eclipse.org/bugs/show_bug.cgi?id=444899
 Id: _2o--AHl3EeSxJeam03ptGg
-Runtime-Version: 2.5.5.202403150112
-Save-Time: 3/15/24, 11:20 AM
+Runtime-Version: 2.7.2.202512051719
+Save-Time: 12/5/25, 9:36 PM
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -38,7 +38,20 @@ Entry-Name: .content
 get-view "Test Explorer" | get-tree | select "Project/OpenDialog" | double-click
 get-editor OpenDialog | get-button Replay | click
 get-view "Test Explorer" | get-tree | select "Project/WbContext" | double-click
+
+set-q7-option -key "context.runnable.timeout" -value 10000
 get-editor WbContext | get-button Apply | click
+proc waitForTaskToComplete {
+	loop {
+		if [get-view "Execution View" | get-label ".*/1"
+			| get-property caption -raw | not-eq "1/1"] {
+			wait 500
+			recur
+		}
+	}
+}
+
+waitForTaskToComplete
 try {
 	with [get-view "Execution View"] {
 	  maximize
@@ -46,7 +59,8 @@ try {
 	    | equals "Failed to apply context WbContext.ctx\n"
 	    + "  Failed to execute context: WbContext Cause: Failed to close dialogs\n"
 	    + "    Failed to close dialogs\n"
-	    + "      Shell with name My Title and class org.eclipse.swt.widgets.Shell is not disposed and visible" | verify-true
+	    + "      Failed to close dialogs\n"
+	    + "        Shell with name My Title and class org.eclipse.swt.widgets.Shell is not disposed and visible" | verify-true
 	}
 } -finally {
     
