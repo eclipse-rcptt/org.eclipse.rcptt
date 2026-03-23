@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.nebula;
 
+import static org.eclipse.rcptt.util.swt.Events.createClick;
+import static org.eclipse.rcptt.util.swt.Events.createDoubleClick;
+
 import org.eclipse.nebula.widgets.grid.Grid;
 import org.eclipse.nebula.widgets.grid.GridColumn;
 import org.eclipse.nebula.widgets.grid.GridItem;
@@ -31,6 +34,7 @@ import org.eclipse.rcptt.tesla.nebula.grid.parts.RowHeader;
 import org.eclipse.rcptt.tesla.nebula.viewers.NebulaViewers;
 import org.eclipse.rcptt.util.swt.Bounds;
 import org.eclipse.rcptt.util.swt.Events;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Widget;
 
@@ -113,14 +117,14 @@ public class NebulaUIPlayerExtension extends AbstractSWTUIPlayerExtension {
 		GridCell gridCell = (GridCell)widget;
 		GridItem gridItem = gridCell.unwrap();
 		Grid grid = gridItem.getParent();
-		final Event[] event = Events.createClick(Bounds.centerAbs(gridItem.getBounds(gridCell.getColumn())));
+		Point center = Bounds.centerAbs(gridItem.getBounds(gridCell.getColumn()));
+		final Event[] event = doubleClick ? createDoubleClick(center) : createClick(center);
 		widget.getPlayer().exec("Performing click on a Nebula Grid cell", new Runnable() {
 			@Override
 			public void run() {
 				widget.getPlayer().getEvents().sendAll(grid, event);
 			}
-		});				
-
+		});
 	}
 
 	@Override
