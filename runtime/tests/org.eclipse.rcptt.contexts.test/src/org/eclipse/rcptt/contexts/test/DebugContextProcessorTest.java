@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.contexts.test;
 
-import static java.lang.System.currentTimeMillis;
 import static org.eclipse.rcptt.debug.DebugFactory.eINSTANCE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,10 +19,10 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -115,30 +114,21 @@ public class DebugContextProcessorTest {
 	public static void waitFor(CompletableFuture<Void> result, int timeout_ms)
 			throws AssertionError{
 		Display display = Display.getCurrent();
-		
-		Job displayKillJob = new Job("Wakeup Display") {
-			@Override
-			protected org.eclipse.core.runtime.IStatus run(org.eclipse.core.runtime.IProgressMonitor monitor) {
-				display.syncExec(display::close);
-				return Status.OK_STATUS;
-			}
-		};
-		try {
-			long stop = currentTimeMillis() + timeout_ms;
-			displayKillJob.schedule(timeout_ms + 1000);
-			while (!result.isDone()) {
-				if (currentTimeMillis() > stop) {
-					Thread.getAllStackTraces().forEach((thread, elements) -> {
-						PrintStream out = System.out;
-						out.printf("\"%s\" #%d\n", thread.getName(), thread.getId());
-						out.printf("   java.lang.Thread.State:  %s\n", thread.getState());
-						for (StackTraceElement i: elements) {
-							out.printf("\tat %s.%s(%s:%d)\n", i.getClassName(), i.getMethodName(), i.getFileName(), i.getLineNumber());	
-						}
-						out.println();
-					});
-					throw new AssertionError("Timeout");
+		CompletableFuture<Void> displayKillTask = CompletableFuture.runAsync(() -> {
+			Thread.getAllStackTraces().forEach((thread, elements) -> {
+				PrintStream out = System.out;
+				out.printf("\"%s\" #%d\n", thread.getName(), thread.getId());
+				out.printf("   java.lang.Thread.State:  %s\n", thread.getState());
+				for (StackTraceElement i: elements) {
+					out.printf("\tat %s.%s(%s:%d)\n", i.getClassName(), i.getMethodName(), i.getFileName(), i.getLineNumber());	
 				}
+				out.println();
+			});
+			display.syncExec(display::close);
+		}, CompletableFuture.delayedExecutor(timeout_ms, TimeUnit.MILLISECONDS, ForkJoinPool.commonPool()));
+		
+		try {
+			while (!result.isDone()) {
 				if (!display.readAndDispatch()) {
 					CompletableFuture.runAsync(() -> display.wake());
 					display.sleep(); // Dangerous, may deadlock, but without this, UIRunnable is never executed
@@ -148,7 +138,7 @@ public class DebugContextProcessorTest {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new AssertionError(e);
 		} finally {
-			displayKillJob.cancel();
+			displayKillTask.cancel(true);
 			result.cancel(true);
 		}
 	}
