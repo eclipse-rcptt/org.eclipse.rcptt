@@ -64,6 +64,15 @@ public class FormatterTest {
 		testWrapping("""
 			echo "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
 		""");
+		testWrapping("""
+				echo "\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t"
+			""");
+		testWrapping("""
+			echo "C:\\Users\\jenkins\\workspaces\\Big-regression-Windows-11\\excelfiles\\xlsx\\acceptance\\from-users\\2024\\test-file-xlsx-(59-116 2-D analysis with 3-D plot).xlsx"
+		"""	);
+		testWrapping("""
+			echo "C:\\\\Users\\\\jenkins\\\\workspaces\\\\Big-regression-Windows-11\\\\excelfiles\\\\xlsx\\\\acceptance\\\\from-users\\\\2024\\\\test-file-xlsx-(59-116 2-D analysis with 3-D plot).xlsx"
+		"""	);
 	}
 	
 	
