@@ -561,7 +561,6 @@
         <setEntry value="org.eclipse.rcptt.watson.core@default:default"/>
         <setEntry value="org.eclipse.rcptt.watson.jface@default:default"/>
         <setEntry value="org.eclipse.rcptt.watson.jobs@default:default"/>
-        <setEntry value="org.eclipse.rcptt.watson.ui@default:default"/>
         <setEntry value="org.eclipse.rcptt@default:default"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
