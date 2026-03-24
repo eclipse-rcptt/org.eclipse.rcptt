@@ -162,7 +162,7 @@ public class DragActionImpl extends CommandImpl implements DragAction {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Integer OPERATION_EDEFAULT = new Integer(-1);
+	protected static final Integer OPERATION_EDEFAULT = Integer.valueOf(-1);
 
 	/**
 	 * The cached value of the '{@link #getOperation() <em>Operation</em>}' attribute.

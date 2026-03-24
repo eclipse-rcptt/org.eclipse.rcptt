@@ -119,7 +119,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Integer TIMES_EDEFAULT = new Integer(1);
+	protected static final Integer TIMES_EDEFAULT = Integer.valueOf(1);
 
 	/**
 	 * The cached value of the '{@link #getTimes() <em>Times</em>}' attribute.
