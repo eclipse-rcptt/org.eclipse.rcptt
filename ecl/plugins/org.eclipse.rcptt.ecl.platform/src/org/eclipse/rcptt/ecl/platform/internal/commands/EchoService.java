@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.rcptt.ecl.runtime.ICommandService;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 
 public class EchoService implements ICommandService {
+	@Override
 	public IStatus service(Command command, IProcess context)
 			throws InterruptedException, CoreException {
 		if (!(command instanceof Echo)) {
