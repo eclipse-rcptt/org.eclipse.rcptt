@@ -75,6 +75,7 @@ public class SetWidthImpl extends ControlCommandImpl implements SetWidth {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getWidth() {
 		return width;
 	}
@@ -84,6 +85,7 @@ public class SetWidthImpl extends ControlCommandImpl implements SetWidth {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidth(int newWidth) {
 		int oldWidth = width;
 		width = newWidth;

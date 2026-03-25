@@ -98,6 +98,7 @@ public class DoubleClickTextImpl extends ControlCommandImpl implements DoubleCli
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPosition() {
 		return position;
 	}
@@ -107,6 +108,7 @@ public class DoubleClickTextImpl extends ControlCommandImpl implements DoubleCli
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPosition(String newPosition) {
 		String oldPosition = position;
 		position = newPosition;
@@ -119,6 +121,7 @@ public class DoubleClickTextImpl extends ControlCommandImpl implements DoubleCli
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getButton() {
 		return button;
 	}
@@ -128,6 +131,7 @@ public class DoubleClickTextImpl extends ControlCommandImpl implements DoubleCli
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(String newButton) {
 		String oldButton = button;
 		button = newButton;
