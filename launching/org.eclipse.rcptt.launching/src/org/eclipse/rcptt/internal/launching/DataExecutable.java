@@ -107,12 +107,14 @@ public abstract class DataExecutable extends Executable {
 
 	
 	@Override
-	public IStatus execute() throws InterruptedException {
-		try {
-			return doExecute();
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
+	public final IStatus execute() throws InterruptedException {
+		return mergeResults(() -> {
+			try {
+				return doExecute();
+			} catch (CoreException e) {
+				return e.getStatus();
+			}
+		}, super::execute);
 	}
 
 	public boolean isTerminateUser() {

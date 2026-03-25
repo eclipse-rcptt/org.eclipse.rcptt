@@ -1,0 +1,61 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Contexts: _ymiyse5IEeCU6db9MgIBkA,_ZQYygK2sEeCqBbDEJWufvQ,_XltvoIKaEeC_2txVMvPWLQ,_W62xEO9AEeCZz89QM6kozg
+Element-Name: AddContextFromControlPanel
+Element-Type: testcase
+Element-Version: 3.0
+External-Reference: 
+Id: _3lOkMO_-EeCXWfaP50PILw
+Runtime-Version: 2.8.0.202512040252
+Save-Time: 12/15/25, 1:40 PM
+Tags: selfAUT, Context, ControlPanel
+Testcase-Type: ecl
+
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
+Content-Type: text/plain
+Entry-Name: .description
+
+Copyright (c) 2009, 2019 Xored Software Inc and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+
+Contributors:
+    Xored Software Inc - initial creation and/or initial documentation
+--------------------------------------------------------------------------------
+
+TEST STEPS
+
+1. Start recording;
+2. Switch to "Contexts" tab and press "Add" button;
+3. Select context in a list and press "OK";
+4. Switch to Q7 mode. Make sure selected contexts present in Context list in a test.  
+------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa--
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
+Content-Type: text/ecl
+Entry-Name: .content
+
+get-view "Test Explorer" | get-tree | select "TestQ7Prj/Test scenario" | double-click -nowait
+get-editor "Test scenario" | get-button Record | click
+
+with [get-window "Control Panel.*"] {
+    get-tab-folder | get-tab-item Contexts | click
+    get-button "Add..." | click
+    with [get-window "Select context"] {
+        get-button "Show contexts from required projects only" | click
+        get-table | select "1 \\(Q7Project\\)" "2 \\(Q7Project\\)" "A \\(Q7Project\\)"
+        get-button OK | click
+    } 
+}
+try -times 10 -delay 20000 -command {
+    get-window "Control Panel.*" | get-button Stop | click
+}
+with [get-window "Control Panel - Test scenario (TestQ7Prj) - selfQ7"] {
+    get-button Save | click
+    get-button "Return to RCPTT" | click
+}
+get-window "Missing references" | get-button Yes | click
+get-editor "Test scenario" | get-section Contexts | click -nowait
+get-editor "Test scenario" | get-section Contexts | get-table | get-property itemCount | equals 3 | verify-true
+------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

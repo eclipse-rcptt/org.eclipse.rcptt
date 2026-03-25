@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ import com.google.common.html.HtmlEscapers;
 public class FullSingleTestHtmlRenderer {
 	private final PrintWriter writer;
 	private final NumberFormat durationFormat;
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 	private final Function<Screenshot, String> imageStorage;
 	private static final ILog LOG = Platform.getLog(FullSingleTestHtmlRenderer.class);
 
@@ -123,8 +123,21 @@ public class FullSingleTestHtmlRenderer {
 		closeDetails();
 	}
 
+	private void renderTime(long ms_since_epoch) {
+		writer.print("<span class=\"time\" epoch=\"");
+		writer.print(ms_since_epoch);
+		writer.print("\">");
+		writer.print(dateFormat.format(ms_since_epoch));
+		writer.print("</span>");
+		
+	}
 	private void renderNode(Node node) {
+		renderTime(node.getStartTime());
+		writer.print(" - ");
+		renderTime(node.getEndTime());
+		writer.println("<p>");
 		Q7Info info = ReportHelper.getInfo(node);
+		
 		renderResult(info.getResult());
 		EList<Node> children = node.getChildren();
 		Q7WaitInfoRoot waitInfo = ReportHelper.getWaitInfo(node, false);
@@ -144,13 +157,14 @@ public class FullSingleTestHtmlRenderer {
 		for (LoggingCategory logCategory : LoggingCategory.VALUES) {
 			String logs2 = ReportBuilder.getLogs(node, logCategory);
 			if (logs2 != null)
-				logs.append(logs2);
+				logs.append(escape(logs2));
 		}
 		if (logs.length() > 2) {
-			renderHeader(2, "Logs", "");
+			openDetails(2, "Logs", "");
 			writer.println("<pre>");
 			writer.println(logs);
 			writer.println("</pre>");
+			closeDetails();
 		}
 	}
 
@@ -247,7 +261,12 @@ public class FullSingleTestHtmlRenderer {
 	public void renderAdvanced(AdvancedInformation info) {
 		EList<InfoNode> nodes = info.getNodes();
 		for (InfoNode infoNode : nodes) {
+			if (infoNode.getChildren().isEmpty() && infoNode.getProperties().isEmpty()) {
+				continue;
+			}
+			openDetails(5, infoNode.getName(), "");
 			renderNode(infoNode);
+			closeDetails();
 		}
 		// Append job information
 		EList<JobEntry> jobs = info.getJobs();
@@ -266,8 +285,7 @@ public class FullSingleTestHtmlRenderer {
 		// Append thread information
 		EList<StackTraceEntry> threads = info.getThreads();
 		if (!threads.isEmpty()) {
-			renderHeader(5, "Thread information", "");
-			writer.println("<div class=\"childNode\">");
+			openDetails(5, "Thread information", "");
 			for (StackTraceEntry trace : threads) {
 				if (trace.getThreadClass().equals(
 						"org.eclipse.core.internal.jobs.Worker")
@@ -284,12 +302,11 @@ public class FullSingleTestHtmlRenderer {
 							.println("<br>");
 				}
 			}
-			writer.println("</div>");
+			closeDetails();
 		}
 	}
 
 	private void renderNode(InfoNode infoNode) {
-		writer.println(infoNode.getName());
 		EList<NodeProperty> list = infoNode.getProperties();
 		EList<InfoNode> childs = infoNode.getChildren();
 		if (!list.isEmpty() || !childs.isEmpty()) {
@@ -298,11 +315,12 @@ public class FullSingleTestHtmlRenderer {
 			// Out properties
 			if (list.size() != 0) {
 				for (NodeProperty nodeProperty : list) {
-					writer.println(nodeProperty.getName() + "=" + nodeProperty.getValue() + " <br>");
+					writer.println(escape(nodeProperty.getName()) + "=" + escape(nodeProperty.getValue()) + " <br>");
 				}
 			}
 			if (childs.size() != 0) {
 				for (InfoNode child : childs) {
+					writer.println(escape(child.getName()));
 					renderNode(child);
 				}
 			}

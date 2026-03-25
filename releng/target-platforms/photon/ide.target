@@ -5,20 +5,20 @@
 <unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
 <unit id="org.hamcrest" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20170919201930/repository"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20170919201930/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.nebula.widgets.grid.feature.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/nebula/releases/latest"/>
+<repository location="https://download.eclipse.org/nebula/releases/latest"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.rcptt.updates.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/rcptt/nightly/2.4.1/latest/repository"/>
+<repository location="https://download.eclipse.org/rcptt/nightly/2.4.1/latest/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.platform.sdk" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/photon"/>
+<repository location="https://download.eclipse.org/releases/photon"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.antlr.runtime" version="3.2.0.v201101311130"/>
@@ -28,12 +28,12 @@
 <unit id="org.eclipse.emf.transaction.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.gmf.feature.group" version="0.0.0"/>
 <unit id="org.jsoup" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/photon"/>
+<repository location="https://download.eclipse.org/releases/photon"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ajdt.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.contribution.weaving.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/ajdt/48/dev/update/"/>
+<repository location="https://download.eclipse.org/tools/ajdt/48/dev/update/"/>
 </location>
 </locations>
 </target>

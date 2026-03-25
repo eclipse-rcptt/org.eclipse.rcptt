@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.rcptt.runner.util;
 
+import static org.eclipse.core.runtime.Status.error;
 import static org.eclipse.rcptt.runner.HeadlessRunnerPlugin.PLUGIN_ID;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -28,6 +30,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.rcptt.internal.launching.ext.JDTUtils;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.runner.HeadlessRunnerPlugin;
 import org.eclipse.rcptt.runner.RunnerConfiguration;
@@ -148,39 +151,40 @@ public class AUTsManager {
 			return autVM;
 		}
 		if (conf.javaVM != null) {
-			return autVM = Optional.of(VmInstallMetaData.register(Path.of(conf.javaVM)));
+			return autVM = Optional.of(tpc.getCompatibility().selectCompatibile(VmInstallMetaData.register(Path.of(conf.javaVM)).toList()));
 		}
 
 		if (conf.executionEnvironment != null) {
-			Optional<VmInstallMetaData> result = Optional
-					.ofNullable(JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(conf.executionEnvironment))
-					.flatMap(e -> suitableVm(e))
-					.flatMap(VmInstallMetaData::adapt);
+			List<VmInstallMetaData> result = Optional
+				.ofNullable(JavaRuntime.getExecutionEnvironmentsManager().getEnvironment(conf.executionEnvironment))
+				.stream()
+				.flatMap(e -> suitableVm(e))
+				.toList();
 			if (result.isEmpty()) {
-				throw new CoreException(Status.error("Can't find an installed JVM strictly compatible with execution environment " + conf.executionEnvironment)); 
+				throw new CoreException(error("No compatible JVM is installed for environemnt: " + conf.executionEnvironment));
 			}
-			return autVM = result;
+			return autVM = Optional.of(tpc.getCompatibility().selectCompatibile(result.stream().toList()));
 		}
 
-		return autVM = addJvmFromIniFile();
+		return autVM = getJvmFromIniFile();
 	}
 
-	private Optional<IVMInstall> suitableVm(IExecutionEnvironment e) {
+	private Stream<VmInstallMetaData> suitableVm(IExecutionEnvironment e) {
 		IVMInstall result = e.getDefaultVM();
 		if (result != null) {
-			return Optional.of(result);
+			return VmInstallMetaData.adapt(result);
 		}
-		return Arrays.stream(e.getCompatibleVMs()).filter(e::isStrictlyCompatible).findFirst();
+		return Arrays.stream(e.getCompatibleVMs()).filter(e::isStrictlyCompatible).flatMap(VmInstallMetaData::adapt);
 	}
 
-	private Optional<VmInstallMetaData> addJvmFromIniFile() throws CoreException {
+	private Optional<VmInstallMetaData> getJvmFromIniFile() throws CoreException {
 		Path vmFromIni = tpc.getTargetPlatform().getJavaHome().orElse(null);
 		if (vmFromIni == null) {
 			return Optional.empty();
 		}
 		System.out.println("Trying to use VM from application's ini file: "
 				+ vmFromIni);
-		return Optional.of(VmInstallMetaData.register(vmFromIni));
+		return Optional.of(tpc.getCompatibility().selectCompatibile(VmInstallMetaData.register(vmFromIni).toList()));
 	}
 
 }

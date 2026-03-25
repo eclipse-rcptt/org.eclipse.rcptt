@@ -22,7 +22,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.zip.ZipInputStream;
@@ -259,7 +264,7 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 
 	private static boolean deleteFilesExceptMetadata(final File folder,
 			final String[] ignoredPatterns, final List<File> undeletedResource,
-			boolean root) {
+			boolean root) throws IOException {
 		boolean haveIgnoredChild = false;
 		for (final File file : folder.listFiles()) {
 			if ((file.getName().equals(".metadata") && root)
@@ -267,6 +272,16 @@ public class WorkspaceContextProcessor implements IContextProcessor {
 				haveIgnoredChild = true;
 				continue;
 			}
+			DosFileAttributeView fileStore = Files.getFileAttributeView(file.toPath(), DosFileAttributeView.class);
+			if (fileStore != null) {
+				fileStore.setReadOnly(false);
+			}
+			PosixFileAttributeView fileStore2 = Files.getFileAttributeView(file.toPath(), PosixFileAttributeView.class);
+			if (fileStore2 != null) {
+				var p = fileStore2.readAttributes().permissions();
+				p.addAll(EnumSet.of(PosixFilePermission.GROUP_WRITE, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OTHERS_WRITE));
+			}
+
 			boolean ignoreBecauseOfChild = false;
 			if (file.isDirectory()) {
 				ignoreBecauseOfChild = deleteFilesExceptMetadata(file,

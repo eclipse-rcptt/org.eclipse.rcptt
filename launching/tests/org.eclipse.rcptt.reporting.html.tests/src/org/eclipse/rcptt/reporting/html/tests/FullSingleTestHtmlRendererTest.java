@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.rcptt.reporting.html.tests;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,6 +31,10 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.ReportFactory;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Screenshot;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Snaphot;
 import org.eclipse.rcptt.tesla.core.Q7WaitUtils;
+import org.eclipse.rcptt.tesla.core.info.AdvancedInformation;
+import org.eclipse.rcptt.tesla.core.info.InfoFactory;
+import org.eclipse.rcptt.tesla.core.info.InfoNode;
+import org.eclipse.rcptt.tesla.core.info.NodeProperty;
 import org.eclipse.rcptt.verifications.status.EVerificationStatus;
 import org.eclipse.rcptt.verifications.status.StatusFactory;
 import org.eclipse.rcptt.verifications.status.VerificationStatusData;
@@ -183,12 +190,46 @@ public class FullSingleTestHtmlRendererTest {
 
 		String result = generate(report);
 		
-		assertThat(result, Matchers.stringContainsInOrder(
+		assertThat(result, stringContainsInOrder(
 				"Failure Reason",
 				"expected:&lt;wait 200\\n&gt; but was:&lt;wait 200&gt;",
 				"Details",  
 				"expected:&lt;wait 200\\n&gt; but was:&lt;wait 200&gt;"
 		));
+	}
+	
+	@Test
+	public void escapeSwtSnapshot() {
+		Report report = createReport("2", IStatus.ERROR);
+		Snaphot sn = ReportFactory.eINSTANCE.createSnaphot();
+		report.getRoot().getSnapshots().add(sn);
+		AdvancedInformation information = InfoFactory.eINSTANCE.createAdvancedInformation();
+		sn.setData(information);
+		InfoNode node = InfoFactory.eINSTANCE.createInfoNode();
+		information.getNodes().add(node);
+		node.setName("swt.info");
+		InfoNode node2 = InfoFactory.eINSTANCE.createInfoNode();
+		node.getChildren().add(node2);
+		node2.setName("Text(502<html><head><title>502 Bad Gateway...)");
+		NodeProperty property = InfoFactory.eINSTANCE.createNodeProperty();
+		node2.getProperties().add(property);
+		property.setName("<propertyName>");
+		property.setValue("<propertyValue>");
+		
+		String result = generate(report);
+		assertThat(result, stringContainsInOrder(
+				"Text",
+				"502",
+				"502 Bad Gateway..."
+				));
+		assertThat(result, not(containsString("502<")));
+		assertThat(result, not(containsString(">502")));
+		assertThat(result, containsString("502&lt;"));
+		assertThat(result, containsString("&gt;502"));
+		assertThat(result, not(containsString("<propertyName>")));
+		assertThat(result, not(containsString("<propertyValue>")));
+		assertThat(result, containsString("&lt;propertyName&gt;"));
+		assertThat(result, containsString("&lt;propertyValue&gt;"));
 	}
 
 	

@@ -372,7 +372,8 @@ public class LaunchUtils {
 
 	private static void doLaunch(final Aut aut, final Shell shell,
 			final AtomicReference<AutLaunch> launch) {
-		final ProgressMonitorDialog progress = new ProgressMonitorDialog(shell);
+		Shell modalRoot = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
+		final ProgressMonitorDialog progress = new ProgressMonitorDialog(modalRoot);
 		final AtomicReference<IStatus> status = new AtomicReference<IStatus>();
 		try {
 			progress.run(true, true, new IRunnableWithProgress() {
@@ -401,7 +402,7 @@ public class LaunchUtils {
 		}
 		if (!s.isOK()) {
 			RcpttPlugin.getDefault().getLog().log(s);
-			AUTConnectionErrorDialog.showAUTConnectionError(shell, s,
+			AUTConnectionErrorDialog.showAUTConnectionError(modalRoot, s,
 					aut.getConfig());
 			return;
 		}

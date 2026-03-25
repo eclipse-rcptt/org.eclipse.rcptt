@@ -48,6 +48,8 @@ import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.ecl.core.CoreFactory;
 import org.eclipse.rcptt.ecl.core.Script;
 import org.eclipse.rcptt.internal.core.Q7LazyResource;
+import org.eclipse.rcptt.internal.core.model.Q7NamedElement;
+import org.eclipse.rcptt.internal.core.model.Q7NamedElementTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -58,6 +60,7 @@ public class PlainTextPersistenceModelTest {
 	
 	@Before
 	public void before() throws CoreException {
+		Q7NamedElementTest.enableSyncOnAccess(false);
 		for (IProject project: WORKSPACE.getRoot().getProjects()) {
 			project.delete(true, true, null);
 		}

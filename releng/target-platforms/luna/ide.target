@@ -3,29 +3,29 @@
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="com.google.guava" version="12.0.0.v201212092141"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="com.google.gson" version="2.2.4.v201311231704"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.nebula.widgets.grid.feature.feature.group" version="1.0.0.201409040043"/>
-<repository location="http://download.eclipse.org/technology/nebula/archives/Q32014/release/"/>
+<repository location="https://download.eclipse.org/technology/nebula/archives/Q32014/release/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.antlr.runtime" version="3.2.0.v201101311130"/>
 <unit id="org.jsoup" version="1.7.2.v201304221138"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.rcptt.updates.feature.group" version="1.5.3.201409120955"/>
-<repository location="http://download.eclipse.org/rcptt/nightly/1.5.4/latest/repository"/>
+<repository location="https://download.eclipse.org/rcptt/nightly/1.5.4/latest/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.ajdt.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.contribution.weaving.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/ajdt/44/dev/update/"/>
+<repository location="https://download.eclipse.org/tools/ajdt/44/dev/update/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.rcp.sdk.id" version="0.0.0"/>
@@ -37,7 +37,7 @@
 <unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.platform.sdk" version="0.0.0"/>
 <unit id="org.eclipse.emf.transaction.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/luna/"/>
+<repository location="https://download.eclipse.org/releases/luna/"/>
 </location>
 </locations>
 <environment>

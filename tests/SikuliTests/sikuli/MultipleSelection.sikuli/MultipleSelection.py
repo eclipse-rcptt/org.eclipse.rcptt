@@ -1,5 +1,0 @@
-click("sA1SA1attrib-1.png")
-keyDown(Key.CTRL)
-click("QssAZ.png")
-keyUp()
-type(Key.DELETE)

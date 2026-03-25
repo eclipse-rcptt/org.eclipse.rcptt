@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.rcptt.ui.report.internal;
 
+import java.io.UncheckedIOException;
+import java.util.Collections;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,7 +23,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.rcptt.internal.ui.Images;
 import org.eclipse.rcptt.reporting.Q7Statistics;
 import org.eclipse.rcptt.reporting.ReportingFactory;
-import org.eclipse.rcptt.reporting.util.Q7ReportIterator;
+import org.eclipse.rcptt.reporting.util.ReportEntry;
 import org.eclipse.rcptt.reporting.util.ReportUtils;
 import org.eclipse.rcptt.ui.controls.AbstractEmbeddedComposite;
 import org.eclipse.rcptt.ui.launching.StatisticPanel;
@@ -35,19 +38,15 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 	private StatisticPanel panel;
 	private Q7Statistics statistics = ReportingFactory.eINSTANCE.createQ7Statistics();
 
-	class UpdateJob extends Job {
+	Iterable<ReportEntry> iterator = Collections.<ReportEntry>emptyList();
+
+	private final Job updateJob = new Job("Calculating report statistics") {
 
 		@Override
 		public boolean belongsTo(Object family) {
 			return family == StatisticsComposite.this;
 		}
 
-		private final Q7ReportIterator iterator;
-
-		public UpdateJob(Q7ReportIterator iterator) {
-			super("Calculating report statistics");
-			this.iterator = iterator;
-		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -56,7 +55,7 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 				synchronized (iterator) {
 					statistics = ReportUtils.calculateStatistics(iterator.iterator());
 				}
-			} catch (NullPointerException e) { // indicates external iterruption
+			} catch (UncheckedIOException | NullPointerException e) { // indicates external iterruption
 				if (monitor.isCanceled())
 					return Status.CANCEL_STATUS;
 				throw e;
@@ -77,23 +76,32 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 	}
 
 	public StatisticsComposite() {
-
+	}
+	
+	@Override
+	public void dispose() {
+		updateJob.cancel();
+		super.dispose();
 	}
 
-	void setReports(Q7ReportIterator iterator) {
-		Job.getJobManager().cancel(this);
+	void setReports(Iterable<ReportEntry> iterator) {
+		updateJob.cancel();
+		this.iterator = iterator;
 		if (iterator != null)
-			new UpdateJob(iterator).schedule();
+			updateJob.schedule();
 	}
 
+	@Override
 	public String getName() {
 		return "Execution statistics";
 	}
 
+	@Override
 	public Image getImage() {
 		return Images.getImage(Images.FILE);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
@@ -130,6 +138,7 @@ public class StatisticsComposite extends AbstractEmbeddedComposite {
 		});
 	}
 
+	@Override
 	public Control getControl() {
 		return control;
 	}

@@ -44,7 +44,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -74,7 +73,6 @@ import org.eclipse.pde.internal.launching.launcher.BundleLauncherHelper;
 import org.eclipse.pde.internal.launching.launcher.LaunchArgumentsHelper;
 import org.eclipse.pde.internal.launching.launcher.LaunchConfigurationHelper;
 import org.eclipse.pde.internal.launching.launcher.LauncherUtils;
-import org.eclipse.pde.internal.launching.launcher.VMHelper;
 import org.eclipse.pde.launching.EquinoxLaunchConfiguration;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.rcptt.internal.launching.aut.LaunchInfoCache;
@@ -87,7 +85,6 @@ import org.eclipse.rcptt.internal.launching.ext.Q7ExtLaunchingPlugin;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
 import org.eclipse.rcptt.internal.launching.ext.UpdateVMArgs;
 import org.eclipse.rcptt.launching.IQ7Launch;
-import org.eclipse.rcptt.launching.common.Q7LaunchingCommon;
 import org.eclipse.rcptt.launching.events.AutEventManager;
 import org.eclipse.rcptt.launching.ext.BundleStart;
 import org.eclipse.rcptt.launching.ext.OriginalOrderProperties;
@@ -97,7 +94,6 @@ import org.eclipse.rcptt.launching.ext.Q7LaunchDelegateUtils;
 import org.eclipse.rcptt.launching.ext.VmInstallMetaData;
 import org.eclipse.rcptt.launching.internal.target.TargetPlatformHelper;
 import org.eclipse.rcptt.launching.target.ITargetPlatformHelper;
-import org.eclipse.rcptt.launching.target.TargetPlatformManager;
 import org.eclipse.rcptt.tesla.core.TeslaLimits;
 import org.eclipse.rcptt.util.FileUtil;
 
@@ -405,6 +401,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 		// Filter some PDE parameters
 		Iterables.removeIf(args, new Predicate<String>() {
+			@Override
 			public boolean apply(String input) {
 				if (input.contains("-Declipse.pde.launch=true")) {
 					return true;
@@ -791,6 +788,7 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		final boolean[] terminated = { false };
 		final DebugPlugin debugPlugin = DebugPlugin.getDefault();
 		debugPlugin.addDebugEventListener(new IDebugEventSetListener() {
+			@Override
 			public void handleDebugEvents(DebugEvent[] events) {
 				for (DebugEvent event : events) {
 					if (isTerminateEventFor(event, previousLaunch)) {
@@ -977,7 +975,6 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 
 	private static boolean updateJVM(ILaunchConfiguration configuration,
 			OSArchitecture architecture, ITargetPlatformHelper target) throws CoreException {
-		OSArchitecture jvmArch = OSArchitecture.Unknown;
 		IVMInstall jvmInstall = VmInstallMetaData.all().filter(m -> m.arch.equals(architecture)).findFirst()
 				.map(i -> i.install).orElse(null);
 		if (jvmInstall == null) {
@@ -991,26 +988,9 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 				Q7LaunchDelegateUtils.getJoinedVMArgs(target, null));
 
-		OSArchitecture configArch;
-		String archAttrValue = configuration.getAttribute(
-				Q7LaunchingCommon.ATTR_ARCH, "");
-		if (archAttrValue.isEmpty())
-			configArch = null;
-		else
-			configArch = OSArchitecture.valueOf(archAttrValue);
 
-		OSArchitecture autArch = configArch == null ? target
-				.detectArchitecture(null) : configArch;
+		OSArchitecture autArch = target.detectArchitecture(null);
 
-		// there is no -d32 on Windows
-		if (!autArch.equals(jvmArch)
-				&& Platform.getOS().equals(Platform.OS_MACOSX)) {
-			if (vmArgs != null && !vmArgs.contains(ATTR_D32)) {
-				vmArgs += " " + ATTR_D32;
-			} else {
-				vmArgs = ATTR_D32;
-			}
-		}
 		if (vmArgs != null && vmArgs.length() > 0) {
 			vmArgs = UpdateVMArgs.updateAttr(vmArgs);
 			workingCopy
@@ -1064,5 +1044,4 @@ public class RcpttRapLaunchDelegate extends EquinoxLaunchConfiguration {
 		return true;
 	}
 
-	private static final String ATTR_D32 = "-d32";
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -43,8 +43,7 @@ public class JUnitFileReportGenerator implements IReportRenderer {
 			writer = XMLUtils.createWriter(stream);
 			writer.writeStartDocument();
 
-			Q7Statistics statistics = ReportUtils.calculateStatistics(report
-					.iterator());
+			Q7Statistics statistics = ReportUtils.calculateStatisticsSlow(report.iterator());
 			new JUnitXMLReportGenerator().writeSuite(writer, reportName,
 					report.iterator(), statistics);
 
@@ -66,6 +65,7 @@ public class JUnitFileReportGenerator implements IReportRenderer {
 		return Status.OK_STATUS;
 	}
 
+	@Override
 	public String[] getGeneratedFileNames(String reportName) {
 		return new String[] { reportName + ".junit.xml" };
 	}

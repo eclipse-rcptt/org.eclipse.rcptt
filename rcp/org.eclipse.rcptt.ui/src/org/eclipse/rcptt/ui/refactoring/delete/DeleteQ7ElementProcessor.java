@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2025 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,7 @@ import org.eclipse.rcptt.internal.ui.Messages;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 import org.eclipse.rcptt.ui.refactoring.ResourceAccessChange;
 import org.eclipse.rcptt.ui.utils.WriteAccessChecker;
-import org.eclipse.ui.internal.UIPlugin;
+import org.eclipse.ui.PlatformUI;
 
 @SuppressWarnings("restriction")
 public class DeleteQ7ElementProcessor extends DeleteResourcesProcessor {
@@ -81,7 +81,7 @@ public class DeleteQ7ElementProcessor extends DeleteResourcesProcessor {
 		this.resources = resources;
 
 		try {
-			UIPlugin.getDefault().getWorkbench().getProgressService().
+			PlatformUI.getWorkbench().getProgressService().
 					run(true, false, new ReferenceCollector());
 
 			/*
