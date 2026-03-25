@@ -62,6 +62,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -136,6 +137,7 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 	
 	@Test
+	@Ignore("https://github.com/eclipse-m2e/m2e-core/issues/2025")
 	public void surviveRestart() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
