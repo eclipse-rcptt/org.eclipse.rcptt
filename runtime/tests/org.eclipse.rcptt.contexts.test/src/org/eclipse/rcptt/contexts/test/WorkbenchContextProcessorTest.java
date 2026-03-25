@@ -104,7 +104,7 @@ public class WorkbenchContextProcessorTest {
 		Shell parent = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
 		WorkbenchContext context = eINSTANCE.createWorkbenchContext();
 		context.setNoModalDialogs(true);
-		UncloseableDialog dialog = new UncloseableDialog(parent, "This dialog will onlly close in a second");
+		UncloseableDialog dialog = new UncloseableDialog(parent, "This dialog will close in a second");
 		// Display did not implements java.util.concurrent.Executor in Eclipse Platform 2021-03
 		CompletableFuture<Void> result =  CompletableFuture.runAsync(() -> {}, parent.getDisplay()::asyncExec).thenRunAsync(() -> {
 			try {
