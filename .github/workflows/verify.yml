@@ -9,20 +9,20 @@ jobs:
   mockup_build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         repository: xored/q7.quality.mockups
-    - uses: actions/setup-java@v5
+    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - uses: stCarolas/setup-maven@v5.1
+    - uses: stCarolas/setup-maven@12eb41b233df95d49b0c11fc1b5bc8312e5d4ce0 # v5.1
       with:
         maven-version: 3.9.9
     - run: mvn clean verify
     - name: Archive update site
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         if-no-files-found: error
         name: mockup_repository
@@ -35,8 +35,8 @@ jobs:
       env:
         DISPLAY: :1
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/cache@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: m2repository
           path: |
@@ -47,7 +47,7 @@ jobs:
         run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: Archive results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: build_results
@@ -58,32 +58,32 @@ jobs:
             **/target/work/**/*.ini
             **/*.hrpof
       - name: Archive update site
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: repository
           path: 'repository/rcptt/target/repository/**'
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v6
+        uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
           fail_on_failure: true
           annotate_only: true
       - name: Archive Runner
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: runner
           path: runner/product/target/products/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip
       - name: Archive Maven Plugin
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: maven-plugin
           path: /root/.m2/repository/org/eclipse/rcptt/rcptt-*/**
       - name: Archive IDE
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: ide
@@ -96,24 +96,24 @@ jobs:
       env:
         DISPLAY: :1
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: VNC
         run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
       - name: Download Runner
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: runner
       - name: Download Maven Plugin
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: maven-plugin
           path: /root/.m2/repository/org/eclipse/rcptt
       - name: Download IDE
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ide
       - name: Download Mockups
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: mockup_repository
           path: mockup_repository
@@ -121,7 +121,7 @@ jobs:
       - name: RCPTT Tests
         run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip -Dmockup_repository=file://`pwd`/mockup_repository --errors --batch-mode --no-transfer-progress
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v6
+        uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
@@ -129,7 +129,7 @@ jobs:
           annotate_only: true
       - name: Archive results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: self_results
@@ -150,10 +150,10 @@ jobs:
       env:
         DISPLAY: :1
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: xored/q7.quality.mockups
-      - uses: actions/cache@v5
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: mockups_maven
           path: |
@@ -161,11 +161,11 @@ jobs:
       - name: VNC
         run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
       - name: Download Runner
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: runner
       - name: Download Mockups
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: mockup_repository
           path: repository/target/repository/
@@ -173,7 +173,7 @@ jobs:
       - name: RCPTT Tests
         run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DmockupsRepository=file://`pwd`/repository/target/repository  --errors --batch-mode --no-transfer-progress
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v6
+        uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
@@ -181,7 +181,7 @@ jobs:
           annotate_only: true
       - name: Archive results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           if-no-files-found: error
           name: mockup_results
