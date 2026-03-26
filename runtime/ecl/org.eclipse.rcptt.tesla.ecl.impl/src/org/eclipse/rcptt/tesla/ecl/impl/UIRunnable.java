@@ -157,7 +157,7 @@ public abstract class UIRunnable<T> {
 				}
 				long time = System.currentTimeMillis();
 				if (time > halfWay) {
-					if (processed.get().equals(RunningState.Starting)) {
+					if (processed.get().equals(RunningState.Starting) || processed.get().equals(RunningState.Execution)) {
 						// try to close all modal dialogs and clean job
 						// processor
 						display.asyncExec(new Runnable() {
