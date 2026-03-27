@@ -136,6 +136,7 @@ public class Q7TargetPlatformInitializer {
 
 		UpdateSite q7Deps = InjectionFactory.eINSTANCE.createUpdateSite();
 		q7Deps.setUri(q7Info.deps.toString());
+		q7Deps.getUnits().add("org.antlr.runtime");
 
 		if (!hasRAP) {
 			q7Deps.getUnits().add(EMF_FEATURE_GROUP);
