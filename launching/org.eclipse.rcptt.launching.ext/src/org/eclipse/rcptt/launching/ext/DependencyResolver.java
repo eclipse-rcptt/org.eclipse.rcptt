@@ -28,6 +28,7 @@ public final class DependencyResolver {
 
 	private final ListMultimap<String, IPluginModelBase> dependecies;
 	private final Map<IPluginModelBase, Boolean> visit = new HashMap<>();
+	private final StringBuilder log = new StringBuilder();
 
 	public DependencyResolver(ListMultimap<String, IPluginModelBase> fAllBundles) {
 		Objects.requireNonNull(fAllBundles);
@@ -46,6 +47,10 @@ public final class DependencyResolver {
 		});
 		return Collections.unmodifiableList(toRemove);
 	}
+	
+	public String log() {
+		return log.toString();
+	}
 
 	private boolean checkPlugin(IPluginModelBase plugin) {
 		if (plugin == null) {
@@ -61,24 +66,33 @@ public final class DependencyResolver {
 			}
 			if (!dependecies.containsKey(dep.getName())) {
 				visit.put(plugin, false);
+				log(plugin.getBundleDescription().getSymbolicName() + " depends on a missing " + dep.getName());
 				return false;
 			}
 			
-			List<IPluginModelBase> candidates = dependecies.get(dep.getName()).stream().filter(p -> dep.getVersionRange().isIncluded(new Version(p.getPluginBase().getVersion()))).toList();
-			if (candidates.isEmpty()){
+			List<IPluginModelBase> candidates = dependecies.get(dep.getName());
+			List<IPluginModelBase> matches = candidates.stream().filter(p -> dep.getVersionRange().isIncluded(new Version(p.getPluginBase().getVersion()))).toList();
+			if (matches.isEmpty()){
 				visit.put(plugin, false);
+				List<String> versions = candidates.stream().map(m -> m.getBundleDescription().getVersion().toString()).toList();
+				log(plugin.getBundleDescription().getSymbolicName() + " requires " + dep.getName() + "_" + dep.getVersionRange() + " but only following versions are available " + versions);
 				return false;
 			}
 			visit.put(plugin, true);
 			
-			if (!candidates.stream().anyMatch(this::checkPlugin)) {
+			if (!matches.stream().anyMatch(this::checkPlugin)) {
 				visit.put(plugin, false);
+				log(plugin.getBundleDescription().getSymbolicName() + " requires " + dep.getName() + "_" + dep.getVersionRange() + " but it is unresolved");
 				return false;
 			}
 		}
 
 		visit.put(plugin, true);
 		return true;
+	}
+	
+	private void log(String message) {
+		log.append(message).append("\n");
 	}
 
 }

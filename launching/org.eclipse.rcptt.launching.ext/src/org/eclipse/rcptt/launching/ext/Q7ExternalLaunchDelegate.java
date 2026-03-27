@@ -532,7 +532,7 @@ public class Q7ExternalLaunchDelegate extends
 		if (launch.fAllBundles.containsKey("org.eclipse.rcptt.core")) {
 			log(Status.info(message));
 		} else {
-			throw new CoreException(Status.error("Injection failed:\n" + message) );
+			throw new CoreException(Status.error("Injection failed:\n" + resolver.log()) );
 		}
 	}
 
