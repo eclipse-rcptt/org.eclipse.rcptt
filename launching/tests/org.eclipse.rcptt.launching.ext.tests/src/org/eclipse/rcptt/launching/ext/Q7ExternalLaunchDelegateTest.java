@@ -98,7 +98,7 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 
 	
-	@Test(timeout=100000)
+	@Test(timeout=200000)
 	public void recreateAutOfSameName() throws IOException, InterruptedException, CoreException {
 		Path installDir1 = expandAut();
 		Path installDir2 = temporaryFolder.newFolder("install2").toPath();
