@@ -9,7 +9,6 @@
     Contributors:
     	Xored Software Inc - initial API and implementation and/or initial documentation
  -->
-
 <feature
       id="org.eclipse.rcptt.ecl.core"
       label="RCPTT ECL Core"
@@ -52,13 +51,6 @@
          download-size="0"
          install-size="0"
          version="2.9.0.qualifier"
-         unpack="false"/>
-
-   <plugin
-         id="org.antlr.runtime"
-         download-size="0"
-         install-size="0"
-         version="3.2.0.qualifier"
          unpack="false"/>
 
    <plugin

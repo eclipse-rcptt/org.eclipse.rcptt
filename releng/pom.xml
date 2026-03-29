@@ -38,7 +38,7 @@
     <ajJavaSource>1.8</ajJavaSource>
     <ajJavaTarget>1.8</ajJavaTarget>
 		<ajJavaCompilance>1.8</ajJavaCompilance>
-		<cbi-version>1.3.2</cbi-version>
+		<cbi-version>1.5.4</cbi-version>
 		<buildUrl>file:/${user.dir}</buildUrl>
 	</properties>
 	<prerequisites>

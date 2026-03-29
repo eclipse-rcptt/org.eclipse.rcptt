@@ -44,6 +44,9 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Build
         run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+      - name: List all files
+        if: always()
+        run: find . > files.txt
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -52,9 +55,10 @@ jobs:
           name: build_results
           include-hidden-files: true
           path: |
-            **/target/work/**/*.log
-            **/target/work/**/*.info
-            **/target/work/**/*.ini
+            files.txt
+            **/target/**/*.log
+            **/target/**/*.info
+            **/target/**/*.ini
             **/*.hrpof
       - name: Archive update site
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -104,6 +108,9 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Build
         run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+      - name: List all files
+        if: always()
+        run: find . > files.txt
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -112,9 +119,10 @@ jobs:
           name: test_latest_results
           include-hidden-files: true
           path: |
-            **/target/work/**/*.log
-            **/target/work/**/*.info
-            **/target/work/**/*.ini
+            files.txt
+            **/target/**/*.log
+            **/target/**/*.info
+            **/target/**/*.ini
             **/*.hrpof
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1

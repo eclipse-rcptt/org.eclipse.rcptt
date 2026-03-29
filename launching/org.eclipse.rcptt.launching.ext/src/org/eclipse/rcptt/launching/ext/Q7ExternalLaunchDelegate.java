@@ -549,7 +549,7 @@ public class Q7ExternalLaunchDelegate extends
 		monitor.done();
 	}
 	
-	public static void removeUnresolved(BundlesToLaunch launch) {
+	public static void removeUnresolved(BundlesToLaunch launch) throws CoreException {
 		DependencyResolver resolver = new DependencyResolver(launch.fAllBundles);
 		Collection<IPluginModelBase> toDelete = resolver.checkPlugins(launch.fModels.keySet());
 		toDelete.forEach(plugin->{
@@ -558,7 +558,11 @@ public class Q7ExternalLaunchDelegate extends
 		});
 		String message  = "Following bundles were unresolved:\n" + 
 		toDelete.stream().map(p -> p.getBundleDescription().getName()+"_"+p.getPluginBase().getVersion()).collect(Collectors.joining("\n"));
-		log(Status.info(message));
+		if (launch.fAllBundles.containsKey("org.eclipse.rcptt.core")) {
+			log(Status.info(message));
+		} else {
+			throw new CoreException(Status.error("Injection failed:\n" + resolver.log()) );
+		}
 	}
 
 	public static class BundlesToLaunchCollector {

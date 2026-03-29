@@ -48,6 +48,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.pde.launching.IPDELauncherConstants;
+import org.eclipse.rcptt.core.OptionsHandler;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.parser.EclCoreParser;
 import org.eclipse.rcptt.internal.launching.ext.Q7TargetPlatformManager;
@@ -81,6 +82,8 @@ public class Q7ExternalLaunchDelegateTest {
 	public static void beforeClass() throws CoreException {
 		VmInstallMetaData install = VmInstallMetaData.register(Path.of(System.getProperty("java.home"))).findFirst().get();
 		JavaRuntime.setDefaultVMInstall(install.install, null);
+		var options = new OptionsHandler();
+		options.applyOption(org.eclipse.rcptt.tesla.core.TeslaLimits.AUT_STARTUP_TIMEOUT, "95");
 	}
 	@SuppressWarnings("resource")
 	@Before
@@ -95,7 +98,7 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 
 	
-	@Test
+	@Test(timeout=200000)
 	public void recreateAutOfSameName() throws IOException, InterruptedException, CoreException {
 		Path installDir1 = expandAut();
 		Path installDir2 = temporaryFolder.newFolder("install2").toPath();
@@ -109,7 +112,7 @@ public class Q7ExternalLaunchDelegateTest {
 		assertNoErrorsInOutput();
 	}
 	
-	@Test
+	@Test(timeout=100000)
 	public void runtimeIsInjected() throws CoreException, IOException, InterruptedException {
 		Path installDir = expandAut();
 		assertFalse(readBundlesInfo(installDir).contains("org.aspectj.weaver"));
@@ -135,7 +138,7 @@ public class Q7ExternalLaunchDelegateTest {
 
 	}
 	
-	@Test
+	@Test(timeout=400000)
 	public void surviveRestart() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
@@ -148,8 +151,8 @@ public class Q7ExternalLaunchDelegateTest {
 			launch.execute(command);
 			for (long stop = currentTimeMillis() + 100_000; currentTimeMillis() < stop; ) {
 				try {
+					Thread.sleep(1000);
 					launch.ping();
-					Thread.yield();
 				} catch (CoreException e) {
 					break;
 				}
@@ -163,8 +166,8 @@ public class Q7ExternalLaunchDelegateTest {
 			
 			for (long stop = currentTimeMillis() + 200_000; currentTimeMillis() < stop; ) {
 				try {
+					Thread.sleep(1000);
 					launch.ping();
-					Thread.yield();
 					break;
 				} catch (CoreException e) {
 					// Expected for a while
@@ -177,7 +180,7 @@ public class Q7ExternalLaunchDelegateTest {
 	}
 	
 
-	@Test
+	@Test(timeout=100000)
 	public void shutdownShouldBeSoft() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		AutLaunch launch = startAut(installDir, List.of("-consoleLog"));
@@ -190,7 +193,7 @@ public class Q7ExternalLaunchDelegateTest {
 		assertTrue(output, output.contains("Workbench is about to shut down"));
 	}
 	
-	@Test
+	@Test(timeout=100000)
 	public void autLaunchIsNotNull() throws InterruptedException, CoreException, IOException {
 		Path installDir = expandAut();
 		Aut aut = createAut(installDir, List.of("-consoleLog"));
