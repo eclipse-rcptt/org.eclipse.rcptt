@@ -176,6 +176,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -202,6 +203,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -214,6 +216,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getOffset() {
 		return offset;
 	}
@@ -223,6 +226,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setOffset(Integer newOffset) {
 		Integer oldOffset = offset;
 		offset = newOffset;
@@ -235,6 +239,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getLength() {
 		return length;
 	}
@@ -244,6 +249,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLength(Integer newLength) {
 		Integer oldLength = length;
 		length = newLength;
@@ -256,6 +262,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getStartLine() {
 		return startLine;
 	}
@@ -265,6 +272,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setStartLine(Integer newStartLine) {
 		Integer oldStartLine = startLine;
 		startLine = newStartLine;
@@ -277,6 +285,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getEndLine() {
 		return endLine;
 	}
@@ -286,6 +295,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEndLine(Integer newEndLine) {
 		Integer oldEndLine = endLine;
 		endLine = newEndLine;
@@ -298,6 +308,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getEndOffset() {
 		return endOffset;
 	}
@@ -307,6 +318,7 @@ public class SetTextSelectionImpl extends CommandImpl implements SetTextSelectio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEndOffset(Integer newEndOffset) {
 		Integer oldEndOffset = endOffset;
 		endOffset = newEndOffset;

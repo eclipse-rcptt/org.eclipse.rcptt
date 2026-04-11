@@ -92,6 +92,7 @@ public class ContainsImpl extends CommandImpl implements Contains {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EObject getInput() {
 		if (input != null && input.eIsProxy()) {
 			InternalEObject oldInput = (InternalEObject)input;
@@ -118,6 +119,7 @@ public class ContainsImpl extends CommandImpl implements Contains {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setInput(EObject newInput) {
 		EObject oldInput = input;
 		input = newInput;
@@ -130,6 +132,7 @@ public class ContainsImpl extends CommandImpl implements Contains {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getValue() {
 		return value;
 	}
@@ -139,6 +142,7 @@ public class ContainsImpl extends CommandImpl implements Contains {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setValue(String newValue) {
 		String oldValue = value;
 		value = newValue;
