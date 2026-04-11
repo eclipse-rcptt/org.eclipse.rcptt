@@ -133,6 +133,12 @@ public class ReflectionUtil {
 		} catch (NoSuchFieldException e) {
 			// check superclass
 		}
+		for (Class<?> clazz1 : clazz.getInterfaces()) {
+			Field result = findField(clazz1, name);
+			if (result != null) {
+				return result;
+			}
+		}
 		return findField(clazz.getSuperclass(), name);
 	}
 
@@ -156,6 +162,12 @@ public class ReflectionUtil {
 			return null;
 		} catch (NoSuchMethodException e) {
 			// check superclass
+		}
+		for (Class<?> clazz1 : clazz.getInterfaces()) {
+			Method result = findMethod(clazz1, name);
+			if (result != null) {
+				return result;
+			}
 		}
 		return findMethod(clazz.getSuperclass(), name, params);
 	}
