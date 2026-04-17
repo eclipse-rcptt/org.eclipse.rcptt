@@ -10,7 +10,7 @@
 + An OpenJDK version 21 is required.
 + Clone the repository: `git clone -b master git@github.com:eclipse-rcptt/org.eclipse.rcptt.git`
 + Maven Tycho Build: run `build.sh` on Unix or or `build.cmd` in Windows
-  + When graphical context in unavailable (headless builds) skip tests with argument `-Dmaven.test.skip=true`
+  + When graphical context is unavailable (headless builds) skip tests with argument `-Dmaven.test.skip=true`
 + For IDE builds set the active target platform to the latest one in `releng/target-platforms`.
 
 ### Coding standards
