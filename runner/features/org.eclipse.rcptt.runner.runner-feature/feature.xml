@@ -43,6 +43,7 @@
       <import feature="org.eclipse.rcptt.ecl.server" version="2.9.0" match="compatible"/>
       <import feature="org.eclipse.rcptt.watson" version="2.9.0" match="compatible"/>
       <import feature="org.eclipse.rcptt.ecl.platform" version="2.9.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.launching.macosx" filter="(osgi.os=macosx)"/>
    </requires>
 
    <plugin
@@ -103,11 +104,6 @@
 
    <plugin
          id="org.hamcrest.core"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.jdt.launching.macosx"
-         os="macosx"
          version="0.0.0"/>
 
    <plugin
