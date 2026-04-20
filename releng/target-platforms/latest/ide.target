@@ -51,6 +51,7 @@
 	</location>
 	<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20211213173813/repository"/>
+		<unit id="org.apache.commons.codec" version="0.0.0"/>
 		<unit id="org.apache.poi" version="4.1.1.v20200604-1524"/>
 		<unit id="org.apache.poi.ooxml" version="4.1.1.v20200820-1148"/>
 	</location>
