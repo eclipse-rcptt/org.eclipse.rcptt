@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.maven.artifact.versioning.ComparableVersion;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
@@ -85,7 +83,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	private static final String RUNNER_PLATFORM = "-runnerPlatform";
 	private static final String TESTENGINE = "-testEngine";
 	private static final String ENABLE_SOFTWARE_INSTALLATION = "-enableSoftwareInstallation";
-	private static final String RUNNER_PROGRESS_PROPERTY = "rcptt.runner.progress";
+	private static final String RUNNER_PROGRESS_PROPERTY = "rcptt.runner.target_progress";
 
 	private static int shutdownListenerPort;
 	private static final String[] DEFAULT_Q7_VM_ARGS = new String[] { "-Xms256m", "-Xmx512m",
@@ -93,9 +91,6 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 
 	// TODO: Replace this random number with carefully thought one
 	private static final int TEST_FAIL_EXIT_CODE = 56;
-
-	@Parameter(defaultValue = "${session}", readonly = true)
-	private MavenSession session;
 
 	private class AUTCommandLine extends Commandline {
 		@Override public void addEnvironment(String name, String value) {
@@ -128,11 +123,8 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 		// Q7 VM Args
 
 		List<String> q7VmArgs = new ArrayList<String>();
-		String existingProperty = System.getProperty(RUNNER_PROGRESS_PROPERTY);
-		if (existingProperty == null) {
-			q7VmArgs.add("-D" + RUNNER_PROGRESS_PROPERTY + "=" + session.getRequest().isDebug());
-		}
 		String[] userArgs = getQ7Coords().getVmArgs();
+
 		if (userArgs == null || userArgs.length == 0) {
 			q7VmArgs.addAll(asList(DEFAULT_Q7_VM_ARGS));
 			if (java.hasPermGen()) {
@@ -140,6 +132,10 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 			}
 		} else {
 			q7VmArgs.addAll(asList(userArgs));
+		}
+
+		if (!containsProperty(q7VmArgs, RUNNER_PROGRESS_PROPERTY)) {
+			q7VmArgs.add("-D" + RUNNER_PROGRESS_PROPERTY + "=" + getLog().isDebugEnabled());
 		}
 
 		for (String arg : q7VmArgs) {
@@ -337,6 +333,16 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 			getLog().info("Process terminated. Send shutdown request to RCPTT runner.");
 		}
 	};
+
+	private static boolean containsProperty(List<String> args, String property) {
+		String prefix = "-D" + property + "=";
+		for (String arg : args) {
+			if (arg.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private String getImports() throws MojoFailureException {
 		StringBuilder sb = new StringBuilder();
