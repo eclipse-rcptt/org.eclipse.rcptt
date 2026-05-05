@@ -14,18 +14,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.internal.Utilities;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
 import org.eclipse.compare.structuremergeviewer.IStructureCreator;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.rcptt.core.Scenarios;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.persistence.IPersistenceModel;
@@ -91,31 +92,40 @@ public class ScenarioStructureCreator implements IStructureCreator {
 					}
 
 					Scenario sc = (Scenario) info.getNamedElement();
+					IDocument document = new Document(scenarioContent);
+					// Find offsets of each section in the raw file text so that
+					// clicking items in the Outline view navigates the text viewer
+					// to the corresponding section (analogous to JDT's behavior).
+					int nameOffset = findHeaderOffset(scenarioContent, "Element-Name"); //$NON-NLS-1$
+					int tagsOffset = findHeaderOffset(scenarioContent, "Tags"); //$NON-NLS-1$
+					int extRefOffset = findHeaderOffset(scenarioContent, "External-Reference"); //$NON-NLS-1$
+					int descOffset = findBodyOffset(scenarioContent, ".description"); //$NON-NLS-1$
+					int scriptOffset = findBodyOffset(scenarioContent, ".content"); //$NON-NLS-1$
 					// Root node
-					ScenarioRoot root = new ScenarioRoot("");
+					ScenarioRoot root = new ScenarioRoot("", document, 0, 0); //$NON-NLS-1$
 					// Scenario node
 					ScenarioRoot scenario = root
-							.createScenarioContainer(CONTENT_TYPE_SCENARIO);
+							.createScenarioContainer(CONTENT_TYPE_SCENARIO, document, 0, scenarioContent.length());
 					scenario.setStringContents(scenarioContent);
 					// Name
 					ScenarioPart name = scenario
-							.createPartContainer(CONTENT_TYPE_NAME);
+							.createPartContainer(CONTENT_TYPE_NAME, document, nameOffset, 1);
 					name.setStringContents(sc.getName());
 					// Tags
 					ScenarioPart tags = scenario
-							.createPartContainer(CONTENT_TYPE_TAGS);
+							.createPartContainer(CONTENT_TYPE_TAGS, document, tagsOffset, 1);
 					tags.setStringContents(sc.getTags());
 					// External references
 					ScenarioPart extRef = scenario
-							.createPartContainer(CONTENT_TYPE_EXTERNALREF);
+							.createPartContainer(CONTENT_TYPE_EXTERNALREF, document, extRefOffset, 1);
 					extRef.setStringContents(sc.getExternalReference());
 					// Description
 					ScenarioPart desc = scenario
-							.createPartContainer(CONTENT_TYPE_DESCRIPTION);
+							.createPartContainer(CONTENT_TYPE_DESCRIPTION, document, descOffset, 1);
 					desc.setStringContents(sc.getDescription());
 					// Script
 					ScenarioPart script = scenario
-							.createPartContainer(CONTENT_TYPE_SCRIPT);
+							.createPartContainer(CONTENT_TYPE_SCRIPT, document, scriptOffset, 1);
 					script.setStringContents(Scenarios.getScriptContent(sc));
 
 					return root;
@@ -128,6 +138,44 @@ public class ScenarioStructureCreator implements IStructureCreator {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Finds the character offset of a header attribute line (e.g. "Element-Name: ")
+	 * within the raw scenario file text. Returns 0 if not found.
+	 */
+	private static int findHeaderOffset(String text, String attributeKey) {
+		// Restrict search to the header section (before the first MIME boundary)
+		int bodyStart = text.indexOf("\n------=_"); //$NON-NLS-1$
+		String header = bodyStart >= 0 ? text.substring(0, bodyStart) : text;
+		String pattern = "\n" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
+		int idx = header.indexOf(pattern);
+		if (idx >= 0) {
+			return idx + 1; // skip the leading newline, point to start of "Key: " line
+		}
+		// Try at the very start of text (no leading newline)
+		if (header.startsWith(attributeKey + ":")) { //$NON-NLS-1$
+			return 0;
+		}
+		return 0;
+	}
+
+	/**
+	 * Finds the character offset of a MIME body part identified by its
+	 * "Entry-Name" within the raw scenario file text. Returns 0 if not found.
+	 */
+	private static int findBodyOffset(String text, String entryName) {
+		String pattern = "Entry-Name: " + entryName; //$NON-NLS-1$
+		int idx = text.indexOf(pattern);
+		if (idx >= 0) {
+			// Return the start of the MIME boundary line (------=_...) before this entry
+			int boundaryStart = text.lastIndexOf("\n------=_", idx); //$NON-NLS-1$
+			if (boundaryStart >= 0) {
+				return boundaryStart + 1; // skip the leading newline
+			}
+			return idx;
+		}
+		return 0;
 	}
 
 	public IStructureComparator locate(Object path, Object input) {
@@ -145,19 +193,35 @@ public class ScenarioStructureCreator implements IStructureCreator {
 		Assert.isTrue(false); // Cannot update scenario file
 	}
 
-	static abstract class ScenarioResource implements IStructureComparator,
-			ITypedElement {
+	/**
+	 * A structure node for a scenario element that extends {@link DocumentRangeNode} so
+	 * that the Eclipse compare framework can navigate the text viewer to the
+	 * corresponding position in the raw file when the user clicks on this node in
+	 * the Outline view (analogous to JDT's {@code JavaNode} / {@code DocumentRangeNode}
+	 * approach).
+	 */
+	static class ScenarioPart extends DocumentRangeNode implements ITypedElement, IStreamContentAccessor {
 
-		private final String fName;
+		private String fContents;
 
-		ScenarioResource(String name) {
-			fName = name;
+		ScenarioPart(String name, IDocument doc, int start, int length) {
+			super(0, name, doc, start, length);
 		}
 
+		@Override
 		public String getName() {
-			return fName;
+			return getId();
 		}
 
+		@Override
+		public String getType() {
+			if (CONTENT_TYPE_SCRIPT.equals(getName()))
+				return TYPE_ECL;
+
+			return ITypedElement.TEXT_TYPE;
+		}
+
+		@Override
 		public Image getImage() {
 			if (CONTENT_TYPE_SCENARIO.equals(getName())) {
 				return Images.getImage(Images.SCENARIO);
@@ -168,44 +232,8 @@ public class ScenarioStructureCreator implements IStructureCreator {
 			return CompareUI.getImage(getType());
 		}
 
-		/*
-		 * Returns true if other is ITypedElement and names are equal.
-		 * 
-		 * @see IComparator#equals
-		 */
+		/** Returns the extracted section content (not the raw document range). */
 		@Override
-		public boolean equals(Object other) {
-			if (other instanceof ITypedElement)
-				return fName.equals(((ITypedElement) other).getName());
-			return super.equals(other);
-		}
-
-		@Override
-		public int hashCode() {
-			return fName.hashCode();
-		}
-	}
-
-	static class ScenarioPart extends ScenarioResource implements
-			IStreamContentAccessor {
-
-		private String fContents;
-
-		ScenarioPart(String name) {
-			super(name);
-		}
-
-		public String getType() {
-			if (CONTENT_TYPE_SCRIPT.equals(getName()))
-				return TYPE_ECL;
-
-			return ITypedElement.TEXT_TYPE;
-		}
-
-		public Object[] getChildren() {
-			return null;
-		}
-
 		public InputStream getContents() {
 			return new ByteArrayInputStream(fContents.getBytes(StandardCharsets.UTF_8));
 		}
@@ -224,11 +252,8 @@ public class ScenarioStructureCreator implements IStructureCreator {
 
 	static class ScenarioRoot extends ScenarioPart {
 
-		private final HashMap<String, ScenarioPart> fChildren = new HashMap<String, ScenarioPart>(
-				10);
-
-		ScenarioRoot(String name) {
-			super(name);
+		ScenarioRoot(String name, IDocument doc, int start, int length) {
+			super(name, doc, start, length);
 		}
 
 		@Override
@@ -240,24 +265,15 @@ public class ScenarioStructureCreator implements IStructureCreator {
 			return ITypedElement.FOLDER_TYPE;
 		}
 
-		@Override
-		public Object[] getChildren() {
-			Object[] children = new Object[fChildren.size()];
-			Iterator<ScenarioPart> iter = fChildren.values().iterator();
-			for (int i = 0; iter.hasNext(); i++)
-				children[i] = iter.next();
-			return children;
+		ScenarioRoot createScenarioContainer(String name, IDocument doc, int start, int length) {
+			ScenarioRoot child = new ScenarioRoot(name, doc, start, length);
+			addChild(child);
+			return child;
 		}
 
-		ScenarioRoot createScenarioContainer(String name) {
-			ScenarioRoot scenario = new ScenarioRoot(name);
-			fChildren.put(name, scenario);
-			return scenario;
-		}
-
-		ScenarioPart createPartContainer(String type) {
-			ScenarioPart part = new ScenarioPart(type);
-			fChildren.put(type, part);
+		ScenarioPart createPartContainer(String type, IDocument doc, int start, int length) {
+			ScenarioPart part = new ScenarioPart(type, doc, start, length);
+			addChild(part);
 			return part;
 		}
 	}
