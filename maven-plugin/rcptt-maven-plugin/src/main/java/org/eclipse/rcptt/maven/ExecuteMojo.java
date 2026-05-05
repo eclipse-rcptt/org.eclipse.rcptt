@@ -83,6 +83,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 	private static final String RUNNER_PLATFORM = "-runnerPlatform";
 	private static final String TESTENGINE = "-testEngine";
 	private static final String ENABLE_SOFTWARE_INSTALLATION = "-enableSoftwareInstallation";
+	private static final String RUNNER_PROGRESS_PROPERTY = "rcptt.runner.target_progress";
 
 	private static int shutdownListenerPort;
 	private static final String[] DEFAULT_Q7_VM_ARGS = new String[] { "-Xms256m", "-Xmx512m",
@@ -123,6 +124,7 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 
 		List<String> q7VmArgs = new ArrayList<String>();
 		String[] userArgs = getQ7Coords().getVmArgs();
+
 		if (userArgs == null || userArgs.length == 0) {
 			q7VmArgs.addAll(asList(DEFAULT_Q7_VM_ARGS));
 			if (java.hasPermGen()) {
@@ -130,6 +132,10 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 			}
 		} else {
 			q7VmArgs.addAll(asList(userArgs));
+		}
+
+		if (!containsProperty(q7VmArgs, RUNNER_PROGRESS_PROPERTY)) {
+			q7VmArgs.add("-D" + RUNNER_PROGRESS_PROPERTY + "=" + getLog().isDebugEnabled());
 		}
 
 		for (String arg : q7VmArgs) {
@@ -329,6 +335,16 @@ public class ExecuteMojo extends AbstractRCPTTMojo {
 			getLog().info("Process terminated. Send shutdown request to RCPTT runner.");
 		}
 	};
+
+	private static boolean containsProperty(List<String> args, String property) {
+		String prefix = "-D" + property + "=";
+		for (String arg : args) {
+			if (arg.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private String getImports() throws MojoFailureException {
 		StringBuilder sb = new StringBuilder();
