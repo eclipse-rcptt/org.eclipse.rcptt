@@ -50,7 +50,10 @@ public class ScenarioStructureCreator implements IStructureCreator {
 	public static final String CONTENT_TYPE_DESCRIPTION = "Description"; //$NON-NLS-1$
 	public static final String CONTENT_TYPE_SCRIPT = "Script"; //$NON-NLS-1$
 
-	public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$	
+	public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$
+
+	/** Prefix that starts every MIME boundary line in RCPTT plain-text files. */
+	private static final String MIME_BOUNDARY_PREFIX = "\n------=_"; //$NON-NLS-1$
 
 	private final String fTitle;
 
@@ -101,6 +104,10 @@ public class ScenarioStructureCreator implements IStructureCreator {
 					int extRefOffset = findHeaderOffset(scenarioContent, "External-Reference"); //$NON-NLS-1$
 					int descOffset = findBodyOffset(scenarioContent, ".description"); //$NON-NLS-1$
 					int scriptOffset = findBodyOffset(scenarioContent, ".content"); //$NON-NLS-1$
+					// Length 1 is sufficient: TextMergeViewer.findDiff() only uses the
+					// offset to locate the nearest text diff; the length is irrelevant
+					// for navigation purposes.
+					final int rangeLength = 1;
 					// Root node
 					ScenarioRoot root = new ScenarioRoot("", document, 0, 0); //$NON-NLS-1$
 					// Scenario node
@@ -109,23 +116,23 @@ public class ScenarioStructureCreator implements IStructureCreator {
 					scenario.setStringContents(scenarioContent);
 					// Name
 					ScenarioPart name = scenario
-							.createPartContainer(CONTENT_TYPE_NAME, document, nameOffset, 1);
+							.createPartContainer(CONTENT_TYPE_NAME, document, nameOffset, rangeLength);
 					name.setStringContents(sc.getName());
 					// Tags
 					ScenarioPart tags = scenario
-							.createPartContainer(CONTENT_TYPE_TAGS, document, tagsOffset, 1);
+							.createPartContainer(CONTENT_TYPE_TAGS, document, tagsOffset, rangeLength);
 					tags.setStringContents(sc.getTags());
 					// External references
 					ScenarioPart extRef = scenario
-							.createPartContainer(CONTENT_TYPE_EXTERNALREF, document, extRefOffset, 1);
+							.createPartContainer(CONTENT_TYPE_EXTERNALREF, document, extRefOffset, rangeLength);
 					extRef.setStringContents(sc.getExternalReference());
 					// Description
 					ScenarioPart desc = scenario
-							.createPartContainer(CONTENT_TYPE_DESCRIPTION, document, descOffset, 1);
+							.createPartContainer(CONTENT_TYPE_DESCRIPTION, document, descOffset, rangeLength);
 					desc.setStringContents(sc.getDescription());
 					// Script
 					ScenarioPart script = scenario
-							.createPartContainer(CONTENT_TYPE_SCRIPT, document, scriptOffset, 1);
+							.createPartContainer(CONTENT_TYPE_SCRIPT, document, scriptOffset, rangeLength);
 					script.setStringContents(Scenarios.getScriptContent(sc));
 
 					return root;
@@ -146,7 +153,7 @@ public class ScenarioStructureCreator implements IStructureCreator {
 	 */
 	private static int findHeaderOffset(String text, String attributeKey) {
 		// Restrict search to the header section (before the first MIME boundary)
-		int bodyStart = text.indexOf("\n------=_"); //$NON-NLS-1$
+		int bodyStart = text.indexOf(MIME_BOUNDARY_PREFIX);
 		String header = bodyStart >= 0 ? text.substring(0, bodyStart) : text;
 		String pattern = "\n" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
 		int idx = header.indexOf(pattern);
@@ -169,7 +176,7 @@ public class ScenarioStructureCreator implements IStructureCreator {
 		int idx = text.indexOf(pattern);
 		if (idx >= 0) {
 			// Return the start of the MIME boundary line (------=_...) before this entry
-			int boundaryStart = text.lastIndexOf("\n------=_", idx); //$NON-NLS-1$
+			int boundaryStart = text.lastIndexOf(MIME_BOUNDARY_PREFIX, idx);
 			if (boundaryStart >= 0) {
 				return boundaryStart + 1; // skip the leading newline
 			}
