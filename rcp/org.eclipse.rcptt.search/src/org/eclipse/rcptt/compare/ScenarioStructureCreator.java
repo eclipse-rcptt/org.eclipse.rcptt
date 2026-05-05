@@ -149,7 +149,9 @@ public class ScenarioStructureCreator implements IStructureCreator {
 
 	/**
 	 * Finds the character offset of a header attribute line (e.g. "Element-Name: ")
-	 * within the raw scenario file text. Returns 0 if not found.
+	 * within the raw scenario file text. Returns 0 if not found, which causes
+	 * navigation to fall back to the beginning of the file - an acceptable
+	 * degradation for sections that are not present in the file.
 	 */
 	private static int findHeaderOffset(String text, String attributeKey) {
 		// Restrict search to the header section (before the first MIME boundary)
@@ -169,7 +171,9 @@ public class ScenarioStructureCreator implements IStructureCreator {
 
 	/**
 	 * Finds the character offset of a MIME body part identified by its
-	 * "Entry-Name" within the raw scenario file text. Returns 0 if not found.
+	 * "Entry-Name" within the raw scenario file text. Returns 0 if not found,
+	 * which causes navigation to fall back to the beginning of the file - an
+	 * acceptable degradation for body parts that are not present in the file.
 	 */
 	private static int findBodyOffset(String text, String entryName) {
 		String pattern = "Entry-Name: " + entryName; //$NON-NLS-1$
