@@ -49,7 +49,10 @@ public class ScenarioStructureCreator implements IStructureCreator {
 	public static final String CONTENT_TYPE_DESCRIPTION = "Description"; //$NON-NLS-1$
 	public static final String CONTENT_TYPE_SCRIPT = "Script"; //$NON-NLS-1$
 
-	public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$	
+	public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$
+
+	/** Prefix that starts every MIME boundary line in RCPTT plain-text files. */
+	static final String MIME_BOUNDARY_PREFIX = "\n------=_"; //$NON-NLS-1$
 
 	private final String fTitle;
 
@@ -77,8 +80,8 @@ public class ScenarioStructureCreator implements IStructureCreator {
 
 					Q7ResourceInfo info = new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, URI.createURI("__compare__"));
 					final IPersistenceModel model = PersistenceManager
-							.getInstance()
-							.getModel(content, info.getResource());
+								.getInstance()
+								.getModel(content, info.getResource());
 					if (model == null) {
 						return null;
 					}
@@ -95,28 +98,33 @@ public class ScenarioStructureCreator implements IStructureCreator {
 					ScenarioRoot root = new ScenarioRoot("");
 					// Scenario node
 					ScenarioRoot scenario = root
-							.createScenarioContainer(CONTENT_TYPE_SCENARIO);
+								.createScenarioContainer(CONTENT_TYPE_SCENARIO);
 					scenario.setStringContents(scenarioContent);
 					// Name
 					ScenarioPart name = scenario
-							.createPartContainer(CONTENT_TYPE_NAME);
+								.createPartContainer(CONTENT_TYPE_NAME);
 					name.setStringContents(sc.getName());
+					name.setRawOffset(findHeaderOffset(scenarioContent, "Element-Name")); //$NON-NLS-1$
 					// Tags
 					ScenarioPart tags = scenario
-							.createPartContainer(CONTENT_TYPE_TAGS);
+								.createPartContainer(CONTENT_TYPE_TAGS);
 					tags.setStringContents(sc.getTags());
+					tags.setRawOffset(findHeaderOffset(scenarioContent, "Tags")); //$NON-NLS-1$
 					// External references
 					ScenarioPart extRef = scenario
-							.createPartContainer(CONTENT_TYPE_EXTERNALREF);
+								.createPartContainer(CONTENT_TYPE_EXTERNALREF);
 					extRef.setStringContents(sc.getExternalReference());
+					extRef.setRawOffset(findHeaderOffset(scenarioContent, "External-Reference")); //$NON-NLS-1$
 					// Description
 					ScenarioPart desc = scenario
-							.createPartContainer(CONTENT_TYPE_DESCRIPTION);
+								.createPartContainer(CONTENT_TYPE_DESCRIPTION);
 					desc.setStringContents(sc.getDescription());
+					desc.setRawOffset(findBodyOffset(scenarioContent, ".description")); //$NON-NLS-1$
 					// Script
 					ScenarioPart script = scenario
-							.createPartContainer(CONTENT_TYPE_SCRIPT);
+								.createPartContainer(CONTENT_TYPE_SCRIPT);
 					script.setStringContents(Scenarios.getScriptContent(sc));
+					script.setRawOffset(findBodyOffset(scenarioContent, ".content")); //$NON-NLS-1$
 
 					return root;
 				} catch (IOException e) {
@@ -128,6 +136,44 @@ public class ScenarioStructureCreator implements IStructureCreator {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Finds the character offset of a header attribute line (e.g. "Element-Name: ")
+	 * within the raw scenario file text. Returns 0 if not found.
+	 */
+	static int findHeaderOffset(String text, String attributeKey) {
+		// Restrict search to the header section (before the first MIME boundary)
+		int bodyStart = text.indexOf(MIME_BOUNDARY_PREFIX);
+		String header = bodyStart >= 0 ? text.substring(0, bodyStart) : text;
+		String pattern = "\n" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
+		int idx = header.indexOf(pattern);
+		if (idx >= 0) {
+			return idx + 1; // skip the leading newline, point to start of "Key: " line
+		}
+		// Try at the very start of text (no leading newline)
+		if (header.startsWith(attributeKey + ":")) { //$NON-NLS-1$
+			return 0;
+		}
+		return 0;
+	}
+
+	/**
+	 * Finds the character offset of a MIME body part identified by its
+	 * "Entry-Name" within the raw scenario file text. Returns 0 if not found.
+	 */
+	static int findBodyOffset(String text, String entryName) {
+		String pattern = "Entry-Name: " + entryName; //$NON-NLS-1$
+		int idx = text.indexOf(pattern);
+		if (idx >= 0) {
+			// Return the start of the MIME boundary line (------=_...) before this entry
+			int boundaryStart = text.lastIndexOf(MIME_BOUNDARY_PREFIX, idx);
+			if (boundaryStart >= 0) {
+				return boundaryStart + 1; // skip the leading newline
+			}
+			return idx;
+		}
+		return 0;
 	}
 
 	public IStructureComparator locate(Object path, Object input) {
@@ -190,6 +236,8 @@ public class ScenarioStructureCreator implements IStructureCreator {
 			IStreamContentAccessor {
 
 		private String fContents;
+		/** Character offset in the raw scenario file, used for Outline view navigation. */
+		private int fRawOffset = -1;
 
 		ScenarioPart(String name) {
 			super(name);
@@ -219,6 +267,20 @@ public class ScenarioStructureCreator implements IStructureCreator {
 			if (fContents == null) {
 				fContents = "";
 			}
+		}
+
+		/**
+		 * Returns the character offset of this section in the raw scenario file, or -1
+		 * if not set. Used by {@link ScenarioMergeViewerCreator.ScenarioMergeViewer} to
+		 * scroll the text viewer to the corresponding section when the user clicks this
+		 * node in the Outline view.
+		 */
+		int getRawOffset() {
+			return fRawOffset;
+		}
+
+		void setRawOffset(int offset) {
+			fRawOffset = offset;
 		}
 	}
 

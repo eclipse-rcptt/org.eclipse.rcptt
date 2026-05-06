@@ -76,6 +76,12 @@
             contentMergeViewerId="org.eclipse.rcptt.compare.ECLMergeViewerCreator"
             contentTypeId="org.eclipse.rcptt.core.ecl">
       </contentTypeBinding>
+      <viewer
+            class="org.eclipse.rcptt.compare.ScenarioMergeViewerCreator"
+            extensions="scenario, test"
+            id="org.eclipse.rcptt.compare.ScenarioMergeViewerCreator"
+            label="RCPTT Test Case Compare">
+      </viewer>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
