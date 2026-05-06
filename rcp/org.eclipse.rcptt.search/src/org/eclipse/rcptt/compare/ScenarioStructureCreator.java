@@ -41,287 +41,287 @@ import org.eclipse.swt.graphics.Image;
 @SuppressWarnings("restriction")
 public class ScenarioStructureCreator implements IStructureCreator {
 
-public static final String STRUCTURE_COMPARE_TITLE = "Test Case Structure Compare"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_SCENARIO = "Test Case"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_NAME = "Name"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_TAGS = "Tags"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_EXTERNALREF = "External References"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_DESCRIPTION = "Description"; //$NON-NLS-1$
-public static final String CONTENT_TYPE_SCRIPT = "Script"; //$NON-NLS-1$
+	public static final String STRUCTURE_COMPARE_TITLE = "Test Case Structure Compare"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_SCENARIO = "Test Case"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_NAME = "Name"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_TAGS = "Tags"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_EXTERNALREF = "External References"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_DESCRIPTION = "Description"; //$NON-NLS-1$
+	public static final String CONTENT_TYPE_SCRIPT = "Script"; //$NON-NLS-1$
 
-public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$
+	public static final String TYPE_ECL = "ecl"; //$NON-NLS-1$
 
-/** Prefix that starts every MIME boundary line in RCPTT plain-text files. */
-static final String MIME_BOUNDARY_PREFIX = "\n------=_"; //$NON-NLS-1$
+	/** Prefix that starts every MIME boundary line in RCPTT plain-text files. */
+	static final String MIME_BOUNDARY_PREFIX = "\n------=_"; //$NON-NLS-1$
 
-private final String fTitle;
+	private final String fTitle;
 
-public ScenarioStructureCreator() {
-this(STRUCTURE_COMPARE_TITLE);
-}
+	public ScenarioStructureCreator() {
+		this(STRUCTURE_COMPARE_TITLE);
+	}
 
-public ScenarioStructureCreator(String title) {
-fTitle = title;
-}
+	public ScenarioStructureCreator(String title) {
+		fTitle = title;
+	}
 
-public String getName() {
-return fTitle;
-}
+	public String getName() {
+		return fTitle;
+	}
 
-public IStructureComparator getStructure(Object input) {
-if (input instanceof IStreamContentAccessor) {
-IStreamContentAccessor sca = (IStreamContentAccessor) input;
-try {
-String scenarioContent = Utilities.readString(sca);
-InputStream is = sca.getContents();
+	public IStructureComparator getStructure(Object input) {
+		if (input instanceof IStreamContentAccessor) {
+			IStreamContentAccessor sca = (IStreamContentAccessor) input;
+			try {
+				String scenarioContent = Utilities.readString(sca);
+				InputStream is = sca.getContents();
 
-try {
-byte[] content = FileUtil.getStreamContent(is);
+				try {
+					byte[] content = FileUtil.getStreamContent(is);
 
-Q7ResourceInfo info = new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, URI.createURI("__compare__"));
-final IPersistenceModel model = PersistenceManager
-.getInstance()
-.getModel(content, info.getResource());
-if (model == null) {
-return null;
-}
+					Q7ResourceInfo info = new Q7ResourceInfo(IPlainConstants.PLAIN_HEADER, URI.createURI("__compare__"));
+					final IPersistenceModel model = PersistenceManager
+								.getInstance()
+								.getModel(content, info.getResource());
+					if (model == null) {
+						return null;
+					}
 
-try {
-info.load(null);
-} catch (ModelException e){
-RcpttPlugin.log(e);
-return null;
-}
+					try {
+						info.load(null);
+					} catch (ModelException e){
+						RcpttPlugin.log(e);
+						return null;
+					}
 
-Scenario sc = (Scenario) info.getNamedElement();
-// Root node
-ScenarioRoot root = new ScenarioRoot("");
-// Scenario node
-ScenarioRoot scenario = root
-.createScenarioContainer(CONTENT_TYPE_SCENARIO);
-scenario.setStringContents(scenarioContent);
-// Name
-ScenarioPart name = scenario
-.createPartContainer(CONTENT_TYPE_NAME);
-name.setStringContents(sc.getName());
-name.setRawOffset(findHeaderOffset(scenarioContent, "Element-Name")); //$NON-NLS-1$
-// Tags
-ScenarioPart tags = scenario
-.createPartContainer(CONTENT_TYPE_TAGS);
-tags.setStringContents(sc.getTags());
-tags.setRawOffset(findHeaderOffset(scenarioContent, "Tags")); //$NON-NLS-1$
-// External references
-ScenarioPart extRef = scenario
-.createPartContainer(CONTENT_TYPE_EXTERNALREF);
-extRef.setStringContents(sc.getExternalReference());
-extRef.setRawOffset(findHeaderOffset(scenarioContent, "External-Reference")); //$NON-NLS-1$
-// Description
-ScenarioPart desc = scenario
-.createPartContainer(CONTENT_TYPE_DESCRIPTION);
-desc.setStringContents(sc.getDescription());
-desc.setRawOffset(findBodyOffset(scenarioContent, ".description")); //$NON-NLS-1$
-// Script
-ScenarioPart script = scenario
-.createPartContainer(CONTENT_TYPE_SCRIPT);
-script.setStringContents(Scenarios.getScriptContent(sc));
-script.setRawOffset(findBodyOffset(scenarioContent, ".content")); //$NON-NLS-1$
+					Scenario sc = (Scenario) info.getNamedElement();
+					// Root node
+					ScenarioRoot root = new ScenarioRoot("");
+					// Scenario node
+					ScenarioRoot scenario = root
+								.createScenarioContainer(CONTENT_TYPE_SCENARIO);
+					scenario.setStringContents(scenarioContent);
+					// Name
+					ScenarioPart name = scenario
+								.createPartContainer(CONTENT_TYPE_NAME);
+					name.setStringContents(sc.getName());
+					name.setRawOffset(findHeaderOffset(scenarioContent, "Element-Name")); //$NON-NLS-1$
+					// Tags
+					ScenarioPart tags = scenario
+								.createPartContainer(CONTENT_TYPE_TAGS);
+					tags.setStringContents(sc.getTags());
+					tags.setRawOffset(findHeaderOffset(scenarioContent, "Tags")); //$NON-NLS-1$
+					// External references
+					ScenarioPart extRef = scenario
+								.createPartContainer(CONTENT_TYPE_EXTERNALREF);
+					extRef.setStringContents(sc.getExternalReference());
+					extRef.setRawOffset(findHeaderOffset(scenarioContent, "External-Reference")); //$NON-NLS-1$
+					// Description
+					ScenarioPart desc = scenario
+								.createPartContainer(CONTENT_TYPE_DESCRIPTION);
+					desc.setStringContents(sc.getDescription());
+					desc.setRawOffset(findBodyOffset(scenarioContent, ".description")); //$NON-NLS-1$
+					// Script
+					ScenarioPart script = scenario
+								.createPartContainer(CONTENT_TYPE_SCRIPT);
+					script.setStringContents(Scenarios.getScriptContent(sc));
+					script.setRawOffset(findBodyOffset(scenarioContent, ".content")); //$NON-NLS-1$
 
-return root;
-} catch (IOException e) {
-e.printStackTrace();
-}
-} catch (CoreException e) {
-e.printStackTrace();
-}
-}
+					return root;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
 
-return null;
-}
+		return null;
+	}
 
-/**
- * Finds the character offset of a header attribute line (e.g. "Element-Name: ")
- * within the raw scenario file text. Returns 0 if not found.
- */
-static int findHeaderOffset(String text, String attributeKey) {
-// Restrict search to the header section (before the first MIME boundary)
-int bodyStart = text.indexOf(MIME_BOUNDARY_PREFIX);
-String header = bodyStart >= 0 ? text.substring(0, bodyStart) : text;
-String pattern = "\n" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
-int idx = header.indexOf(pattern);
-if (idx >= 0) {
-return idx + 1; // skip the leading newline, point to start of "Key: " line
-}
-// Try at the very start of text (no leading newline)
-if (header.startsWith(attributeKey + ":")) { //$NON-NLS-1$
-return 0;
-}
-return 0;
-}
+	/**
+	 * Finds the character offset of a header attribute line (e.g. "Element-Name: ")
+	 * within the raw scenario file text. Returns 0 if not found.
+	 */
+	static int findHeaderOffset(String text, String attributeKey) {
+		// Restrict search to the header section (before the first MIME boundary)
+		int bodyStart = text.indexOf(MIME_BOUNDARY_PREFIX);
+		String header = bodyStart >= 0 ? text.substring(0, bodyStart) : text;
+		String pattern = "\n" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
+		int idx = header.indexOf(pattern);
+		if (idx >= 0) {
+			return idx + 1; // skip the leading newline, point to start of "Key: " line
+		}
+		// Try at the very start of text (no leading newline)
+		if (header.startsWith(attributeKey + ":")) { //$NON-NLS-1$
+			return 0;
+		}
+		return 0;
+	}
 
-/**
- * Finds the character offset of a MIME body part identified by its
- * "Entry-Name" within the raw scenario file text. Returns 0 if not found.
- */
-static int findBodyOffset(String text, String entryName) {
-String pattern = "Entry-Name: " + entryName; //$NON-NLS-1$
-int idx = text.indexOf(pattern);
-if (idx >= 0) {
-// Return the start of the MIME boundary line (------=_...) before this entry
-int boundaryStart = text.lastIndexOf(MIME_BOUNDARY_PREFIX, idx);
-if (boundaryStart >= 0) {
-return boundaryStart + 1; // skip the leading newline
-}
-return idx;
-}
-return 0;
-}
+	/**
+	 * Finds the character offset of a MIME body part identified by its
+	 * "Entry-Name" within the raw scenario file text. Returns 0 if not found.
+	 */
+	static int findBodyOffset(String text, String entryName) {
+		String pattern = "Entry-Name: " + entryName; //$NON-NLS-1$
+		int idx = text.indexOf(pattern);
+		if (idx >= 0) {
+			// Return the start of the MIME boundary line (------=_...) before this entry
+			int boundaryStart = text.lastIndexOf(MIME_BOUNDARY_PREFIX, idx);
+			if (boundaryStart >= 0) {
+				return boundaryStart + 1; // skip the leading newline
+			}
+			return idx;
+		}
+		return 0;
+	}
 
-public IStructureComparator locate(Object path, Object input) {
-return null;
-}
+	public IStructureComparator locate(Object path, Object input) {
+		return null;
+	}
 
-public String getContents(Object node, boolean ignoreWhitespace) {
-if (node instanceof ScenarioPart) {
-return ((ScenarioPart) node).getStringContents();
-}
-return null;
-}
+	public String getContents(Object node, boolean ignoreWhitespace) {
+		if (node instanceof ScenarioPart) {
+			return ((ScenarioPart) node).getStringContents();
+		}
+		return null;
+	}
 
-public void save(IStructureComparator node, Object input) {
-Assert.isTrue(false); // Cannot update scenario file
-}
+	public void save(IStructureComparator node, Object input) {
+		Assert.isTrue(false); // Cannot update scenario file
+	}
 
-static abstract class ScenarioResource implements IStructureComparator,
-ITypedElement {
+	static abstract class ScenarioResource implements IStructureComparator,
+			ITypedElement {
 
-private final String fName;
+		private final String fName;
 
-ScenarioResource(String name) {
-fName = name;
-}
+		ScenarioResource(String name) {
+			fName = name;
+		}
 
-public String getName() {
-return fName;
-}
+		public String getName() {
+			return fName;
+		}
 
-public Image getImage() {
-if (CONTENT_TYPE_SCENARIO.equals(getName())) {
-return Images.getImage(Images.SCENARIO);
-}
-if (CONTENT_TYPE_SCRIPT.equals(getName())) {
-return Images.getImage(Images.PANEL_SCENARIO);
-}
-return CompareUI.getImage(getType());
-}
+		public Image getImage() {
+			if (CONTENT_TYPE_SCENARIO.equals(getName())) {
+				return Images.getImage(Images.SCENARIO);
+			}
+			if (CONTENT_TYPE_SCRIPT.equals(getName())) {
+				return Images.getImage(Images.PANEL_SCENARIO);
+			}
+			return CompareUI.getImage(getType());
+		}
 
-/*
- * Returns true if other is ITypedElement and names are equal.
- * 
- * @see IComparator#equals
- */
-@Override
-public boolean equals(Object other) {
-if (other instanceof ITypedElement)
-return fName.equals(((ITypedElement) other).getName());
-return super.equals(other);
-}
+		/*
+		 * Returns true if other is ITypedElement and names are equal.
+		 * 
+		 * @see IComparator#equals
+		 */
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof ITypedElement)
+				return fName.equals(((ITypedElement) other).getName());
+			return super.equals(other);
+		}
 
-@Override
-public int hashCode() {
-return fName.hashCode();
-}
-}
+		@Override
+		public int hashCode() {
+			return fName.hashCode();
+		}
+	}
 
-static class ScenarioPart extends ScenarioResource implements
-IStreamContentAccessor {
+	static class ScenarioPart extends ScenarioResource implements
+			IStreamContentAccessor {
 
-private String fContents;
-/** Character offset in the raw scenario file, used for Outline view navigation. */
-private int fRawOffset = -1;
+		private String fContents;
+		/** Character offset in the raw scenario file, used for Outline view navigation. */
+		private int fRawOffset = -1;
 
-ScenarioPart(String name) {
-super(name);
-}
+		ScenarioPart(String name) {
+			super(name);
+		}
 
-public String getType() {
-if (CONTENT_TYPE_SCRIPT.equals(getName()))
-return TYPE_ECL;
+		public String getType() {
+			if (CONTENT_TYPE_SCRIPT.equals(getName()))
+				return TYPE_ECL;
 
-return ITypedElement.TEXT_TYPE;
-}
+			return ITypedElement.TEXT_TYPE;
+		}
 
-public Object[] getChildren() {
-return null;
-}
+		public Object[] getChildren() {
+			return null;
+		}
 
-public InputStream getContents() {
-return new ByteArrayInputStream(fContents.getBytes(StandardCharsets.UTF_8));
-}
+		public InputStream getContents() {
+			return new ByteArrayInputStream(fContents.getBytes(StandardCharsets.UTF_8));
+		}
 
-String getStringContents() {
-return fContents;
-}
+		String getStringContents() {
+			return fContents;
+		}
 
-void setStringContents(String contents) {
-fContents = contents;
-if (fContents == null) {
-fContents = "";
-}
-}
+		void setStringContents(String contents) {
+			fContents = contents;
+			if (fContents == null) {
+				fContents = "";
+			}
+		}
 
-/**
- * Returns the character offset of this section in the raw scenario file, or -1
- * if not set. Used by {@link ScenarioMergeViewerCreator.ScenarioMergeViewer} to
- * scroll the text viewer to the corresponding section when the user clicks this
- * node in the Outline view.
- */
-int getRawOffset() {
-return fRawOffset;
-}
+		/**
+		 * Returns the character offset of this section in the raw scenario file, or -1
+		 * if not set. Used by {@link ScenarioMergeViewerCreator.ScenarioMergeViewer} to
+		 * scroll the text viewer to the corresponding section when the user clicks this
+		 * node in the Outline view.
+		 */
+		int getRawOffset() {
+			return fRawOffset;
+		}
 
-void setRawOffset(int offset) {
-fRawOffset = offset;
-}
-}
+		void setRawOffset(int offset) {
+			fRawOffset = offset;
+		}
+	}
 
-static class ScenarioRoot extends ScenarioPart {
+	static class ScenarioRoot extends ScenarioPart {
 
-private final HashMap<String, ScenarioPart> fChildren = new HashMap<String, ScenarioPart>(
-10);
+		private final HashMap<String, ScenarioPart> fChildren = new HashMap<String, ScenarioPart>(
+				10);
 
-ScenarioRoot(String name) {
-super(name);
-}
+		ScenarioRoot(String name) {
+			super(name);
+		}
 
-@Override
-public String getType() {
-if (CONTENT_TYPE_SCENARIO.equals(getName())) {
-return ITypedElement.TEXT_TYPE;
-}
+		@Override
+		public String getType() {
+			if (CONTENT_TYPE_SCENARIO.equals(getName())) {
+				return ITypedElement.TEXT_TYPE;
+			}
 
-return ITypedElement.FOLDER_TYPE;
-}
+			return ITypedElement.FOLDER_TYPE;
+		}
 
-@Override
-public Object[] getChildren() {
-Object[] children = new Object[fChildren.size()];
-Iterator<ScenarioPart> iter = fChildren.values().iterator();
-for (int i = 0; iter.hasNext(); i++)
-children[i] = iter.next();
-return children;
-}
+		@Override
+		public Object[] getChildren() {
+			Object[] children = new Object[fChildren.size()];
+			Iterator<ScenarioPart> iter = fChildren.values().iterator();
+			for (int i = 0; iter.hasNext(); i++)
+				children[i] = iter.next();
+			return children;
+		}
 
-ScenarioRoot createScenarioContainer(String name) {
-ScenarioRoot scenario = new ScenarioRoot(name);
-fChildren.put(name, scenario);
-return scenario;
-}
+		ScenarioRoot createScenarioContainer(String name) {
+			ScenarioRoot scenario = new ScenarioRoot(name);
+			fChildren.put(name, scenario);
+			return scenario;
+		}
 
-ScenarioPart createPartContainer(String type) {
-ScenarioPart part = new ScenarioPart(type);
-fChildren.put(type, part);
-return part;
-}
-}
+		ScenarioPart createPartContainer(String type) {
+			ScenarioPart part = new ScenarioPart(type);
+			fChildren.put(type, part);
+			return part;
+		}
+	}
 
 }
