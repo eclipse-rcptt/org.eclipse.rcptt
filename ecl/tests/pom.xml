@@ -22,6 +22,7 @@
   </parent>
   <modules>
     <module>org.eclipse.rcptt.ecl.operations.tests</module>
+    <module>org.eclipse.rcptt.ecl.platform.tests</module>
     <module>org.eclipse.rcptt.ecl.data.tests</module>
     <module>org.eclipse.rcptt.ecl.client.tcp.tests</module>
     <module>org.eclipse.rcptt.ecl.core.tests</module>
