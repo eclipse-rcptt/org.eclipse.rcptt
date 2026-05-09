@@ -62,7 +62,6 @@
     </plugins>
   </build>
   <properties>
-    <buildUrl>file:/${user.dir}</buildUrl>
     <rcpttRuntimeRepo>${buildUrl}/runtime/org.eclipse.rcptt.runtime-updatesite/target/repository/</rcpttRuntimeRepo>
     <e4xRepository>${buildUrl}/repository/e4x/target/repository</e4xRepository>
     <coreRepository>${buildUrl}/repository/core/target/repository</coreRepository>
