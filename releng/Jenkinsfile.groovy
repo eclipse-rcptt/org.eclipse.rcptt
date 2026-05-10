@@ -166,7 +166,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
         mvn "releng/runner/pom.xml verify"
         mvn "maven-plugin/pom.xml install"
       }
-      this.script.sh "./$DOC_DIR/generate-doc.sh -Dmaven.repo.local=${getWorkspace()}/m2 -B -e"
+      this.script.sh "./$DOC_DIR/generate-doc.sh -B -e"
     }
   }
 
@@ -185,7 +185,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
 
   private void get_version_from_pom() {
-    return sh_with_return("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
+    return sh_with_return("mvn -q -Dexec.executable=echo -Dexec.args='\${project.version}' --non-recursive exec:exec -f releng/pom.xml")
   }
 
   private void get_version() {
@@ -230,7 +230,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 		try {
 	    this.script.xvnc() {
 	      this.script.sh "mvn clean verify -B -f ${dir}/pom.xml \
-	          -Dmaven.repo.local=${getWorkspace()}/m2 -e \
+	          -e \
 	          -Dci-maven-version=2.6.0-SNAPSHOT \
 	          -DexplicitRunner=`readlink -f ${runner}` \
 	          ${args}"
@@ -385,7 +385,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + this.mvn_args + " " + arguments)
+    sh("mvn -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + this.mvn_args + " " + arguments)
   } 
 
 }
