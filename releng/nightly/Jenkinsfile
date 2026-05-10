@@ -41,13 +41,13 @@ pipeline {
         }
       }
     }
-    stage('Deploy') {
-      steps {
-        script {
-          build.deploy("Nightly")
-        }
-      }
-    }
+//    stage('Deploy') {
+//      steps {
+//        script {
+//          build.deploy("Nightly")
+//        }
+//      }
+//    }
   }
 
   post {
