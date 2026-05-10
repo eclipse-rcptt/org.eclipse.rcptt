@@ -225,16 +225,30 @@
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>set-build-url</id>
+            <id>set-build-url-slashes</id>
             <phase>initialize</phase>
             <goals>
               <goal>regex-property</goal>
             </goals>
             <configuration>
               <name>buildUrl</name>
-              <value>file://${maven.multiModuleProjectDirectory}</value>
+              <value>file:///${maven.multiModuleProjectDirectory}</value>
               <regex>\\</regex>
               <replacement>/</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+          <execution>
+            <id>set-build-url-normalize</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>buildUrl</name>
+              <value>${buildUrl}</value>
+              <regex>file:////</regex>
+              <replacement>file:///</replacement>
               <failIfNoMatch>false</failIfNoMatch>
             </configuration>
           </execution>
