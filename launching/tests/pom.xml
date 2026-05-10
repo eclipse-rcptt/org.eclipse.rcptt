@@ -18,6 +18,9 @@
 	</parent>
 	<artifactId>launching.tests</artifactId>
 	<packaging>pom</packaging>
+	<properties>
+		<cbi.jarsigner.skip>true</cbi.jarsigner.skip>
+	</properties>
 	<modules>
 		<module>org.eclipse.rcptt.launching.ext.tests</module>
 		<module>org.eclipse.rcptt.launching.tests</module>

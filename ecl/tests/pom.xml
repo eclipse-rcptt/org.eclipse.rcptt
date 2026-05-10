@@ -14,6 +14,9 @@
   <groupId>org.eclipse.rcptt.ecl</groupId>
   <artifactId>ecl-tests</artifactId>
   <packaging>pom</packaging>
+  <properties>
+    <cbi.jarsigner.skip>true</cbi.jarsigner.skip>
+  </properties>
   <parent>
     <artifactId>ecl</artifactId>
     <groupId>org.eclipse.rcptt</groupId>

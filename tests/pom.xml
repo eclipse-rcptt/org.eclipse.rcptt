@@ -18,6 +18,9 @@
     <version>2.9.0-SNAPSHOT</version>
     <relativePath>../releng/core/pom.xml</relativePath>
   </parent>
+  <properties>
+    <cbi.jarsigner.skip>true</cbi.jarsigner.skip>
+  </properties>
   <modules>
     <!-- Tesla plugins -->
     <module>org.eclipse.rcptt.core.tests</module>
