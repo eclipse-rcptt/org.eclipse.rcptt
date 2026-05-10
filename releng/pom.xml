@@ -65,6 +65,8 @@
           <version>${tycho-version}</version>
           <configuration>
             <showEclipseLog>true</showEclipseLog>
+            <printBundles>true</printBundles>
+            <printWires>true</printWires>
           </configuration>
         </plugin>
         <plugin>

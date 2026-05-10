@@ -37,7 +37,7 @@ pipeline {
       steps {
         script {
           build.mvn_args += " -Ddash.skip=true"
-          build.build_and_test(true)
+          build.build_and_test(false)
         }
       }
     }
