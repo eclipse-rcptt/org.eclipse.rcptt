@@ -8,7 +8,7 @@ External-Reference:
 Id: _n3bH8MmFEeCVO9X7TqWdlg
 Runtime-Version: 2.3.0.qualifier
 Save-Time: 5/11/18 3:07 PM
-Tags: Q7Explorer, Project
+Tags: Q7Explorer, Project, skipExecution
 Testcase-Type: ecl
 
 ------=_.description-216f885c-d591-38ce-8ea2-e4f8cb4d6ffa
@@ -24,6 +24,9 @@ https://www.eclipse.org/legal/epl-v20.html
 Contributors:
     Xored Software Inc - initial creation and/or initial documentation
 --------------------------------------------------------------------------------
+
+Note: skipExecution because of https://github.com/eclipse-platform/eclipse.platform.ui/pull/3871#issuecomment-4336933994.
+Re-enable this test after the Eclipse Platform fix (reverting this regression) reaches the staging repository.
 
 1. Select project with reference
 2. Select "Close Unrelated Projects" in context menu
