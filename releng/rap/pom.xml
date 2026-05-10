@@ -83,7 +83,6 @@ documentation
 
 
 	<properties>
-		<buildUrl>file:${user.dir}</buildUrl>
 		<rapRcpttRepository>${buildUrl}/</rapRcpttRepository>
 		<rcpttRepositoryFull>${buildUrl}/repository/full/target/repository/</rcpttRepositoryFull>
 		<rcpttExternalDepencenciesRepository>${buildUrl}/repository/dependencies/target/repository</rcpttExternalDepencenciesRepository>
