@@ -39,7 +39,7 @@
     <ajJavaTarget>1.8</ajJavaTarget>
 		<ajJavaCompilance>1.8</ajJavaCompilance>
 		<cbi-version>1.5.4</cbi-version>
-		<buildUrl>file:/${user.dir}</buildUrl>
+		<buildUrl>file://${maven.multiModuleProjectDirectory}</buildUrl>
 	</properties>
 	<prerequisites>
 		<maven>3.9.0</maven>
@@ -210,7 +210,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -220,6 +220,26 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>set-build-url</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>buildUrl</name>
+              <value>file://${maven.multiModuleProjectDirectory}</value>
+              <regex>\\</regex>
+              <replacement>/</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
           <groupId>org.eclipse.dash</groupId>
           <artifactId>license-tool-plugin</artifactId>
