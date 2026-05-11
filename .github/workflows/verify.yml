@@ -44,6 +44,8 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Maven and Java version
         run: mvn --version
+      - name: Maven local repo location
+        run: mvn --quiet --non-recursive help:evaluate -Dtycho.mode=maven -DforceStdout -Dexpression='maven.repo.local'
       - name: Build
         run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: List all files
@@ -110,6 +112,8 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Maven and Java version
         run: mvn --version
+      - name: Maven local repo location
+        run: mvn --quiet --non-recursive help:evaluate -Dtycho.mode=maven -DforceStdout -Dexpression='maven.repo.local'
       - name: Build
         run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: List all files
