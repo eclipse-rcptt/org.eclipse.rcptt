@@ -6,27 +6,6 @@ on:
 permissions:
   checks: write
 jobs:
-  mockup_build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        repository: xored/q7.quality.mockups
-    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - uses: stCarolas/setup-maven@12eb41b233df95d49b0c11fc1b5bc8312e5d4ce0 # v5.1
-      with:
-        maven-version: 3.9.9
-    - run: mvn clean verify
-    - name: Archive update site
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      with:
-        if-no-files-found: error
-        name: mockup_repository
-        path: 'repository/target/repository/**'
   build:
     runs-on: ubuntu-latest
     container:
@@ -44,8 +23,10 @@ jobs:
         run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
       - name: Maven and Java version
         run: mvn --version
+      - name: Maven local repo location
+        run: mvn --quiet --non-recursive help:evaluate -Dtycho.mode=maven -DforceStdout -Dexpression='settings.localRepository'
       - name: Build
-        run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -Dmaven.repo.local=`pwd`/m2 -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: List all files
         if: always()
         run: find . > files.txt
@@ -86,162 +67,10 @@ jobs:
         with:
           if-no-files-found: error
           name: maven-plugin
-          path: /root/.m2/repository/org/eclipse/rcptt/rcptt-*/**
+          path: m2/org/eclipse/rcptt/rcptt-*/**
       - name: Archive IDE
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           if-no-files-found: error
           name: ide
           path: repository/full/target/products/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip
-  test_latest:
-    runs-on: ubuntu-latest
-    container:
-      image: basilevs/ubuntu-rcptt:3.7.3 
-      env:
-        DISPLAY: :1
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          key: m2repository
-          path: |
-            /root/.m2/repository
-      - name: VNC
-        run: vncserver $DISPLAY -localhost=1 -noxstartup -PasswordFile /root/.vnc/passwd
-      - name: Maven and Java version
-        run: mvn --version
-      - name: Build
-        run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` --errors --batch-mode --no-transfer-progress
-      - name: List all files
-        if: always()
-        run: find . > files.txt
-      - name: Archive results
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          if-no-files-found: error
-          name: test_latest_results
-          include-hidden-files: true
-          path: |
-            files.txt
-            **/target/**/*.log
-            **/target/**/*.info
-            **/target/**/*.ini
-            **/*.hrpof
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
-        if: always() # always run even if the previous step fails
-        with:
-          report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
-          annotate_only: true
-  self_test:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - mockup_build
-    container:
-      image: basilevs/ubuntu-rcptt:3.7.3 
-      env:
-        DISPLAY: :1
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: VNC
-        run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
-      - name: Download Runner
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: runner
-      - name: Download Maven Plugin
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: maven-plugin
-          path: /root/.m2/repository/org/eclipse/rcptt
-      - name: Download IDE
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ide
-      - name: Download Mockups
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: mockup_repository
-          path: mockup_repository
-      - run: find . > list.txt
-      - name: RCPTT Tests
-        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DrcpttPath=`pwd`/org.eclipse.rcptt.platform.product-linux.gtk.x86_64.zip -Dmockup_repository=file://`pwd`/mockup_repository --errors --batch-mode --no-transfer-progress
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
-        if: always() # always run even if the previous step fails
-        with:
-          report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
-          annotate_only: true
-      - name: Archive results
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          if-no-files-found: error
-          name: self_results
-          include-hidden-files: true
-          path: |
-            list.txt
-            rcpttTests/**/target/results/**
-            rcpttTests/**/target/surefire-reports/**
-            rcpttTests/**/target/**/*log
-            rcpttTests/**/target/**/*.info
-            rcpttTests/**/target/**/*.ini
-            **/*.hrpof
-  mockup_test:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - mockup_build
-    container:
-      image: basilevs/ubuntu-rcptt:3.7.3 
-      env:
-        DISPLAY: :1
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: xored/q7.quality.mockups
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          key: mockups_maven
-          path: |
-            /root/.m2/repository
-      - name: VNC
-        run: Xvnc $DISPLAY -PasswordFile /root/.vnc/passwd &
-      - name: Download Runner
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: runner
-      - name: Download Mockups
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: mockup_repository
-          path: repository/target/repository/
-      - run: find . > list.txt
-      - name: RCPTT Tests
-        run: mvn clean verify --file rcpttTests -DexplicitRunner=`pwd`/org.eclipse.rcptt.runner.headless-linux.gtk.x86_64.zip -DmockupsRepository=file://`pwd`/repository/target/repository  --errors --batch-mode --no-transfer-progress
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
-        if: always() # always run even if the previous step fails
-        with:
-          report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: false
-          annotate_only: true
-      - name: Archive results
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          if-no-files-found: error
-          name: mockup_results
-          include-hidden-files: true
-          path: |
-            list.txt
-            rcpttTests/target/results/**
-            rcpttTests/target/surefire-reports/**
-            rcpttTests/target/**/*log
-            rcpttTests/target/**/*.info
-            rcpttTests/target/**/*.ini
-            **/*.hrpof
