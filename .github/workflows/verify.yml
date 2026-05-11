@@ -115,7 +115,7 @@ jobs:
       - name: Maven local repo location
         run: mvn --quiet --non-recursive help:evaluate -Dtycho.mode=maven -DforceStdout -Dexpression='settings.localRepository'
       - name: Build
-        run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -Dmaven.repo.local=/root/.m2/repository -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
       - name: List all files
         if: always()
         run: find . > files.txt
