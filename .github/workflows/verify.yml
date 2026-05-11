@@ -45,7 +45,7 @@ jobs:
       - name: Maven and Java version
         run: mvn --version
       - name: Build
-        run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -DforceContextQualifier=`date '+%Y%m%d%H%M'` --errors --batch-mode --no-transfer-progress
       - name: List all files
         if: always()
         run: find . > files.txt
@@ -111,7 +111,7 @@ jobs:
       - name: Maven and Java version
         run: mvn --version
       - name: Build
-        run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` -DbuildUrl=file://`pwd` --errors --batch-mode --no-transfer-progress
+        run: ./build.sh -PlatestPlatform -PforceContextQualifier -DforceContextQualifier=`date '+%Y%m%d%H%M'` --errors --batch-mode --no-transfer-progress
       - name: List all files
         if: always()
         run: find . > files.txt
