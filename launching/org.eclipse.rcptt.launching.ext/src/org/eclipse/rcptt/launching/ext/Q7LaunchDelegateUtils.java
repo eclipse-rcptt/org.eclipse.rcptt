@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,7 +60,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -347,21 +345,7 @@ public class Q7LaunchDelegateUtils {
 		if (args == null || args.isEmpty()) {
 			return "";
 		}
-		return args.stream().map(Q7LaunchDelegateUtils::escapeCommandArg).collect(Collectors.joining(" "));
-	}
-
-	public static String escapeCommandArg(String argument) {
-        if (Platform.getOS().equals(Platform.OS_WIN32)) {
-            // https://stackoverflow.com/questions/29213106/how-to-securely-escape-command-line-arguments-for-the-cmd-exe-shell-on-windows
-            if (argument.isEmpty()) {
-                return "\"\"";
-            }
-
-            return "\"" + argument.replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\\\\$", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-
-        } else {
-            return "\"" + argument.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
-        }
+		return DebugPlugin.renderArguments(args.toArray(String[]::new), null);
 	}
 
 	public static String joinCommandArgs(String[] args) {
