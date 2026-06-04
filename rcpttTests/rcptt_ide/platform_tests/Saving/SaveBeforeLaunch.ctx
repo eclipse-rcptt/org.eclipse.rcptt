@@ -34,7 +34,7 @@ proc "set-save-before-launch" [val mode] {
 	get-preferences-menu | click
 	with [get-window Preferences] {
 	    get-tree | select "Run\\/Debug/Launching"
-	    get-group "Save required dirty editors before launching" | get-button $mode | click
+	    get-group "Save .* editors .*before launch.*" | get-button $mode | click
 	    get-button "Apply and Close" | click
 	}
 }
