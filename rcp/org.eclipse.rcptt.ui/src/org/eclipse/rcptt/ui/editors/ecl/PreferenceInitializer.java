@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.RGB;
-
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
@@ -33,8 +33,12 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 				StringConverter.asString(new RGB(42, 0, 255)));
 		preferences.setDefault(EclEditorToolkit.Style.comment,
 				StringConverter.asString(new RGB(63, 127, 95)));
+		
+		
+		var defColor = Display.isSystemDarkTheme() ? new RGB(200, 200, 200) : new RGB(0, 0, 0);
+		
 		preferences.setDefault(EclEditorToolkit.Style.def,
-				StringConverter.asString(new RGB(0, 0, 0)));
+				StringConverter.asString(defColor));
 	}
 
 }
