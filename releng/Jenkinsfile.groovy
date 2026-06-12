@@ -212,7 +212,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
       _run_tests(
           "${getWorkspace()}/$RUNNER_DIR/org.eclipse.rcptt.runner.headless*-linux.gtk.x86_64.zip",
           "mockups/rcpttTests",
-          "-DmockupsRepository=https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository"
+          "-DmockupsRepository=https://download.eclipse.org/rcptt/dependencies/mockups/nightly/latest/repository/"
       )
     }
   }

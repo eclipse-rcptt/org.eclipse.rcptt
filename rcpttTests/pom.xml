@@ -20,7 +20,7 @@
     <version>2.6.2-SNAPSHOT</version>
     <relativePath>./pom-base.xml</relativePath>
   </parent>
-  <properties><mockup_repository>https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository/</mockup_repository></properties>
+  <properties><mockup_repository>https://download.eclipse.org/rcptt/dependencies/mockups/nightly/latest/repository/</mockup_repository></properties>
   <dependencies>
 		<dependency>
 			<groupId>org.jboss.byteman</groupId>
