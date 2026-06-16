@@ -13,6 +13,7 @@ package org.eclipse.rcptt.reporting.html.tests;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.rcptt.internal.core.RcpttPlugin;
 import org.eclipse.rcptt.reporting.core.IReportRenderer.IContentFactory;
-
-import com.google.common.base.Charsets;
 
 public class VolatileContentFactory implements IContentFactory {
 	private final Map<String, byte[]> data;
@@ -77,6 +76,6 @@ public class VolatileContentFactory implements IContentFactory {
 	}
 
 	public String read(String path) {
-		return new String(data.get(createKey(path)), Charsets.UTF_8);
+		return new String(data.get(createKey(path)), StandardCharsets.UTF_8);
 	}
 }

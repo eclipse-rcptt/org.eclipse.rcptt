@@ -16,9 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.CoreException;
@@ -26,8 +24,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.rcptt.tesla.ecl.impl.UIRunnable;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.junit.After;
 import org.junit.Test;
 
@@ -76,7 +76,46 @@ public class UIRunnableTest {
 	public interface ThrowingRunnable {
 	    void run() throws Exception;
 	}
+	
+	@Test
+	public void closeNewDialogs() {
+		UIRunnable<Void> subject = new UIRunnable<>() {
+			@Override
+			public Void run() throws CoreException {
+				MessageDialog.openInformation(PlatformUI.getWorkbench().getModalDialogShellProvider().getShell(), "Information", "Client code is blocked on this dialog. The dialog has to be closed for the task to complete.");
+				return null;
+			}
+		};
+		Thread thread = Thread.currentThread();
+		CompletableFuture<Void> result = CompletableFuture.runAsync(() -> {
+			try {
+				UIRunnable.exec(subject, 1_000, thread::isInterrupted);
+			} catch (CoreException e) {
+				throw new AssertionError(e);
+			}
+		});
+		waitFor(result, 2_000);
+	}
  
+	@Test
+	public void noopIsQuick() {
+		UIRunnable<Void> subject = new UIRunnable<>() {
+			@Override
+			public Void run() throws CoreException {
+				return null;
+			}
+		};
+		Thread thread = Thread.currentThread();
+		CompletableFuture<Void> result = CompletableFuture.runAsync(() -> {
+			try {
+				UIRunnable.exec(subject, 1_000, thread::isInterrupted);
+			} catch (CoreException e) {
+				throw new AssertionError(e);
+			}
+		});
+		waitFor(result, 2_000);
+	}
+	
 	private static void assertThrows(Class<?> clazz, ThrowingRunnable runnable) {
 		try {
 			runnable.run();
@@ -121,18 +160,4 @@ public class UIRunnableTest {
 		long spent = stop - start;
 		assertTrue("The cancellation should be quick", spent < 1000);
 	}
-	
-	private Closeable stopUIThread() {
-		CountDownLatch release = new CountDownLatch(1);
-		Display.getDefault().asyncExec(() -> {
-			try {
-				release.await();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new IllegalStateException(e);
-			}
-		});
-		return release::countDown;
-	}
-
 }

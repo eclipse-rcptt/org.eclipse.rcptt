@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.eclipse.debug.core.IStreamListener;
@@ -22,7 +23,6 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 
-import com.google.common.base.Charsets;
 import org.eclipse.rcptt.core.launching.events.AutBundleState;
 import org.eclipse.rcptt.internal.launching.Q7LaunchingPlugin;
 import org.eclipse.rcptt.launching.AutLaunch;
@@ -58,7 +58,7 @@ public class OutputCaptureLaunchListener implements AutLaunchListener {
 			if (listener == null) {
 				this.listener = new PrintStreamListener(new PrintStream(
 						new FileOutputStream(logFile, true), true,
-						Charsets.UTF_8.name()));
+						StandardCharsets.UTF_8.name()));
 			}
 
 			for (IProcess process : processes) {

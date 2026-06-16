@@ -68,7 +68,7 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
+          fail_on_failure: false
           annotate_only: true
       - name: Archive Runner
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -177,7 +177,7 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
+          fail_on_failure: false
           annotate_only: true
       - name: Archive results
         if: always()

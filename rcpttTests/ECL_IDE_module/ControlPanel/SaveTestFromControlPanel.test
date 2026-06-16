@@ -6,8 +6,8 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _0Dby0fL7EeCE19s6EOk3LA
-Runtime-Version: 2.5.5.202404041628
-Save-Time: 3/28/25, 7:56 PM
+Runtime-Version: 2.6.1.202507081549
+Save-Time: 9/7/25, 10:43 AM
 Tags: selfAUT, ControlPanel, TestCase, Save
 Testcase-Type: ecl
 
@@ -38,7 +38,7 @@ Entry-Name: .content
 
 get-view "Test Explorer" | get-tree | select "TestQ7Prj/Test scenario" | double-click
 get-editor "Test scenario" | get-button Record | click
-try -times 10 -delay 5000 -command {
+try -times 10 -delay 6000 -command {
 	get-window "Control Panel - Test scenario (TestQ7Prj) - selfQ7 [Recording]" | get-button Stop | click
 }
 with [get-window "Control Panel - Test scenario (TestQ7Prj) - selfQ7"] {

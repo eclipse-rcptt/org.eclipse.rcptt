@@ -13,6 +13,7 @@ package org.eclipse.rcptt.ecl.parser.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -23,7 +24,6 @@ import org.eclipse.rcptt.ecl.runtime.IPipe;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.ecl.runtime.ISession;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
 public class TestSession {
@@ -59,7 +59,7 @@ public class TestSession {
 
 	public static String toString(InputStream is) throws IOException {
 		try {
-			return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
+			return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
 		} finally {
 			is.close();
 		}

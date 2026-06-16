@@ -17,7 +17,7 @@
   <parent>
     <groupId>org.eclipse.rcptt.tests</groupId>
     <artifactId>base</artifactId>
-    <version>2.6.2-SNAPSHOT</version>
+    <version>2.7.5-SNAPSHOT</version>
     <relativePath>./pom-base.xml</relativePath>
   </parent>
   <properties><mockup_repository>https://download.eclipse.org/rcptt/dependencies/mockups/nightly/latest/repository/</mockup_repository></properties>

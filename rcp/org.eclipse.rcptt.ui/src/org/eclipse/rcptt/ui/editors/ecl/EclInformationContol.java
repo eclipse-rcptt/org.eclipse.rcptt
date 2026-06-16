@@ -12,6 +12,7 @@ package org.eclipse.rcptt.ui.editors.ecl;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -19,7 +20,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Shell;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.eclipse.rcptt.internal.ui.Q7UIPlugin;
 
@@ -70,7 +70,7 @@ public class EclInformationContol extends BrowserInformationControl {
 			if (url == null) {
 				return styles = "";
 			}
-			return styles = Resources.toString(url, Charsets.UTF_8);
+			return styles = Resources.toString(url, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			Q7UIPlugin.log(e);
 			return styles = "";

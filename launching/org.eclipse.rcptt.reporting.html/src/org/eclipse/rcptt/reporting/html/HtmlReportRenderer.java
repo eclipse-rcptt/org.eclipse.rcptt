@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.reporting.html;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.compose;
 import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.base.Predicates.not;
@@ -22,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 
 import org.eclipse.core.runtime.CoreException;
@@ -38,7 +38,6 @@ import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Report;
 import org.eclipse.rcptt.sherlock.core.model.sherlock.report.Screenshot;
 import org.eclipse.rcptt.util.FileUtil;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -57,7 +56,7 @@ public class HtmlReportRenderer implements IReportRenderer {
 	static String loadAsString(String path) {
 		try {
 			byte[] content = FileUtil.getStreamContent(HtmlReportRenderer.class.getResourceAsStream(path));
-			return new String(content, UTF_8);
+			return new String(content, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load " + path);
 		}
@@ -69,7 +68,7 @@ public class HtmlReportRenderer implements IReportRenderer {
 		PrintWriter writer = null;
 		try {
 			OutputStream stream = factory.createFileStream(reportName + ".html");
-			writer = new PrintWriter(new OutputStreamWriter(stream, Charsets.UTF_8));
+			writer = new PrintWriter(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
 			renderReport(writer, reportList, factory);
 		} catch (Exception e) {
 			return Plugin.UTILS.createError(e);

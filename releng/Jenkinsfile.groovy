@@ -90,6 +90,7 @@ class Build implements Serializable {
   private final String[] PLATFORMS=["linux.gtk.x86_64", "macosx.cocoa.x86_64", "macosx.cocoa.aarch64", "win32.win32.x86_64"];
 
   private final def script
+  private String mvn_args;
 
   String YAML_BUILD_AGENT="""
 apiVersion: v1
@@ -115,6 +116,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
 
   Build(def script) {
     this.script = script
+    this.mvn_args = ""
   }
 
   void build_and_test(Boolean sign) {
@@ -384,7 +386,7 @@ $SSH_DEPLOY_CONTAINER_VOLUMES
   }
   
   private void mvn(String arguments) {
-    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + arguments)
+    sh("mvn -Dmaven.repo.local=${getWorkspace()}/m2 -Ddash.batch=200 -Dtycho.localArtifacts=ignore --errors --batch-mode --no-transfer-progress " + this.mvn_args + " " + arguments)
   } 
 
 }

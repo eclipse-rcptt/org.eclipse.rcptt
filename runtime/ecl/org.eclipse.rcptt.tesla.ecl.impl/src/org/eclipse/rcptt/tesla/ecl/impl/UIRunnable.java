@@ -158,7 +158,7 @@ public abstract class UIRunnable<T> {
 				}
 				long time = System.currentTimeMillis();
 				if (time > halfWay) {
-					if (processed.get().equals(RunningState.Starting)) {
+					if (processed.get().equals(RunningState.Starting) || processed.get().equals(RunningState.Execution)) {
 						// try to close all modal dialogs and clean job
 						// processor
 						display.asyncExec(new Runnable() {
@@ -173,7 +173,7 @@ public abstract class UIRunnable<T> {
 				if (time > stop) {
 					// Lets also capture all thread dump.
 					storeTimeoutInReport(display, collector);
-					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout during execution of " + runnable, new RuntimeException()) {
+					MultiStatus status = new MultiStatus(PLUGIN_ID, IProcess.TIMEOUT_CODE, "Timeout (" + timeout_ms + "ms) during execution of " + runnable, new RuntimeException()) {
 						{
 							setSeverity(ERROR);
 						}

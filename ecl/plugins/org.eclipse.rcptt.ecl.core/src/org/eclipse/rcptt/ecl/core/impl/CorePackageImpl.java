@@ -2372,7 +2372,7 @@ public class CorePackageImpl extends EPackageImpl implements CorePackage {
 		   source,
 		   new String[] {
 			   "description", "Corresponds command from <code>then</code> branch if an object from the <code>input</code> matches the <code>condition</code> object.",
-			   "returns", "An internal object describing the case.",
+			   "returns", "An internal object describing the case. Can only be used by a containing <code>switch</code> command.",
 			   "example", "list 1 2 3 | get 0 | switch [case 1 {\r\n\tlog -message \"First item is 1\"\r\n}] [case 2 {\n\tlog -message \"First item is 2\"\n}]"
 		   });
 		addAnnotation
@@ -2385,7 +2385,7 @@ public class CorePackageImpl extends EPackageImpl implements CorePackage {
 		  (getCase_Then(),
 		   source,
 		   new String[] {
-			   "description", "Branch being executed when <code>input</code> matches the object specified in <code>condition</code>"
+			   "description", "Code to execute. <code>input</code> is propagated from the command to this branch code."
 		   });
 		addAnnotation
 		  (switchEClass,

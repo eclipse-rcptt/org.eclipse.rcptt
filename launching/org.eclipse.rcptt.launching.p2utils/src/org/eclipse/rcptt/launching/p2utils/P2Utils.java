@@ -54,7 +54,6 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.pde.core.target.ITargetPlatformService;
 import org.eclipse.pde.internal.core.PDECore;
-import org.eclipse.rcptt.launching.injection.UpdateSite;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -209,12 +208,12 @@ public class P2Utils {
 		return queries;
 	}
 
-	public static IQuery<IInstallableUnit> createQuery(UpdateSite site) {
+	public static IQuery<IInstallableUnit> createQuery(Collection<String> unitExpressions) {
 		IQuery<IInstallableUnit> finalQuery = null;
-		if (site.isAllUnits()) {
+		if (unitExpressions.isEmpty()) {
 			finalQuery = QueryUtil.ALL_UNITS;
 		} else {
-			List<IQuery<IInstallableUnit>> items = P2Utils.mapUnitsToQuery(new HashSet<String>(site.getUnits()));
+			List<IQuery<IInstallableUnit>> items = P2Utils.mapUnitsToQuery(Set.copyOf(unitExpressions));
 			finalQuery = QueryUtil.createLatestQuery(QueryUtil.createCompoundQuery(items, false));
 		}
 		return finalQuery;
