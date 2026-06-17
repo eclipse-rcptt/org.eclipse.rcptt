@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.tesla.swt.reflection;
 
 import static org.eclipse.rcptt.tesla.core.TeslaFeatures.isProtectedEnabled;
+import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PROTECTED;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
@@ -525,6 +526,10 @@ public class JavaMembersHelper {
 			}
 			Field field = ReflectionUtil.findField(object.getClass(),
 					memberName);
+			if (field == null) {
+				throw new IllegalArgumentException(format("Class: %s, field: %s",
+						object.getClass(), memberName));
+			}
 			Object value = field.get(object);
 			return new PropertyValue(object, value, memberName, field.getType());
 		}
@@ -546,6 +551,10 @@ public class JavaMembersHelper {
 
 			Method method = ReflectionUtil.findMethod(object.getClass(),
 					memberName);
+			if (method == null) {
+				throw new IllegalArgumentException(format("Class: %s, method: %s",
+						object.getClass(), memberName));
+			}
 			Object value = method.invoke(object);
 			return new PropertyValue(object, value, memberName,
 					method.getReturnType());
