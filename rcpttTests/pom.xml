@@ -40,7 +40,7 @@
     <runner-version>2.9.0-SNAPSHOT</runner-version>
     <autRepository>file://${basedir}/../modules/repository/target/repository</autRepository>
     <runtimeRepository>file:/${user.dir}/runtime/updates/org.eclipse.rcptt.updates.runtime.e4x/q7</runtimeRepository>
-    <mockup_repository>https://ci.eclipse.org/rcptt/job/mockups/lastSuccessfulBuild/artifact/repository/target/repository/</mockup_repository>
+    <mockup_repository>https://download.eclipse.org/rcptt/dependencies/mockups/nightly/latest/repository/</mockup_repository>
   </properties>
 	<modules>
 		<module>rcptt_ide</module>
