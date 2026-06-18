@@ -92,6 +92,7 @@ public class SetTextImpl extends CommandImpl implements SetText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -118,6 +119,7 @@ public class SetTextImpl extends CommandImpl implements SetText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -130,6 +132,7 @@ public class SetTextImpl extends CommandImpl implements SetText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -139,6 +142,7 @@ public class SetTextImpl extends CommandImpl implements SetText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;

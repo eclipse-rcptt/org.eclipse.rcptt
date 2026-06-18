@@ -228,8 +228,7 @@ public final class SWTUIPlayer {
 				this.ignoreWindows[i++] = wrap(shell);
 			}
 		}
-		collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
+		collector = new UIJobCollector(Job.getJobManager());
 		timerListener = getTimerExecHelper();
 		TeslaTimerExecManager.getManager().addEventListener(timerListener);
 	}
@@ -703,12 +702,10 @@ public final class SWTUIPlayer {
 					currIdx++;
 				}
 			} catch (Exception e) {
-				// Skip brokeb parts.
+				// Skip broken parts.
 				TeslaCore.log(e);
 			}
 		}
-
-		TeslaCore.log("Can not find view by pattern \"" + pattern + "\". Activating views...");
 
 		// Not found, lets go with resolve of view parts, it will initialize
 		// titles.
@@ -727,6 +724,7 @@ public final class SWTUIPlayer {
 				currIdx++;
 			}
 		}
+		TeslaCore.log("Can not find view by pattern \"" + pattern + "\".");
 		return null;
 	}
 
@@ -2216,7 +2214,7 @@ public final class SWTUIPlayer {
 	}
 
 	private void shutdown() {
-		Job.getJobManager().removeJobChangeListener(collector);
+		collector.close();
 		BrowserManager.getInstance().clear();
 		TeslaTimerExecManager.getManager().removeEventListener(timerListener);
 	}

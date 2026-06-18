@@ -11,12 +11,16 @@
 package org.eclipse.rcptt.internal.launching.ext;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.build.IPDEBuildConstants;
@@ -72,6 +76,17 @@ public class PDEUtils {
 	
 	public static Stream<String> startupPackageNames() {
 		return Stream.of(IPDEBuildConstants.BUNDLE_EQUINOX_LAUNCHER);
+	}
+	
+	public static Optional<String> getExecutionEnvironmentId(ILaunchConfiguration configuration) throws CoreException {
+		String jre = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, (String) null);
+		if (jre == null) {
+			return Optional.empty();
+		}
+		
+		// Launch configuration has a JRE or EE set, throw exception if associated vm not found
+		IPath jrePath = IPath.fromPortableString(jre);
+		return Optional.ofNullable(JavaRuntime.getExecutionEnvironmentId(jrePath));
 	}
 
 }

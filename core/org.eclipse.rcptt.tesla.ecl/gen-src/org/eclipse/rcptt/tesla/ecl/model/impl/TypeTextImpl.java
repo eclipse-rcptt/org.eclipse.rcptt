@@ -113,6 +113,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -139,6 +140,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -151,6 +153,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -160,6 +163,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;
@@ -172,6 +176,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isDisplay() {
 		return display;
 	}
@@ -181,6 +186,7 @@ public class TypeTextImpl extends CommandImpl implements TypeText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDisplay(boolean newDisplay) {
 		boolean oldDisplay = display;
 		display = newDisplay;

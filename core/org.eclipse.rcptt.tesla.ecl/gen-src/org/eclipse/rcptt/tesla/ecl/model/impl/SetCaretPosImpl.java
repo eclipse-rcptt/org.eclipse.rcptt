@@ -113,6 +113,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -139,6 +140,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -151,6 +153,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -160,6 +163,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -172,6 +176,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getColumn() {
 		return column;
 	}
@@ -181,6 +186,7 @@ public class SetCaretPosImpl extends CommandImpl implements SetCaretPos {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(int newColumn) {
 		int oldColumn = column;
 		column = newColumn;

@@ -74,6 +74,7 @@ public class ApplyCellEditImpl extends CellEditImpl implements ApplyCellEdit {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isDeactivate() {
 		return deactivate;
 	}
@@ -83,6 +84,7 @@ public class ApplyCellEditImpl extends CellEditImpl implements ApplyCellEdit {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDeactivate(boolean newDeactivate) {
 		boolean oldDeactivate = deactivate;
 		deactivate = newDeactivate;

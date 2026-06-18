@@ -134,6 +134,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -160,6 +161,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -172,6 +174,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -181,6 +184,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -193,6 +197,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getColumn() {
 		return column;
 	}
@@ -202,6 +207,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(int newColumn) {
 		int oldColumn = column;
 		column = newColumn;
@@ -214,6 +220,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getWith() {
 		return with;
 	}
@@ -223,6 +230,7 @@ public class HoverTextImpl extends CommandImpl implements HoverText {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWith(String newWith) {
 		String oldWith = with;
 		with = newWith;

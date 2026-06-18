@@ -93,6 +93,7 @@ public class OptionsImpl extends CommandImpl implements Options {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isAllowStatusDialog() {
 		return allowStatusDialog;
 	}
@@ -102,6 +103,7 @@ public class OptionsImpl extends CommandImpl implements Options {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAllowStatusDialog(boolean newAllowStatusDialog) {
 		boolean oldAllowStatusDialog = allowStatusDialog;
 		allowStatusDialog = newAllowStatusDialog;
@@ -114,6 +116,7 @@ public class OptionsImpl extends CommandImpl implements Options {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Command getCommand() {
 		if (command != null && command.eIsProxy()) {
 			InternalEObject oldCommand = (InternalEObject)command;
@@ -140,6 +143,7 @@ public class OptionsImpl extends CommandImpl implements Options {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCommand(Command newCommand) {
 		Command oldCommand = command;
 		command = newCommand;

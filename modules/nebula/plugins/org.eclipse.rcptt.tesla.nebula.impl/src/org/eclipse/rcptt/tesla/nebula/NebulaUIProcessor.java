@@ -45,6 +45,8 @@ import org.eclipse.rcptt.tesla.core.protocol.ClickColumn;
 import org.eclipse.rcptt.tesla.core.protocol.DoubleClick;
 import org.eclipse.rcptt.tesla.core.protocol.DragCommand;
 import org.eclipse.rcptt.tesla.core.protocol.ElementKind;
+import org.eclipse.rcptt.tesla.core.protocol.GetText;
+import org.eclipse.rcptt.tesla.core.protocol.GetTextResponse;
 import org.eclipse.rcptt.tesla.core.protocol.IElementProcessorMapper;
 import org.eclipse.rcptt.tesla.core.protocol.ProtocolPackage;
 import org.eclipse.rcptt.tesla.core.protocol.SelectCommand;
@@ -54,6 +56,7 @@ import org.eclipse.rcptt.tesla.core.protocol.SetWidth;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Command;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Element;
 import org.eclipse.rcptt.tesla.core.protocol.raw.Response;
+import org.eclipse.rcptt.tesla.core.protocol.raw.ResponseStatus;
 import org.eclipse.rcptt.tesla.core.ui.Color;
 import org.eclipse.rcptt.tesla.core.ui.Selection;
 import org.eclipse.rcptt.tesla.core.ui.UiFactory;
@@ -64,6 +67,8 @@ import org.eclipse.rcptt.tesla.ecl.nebula.NebulaGridItem;
 import org.eclipse.rcptt.tesla.internal.core.AbstractTeslaClient;
 import org.eclipse.rcptt.tesla.internal.ui.SWTElementMapper;
 import org.eclipse.rcptt.tesla.internal.ui.player.ISWTModelMapperExtension;
+import org.eclipse.rcptt.tesla.internal.ui.player.ItemUIElement;
+import org.eclipse.rcptt.tesla.internal.ui.player.PlayerTextUtils;
 import org.eclipse.rcptt.tesla.internal.ui.player.PlayerWrapUtils;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTEvents;
 import org.eclipse.rcptt.tesla.internal.ui.player.SWTModelMapper;
@@ -140,7 +145,9 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 			SelectData data = ((SelectCommand) command).getData();
 			SWTUIElement parent = getMapper().get(data.getParent());
 
-			GridScrollingHelper.scrollGridFor(data, parent);
+			if (!GridScrollingHelper.scrollGridFor(data, parent)) {
+				return new PreExecuteStatus(false);
+			}
 		}
 		// for SetSelectionEx see SelectingParts.mouseActions
 		else if (command instanceof SetSelectionRange) {
@@ -245,6 +252,19 @@ public class NebulaUIProcessor extends SWTUIProcessor implements
 			return okResponse();
 		}
 		return null;
+	}
+	
+	
+	@Override
+	protected Response handleGetText(GetText command) {
+		final SWTUIElement element = getMapper().get(command.getElement());
+		final GetTextResponse response = factory.createGetTextResponse();
+		if (element.unwrap() instanceof GridItem) {
+			response.setText(element.getText());
+		} else {
+			return super.handleGetText(command);
+		}
+		return response;
 	}
 
 	@Override

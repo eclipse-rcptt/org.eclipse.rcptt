@@ -79,6 +79,7 @@ public class ControlNotFoundImpl extends CommandImpl implements ControlNotFound 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -88,6 +89,7 @@ public class ControlNotFoundImpl extends CommandImpl implements ControlNotFound 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;

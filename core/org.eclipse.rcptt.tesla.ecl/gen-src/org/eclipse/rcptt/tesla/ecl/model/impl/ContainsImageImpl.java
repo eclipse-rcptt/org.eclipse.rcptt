@@ -101,6 +101,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getImageURI() {
 		return imageURI;
 	}
@@ -109,6 +110,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setImageURI(String newImageURI) {
 		String oldImageURI = imageURI;
 		imageURI = newImageURI;
@@ -120,6 +122,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getRawImage() {
 		return rawImage;
 	}
@@ -128,6 +131,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRawImage(String newRawImage) {
 		String oldRawImage = rawImage;
 		rawImage = newRawImage;
@@ -139,6 +143,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -163,6 +168,7 @@ public class ContainsImageImpl extends CommandImpl implements ContainsImage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;

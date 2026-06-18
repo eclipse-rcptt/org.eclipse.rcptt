@@ -10,7 +10,9 @@
 + An OpenJDK version 21 is required.
 + Clone the repository: `git clone -b master git@github.com:eclipse-rcptt/org.eclipse.rcptt.git`
 + Maven Tycho Build: run `build.sh` on Unix or or `build.cmd` in Windows
-+ For IDE builds set the active target platform to the latest one in `releng/target-platforms`.
+  + When graphical context is unavailable (headless builds) skip tests with argument `-Dmaven.test.skip=true`
+  + Maven  uses `<repository>` declarations in project file (does not use PDE target definitions below).
++ For interactive IDE experience, install Eclipse IDE for Eclipse Commiters and configure PDE's active target platform to the latest target definition in `releng/target-platforms`.
 
 ### Coding standards
 * Coding style: please use the `formatter.xml` in the top directory.
@@ -18,18 +20,11 @@
 ## Eclipse Contributor Agreement
 
 Before your contribution can be accepted by the project team contributors must
-electronically sign the Eclipse Contributor Agreement (ECA).
-
+electronically sign the Eclipse Contributor Agreement (ECA). For more information, please see the Eclipse Committer Handbook:
+* https://www.eclipse.org/projects/handbook/#resources-commit
 * http://www.eclipse.org/legal/ECA.php
 
-Commits that are provided by non-committers must have a Signed-off-by field in
-the footer indicating that the author is aware of the terms by which the
-contribution has been provided to the project. The non-committer must
-additionally have an Eclipse Foundation account and must have a signed Eclipse
-Contributor Agreement (ECA) on file.
 
-For more information, please see the Eclipse Committer Handbook:
-https://www.eclipse.org/projects/handbook/#resources-commit
 
 ## Contact
 

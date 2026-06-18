@@ -209,6 +209,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -218,6 +219,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -230,6 +232,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -256,6 +259,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -268,6 +272,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -277,6 +282,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -289,6 +295,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -315,6 +322,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -327,6 +335,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -336,6 +345,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -348,6 +358,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -357,6 +368,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;
@@ -369,6 +381,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -378,6 +391,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -390,6 +404,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getKind() {
 		return kind;
 	}
@@ -399,6 +414,7 @@ public class GetControlImpl extends CommandImpl implements GetControl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(String newKind) {
 		String oldKind = kind;
 		kind = newKind;

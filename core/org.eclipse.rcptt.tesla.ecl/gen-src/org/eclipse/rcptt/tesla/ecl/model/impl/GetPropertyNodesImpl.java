@@ -82,6 +82,7 @@ public class GetPropertyNodesImpl extends CommandImpl implements GetPropertyNode
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Element getElement() {
 		if (element != null && element.eIsProxy()) {
 			InternalEObject oldElement = (InternalEObject)element;
@@ -106,6 +107,7 @@ public class GetPropertyNodesImpl extends CommandImpl implements GetPropertyNode
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setElement(Element newElement) {
 		Element oldElement = element;
 		element = newElement;
@@ -117,6 +119,7 @@ public class GetPropertyNodesImpl extends CommandImpl implements GetPropertyNode
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getNodePath() {
 		return nodePath;
 	}
@@ -125,6 +128,7 @@ public class GetPropertyNodesImpl extends CommandImpl implements GetPropertyNode
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setNodePath(String newNodePath) {
 		String oldNodePath = nodePath;
 		nodePath = newNodePath;

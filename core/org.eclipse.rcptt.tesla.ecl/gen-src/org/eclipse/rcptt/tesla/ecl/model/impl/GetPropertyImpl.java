@@ -134,6 +134,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EObject getObject() {
 		if (object != null && object.eIsProxy()) {
 			InternalEObject oldObject = (InternalEObject)object;
@@ -160,6 +161,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setObject(EObject newObject) {
 		EObject oldObject = object;
 		object = newObject;
@@ -172,6 +174,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -181,6 +184,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setName(String newName) {
 		String oldName = name;
 		name = newName;
@@ -193,6 +197,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -202,6 +207,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -214,6 +220,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isRaw() {
 		return raw;
 	}
@@ -223,6 +230,7 @@ public class GetPropertyImpl extends CommandImpl implements GetProperty {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRaw(boolean newRaw) {
 		boolean oldRaw = raw;
 		raw = newRaw;

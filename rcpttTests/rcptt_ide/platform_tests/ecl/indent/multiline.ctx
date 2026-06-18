@@ -1,0 +1,66 @@
+--- RCPTT testcase ---
+Format-Version: 1.0
+Context-Type: org.eclipse.rcptt.ctx.workspace
+Element-Name: multiline
+Element-Type: context
+Element-Version: 2.0
+Id: _2QyEIBx6EfGbha--mGlZ2A
+Runtime-Version: 2.8.0.qualifier
+Save-Time: 3/10/26, 4:15 PM
+
+------=_contents/multiline_test/rcptt.properties-79067b66-fef9-3014-b7ed-7b88815e9923
+Content-Type: q7/binary
+Entry-Name: contents/multiline_test/rcptt.properties
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAABNzs0KgkAUhuH9XMVc
+QMe/RMRlYeHCMJW2MehRJhy1mWPUrjvqnrqSjEBaP3wvHwDwfJuVJSc0VAmDHADYbtBKEJxQGzn0EXct
+h8UdKuwJDkJhxDM9XLAiXiCR7FuzcPkYZx5/nCKJWpBYdCl6czGpI37WTlu0m3sQN/vKS861G4dpe2T5
+1JNU+D8ILce6TqKTjUTNCnFDKOX3y9p2HdsLVtyPXP/9fGUpYx9QSwcIdVPv+6sAAADZAAAAUEsBAhQA
+FAAICAgAAAAhAHVT7/urAAAA2QAAAAgACQAAAAAAAAAAAAAAAAAAAC5jb250ZW50VVQFAAEAAAAAUEsF
+BgAAAAABAAEAPwAAAOoAAAAAAA==
+------=_contents/multiline_test/rcptt.properties-79067b66-fef9-3014-b7ed-7b88815e9923--
+------=_contents/multiline_test/multiline.test-fe1a0ff4-73ad-342d-a034-101f1d49bf41
+Content-Type: q7/binary
+Entry-Name: contents/multiline_test/multiline.test
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAACdkcFugzAMhu95ijzA
+DAkppSDtsopNPXTqGJp2QxmYKlIIawgVve2N9k57kpUJ6H0+Wb/sz79tAKDZ9pDn1GHnStkhBQDy2NpG
+OnhD26nWJJR7jKQaGzQOnmWDCW167ZRWBhc9v3xe9RmzyAtDjIzBoTVSQ4Y1WjTltYPsqoQW7nx6bx+G
+dVo/lcGuqHi62R9fSNYbpxq8UQJv4zHv1EutaoWWvMozQq5GS8LnzA/Wd3SV8PDn6/uwJ/nkZjKHpSYE
+/uK+8MrWuNEhk1GwEpJBFFYCRBXWEEcxh1DEFTIMPyJZku1UPG85OH+kpcbZy3SSGUiIbo90vA3ltzT4
+3+DrM34BUEsHCMA42DYDAQAApAEAAFBLAQIUABQACAgIAAAAIQDAONg2AwEAAKQBAAAIAAkAAAAAAAAA
+AAAAAAAAAAAuY29udGVudFVUBQABAAAAAFBLBQYAAAAAAQABAD8AAABCAQAAAAA=
+------=_contents/multiline_test/multiline.test-fe1a0ff4-73ad-342d-a034-101f1d49bf41--
+------=_contents/multiline_test/.settings/org.eclipse.core.resources.prefs-4f64bdd1-8ef7-37c6-9138-8e34a01a65ee
+Content-Type: q7/binary
+Entry-Name: contents/multiline_test/.settings/org.eclipse.core.resources.prefs
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAABLTc7JLChO1SsoSk1L
+LUrNS04t1itLLSrOzM+zNeQC8vNTMvPS9W0KivKzUpNL7GxDQ9x0LbgAUEsHCA3o3k03AAAANwAAAFBL
+AQIUABQACAgIAAAAIQAN6N5NNwAAADcAAAAIAAkAAAAAAAAAAAAAAAAAAAAuY29udGVudFVUBQABAAAA
+AFBLBQYAAAAAAQABAD8AAAB2AAAAAAA=
+------=_contents/multiline_test/.settings/org.eclipse.core.resources.prefs-4f64bdd1-8ef7-37c6-9138-8e34a01a65ee--
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf
+Content-Type: q7/binary
+Entry-Name: .q7.content
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAACVksFOhDAQhu/7FKR3
+WuVgDAE2ajabPXjwpPGywTKw1dKSdhB8ewcWCNlsYryV8s03nb9Ntn2tg29wXlmTslt+wwIw0hbKVClr
+sQzv2TbbJNZVHKRWjQfuZIPIJfa8s+7LN7mE+HVePVmD0GPQ1ypetNGgpUbGx7SfshNiEwvRdR23dcVJ
+Lt6eDzPyR6+lfGaG8pETxImFY4HJa6LrVqPSytCGKlJ2jF5+dofH/m5X7j9OeRjWe/0ePbBsEwSJHE5v
+cFjTV+PsJ0j0l6Ijgkd2hggrlYaZ4VMNE1d/Lwo+Kq5D55lJ1IBDBX6NWV1QqHMzD4h0UX45y4VpnaS0
+juIEb1snwZMeyrVZTOppdDHPPsYillwS8d+XkG1+AVBLBwgQsImxHAEAAGQCAABQSwECFAAUAAgICAAA
+ACEAELCJsRwBAABkAgAACAAJAAAAAAAAAAAAAAAAAAAALmNvbnRlbnRVVAUAAQAAAABQSwUGAAAAAAEA
+AQA/AAAAWwEAAAAA
+------=_.q7.content-3d2e0690-ce48-3609-83e0-c704d49f1eaf--
+------=_contents/multiline_test/.project-cfedc2ee-0141-32c2-b46c-7adf187b9695
+Content-Type: q7/binary
+Entry-Name: contents/multiline_test/.project
+
+UEsDBBQACAgIAAAAIQAAAAAAAAAAAAAAAAAIAAkALmNvbnRlbnRVVAUAAQAAAAB1UMtuwjAQPMNXRL5j
+0xM9mERqET9QOFeps4qM/GK9qfr52LGJChK3mdnZnbFl92dN8wsYtXd79sa3rAGn/KDduGfn03Hzzrp2
+LQP6Cyg6QFSoAyVzu15J11to7WRIG+3gmyCSFLOYhspbC45aKe4oifVOzFj8Jz+TNsNXAJVIZZ9prXdD
+FmqUx5GDMjpE4KgCEVcegc9uQH7dfRS0lEiLPY5TTo+FigcuxVNSFWqRlEoTQrEW/KrDDIslp8/WfG65
+sDz34Q9vUEsHCAgf0qXHAAAAgAEAAFBLAQIUABQACAgIAAAAIQAIH9KlxwAAAIABAAAIAAkAAAAAAAAA
+AAAAAAAAAAAuY29udGVudFVUBQABAAAAAFBLBQYAAAAAAQABAD8AAAAGAQAAAAA=
+------=_contents/multiline_test/.project-cfedc2ee-0141-32c2-b46c-7adf187b9695--

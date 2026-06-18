@@ -101,6 +101,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -125,6 +126,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -136,6 +138,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -144,6 +147,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -155,6 +159,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getWith() {
 		return with;
 	}
@@ -163,6 +168,7 @@ public class HoverRulerImpl extends CommandImpl implements HoverRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWith(String newWith) {
 		String oldWith = with;
 		with = newWith;

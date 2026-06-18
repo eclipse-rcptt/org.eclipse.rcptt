@@ -34,6 +34,7 @@ import org.eclipse.rcptt.tesla.nebula.grid.parts.ItemCell;
 import org.eclipse.rcptt.tesla.nebula.grid.parts.RowHeader;
 import org.eclipse.rcptt.tesla.ui.IViewerItem;
 import org.eclipse.rcptt.util.Predicate;
+import org.eclipse.rcptt.util.TableTreeItemPathUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -202,7 +203,7 @@ public class NebulaViewers {
 			if (items == null) {
 				return null;
 			}
-			current = new PathSelectorPart(part).findIn(items);
+			current = new PathSelectorPart(TableTreeItemPathUtil.excludeColumnName(part)).findIn(items);
 			if (current == null)
 				return null;
 		}

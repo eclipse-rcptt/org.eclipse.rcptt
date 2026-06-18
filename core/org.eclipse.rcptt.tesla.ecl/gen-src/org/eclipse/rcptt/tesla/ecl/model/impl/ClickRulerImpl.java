@@ -120,6 +120,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -144,6 +145,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -155,6 +157,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -163,6 +166,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -174,6 +178,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getButton() {
 		return button;
 	}
@@ -182,6 +187,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(String newButton) {
 		String oldButton = button;
 		button = newButton;
@@ -193,6 +199,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getWith() {
 		return with;
 	}
@@ -201,6 +208,7 @@ public class ClickRulerImpl extends CommandImpl implements ClickRuler {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWith(String newWith) {
 		String oldWith = with;
 		with = newWith;
