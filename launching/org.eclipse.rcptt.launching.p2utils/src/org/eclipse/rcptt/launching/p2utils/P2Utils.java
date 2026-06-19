@@ -54,6 +54,7 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.pde.core.target.ITargetPlatformService;
 import org.eclipse.pde.internal.core.PDECore;
+import org.eclipse.pde.internal.core.target.P2TargetUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -76,7 +77,7 @@ public class P2Utils {
 	}
 
 	private static <T> T getPDECoreService(Class<T> serviceClass) {
-		BundleContext context = FrameworkUtil.getBundle(P2Utils.class).getBundleContext();
+		BundleContext context = FrameworkUtil.getBundle(ITargetPlatformService.class).getBundleContext();
 		ServiceReference<T> reference = context.getServiceReference(serviceClass);
 		try {
 			return context.getService(reference);
@@ -95,8 +96,8 @@ public class P2Utils {
 		return getRepositoryManager(getProvisioningAgent());
 	}
 
-	public static IProvisioningAgent getProvisioningAgent() {
-		return getPDECoreService(IProvisioningAgent.class);
+	public static IProvisioningAgent getProvisioningAgent() throws CoreException {
+		return P2TargetUtils.getAgent();
 	}
 
 	/**
