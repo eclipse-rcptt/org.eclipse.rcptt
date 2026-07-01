@@ -5,6 +5,7 @@
 - [Search and report issues](https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues)
   - Be sure to search for existing bugs before you create another one.
 - [Get source code](https://github.com/eclipse-rcptt/org.eclipse.rcptt)
+- [Submit PR](https://github.com/eclipse-rcptt/org.eclipse.rcptt/pulls)
 
 ### Building the source
 + An OpenJDK version 21 is required.
