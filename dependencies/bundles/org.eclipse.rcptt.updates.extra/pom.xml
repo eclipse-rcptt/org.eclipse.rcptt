@@ -55,7 +55,7 @@
 	<configuration>
 	  <source>
 	    <repository>
-	      <url>https://download.eclipse.org/tools/orbit/downloads/drops/R20211213173813/repository/</url>
+	      <url>https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/release/4.29.0/</url>
 	      <layout>p2</layout>
 	    </repository>
 	  </source>
@@ -74,6 +74,7 @@
 	    <iu><id>org.apache.poi.ooxml.schemas</id></iu>
 	    <iu><id>org.apache.xmlbeans</id></iu>
 	    <iu><id>org.dom4j</id></iu>
+	    <iu><id>org.apache.commons.commons-codec</id></iu>
 	  </ius>
 	</configuration>
       </plugin>

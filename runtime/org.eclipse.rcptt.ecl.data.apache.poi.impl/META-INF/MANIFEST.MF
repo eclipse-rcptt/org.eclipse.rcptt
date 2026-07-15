@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Automatic-Module-Name: org.eclipse.rcptt.ecl.data.apache.poi.impl
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.rcptt.ecl.data.apache.poi.impl;singleton:=true
 Bundle-Version: 2.9.0.qualifier
@@ -17,5 +18,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rcptt.ecl.filesystem;bundle-version="[2.9.0,3.0.0)",
  org.apache.poi;bundle-version="[4.0.0,5.0.0)",
  org.apache.poi.ooxml;bundle-version="[4.0.0,5.0.0)",
- org.apache.commons.codec
+ org.apache.commons.commons-codec
 Bundle-ActivationPolicy: lazy
