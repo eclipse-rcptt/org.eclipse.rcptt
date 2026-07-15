@@ -76,6 +76,7 @@
 	    <iu><id>org.dom4j</id></iu>
 	    <iu><id>org.apache.commons.commons-codec</id></iu>
 	    <iu><id>org.apache.commons.collections4</id></iu>
+	    <iu><id>org.apache.commons.math3</id></iu>
 	  </ius>
 	</configuration>
       </plugin>
