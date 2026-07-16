@@ -6,13 +6,13 @@ Element-Type: testcase
 Element-Version: 3.0
 External-Reference: 
 Id: _zBuAkIBmEfGWdfNMhXOVOQ
-Runtime-Version: 2.9.0.202603260152
-Save-Time: 7/15/26, 8:05 PM
+Runtime-Version: 2.9.0.202607151846
+Save-Time: 7/16/26, 5:21 PM
 Testcase-Type: ecl
 
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac
 Content-Type: text/ecl
 Entry-Name: .content
 
-read-excel-file "workspace://project1/test.xslsx" | get pageName | log
+read-excel-file "workspace:/project1/test.xlsx" | get pageName | log
 ------=_.content-0a7243a0-75d3-3d5f-9791-539de0e5b7ac--

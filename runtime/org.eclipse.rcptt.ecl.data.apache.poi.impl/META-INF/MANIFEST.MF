@@ -19,6 +19,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.poi;bundle-version="[4.0.0,5.0.0)",
  org.apache.poi.ooxml;bundle-version="[4.0.0,5.0.0)",
  org.apache.commons.commons-codec,
+ org.apache.commons.commons-compress,
  org.apache.commons.collections4,
  org.apache.commons.math3
 Bundle-ActivationPolicy: lazy
