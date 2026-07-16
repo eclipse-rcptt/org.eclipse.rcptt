@@ -24,7 +24,7 @@
   </licenses>
   
   <properties>
-    <tycho-version>4.0.13</tycho-version>
+    <tycho-version>5.0.3</tycho-version>
     <tycho-groupid>org.eclipse.tycho</tycho-groupid>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ajdt43repository>https://download.eclipse.org/rcptt/dependencies/ajdt/nightly/2.2/</ajdt43repository>
