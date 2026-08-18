@@ -33,6 +33,7 @@
     <eclipse-pde-repository>https://download.eclipse.org/staging/2026-06</eclipse-pde-repository>
     <ecl-platform-repository>https://download.eclipse.org/releases/2021-12</ecl-platform-repository>
     <ecl.executionEnvironment>JavaSE-17</ecl.executionEnvironment> <!-- Should be compatible with ecl-platform-repository -->
+    <ide.executionEnvironment>JavaSE-21</ide.executionEnvironment> <!-- BREE for the IDE/product reactor; overridden by the latestPlatform profile -->
     <aspectj_version>1.14.0</aspectj_version>
     <aspectj_dep>1.9.7</aspectj_dep>
     <ajJavaSource>1.8</ajJavaSource>
@@ -417,7 +418,8 @@
 			<id>latestPlatform</id>
 			<properties>
 				<ecl-platform-repository>${eclipse-pde-repository}</ecl-platform-repository>
-				<ecl.executionEnvironment>JavaSE-21</ecl.executionEnvironment> 
+				<ecl.executionEnvironment>JavaSE-26</ecl.executionEnvironment>
+				<ide.executionEnvironment>JavaSE-26</ide.executionEnvironment>
 			</properties>
 		</profile>
   </profiles>

@@ -94,7 +94,9 @@ jobs:
   test_latest:
     runs-on: ubuntu-latest
     container:
-      image: basilevs/ubuntu-rcptt:3.7.2 
+      # Latest build environment (newest JVM). Built from releng/buildenv/ubuntu/Dockerfile.
+      # The stable lanes above stay on the older, proven tag on purpose.
+      image: basilevs/ubuntu-rcptt:3.8.0
       env:
         DISPLAY: :1
     steps:
