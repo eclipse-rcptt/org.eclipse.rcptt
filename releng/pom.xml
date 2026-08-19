@@ -421,6 +421,19 @@
 				<ecl.executionEnvironment>JavaSE-26</ecl.executionEnvironment>
 				<ide.executionEnvironment>JavaSE-26</ide.executionEnvironment>
 			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>${tycho-groupid}</groupId>
+							<artifactId>tycho-surefire-plugin</artifactId>
+							<configuration>
+								<argLine combine.children="append">--illegal-final-field-mutation=deny</argLine>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
 		</profile>
   </profiles>
   <pluginRepositories>
