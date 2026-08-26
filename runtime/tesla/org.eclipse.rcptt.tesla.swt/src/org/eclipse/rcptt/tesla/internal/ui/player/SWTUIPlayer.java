@@ -1766,6 +1766,20 @@ public final class SWTUIPlayer {
 		// runnable.run();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>
+	 * This implementation defers processing while the SWT {@code Display} is
+	 * occupied (active timers, pending runnables, browser activity, etc.).
+	 * Returning {@code false} is only safe here because this method is
+	 * normally called from {@code Display.sleep()}, which will reschedule the
+	 * poll. If {@code false} were returned when the display is disposed (and
+	 * {@code Display.sleep()} will never be entered again), it would cause a
+	 * live-lock; therefore a disposed display must cause this method to return
+	 * {@code true}.
+	 * </p>
+	 */
 	public boolean canProceed(Context context, Q7WaitInfoRoot info) {
 		if (!display.equals(Display.getCurrent())) {
 			// Q7WaitUtils.updateInfo("display", "non current", info);
