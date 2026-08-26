@@ -1767,7 +1767,8 @@ public final class SWTUIPlayer {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns {@code true} if the current command should be processed now,
+	 * {@code false} to defer processing until the next poll.
 	 *
 	 * <p>
 	 * This implementation defers processing while the SWT {@code Display} is
