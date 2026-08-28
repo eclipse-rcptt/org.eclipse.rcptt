@@ -1767,15 +1767,6 @@ public final class SWTUIPlayer {
 	}
 
 	public boolean canProceed(Context context, Q7WaitInfoRoot info) {
-		if (display == null) {
-			debugProceed("Display is null. Probably execution in other thread.");
-			return false;
-		}
-		// check if current Display is disposed
-		if (display.isDisposed()) {
-			debugProceed("Display is disposed");
-			return false;
-		}		
 		if (!display.equals(Display.getCurrent())) {
 			// Q7WaitUtils.updateInfo("display", "non current", info);
 			debugProceed("Wrong display");

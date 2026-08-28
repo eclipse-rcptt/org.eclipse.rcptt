@@ -79,26 +79,31 @@ public abstract class UIRunnable<T> {
 				boolean tick = processed.get().equals(RunningState.Starting) || processed.get().equals(RunningState.Execution);
 				Q7WaitInfoRoot info = TeslaBridge.getCurrentWaitInfo(tick);
 				
+				boolean resultValue = true;
+				
 				if (!PlatformUI.getWorkbench().getDisplay()
 						.equals(Display.getCurrent())) {
 					Q7WaitUtils.updateInfo("display", "instance", info);
 					debugProceed("Wrong display");
-					return false;
+					resultValue = false;
 				}
 				// Return false if we have SWT observable in timers
 				if (SWTUIPlayer.hasTimers(display, info)) {
 					Q7WaitUtils.updateInfo("display", "timers", info);
 					debugProceed("Has timers");
-					return false;
+					resultValue = false;
 				}
 				// Check for asyncs in synchronizer
-				if (SWTUIPlayer.hasRunnables(display)) {
+				if (resultValue && SWTUIPlayer.hasRunnables(display)) {
 					Q7WaitUtils.updateInfo("display", "runnables", info);
 					debugProceed("Has runnables");
-					return false;
+					resultValue = false;
 				}
 				if (!collector.isEmpty(currentContext, info)) {
 					debugProceed("Has jobs");
+					resultValue = false;
+				}
+				if( !resultValue ) {
 					return false;
 				}
 				if (processed.compareAndSet(RunningState.Starting, RunningState.Execution)) {
