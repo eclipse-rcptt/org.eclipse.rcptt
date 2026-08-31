@@ -11,14 +11,20 @@
 #*******************************************************************************
 export MAVEN_OPTS="-Xms512m -Xmx1024m"
 
+CLEAN=""
+if [ "$1" = "clean" ]; then
+    CLEAN="clean"
+    shift
+fi
+
 OPTIONS="-Dtycho.localArtifacts=ignore $@"
 set -x
 
-mvn -f releng/core/pom.xml $OPTIONS || exit 101
-mvn -f releng/runtime/pom.xml -P runtime4x $OPTIONS || exit 103
-mvn -f releng/ide/pom.xml $OPTIONS || exit 105
+mvn $CLEAN verify -f releng/core/pom.xml $OPTIONS || exit 101
+mvn $CLEAN verify -f releng/runtime/pom.xml -P runtime4x $OPTIONS || exit 103
+mvn $CLEAN verify -f releng/ide/pom.xml $OPTIONS || exit 105
 
-mvn -f releng/rap/pom.xml -P core $OPTIONS || exit 110
-mvn -f releng/rap/pom.xml -P ide $OPTIONS || exit 111
+mvn $CLEAN verify -f releng/rap/pom.xml -P core $OPTIONS || exit 110
+mvn $CLEAN verify -f releng/rap/pom.xml -P ide $OPTIONS || exit 111
 
-mvn -f releng/rcptt/pom.xml $OPTIONS || exit 106
+mvn $CLEAN verify -f releng/rcptt/pom.xml $OPTIONS || exit 106
