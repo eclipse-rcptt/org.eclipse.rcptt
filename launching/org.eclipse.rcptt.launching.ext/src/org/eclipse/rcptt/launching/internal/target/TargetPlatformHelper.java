@@ -939,7 +939,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 				|| getMajorVersion(javaVersions) < 9) {
 			ListIterator<String> iterator = lines.listIterator();
 			while (iterator.hasNext()) {
-				String line = iterator.next();
+				String line = iterator.next().trim();
 				String arg = matchUnsupportedVMArg(line);
 				if (arg != null) {
 					iterator.remove();
