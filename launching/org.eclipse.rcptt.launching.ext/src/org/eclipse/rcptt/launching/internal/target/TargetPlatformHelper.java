@@ -39,9 +39,9 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -920,7 +920,6 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		}
 
 		removeUnsupportedVMArgs(lines);
-		addUnresolvedVMArgs(lines);
 
 		return lines;
 	}
@@ -928,7 +927,8 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 	private static final String VMARG_ADD_MODULES = "--add-modules";
 	private static final String VMARG_PERMIT_ILLEGAL_ACCESS = "--permit-illegal-access";
 	private static final String VMARG_ADD_OPENS = "--add-opens";
-	private static final String VMARG_ALL_UNNAMED = "ALL-UNNAMED";
+	private static final String[] UNSUPPORTED_VMARGS = {
+			VMARG_ADD_MODULES, VMARG_PERMIT_ILLEGAL_ACCESS, VMARG_ADD_OPENS };
 
 	private void removeUnsupportedVMArgs(List<String> lines) {
 		String[] javaVersions = getJavaVersions();
@@ -937,27 +937,33 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 		// see more: https://bugs.eclipse.org/bugs/show_bug.cgi?id=493761
 		if ((getMajorVersion(javaVersions) == 1 && getMinorVersion(javaVersions) < 9)
 				|| getMajorVersion(javaVersions) < 9) {
-			Iterator<String> iterator = lines.iterator();
+			ListIterator<String> iterator = lines.listIterator();
 			while (iterator.hasNext()) {
 				String line = iterator.next();
-				if (line.startsWith(VMARG_ADD_MODULES)
-						|| line.startsWith(VMARG_PERMIT_ILLEGAL_ACCESS)
-						|| line.startsWith(VMARG_ADD_OPENS)) {
+				String arg = matchUnsupportedVMArg(line);
+				if (arg != null) {
 					iterator.remove();
+					// In an *.ini file a VM option and its value may be placed on
+					// separate lines (e.g. "--add-opens" followed by
+					// "java.base/java.lang=ALL-UNNAMED"). When the option is given
+					// without an inline value, drop the following value line as well
+					// so it does not remain as an orphan argument on the command line.
+					if (line.equals(arg) && iterator.hasNext()) {
+						iterator.next();
+						iterator.remove();
+					}
 				}
 			}
 		}
 	}
 
-	private void addUnresolvedVMArgs(List<String> lines) {
-		int startIndex = lines.indexOf(VMARG_ADD_OPENS);
-		if (startIndex != -1) {		
-			for (int i = startIndex; i < lines.size(); i++) {
-				if (lines.get(i).contains(VMARG_ALL_UNNAMED) && !lines.get(i-1).startsWith(VMARG_ADD_OPENS)) {
-					lines.add(i, VMARG_ADD_OPENS);
-				}
+	private static String matchUnsupportedVMArg(String line) {
+		for (String arg : UNSUPPORTED_VMARGS) {
+			if (line.equals(arg) || line.startsWith(arg + "=")) {
+				return arg;
 			}
 		}
+		return null;
 	}
 
 	private static String[] getJavaVersions() {
