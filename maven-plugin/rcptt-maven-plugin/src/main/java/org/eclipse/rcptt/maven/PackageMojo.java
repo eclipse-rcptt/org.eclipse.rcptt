@@ -11,10 +11,15 @@
 package org.eclipse.rcptt.maven;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -22,9 +27,6 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
-import org.codehaus.plexus.util.xml.pull.MXParser;
-import org.codehaus.plexus.util.xml.pull.XmlPullParser;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * Packages two artifacts: - project with q7 tests itself - test results -
@@ -65,11 +67,16 @@ public class PackageMojo extends AbstractRCPTTMojo {
 			throw readError(junitReport);
 		}
 
-		try (FileInputStream inputStream = new FileInputStream(junitReport)) {
-			XmlPullParser parser = new MXParser();
-			parser.setInput(inputStream, "UTF-8");
-			int tag = parser.nextTag();
-			if (tag != XmlPullParser.START_TAG || !parser.getName().equals("testsuite")) {
+		XMLInputFactory factory = XMLInputFactory.newInstance();
+		XMLStreamReader parser;
+		try {
+			parser = factory.createXMLStreamReader(new StreamSource(junitReport));
+		} catch (XMLStreamException e) {
+			throw readError(junitReport, e);
+		}
+		try  {
+			int tag = parser.next();
+			if (tag != XMLStreamConstants.START_ELEMENT || !parser.getName().getLocalPart().equals("testsuite")) {
 				throw invalidFormat(junitReport);
 			}
 
@@ -80,11 +87,16 @@ public class PackageMojo extends AbstractRCPTTMojo {
 			if (failures > 0) {
 				throw new MojoFailureException("There are test failures");
 			}
-
-		} catch (IOException e) {
-			throw readError(junitReport);
-		} catch (XmlPullParserException e) {
-			throw readError(junitReport);
+		} catch (XMLStreamException e) {
+			throw readError(junitReport, e);
+		} finally {
+			if (parser != null) {
+				try {
+					parser.close();
+				} catch (XMLStreamException e) {
+					throw readError(junitReport, e);
+				}
+			}
 		}
 	}
 
@@ -112,7 +124,11 @@ public class PackageMojo extends AbstractRCPTTMojo {
 	}
 
 	private static MojoFailureException readError(File file) {
-		return new MojoFailureException(String.format("Could not read test results file %s", file));
+		return readError(file, null);
+	}
+	
+	private static MojoFailureException readError(File file, Throwable e) {
+		return new MojoFailureException(String.format("Could not read test results file %s", file), e);
 	}
 
 	private static MojoFailureException invalidFormat(File file) {

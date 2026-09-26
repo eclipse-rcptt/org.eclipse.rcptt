@@ -6,7 +6,7 @@ Element-Type: context
 Element-Version: 2.0
 Id: _cQEZwD2QEeSxD9UFwnFS6w
 Runtime-Version: 2.8.0.202602281641
-Save-Time: 3/9/26, 10:05 AM
+Save-Time: 3/9/26, 10:18 AM
 
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998
 Content-Type: text/ecl
@@ -59,33 +59,35 @@ loop [val count 0] {
 			wait 5000
 			recur [$count | plus 1]
 		}
-		try -times 10 -delay 1500 -command {
-			get-aut mockupsQ7 | eval {
-				get-window // Wait for mockups to stop UI blocking procedures
-			}
-		}
-		try -command {
-			get-aut mockupsQ7 | eval {
-				get-menu -path "Window/Perspective/Open Perspective/Other..." | click
-				with [get-window "Open Perspective"] {
-					get-table | select "Q7 Quality"
-					get-button Open | click
-				}
-				get-menu -path "Window/Perspective/Reset Perspective..." | click
-				try -times 10 -delay 5000 -command {
-					get-window "Reset Perspective" | get-button "Reset Perspective" | click
-				}
-			}
-		} -catch {
-			get-menu "Window/Show View/Other..." | click
-			with [get-window "Show View"] {
-				get-tree | select "General/Console" | double-click
-				trace [get-view Console | get-text-viewer | get-property -raw true -name text]
-			}
-			assert-true [bool false] "Failed to open mockup perspective"
-		}
 	} -else {
 		assert-true [bool false] "mockupsQ7 is not available"
 	}
 }
+
+try -times 10 -delay 1500 -command {
+	get-aut mockupsQ7 | eval {
+		get-window // Wait for mockups to stop UI blocking procedures
+	}
+}
+try -command {
+	get-aut mockupsQ7 | eval {
+		get-menu -path "Window/Perspective/Open Perspective/Other..." | click
+		with [get-window "Open Perspective"] {
+			get-table | select "Q7 Quality"
+			get-button Open | click
+		}
+		get-menu -path "Window/Perspective/Reset Perspective..." | click
+		try -times 10 -delay 5000 -command {
+			get-window "Reset Perspective" | get-button "Reset Perspective" | click
+		}
+	}
+} -catch {
+	get-menu "Window/Show View/Other..." | click
+	with [get-window "Show View"] {
+		get-tree | select "General/Console" | double-click
+		trace [get-view Console | get-text-viewer | get-property -raw true -name text]
+	}
+	assert-true [bool false] "Failed to open mockup perspective"
+}
+
 ------=_.ecl.context-718f04b4-ed39-33e3-af62-0995e4561998--

@@ -79,6 +79,7 @@ public class ToControlHandleImpl extends CommandImpl implements ToControlHandle 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Object getWidget() {
 		return widget;
 	}
@@ -88,6 +89,7 @@ public class ToControlHandleImpl extends CommandImpl implements ToControlHandle 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidget(Object newWidget) {
 		Object oldWidget = widget;
 		widget = newWidget;

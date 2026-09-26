@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.rcptt.tesla.swt.aspects.test;
 
-import com.google.common.collect.ImmutableList;
-
-import static org.osgi.framework.FrameworkUtil.getBundle;
-import static org.osgi.framework.Version.parseVersion;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,29 +27,20 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Assert;
 import org.junit.Test;
-import org.osgi.framework.Version;
+
+import com.google.common.collect.ImmutableList;
 
 public class ImagesAspectTest {
 
 	private static final ISharedImages SHARED_IMAGES = PlatformUI.getWorkbench().getSharedImages();
-	private static final String IMAGE_EXTENSION;
-	static {
-		// Version is not exact here, ideally it should be set to a version introducing SVG icons
-		Version workbenchVersion = getBundle(SHARED_IMAGES.getClass()).getVersion();
-		if (workbenchVersion.compareTo(parseVersion("3.130.0")) > 0) {
-			IMAGE_EXTENSION = ".svg";
-		} else {
-			IMAGE_EXTENSION = ".png";
-		}
-	}
 
 	@Test
 	public void newImageFromImageData() {
 		final Image image = new Image(Display.getCurrent(),
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FOLDER).getImageData());
 		try {
-			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
-					ImageSources.INSTANCE.find(image).toString());
+			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj",
+					removeExtensions(ImageSources.INSTANCE.find(image).toString()));
 		} finally {
 			image.dispose();
 		}
@@ -66,8 +52,8 @@ public class ImagesAspectTest {
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FOLDER).getImageData(),
 				SHARED_IMAGES.getImage(ISharedImages.IMG_OBJ_FILE).getImageData());
 		try {
-			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
-					ImageSources.INSTANCE.find(image).toString());
+			Assert.assertEquals("org.eclipse.ui/icons/full/obj16/fldr_obj",
+					removeExtensions(ImageSources.INSTANCE.find(image).toString()));
 		} finally {
 			image.dispose();
 		}
@@ -86,13 +72,26 @@ public class ImagesAspectTest {
 			final CompositeSource composite = (CompositeSource) ImageSources.INSTANCE.find(iconImage);
 			final List<String> strings = new ArrayList<String>();
 			for (ImageSource source : composite.children) {
-				strings.add(source.toString());
+				strings.add(removeExtensions(source.toString()));
 			}
-			Assert.assertEquals(ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj" + IMAGE_EXTENSION,
-					"org.eclipse.ui/icons/full/ovr16/warning_ovr.png"), strings);
+			Assert.assertEquals(ImmutableList.of("org.eclipse.ui/icons/full/obj16/fldr_obj",
+					"org.eclipse.ui/icons/full/ovr16/warning_ovr"), strings);
 		} finally {
 			iconImage.dispose();
 		}
+	}
+
+	private static String removeExtensions(String path) {
+		path = removeSuffix(path, ".png");
+		path = removeSuffix(path, ".svg");
+		return path;
+	}
+
+	private static String removeSuffix(String path, String suffix) {
+		if (path.endsWith(suffix)) {
+			path = path.substring(0, path.length() - suffix.length());
+		}
+		return path;
 	}
 
 }

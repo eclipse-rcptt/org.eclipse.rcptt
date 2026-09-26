@@ -11,6 +11,12 @@
 #*******************************************************************************
 export MAVEN_OPTS="-Xms512m -Xmx756m"
 
+CLEAN=""
+if [ "$1" = "clean" ]; then
+    CLEAN="clean"
+    shift
+fi
+
 OPTIONS="-Dtycho.localArtifacts=ignore $@"
 
-mvn clean install -f releng/runner/pom.xml $OPTIONS || exit 105
+mvn $CLEAN install -f releng/runner/pom.xml $OPTIONS || exit 105

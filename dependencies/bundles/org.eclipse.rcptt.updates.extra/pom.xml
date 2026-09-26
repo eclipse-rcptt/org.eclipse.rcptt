@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.rcptt.external.dependencies</groupId>
   	<artifactId>bundles</artifactId>
-    <version>2.8.1-SNAPSHOT</version>
+    <version>2.9.0-SNAPSHOT</version>
   </parent>
   
   <artifactId>org.eclipse.rcptt.updates.extra</artifactId>
@@ -55,7 +55,7 @@
 	<configuration>
 	  <source>
 	    <repository>
-	      <url>https://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</url>
+	      <url>https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/release/4.29.0/</url>
 	      <layout>p2</layout>
 	    </repository>
 	  </source>
@@ -74,6 +74,10 @@
 	    <iu><id>org.apache.poi.ooxml.schemas</id></iu>
 	    <iu><id>org.apache.xmlbeans</id></iu>
 	    <iu><id>org.dom4j</id></iu>
+	    <iu><id>org.apache.commons.commons-codec</id></iu>
+	    <iu><id>org.apache.commons.commons-compress</id></iu>
+	    <iu><id>org.apache.commons.collections4</id></iu>
+	    <iu><id>org.apache.commons.math3</id></iu>
 	  </ius>
 	</configuration>
       </plugin>

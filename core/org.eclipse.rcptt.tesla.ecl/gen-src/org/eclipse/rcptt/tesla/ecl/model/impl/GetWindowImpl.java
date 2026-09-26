@@ -208,6 +208,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -217,6 +218,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -229,6 +231,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -255,6 +258,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -267,6 +271,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -276,6 +281,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -288,6 +294,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -314,6 +321,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -326,6 +334,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -335,6 +344,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -347,6 +357,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -356,6 +367,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;
@@ -368,6 +380,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getFrom() {
 		return from;
 	}
@@ -377,6 +390,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setFrom(String newFrom) {
 		String oldFrom = from;
 		from = newFrom;
@@ -389,6 +403,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getClass_() {
 		return class_;
 	}
@@ -398,6 +413,7 @@ public class GetWindowImpl extends CommandImpl implements GetWindow {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setClass(String newClass) {
 		String oldClass = class_;
 		class_ = newClass;

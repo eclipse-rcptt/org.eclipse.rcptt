@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1
-FROM maven:3.9.9-eclipse-temurin-21
+# This Dockerfile always tracks the *latest* supported build environment.
+# It is published manually as a new basilevs/ubuntu-rcptt:<version> tag; the
+# stable CI lanes stay pinned to an older, proven tag while the test_latest
+# lane uses the newest one. See README.md for the versioning/publishing process.
+FROM maven:3.9-eclipse-temurin-26
 
 ENV DEBIAN_FRONTEND=noninteractive
 

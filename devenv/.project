@@ -8,6 +8,48 @@
 	</buildSpec>
 	<natures>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>scripts/build.cmd</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build.cmd</locationURI>
+		</link>
+		<link>
+			<name>scripts/build.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/build_dependencies.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build_dependencies.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/build_module_rap.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build_module_rap.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/build_nodeps.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build_nodeps.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/build_repository.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build_repository.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/build_runner.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/build_runner.sh</locationURI>
+		</link>
+		<link>
+			<name>scripts/clean-pom.xml</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/clean-pom.xml</locationURI>
+		</link>
+	</linkedResources>
 	<filteredResources>
 		<filter>
 			<id>1737992165899</id>

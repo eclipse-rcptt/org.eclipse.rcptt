@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: ["Verify branch"]
     types: [completed] #requested
-    branches: [release/2.6, release/2.7, waitJob_195]
+    branches: [release/2.6, release/2.7, release/2.8, waitJob_195]
 
 env:
   downstream_release/2.6: release/2.7
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: create pull request
         run: |
           git config user.name "github-actions[bot]"

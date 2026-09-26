@@ -117,6 +117,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetDiagram createGetDiagram() {
 		GetDiagramImpl getDiagram = new GetDiagramImpl();
 		return getDiagram;
@@ -126,6 +127,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetPalette createGetPalette() {
 		GetPaletteImpl getPalette = new GetPaletteImpl();
 		return getPalette;
@@ -135,6 +137,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetEditPart createGetEditPart() {
 		GetEditPartImpl getEditPart = new GetEditPartImpl();
 		return getEditPart;
@@ -144,6 +147,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetFigure createGetFigure() {
 		GetFigureImpl getFigure = new GetFigureImpl();
 		return getFigure;
@@ -153,6 +157,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetEntry createGetEntry() {
 		GetEntryImpl getEntry = new GetEntryImpl();
 		return getEntry;
@@ -162,6 +167,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ActivateDirectEdit createActivateDirectEdit() {
 		ActivateDirectEditImpl activateDirectEdit = new ActivateDirectEditImpl();
 		return activateDirectEdit;
@@ -171,6 +177,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public CommitDirectEdit createCommitDirectEdit() {
 		CommitDirectEditImpl commitDirectEdit = new CommitDirectEditImpl();
 		return commitDirectEdit;
@@ -180,6 +187,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public CancelDirectEdit createCancelDirectEdit() {
 		CancelDirectEditImpl cancelDirectEdit = new CancelDirectEditImpl();
 		return cancelDirectEdit;
@@ -189,6 +197,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseAction createMouseAction() {
 		MouseActionImpl mouseAction = new MouseActionImpl();
 		return mouseAction;
@@ -198,6 +207,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseMove createMouseMove() {
 		MouseMoveImpl mouseMove = new MouseMoveImpl();
 		return mouseMove;
@@ -207,6 +217,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseDrag createMouseDrag() {
 		MouseDragImpl mouseDrag = new MouseDragImpl();
 		return mouseDrag;
@@ -216,6 +227,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MousePress createMousePress() {
 		MousePressImpl mousePress = new MousePressImpl();
 		return mousePress;
@@ -225,6 +237,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseRelease createMouseRelease() {
 		MouseReleaseImpl mouseRelease = new MouseReleaseImpl();
 		return mouseRelease;
@@ -234,6 +247,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseDoubleClick createMouseDoubleClick() {
 		MouseDoubleClickImpl mouseDoubleClick = new MouseDoubleClickImpl();
 		return mouseDoubleClick;
@@ -243,6 +257,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseEnter createMouseEnter() {
 		MouseEnterImpl mouseEnter = new MouseEnterImpl();
 		return mouseEnter;
@@ -252,6 +267,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseExit createMouseExit() {
 		MouseExitImpl mouseExit = new MouseExitImpl();
 		return mouseExit;
@@ -261,6 +277,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public MouseHover createMouseHover() {
 		MouseHoverImpl mouseHover = new MouseHoverImpl();
 		return mouseHover;
@@ -270,6 +287,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetSourceConnection createGetSourceConnection() {
 		GetSourceConnectionImpl getSourceConnection = new GetSourceConnectionImpl();
 		return getSourceConnection;
@@ -279,6 +297,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetTargetConnection createGetTargetConnection() {
 		GetTargetConnectionImpl getTargetConnection = new GetTargetConnectionImpl();
 		return getTargetConnection;
@@ -288,6 +307,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetPopupBarItem createGetPopupBarItem() {
 		GetPopupBarItemImpl getPopupBarItem = new GetPopupBarItemImpl();
 		return getPopupBarItem;
@@ -297,6 +317,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetConnectionHandle createGetConnectionHandle() {
 		GetConnectionHandleImpl getConnectionHandle = new GetConnectionHandleImpl();
 		return getConnectionHandle;
@@ -306,6 +327,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetPaletteEntry createGetPaletteEntry() {
 		GetPaletteEntryImpl getPaletteEntry = new GetPaletteEntryImpl();
 		return getPaletteEntry;
@@ -315,6 +337,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GetHandle createGetHandle() {
 		GetHandleImpl getHandle = new GetHandleImpl();
 		return getHandle;
@@ -324,6 +347,7 @@ public class DiagramFactoryImpl extends EFactoryImpl implements DiagramFactory {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public DiagramPackage getDiagramPackage() {
 		return (DiagramPackage)getEPackage();
 	}

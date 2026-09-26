@@ -70,6 +70,7 @@ public class TeslaProcessStatusImpl extends ProcessStatusImpl implements TeslaPr
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public AdvancedInformation getInfo() {
 		return info;
 	}
@@ -94,6 +95,7 @@ public class TeslaProcessStatusImpl extends ProcessStatusImpl implements TeslaPr
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setInfo(AdvancedInformation newInfo) {
 		if (newInfo != info) {
 			NotificationChain msgs = null;

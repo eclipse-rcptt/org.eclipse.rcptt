@@ -102,6 +102,7 @@ public class CheckDownloadResultImpl extends CommandImpl implements CheckDownloa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getContentOnBase64() {
 		return contentOnBase64;
 	}
@@ -111,6 +112,7 @@ public class CheckDownloadResultImpl extends CommandImpl implements CheckDownloa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setContentOnBase64(String newContentOnBase64) {
 		String oldContentOnBase64 = contentOnBase64;
 		contentOnBase64 = newContentOnBase64;
@@ -123,6 +125,7 @@ public class CheckDownloadResultImpl extends CommandImpl implements CheckDownloa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getFileName() {
 		return fileName;
 	}
@@ -132,6 +135,7 @@ public class CheckDownloadResultImpl extends CommandImpl implements CheckDownloa
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setFileName(String newFileName) {
 		String oldFileName = fileName;
 		fileName = newFileName;

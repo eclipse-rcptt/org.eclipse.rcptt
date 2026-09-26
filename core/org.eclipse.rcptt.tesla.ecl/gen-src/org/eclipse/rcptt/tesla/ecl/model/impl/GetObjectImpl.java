@@ -71,6 +71,7 @@ public class GetObjectImpl extends CommandImpl implements GetObject {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EObject getObject() {
 		if (object != null && object.eIsProxy()) {
 			InternalEObject oldObject = (InternalEObject)object;
@@ -97,6 +98,7 @@ public class GetObjectImpl extends CommandImpl implements GetObject {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setObject(EObject newObject) {
 		EObject oldObject = object;
 		object = newObject;

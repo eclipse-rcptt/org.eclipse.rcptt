@@ -71,6 +71,7 @@ public class RestoreImpl extends CommandImpl implements Restore {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -97,6 +98,7 @@ public class RestoreImpl extends CommandImpl implements Restore {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;

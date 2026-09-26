@@ -282,6 +282,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetDiagram() {
 		return getDiagramEClass;
 	}
@@ -290,6 +291,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPalette() {
 		return getPaletteEClass;
 	}
@@ -298,6 +300,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetEditPart() {
 		return getEditPartEClass;
 	}
@@ -306,6 +309,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_Path() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(0);
 	}
@@ -314,6 +318,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_Name() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(1);
 	}
@@ -322,6 +327,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_Feature() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(2);
 	}
@@ -330,6 +336,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_ClassName() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(3);
 	}
@@ -338,6 +345,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_Text() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(4);
 	}
@@ -347,6 +355,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getGetEditPart_CustomId() {
 		return (EAttribute)getEditPartEClass.getEStructuralFeatures().get(5);
 	}
@@ -355,6 +364,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetFigure() {
 		return getFigureEClass;
 	}
@@ -363,6 +373,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetEntry() {
 		return getEntryEClass;
 	}
@@ -371,6 +382,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDirectEdit() {
 		return directEditEClass;
 	}
@@ -379,6 +391,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getDirectEdit_Control() {
 		return (EReference)directEditEClass.getEStructuralFeatures().get(0);
 	}
@@ -387,6 +400,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getActivateDirectEdit() {
 		return activateDirectEditEClass;
 	}
@@ -395,6 +409,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCommitDirectEdit() {
 		return commitDirectEditEClass;
 	}
@@ -403,6 +418,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getCancelDirectEdit() {
 		return cancelDirectEditEClass;
 	}
@@ -411,6 +427,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseAction() {
 		return mouseActionEClass;
 	}
@@ -419,6 +436,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getMouseAction_Control() {
 		return (EReference)mouseActionEClass.getEStructuralFeatures().get(0);
 	}
@@ -427,6 +445,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_X() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(1);
 	}
@@ -435,6 +454,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_Y() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(2);
 	}
@@ -443,6 +463,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_Mask() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(4);
 	}
@@ -451,6 +472,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_Button() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(3);
 	}
@@ -459,6 +481,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_Height() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(5);
 	}
@@ -467,6 +490,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMouseAction_Width() {
 		return (EAttribute)mouseActionEClass.getEStructuralFeatures().get(6);
 	}
@@ -475,6 +499,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseMove() {
 		return mouseMoveEClass;
 	}
@@ -483,6 +508,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseDrag() {
 		return mouseDragEClass;
 	}
@@ -491,6 +517,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMousePress() {
 		return mousePressEClass;
 	}
@@ -499,6 +526,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseRelease() {
 		return mouseReleaseEClass;
 	}
@@ -507,6 +535,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseDoubleClick() {
 		return mouseDoubleClickEClass;
 	}
@@ -515,6 +544,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseEnter() {
 		return mouseEnterEClass;
 	}
@@ -523,6 +553,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseExit() {
 		return mouseExitEClass;
 	}
@@ -531,6 +562,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMouseHover() {
 		return mouseHoverEClass;
 	}
@@ -539,6 +571,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetSourceConnection() {
 		return getSourceConnectionEClass;
 	}
@@ -547,6 +580,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetTargetConnection() {
 		return getTargetConnectionEClass;
 	}
@@ -555,6 +589,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPopupBarItem() {
 		return getPopupBarItemEClass;
 	}
@@ -563,6 +598,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetConnectionHandle() {
 		return getConnectionHandleEClass;
 	}
@@ -571,6 +607,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetPaletteEntry() {
 		return getPaletteEntryEClass;
 	}
@@ -579,6 +616,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGetHandle() {
 		return getHandleEClass;
 	}
@@ -587,6 +625,7 @@ public class DiagramPackageImpl extends EPackageImpl implements DiagramPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public DiagramFactory getDiagramFactory() {
 		return (DiagramFactory)getEFactoryInstance();
 	}

@@ -347,6 +347,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ElementKind getKind() {
 		return kind;
 	}
@@ -356,6 +357,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(ElementKind newKind) {
 		ElementKind oldKind = kind;
 		kind = newKind;
@@ -368,6 +370,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getCustomKindId() {
 		return customKindId;
 	}
@@ -377,6 +380,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCustomKindId(String newCustomKindId) {
 		String oldCustomKindId = customKindId;
 		customKindId = newCustomKindId;
@@ -389,6 +393,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -398,6 +403,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;
@@ -410,6 +416,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -419,6 +426,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -431,6 +439,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -440,6 +449,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -452,6 +462,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -461,6 +472,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -473,6 +485,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getIndexes() {
 		return indexes;
 	}
@@ -482,6 +495,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndexes(String newIndexes) {
 		String oldIndexes = indexes;
 		indexes = newIndexes;
@@ -494,6 +508,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -520,6 +535,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -532,6 +548,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -558,6 +575,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -570,6 +588,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Element getResolved() {
 		if (resolved != null && resolved.eIsProxy()) {
 			InternalEObject oldResolved = (InternalEObject)resolved;
@@ -596,6 +615,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setResolved(Element newResolved) {
 		Element oldResolved = resolved;
 		resolved = newResolved;
@@ -608,6 +628,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getRow() {
 		return row;
 	}
@@ -617,6 +638,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRow(Integer newRow) {
 		Integer oldRow = row;
 		row = newRow;
@@ -629,6 +651,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getColumn() {
 		return column;
 	}
@@ -638,6 +661,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(Integer newColumn) {
 		Integer oldColumn = column;
 		column = newColumn;
@@ -650,6 +674,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getX() {
 		return x;
 	}
@@ -659,6 +684,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(int newX) {
 		int oldX = x;
 		x = newX;
@@ -671,6 +697,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getY() {
 		return y;
 	}
@@ -680,6 +707,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(int newY) {
 		int oldY = y;
 		y = newY;
@@ -692,6 +720,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getRawImage() {
 		return rawImage;
 	}
@@ -701,6 +730,7 @@ public class ControlHandlerImpl extends EObjectImpl implements ControlHandler {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRawImage(String newRawImage) {
 		String oldRawImage = rawImage;
 		rawImage = newRawImage;

@@ -248,6 +248,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -256,6 +257,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -267,6 +269,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -291,6 +294,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -302,6 +306,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -310,6 +315,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -321,6 +327,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -345,6 +352,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -356,6 +364,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -364,6 +373,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -375,6 +385,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -383,6 +394,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -394,6 +406,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -402,6 +415,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setName(String newName) {
 		String oldName = name;
 		name = newName;
@@ -413,6 +427,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getFeature() {
 		return feature;
 	}
@@ -421,6 +436,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setFeature(String newFeature) {
 		String oldFeature = feature;
 		feature = newFeature;
@@ -432,6 +448,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getClassName() {
 		return className;
 	}
@@ -440,6 +457,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setClassName(String newClassName) {
 		String oldClassName = className;
 		className = newClassName;
@@ -451,6 +469,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -459,6 +478,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setText(String newText) {
 		String oldText = text;
 		text = newText;
@@ -471,6 +491,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getCustomId() {
 		return customId;
 	}
@@ -480,6 +501,7 @@ public class GetEditPartImpl extends CommandImpl implements GetEditPart {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCustomId(String newCustomId) {
 		String oldCustomId = customId;
 		customId = newCustomId;

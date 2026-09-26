@@ -233,9 +233,8 @@ public class DebugContextProcessor implements IContextProcessor {
 			return;
 		}
 		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
-		final UIJobCollector collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
-		try {
+		
+		try (UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
 			UIRunnable.exec(new UIRunnable<Object>() {
 				@Override
 				public Object run() throws CoreException {
@@ -279,8 +278,6 @@ public class DebugContextProcessor implements IContextProcessor {
 			helper.applyLaunches(context.getLaunches());
 		} catch (InterruptedException e) {
 			throw new CoreException(RcpttPlugin.createStatus("Launch context was interrupted", e));
-		} finally {
-			Job.getJobManager().removeJobChangeListener(collector);
 		}
 	}
 

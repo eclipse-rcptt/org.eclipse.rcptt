@@ -71,6 +71,7 @@ public class VerifyFalseImpl extends CommandImpl implements VerifyFalse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EObject getCondition() {
 		if (condition != null && condition.eIsProxy()) {
 			InternalEObject oldCondition = (InternalEObject)condition;
@@ -97,6 +98,7 @@ public class VerifyFalseImpl extends CommandImpl implements VerifyFalse {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCondition(EObject newCondition) {
 		EObject oldCondition = condition;
 		condition = newCondition;

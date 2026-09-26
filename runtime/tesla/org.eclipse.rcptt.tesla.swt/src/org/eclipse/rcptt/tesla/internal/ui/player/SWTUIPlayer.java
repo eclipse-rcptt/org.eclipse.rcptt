@@ -228,8 +228,7 @@ public final class SWTUIPlayer {
 				this.ignoreWindows[i++] = wrap(shell);
 			}
 		}
-		collector = new UIJobCollector();
-		Job.getJobManager().addJobChangeListener(collector);
+		collector = new UIJobCollector(Job.getJobManager());
 		timerListener = getTimerExecHelper();
 		TeslaTimerExecManager.getManager().addEventListener(timerListener);
 	}
@@ -1767,6 +1766,21 @@ public final class SWTUIPlayer {
 		// runnable.run();
 	}
 
+	/**
+	 * Returns {@code true} if the current command should be processed now,
+	 * {@code false} to defer processing until the next poll.
+	 *
+	 * <p>
+	 * This implementation defers processing while the SWT {@code Display} is
+	 * occupied (active timers, pending runnables, browser activity, etc.).
+	 * Returning {@code false} is only safe here because this method is
+	 * normally called from {@code Display.sleep()}, which will reschedule the
+	 * poll. If {@code false} were returned when the display is disposed (and
+	 * {@code Display.sleep()} will never be entered again), it would cause a
+	 * live-lock; therefore a disposed display must cause this method to return
+	 * {@code true}.
+	 * </p>
+	 */
 	public boolean canProceed(Context context, Q7WaitInfoRoot info) {
 		if (!display.equals(Display.getCurrent())) {
 			// Q7WaitUtils.updateInfo("display", "non current", info);
@@ -2215,7 +2229,7 @@ public final class SWTUIPlayer {
 	}
 
 	private void shutdown() {
-		Job.getJobManager().removeJobChangeListener(collector);
+		collector.close();
 		BrowserManager.getInstance().clear();
 		TeslaTimerExecManager.getManager().removeEventListener(timerListener);
 	}

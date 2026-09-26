@@ -219,7 +219,10 @@ public final class JvmTargetCompatibility {
 		return result.toString();
 	}
 	
-	
+	public Stream<VmInstallMetaData> findForEnvironment(String executionEnvironmentId) {
+		return VmInstallMetaData.forEnvironment(executionEnvironmentId).filter(this::isCompatible);
+	}
+
 	
 	private static final String[] EMPTY = new String[0];
 	private static String[] getExecutionEnironments(IPluginModelBase plugin) {

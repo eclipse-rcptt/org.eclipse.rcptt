@@ -77,6 +77,7 @@ public class BoundControlHandleImpl extends ControlHandlerImpl implements BoundC
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public long getWidgetId() {
 		return widgetId;
 	}
@@ -86,6 +87,7 @@ public class BoundControlHandleImpl extends ControlHandlerImpl implements BoundC
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidgetId(long newWidgetId) {
 		long oldWidgetId = widgetId;
 		widgetId = newWidgetId;
