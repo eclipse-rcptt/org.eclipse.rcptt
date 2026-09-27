@@ -12,8 +12,7 @@ package org.eclipse.rcptt.tesla.ui;
 
 import static org.eclipse.rcptt.util.KeysAndButtons.getModifiers;
 
-import org.eclipse.jface.action.CoolBarManager;
-import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.formatting.AbstractKeyFormatter;
@@ -64,16 +63,14 @@ public class Q7KeyFormatter extends AbstractKeyFormatter {
 			final WorkbenchWindow ww = (WorkbenchWindow) w;
 			final Shell shell = ww.getShell();
 			try {
-				final CoolBarManager coolBarManager = ww.getCoolBarManager();
+				final ICoolBarManager coolBarManager = ww.getCoolBarManager2();
 
 				if (shell != null && coolBarManager != null)
 					shell.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							try {
 								shell.setLayoutDeferred(true);
-								IContributionItem[] items = coolBarManager.getItems();
-								coolBarManager.setItems(new IContributionItem[0]);
-								coolBarManager.setItems(items);
+								coolBarManager.update(true);
 							} finally {
 								shell.setLayoutDeferred(false);
 							}
