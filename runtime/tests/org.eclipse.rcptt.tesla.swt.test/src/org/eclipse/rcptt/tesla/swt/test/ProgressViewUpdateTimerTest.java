@@ -32,12 +32,9 @@ import org.junit.Test;
 public class ProgressViewUpdateTimerTest {
 
 	private static Display display() {
-		try {
-			return Display.getDefault();
-		} catch (Throwable e) {
-			Assume.assumeNoException("A Display is required for this test", e);
-			return null;
-		}
+		Display display = Display.getCurrent();
+		Assume.assumeTrue("A Display is required for this test", display != null);
+		return display;
 	}
 
 	/**
