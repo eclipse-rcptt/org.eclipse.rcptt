@@ -433,7 +433,8 @@ public aspect DisplayAspect {
 							TeslaTimerExecManager.getManager().recordTimerExec(
 									run, time);
 							String name = getRunnableName(run);
-							if (name != null && name.startsWith("org.eclipse.jface")) {
+							if (name != null && name.startsWith("org.eclipse.jface")
+									&& !TeslaTimerExecManager.isProgressViewUpdateTimer(run)) {
 								TeslaEventManager.getManager().hasEvent(HasEventKind.timer, name);
 								display.asyncExec(run);
 								asTimer = false;
@@ -448,7 +449,8 @@ public aspect DisplayAspect {
 								// return proceed(0, run);
 								return null;
 							}
-							if (name != null && !TeslaTimerExecManager.isTimerIgnored(name)) {
+							if (name != null && !TeslaTimerExecManager.isTimerIgnored(name)
+									&& !TeslaTimerExecManager.isProgressViewUpdateTimer(run)) {
 								TeslaEventManager.getManager().hasEvent(HasEventKind.timer, name);
 							}
 						}
