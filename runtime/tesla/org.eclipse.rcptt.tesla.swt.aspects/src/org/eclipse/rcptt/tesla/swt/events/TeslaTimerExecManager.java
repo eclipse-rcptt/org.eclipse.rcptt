@@ -11,6 +11,7 @@
 package org.eclipse.rcptt.tesla.swt.events;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -204,6 +205,53 @@ public class TeslaTimerExecManager {
 		if (clName
 				.startsWith("org.eclipse.nebula.widgets.oscilloscope.OscilloscopeDispatcher")) {
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Detects the progress view update throttler introduced in Eclipse 2026-09
+	 * (eclipse-platform/eclipse.platform.ui#4131). Since then the progress view
+	 * defers job announcements behind a grace period and keeps rescheduling its
+	 * {@link org.eclipse.jface.util.Throttler org.eclipse.jface.util.Throttler}
+	 * for the whole grace period after every scheduled job. Treating this purely
+	 * cosmetic timer as activity makes RCPTT wait after every job and slows tests
+	 * down dramatically (eclipse-rcptt/org.eclipse.rcptt#342), so it must be
+	 * ignored.
+	 * <p>
+	 * The scheduled runnable is an internal {@code Throttler} lambda that wraps
+	 * {@code ProgressManager::notifyListeners}; the wrapped target is found by
+	 * walking the captured fields of the lambda.
+	 */
+	public static boolean isProgressViewUpdateTimer(Runnable run) {
+		return isProgressThrottlerRunnable(run, 0);
+	}
+
+	private static boolean isProgressThrottlerRunnable(Object candidate, int depth) {
+		if (candidate == null || depth > 4) {
+			return false;
+		}
+		if (candidate instanceof SherlockTimerRunnable) {
+			return isProgressThrottlerRunnable(((SherlockTimerRunnable) candidate).getRunnable(), depth);
+		}
+		String name = candidate.getClass().getName();
+		if (depth > 0 && name.contains("org.eclipse.ui.internal.progress")) {
+			return true;
+		}
+		if (!name.startsWith("org.eclipse.jface.util.Throttler")) {
+			return false;
+		}
+		try {
+			for (Field field : candidate.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				Object value = field.get(candidate);
+				if (value instanceof Runnable && isProgressThrottlerRunnable(value, depth + 1)) {
+					return true;
+				}
+			}
+		} catch (RuntimeException | ReflectiveOperationException e) {
+			// Be conservative: if the Throttler internals change we keep the
+			// previous behavior instead of failing.
 		}
 		return false;
 	}
