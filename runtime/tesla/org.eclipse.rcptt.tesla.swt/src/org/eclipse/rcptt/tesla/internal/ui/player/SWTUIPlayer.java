@@ -1854,6 +1854,13 @@ public final class SWTUIPlayer {
 			Class<? extends Runnable> cl = runnable.getClass();
 			String clName = cl.getName();
 
+			// The progress view update throttler (since Eclipse 2026-09) keeps
+			// rescheduling itself for a grace period after every job; it is purely
+			// cosmetic, so do not wait for it. See eclipse-rcptt/org.eclipse.rcptt#342.
+			if (TeslaTimerExecManager.isProgressViewUpdateTimer(runnable)) {
+				continue;
+			}
+
 			// Return true if some of delayed observables are pressent.
 			if (clName.startsWith("org.eclipse.core.internal.databinding.observable.DelayedObservableValue")) {
 				waitFor.add(current);
