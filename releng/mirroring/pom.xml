@@ -28,9 +28,6 @@
     <module>../../repository/dependencies/</module>
   </modules>
 
-  <properties>
-    <buildUrl>file:/${user.dir}</buildUrl>
-  </properties>
   
  <!--  <repositories>
     <repository>

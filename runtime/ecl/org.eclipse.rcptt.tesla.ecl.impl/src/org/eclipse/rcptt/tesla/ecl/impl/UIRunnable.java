@@ -94,7 +94,7 @@ public abstract class UIRunnable<T> {
 					resultValue = false;
 				}
 				// Check for asyncs in synchronizer
-				if (SWTUIPlayer.hasRunnables(display)) {
+				if (resultValue && SWTUIPlayer.hasRunnables(display)) {
 					Q7WaitUtils.updateInfo("display", "runnables", info);
 					debugProceed("Has runnables");
 					resultValue = false;

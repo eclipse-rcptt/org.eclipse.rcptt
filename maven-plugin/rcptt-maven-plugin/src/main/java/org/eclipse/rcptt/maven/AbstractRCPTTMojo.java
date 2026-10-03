@@ -148,17 +148,26 @@ public abstract class AbstractRCPTTMojo extends AbstractMojo {
 	protected String[] projects;
 
 	/**
-	 * @parameter
+	 * Comma-separated list of tags to skip during test execution.
+	 * Can be set from the command line with {@code -Drcptt.skipTags=tag1,tag2}.
+	 *
+	 * @parameter property="rcptt.skipTags"
 	 */
 	protected String[] skipTags;
 
 	/**
-	 * @parameter
+	 * Comma-separated list of test suite names to execute.
+	 * Can be set from the command line with {@code -Drcptt.suites=suite1,suite2}.
+	 *
+	 * @parameter property="rcptt.suites"
 	 */
 	protected String[] suites;
 
 	/**
-	 * @parameter
+	 * Comma-separated list of test file names to execute.
+	 * Can be set from the command line with {@code -Drcptt.tests=test1.test,test2.test}.
+	 *
+	 * @parameter property="rcptt.tests"
 	 */
 	protected String[] tests;
 

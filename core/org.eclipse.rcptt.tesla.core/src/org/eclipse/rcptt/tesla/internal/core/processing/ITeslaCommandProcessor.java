@@ -126,12 +126,22 @@ public interface ITeslaCommandProcessor {
 	boolean isInactivityRequired();
 
 	/**
-	 * Return true if processing of commands could be continued. Using this
-	 * method it is possible to implement custom wail states.
+	 * Answers the question: "Should the current command be processed now or
+	 * later?" Returns {@code true} if processing of commands can be continued.
+	 * Using this method it is possible to implement custom wait states.
+	 *
+	 * <p>
+	 * <b>Contract:</b> If this method returns {@code false}, the command will
+	 * be polled again. Implementations must ensure that {@code false} is only
+	 * returned when the caller will eventually have an opportunity to poll again
+	 * (e.g. from {@code Display.sleep()}). Returning {@code false} indefinitely
+	 * or in situations where polling will never resume will cause a live-lock.
+	 * </p>
 	 *
 	 * @param context
 	 * @param info
-	 * @return
+	 * @return {@code true} if the current command should be processed
+	 *         immediately, {@code false} to defer processing until the next poll
 	 */
 	boolean canProceed(Context context, Q7WaitInfoRoot info);
 

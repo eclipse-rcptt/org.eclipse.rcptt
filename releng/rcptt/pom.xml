@@ -24,7 +24,6 @@
     <module>../../repository/rcptt</module>
   </modules>
   <properties>
-    <buildUrl>file:/${user.dir}</buildUrl>
     <repositoryFull>${buildUrl}/repository/full/target/repository/</repositoryFull>
     <rapRepository>${buildUrl}/repository/rap/target/repository/</rapRepository>
     <dependenciesRepository>${buildUrl}/repository/dependencies/target/repository/</dependenciesRepository>

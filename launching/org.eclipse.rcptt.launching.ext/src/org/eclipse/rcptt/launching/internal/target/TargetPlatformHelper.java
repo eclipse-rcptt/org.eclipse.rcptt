@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -919,72 +918,7 @@ public class TargetPlatformHelper implements ITargetPlatformHelper {
 			return null;
 		}
 
-		removeUnsupportedVMArgs(lines);
-		addUnresolvedVMArgs(lines);
-
 		return lines;
-	}
-
-	private static final String VMARG_ADD_MODULES = "--add-modules";
-	private static final String VMARG_PERMIT_ILLEGAL_ACCESS = "--permit-illegal-access";
-	private static final String VMARG_ADD_OPENS = "--add-opens";
-	private static final String VMARG_ALL_UNNAMED = "ALL-UNNAMED";
-
-	private void removeUnsupportedVMArgs(List<String> lines) {
-		String[] javaVersions = getJavaVersions();
-
-		// remove args was added into .ini file to support java 9
-		// see more: https://bugs.eclipse.org/bugs/show_bug.cgi?id=493761
-		if ((getMajorVersion(javaVersions) == 1 && getMinorVersion(javaVersions) < 9)
-				|| getMajorVersion(javaVersions) < 9) {
-			Iterator<String> iterator = lines.iterator();
-			while (iterator.hasNext()) {
-				String line = iterator.next();
-				if (line.startsWith(VMARG_ADD_MODULES)
-						|| line.startsWith(VMARG_PERMIT_ILLEGAL_ACCESS)
-						|| line.startsWith(VMARG_ADD_OPENS)) {
-					iterator.remove();
-				}
-			}
-		}
-	}
-
-	private void addUnresolvedVMArgs(List<String> lines) {
-		int startIndex = lines.indexOf(VMARG_ADD_OPENS);
-		if (startIndex != -1) {		
-			for (int i = startIndex; i < lines.size(); i++) {
-				if (lines.get(i).contains(VMARG_ALL_UNNAMED) && !lines.get(i-1).startsWith(VMARG_ADD_OPENS)) {
-					lines.add(i, VMARG_ADD_OPENS);
-				}
-			}
-		}
-	}
-
-	private static String[] getJavaVersions() {
-		String javaVersion = System.getProperty("java.version");
-		return javaVersion.split("\\.|-"); // '.' and '-' are separators
-	}
-
-	private static int getMajorVersion(String[] versions) {
-		if (versions.length < 1) {
-			return 0;
-		}
-		try {
-			return Integer.valueOf(versions[0]);
-		} catch (NumberFormatException e) {
-			return 0;
-		}
-	}
-
-	private static int getMinorVersion(String[] versions) {
-		if (versions.length < 2) {
-			return 0;
-		}
-		try {
-			return Integer.valueOf(versions[1]);
-		} catch (NumberFormatException e) {
-			return 0;
-		}
 	}
 
 	public String getTemplateConfigLocation() {

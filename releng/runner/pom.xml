@@ -24,7 +24,6 @@
     <module>../../runner</module>
   </modules>
   <properties>
-    <buildUrl>file:/${user.dir}</buildUrl>
     <repositoryFull>${buildUrl}/repository/full/target/repository/</repositoryFull>
     <repositoryRap>${buildUrl}/repository/rap/target/repository/</repositoryRap>
   </properties>
