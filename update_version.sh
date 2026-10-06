@@ -26,6 +26,7 @@ OPTIONS=(
     -Dtycho.mode=maven
     -Dtycho.localArtifacts=ignore
     "-DnewVersion=$VERSION_WITH_DECORATOR"
+    "-Drcptt-maven-version=$VERSION_WITH_DECORATOR" # rcpttTests use the newly installed Maven plugin, the previous one may be absent
     -DupdateVersionRangeMatchingBounds
     -DgenerateBackupPoms=false
     -B
@@ -44,7 +45,9 @@ mvn versions:set -f clean-pom.xml "${OPTIONS[@]}" || exit 102
 mvn clean install -f maven-plugin/pom.xml # Ensure next version is available to resolve rcpttTests
 
 echo "================== Updating RCPTT Tests =================="
-mvn versions:use-dep-version -f ./rcpttTests/rcptt_ide/ECL_IDE_module/pom.xml  -Dincludes=com.xored.q7:q7contexts.shared -DdepVersion="$VERSION_WITH_DECORATOR" -DgenerateBackupPoms=false -DforceVersion=true -B || exit 103
+mvn versions:use-dep-version -f ./rcpttTests/rcptt_ide/ECL_IDE_module/pom.xml  -Dincludes=com.xored.q7:q7contexts.shared -DdepVersion="$VERSION_WITH_DECORATOR" -DforceVersion=true "${OPTIONS[@]}" || exit 103
+# ECL_IDE_module is not a reactor module of rcpttTests, so versions:set does not update its parent reference
+mvn versions:update-parent -f ./rcpttTests/rcptt_ide/ECL_IDE_module/pom.xml -DparentVersion="$VERSION_WITH_DECORATOR" -DskipResolution=true -DallowSnapshots=true "${OPTIONS[@]}" || exit 107
 mvn versions:set --file ./rcpttTests "${OPTIONS[@]}" || exit 104
 mvn versions:set-property --file ./rcpttTests -Dproperty=rcptt-maven-version "${OPTIONS[@]}" || exit 105
 mvn versions:set-property --file ./rcpttTests -Dproperty=runner-version "${OPTIONS[@]}" || exit 106
