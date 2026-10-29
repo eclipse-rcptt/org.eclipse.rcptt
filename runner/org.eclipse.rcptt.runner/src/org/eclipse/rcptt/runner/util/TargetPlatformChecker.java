@@ -79,7 +79,9 @@ public class TargetPlatformChecker {
 		targetPlatform = null;
 		compatibility  = null;
 		String location = PDELocationUtils.getProductLocation(conf.location).getAbsolutePath();
-		PrintStreamMonitor outMonitor = new PrintStreamMonitor(true);
+		boolean progressEnabled  = Boolean.parseBoolean(System.getProperty("rcptt.runner.target_progress", "true"));
+
+		PrintStreamMonitor outMonitor = new PrintStreamMonitor(progressEnabled);
 		if (conf.config != null) {
 			targetPlatform = TargetPlatformManager.createTargetPlatform(location, outMonitor);
 			Map<String, Version> versions = targetPlatform.getVersions();
