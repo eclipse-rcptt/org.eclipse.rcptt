@@ -348,7 +348,6 @@ public class TestsRunner {
 						}
 						String out = r.userFriendlyMessage(est, timeLeft, processed, artifacts, failed.size());
 						HeadlessRunnerPlugin.getDefault().info(out, null);
-						System.out.println(out);
 					}
 					resultsHandler.results.clear();
 				}
