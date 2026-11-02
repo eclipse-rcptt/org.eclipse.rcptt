@@ -43,6 +43,8 @@ import org.eclipse.rcptt.core.persistence.IPersistenceModel;
 import org.eclipse.rcptt.core.persistence.PersistenceManager;
 import org.eclipse.rcptt.core.scenario.Scenario;
 import org.eclipse.rcptt.core.scenario.ScenarioFactory;
+import org.eclipse.rcptt.core.tests.HangWatchdog;
+import org.eclipse.rcptt.core.tests.Stress;
 import org.eclipse.rcptt.core.tests.model.AbstractModelTestbase;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.ecl.core.CoreFactory;
@@ -52,11 +54,14 @@ import org.eclipse.rcptt.internal.core.model.Q7NamedElement;
 import org.eclipse.rcptt.internal.core.model.Q7NamedElementTest;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class PlainTextPersistenceModelTest {
 	private static final IWorkspace WORKSPACE = ResourcesPlugin.getWorkspace();
+	
+	@Rule
+	public final HangWatchdog WATCHDOG = new HangWatchdog(Stress.millis(90_000));
 	
 	@Before
 	public void before() throws CoreException {
@@ -83,7 +88,7 @@ public class PlainTextPersistenceModelTest {
 	}
 	
 	@Test
-	public void returnNullWhenResourceDoesNotExist() throws IOException, CoreException {
+	public void returnNullWhenResourceDoesNotExist() throws IOException, CoreException, InterruptedException {
 		ITestCase file = createTestCase();
 		URI uri = toURI(file);
 		Scenario scenario = ScenarioFactory.eINSTANCE.createScenario();
@@ -104,7 +109,7 @@ public class PlainTextPersistenceModelTest {
 		noise.schedule(0);
 		long iteration = 0;
 		try {
-			for (long stop = currentTimeMillis() + 1000; currentTimeMillis() < stop;) {
+			for (long stop = currentTimeMillis() + Stress.millis(1000); currentTimeMillis() < stop;) {
 				IPersistenceModel model = PersistenceManager.getInstance().getModel(resource);
 				if (model != null) {
 					model.updateMetadata(); // should not throw
@@ -114,6 +119,7 @@ public class PlainTextPersistenceModelTest {
 			throw new AssertionError("Failed on iteration " + iteration, e);
 		} finally {
 			noise.cancel();
+			noise.join(10_000, null);
 		}
 	}
 
@@ -121,7 +127,7 @@ public class PlainTextPersistenceModelTest {
 	 * @see https://github.com/eclipse-platform/eclipse.platform/discussions/2242
 	 */
 	@Test
-	public void ensureResourcesSurviveConcurrency() throws IOException, CoreException {
+	public void ensureResourcesSurviveConcurrency() throws IOException, CoreException, InterruptedException {
 		IProject project = WORKSPACE.getRoot().getProject("project");
 		project.create(null);
 		project.open(null);
@@ -139,7 +145,7 @@ public class PlainTextPersistenceModelTest {
 		noise.schedule();
 		long iteration = 0;
 		try {
-			for (long stop = currentTimeMillis() + 10_000; currentTimeMillis() < stop; iteration++) {
+			for (long stop = currentTimeMillis() + Stress.millis(10_000); currentTimeMillis() < stop; iteration++) {
 				try (InputStream stream = file.getContents(true)) {
 						stream.readAllBytes();
 				} catch (CoreException e) {
@@ -155,6 +161,7 @@ public class PlainTextPersistenceModelTest {
 			throw new AssertionError("Failed on iteration " + iteration, e);
 		} finally {
 			noise.cancel();
+			noise.join(10_000, null);
 		}
 	}
 	
@@ -165,7 +172,7 @@ public class PlainTextPersistenceModelTest {
 		ITestCase test1 = createTestCase();
 		int iteration = 0;
 		try {
-			for (long stop = currentTimeMillis() + 2000; currentTimeMillis() < stop;) {
+			for (long stop = currentTimeMillis() + Stress.millis(2000); currentTimeMillis() < stop;) {
 				String content = "script " + iteration;
 				setContent(test1, content);
 				assertEquals(content,  ((Script)test1.getContent()).getContent());
@@ -177,9 +184,9 @@ public class PlainTextPersistenceModelTest {
 		}
 	}
 	
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test
-	public void ensureNoCrosstalkBetweenDifferentFiles() throws IOException, CoreException {
+	public void ensureNoCrosstalkBetweenDifferentFiles() throws IOException, CoreException, InterruptedException {
+		Stress.assumeIssue176Enabled();
 		IQ7Project project = getProject();
 		
 		Path folderPath = Path.forPosix("VeryLongDirectoryName".repeat(10)); // to defeat suffix-based id generation
@@ -204,7 +211,7 @@ public class PlainTextPersistenceModelTest {
 		try {
 			int iteration = 0;
 			try {
-				for (long stop = currentTimeMillis() + 2000; currentTimeMillis() < stop;) {
+				for (long stop = currentTimeMillis() + Stress.millis(2000); currentTimeMillis() < stop;) {
 					setContent(test1, "script1");
 					assertTrue(test1.getResource().exists());
 					assertTrue(test1.exists());
@@ -221,6 +228,7 @@ public class PlainTextPersistenceModelTest {
 			}
 		} finally {
 			noise.cancel();
+			noise.join(10_000, null);
 		}
 		
 	}

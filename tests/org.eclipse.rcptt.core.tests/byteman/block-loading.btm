@@ -1,0 +1,13 @@
+# Blocks loading of model elements whose file name starts with "blocked"
+# for -Drcptt.byteman.blockMs (default 5000) milliseconds.
+# Used by UnrelatedElementAccessTest to check that access to unrelated elements
+# does not wait for this load. See https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176
+# Loaded by Maven profile issue176-byteman, see ../README.md
+
+RULE issue176 block loading of blocked* elements
+CLASS org.eclipse.rcptt.internal.core.model.Q7ResourceInfo
+METHOD load(org.eclipse.core.resources.IFile)
+AT ENTRY
+IF $1 != null AND $1.getName().startsWith("blocked")
+DO delay(java.lang.Integer.getInteger("rcptt.byteman.blockMs", 5000).intValue())
+ENDRULE

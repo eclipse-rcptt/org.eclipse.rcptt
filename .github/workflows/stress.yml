@@ -1,0 +1,112 @@
+name: Stress core tests
+# Long running reproduction of concurrency problems
+# https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176
+# See tests/org.eclipse.rcptt.core.tests/README.md
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: 'Minutes to repeat tests in each configuration'
+        default: '60'
+        required: true
+      tests:
+        description: 'Test classes (-Dtest)'
+        default: 'Q7NamedElementTest,PlainTextPersistenceModelTest,DeltaTests,ModelDeadlockTest,ValueLockStressTest'
+        required: true
+      factor:
+        description: 'Multiplier for durations of time-boxed test loops (-Drcptt.stress.factor)'
+        default: '1'
+        required: true
+      issue176:
+        description: 'Enable known failing reproducers (-Drcptt.issue176)'
+        type: boolean
+        default: true
+      byteman:
+        description: 'Inject delays at race points (profile issue176-byteman)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+env:
+  DURATION_MINUTES: ${{ inputs.duration_minutes }}
+  TESTS: ${{ inputs.tests }}
+  FACTOR: ${{ inputs.factor }}
+  ISSUE176: ${{ inputs.issue176 }}
+  BYTEMAN: ${{ inputs.byteman }}
+  RUN_TIMEOUT: 1800
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: unlimited
+            options: ''
+            argline: ''
+          - name: cpus1
+            options: '--cpus=1'
+            argline: ''
+          - name: apc1
+            options: ''
+            argline: '-XX:ActiveProcessorCount=1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    container:
+      image: basilevs/ubuntu-rcptt:3.7.2
+      options: ${{ matrix.options }}
+    env:
+      TEST_ARGLINE: ${{ matrix.argline }}
+      OUT: stress-results
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          key: m2repository
+          path: |
+            /root/.m2/repository
+      - name: Install core bundles
+        run: |
+          mvn -B -ntp install -f releng/mirroring/pom.xml -Dtycho.localArtifacts=ignore
+          mvn -B -ntp install -f releng/core/pom.xml -DskipTests
+      - name: Stress
+        run: MVN_ARGS= tests/org.eclipse.rcptt.core.tests/stress/stress-loop.sh
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stress-${{ matrix.name }}
+          include-hidden-files: true
+          path: stress-results/**
+  windows-arm:
+    # Target platform has no aarch64 Windows fragments, x64 JVM runs under emulation
+    runs-on: windows-11-arm
+    timeout-minutes: 360
+    defaults:
+      run:
+        shell: bash
+    env:
+      OUT: stress-results
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: maven
+      - uses: stCarolas/setup-maven@12eb41b233df95d49b0c11fc1b5bc8312e5d4ce0 # v5.1
+        with:
+          maven-version: 3.9.9
+      - name: Install core bundles
+        run: |
+          mvn -B -ntp install -f releng/mirroring/pom.xml -Dtycho.localArtifacts=ignore
+          mvn -B -ntp install -f releng/core/pom.xml -DskipTests
+      - name: Stress
+        run: MVN_ARGS= tests/org.eclipse.rcptt.core.tests/stress/stress-loop.sh
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stress-windows-arm
+          include-hidden-files: true
+          path: stress-results/**

@@ -21,4 +21,69 @@ documentation
 	</parent>
 	<artifactId>org.eclipse.rcptt.core.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<properties>
+		<!-- Concurrency reproducers for https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176, see README.md -->
+		<rcptt.issue176>false</rcptt.issue176>
+		<rcptt.stress.factor>1</rcptt.stress.factor>
+		<rcptt.hangDumpDir>${project.build.directory}/hang-dumps</rcptt.hangDumpDir>
+		<!-- Extra test JVM arguments, for example -XX:ActiveProcessorCount=1 -->
+		<rcptt.testArgLine></rcptt.testArgLine>
+		<byteman.argLine></byteman.argLine>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>${tycho-groupid}</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>${byteman.argLine} ${rcptt.testArgLine}</argLine>
+					<systemProperties>
+						<rcptt.issue176>${rcptt.issue176}</rcptt.issue176>
+						<rcptt.stress.factor>${rcptt.stress.factor}</rcptt.stress.factor>
+						<rcptt.hangDumpDir>${rcptt.hangDumpDir}</rcptt.hangDumpDir>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<!-- Injects delays at race points with Byteman agent, see byteman/*.btm and README.md -->
+			<id>issue176-byteman</id>
+			<properties>
+				<byteman.version>4.0.28</byteman.version>
+				<byteman.jar>${project.build.directory}/byteman/byteman.jar</byteman.jar>
+				<byteman.scripts>script:${project.basedir}/byteman/race-delays.btm,script:${project.basedir}/byteman/block-loading.btm</byteman.scripts>
+				<byteman.argLine>-javaagent:${byteman.jar}=${byteman.scripts},boot:${byteman.jar} -Dorg.osgi.framework.bootdelegation=org.jboss.byteman.*</byteman.argLine>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-byteman</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.jboss.byteman</groupId>
+											<artifactId>byteman</artifactId>
+											<version>${byteman.version}</version>
+										</artifactItem>
+									</artifactItems>
+									<outputDirectory>${project.build.directory}/byteman</outputDirectory>
+									<stripVersion>true</stripVersion>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

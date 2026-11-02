@@ -27,6 +27,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -42,6 +43,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -49,13 +52,14 @@ import org.eclipse.rcptt.core.model.ITestCase;
 import org.eclipse.rcptt.core.model.ModelException;
 import org.eclipse.rcptt.core.model.search.Q7SearchCore;
 import org.eclipse.rcptt.core.nature.RcpttNature;
+import org.eclipse.rcptt.core.tests.HangWatchdog;
 import org.eclipse.rcptt.core.tests.NoErrorsInLog;
+import org.eclipse.rcptt.core.tests.Stress;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
 import org.eclipse.rcptt.internal.core.model.cache.ModelCache;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -95,14 +99,36 @@ public class Q7NamedElementTest {
 	@Rule
 	public final NoErrorsInLog NO_RESORUCES_ERRORS = new NoErrorsInLog(IWorkspace.class);
 	
+	@Rule
+	public final HangWatchdog WATCHDOG = new HangWatchdog(Stress.millis(90_000));
+	
 	@Before
 	@After
-	public void cleanup() throws CoreException {
-		reindex.cancel();
+	public void cleanup() throws CoreException, InterruptedException {
+		// Stop background activity first, so that its errors are attributed to the test that caused it
+		WORKSPACE.removeResourceChangeListener(indexWaiter);
+		for (Job job: new Job[] {reindex, WORKSPACE_NOISE}) {
+			job.cancel();
+			job.join(10_000, null);
+		}
 		for (IProject i: WORKSPACE.getRoot().getProjects()) {
 			i.delete(true,  true, null);
 		}
-		WORKSPACE.removeResourceChangeListener(indexWaiter);
+		waitForIndexer(10_000);
+	}
+	
+	private static void waitForIndexer(long timeoutMs) {
+		long stop = currentTimeMillis() + timeoutMs;
+		try {
+			ModelManager.getModelManager().getIndexManager().waitUntilReady(new NullProgressMonitor() {
+				@Override
+				public boolean isCanceled() {
+					return currentTimeMillis() > stop;
+				}
+			});
+		} catch (OperationCanceledException e) {
+			TRACE.log(System.Logger.Level.WARNING, "Indexer is still busy after " + timeoutMs + " ms");
+		}
 	}
 	
 	@After
@@ -134,10 +160,12 @@ public class Q7NamedElementTest {
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		ITestCase testcase2 = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		CyclicBarrier barrier = new CyclicBarrier(2);
+		// CompletableFuture.cancel() does not interrupt, stop the closer explicitly to not affect other tests
+		AtomicBoolean stopCloser = new AtomicBoolean();
 		CompletableFuture<Void> closerTask = CompletableFuture.runAsync(() -> {
 			try {
 				barrier.await();
-				while(!Thread.interrupted()) {
+				while(!stopCloser.get() && !Thread.interrupted()) {
 					Thread.yield();
 					testcase2.close();
 				}
@@ -158,6 +186,7 @@ public class Q7NamedElementTest {
 				}
 			}
 		} finally {
+			stopCloser.set(true);
 			closerTask.cancel(true);
 		}
 		if (!closerTask.isCancelled()) {
@@ -215,9 +244,9 @@ public class Q7NamedElementTest {
 		noResourceleaks(testcase -> assertTrue(testcase.exists()));
 	}
 	
-	@Ignore("https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176")
 	@Test(timeout=100_000)
 	public void existsIsNoiseResistant() throws CoreException, IOException {
+		Stress.assumeIssue176Enabled();
 		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
 		Job noise = Job.create("Keep refetching model", (ICoreRunnable) monitor -> {
 			while (!monitor.isCanceled()) {
@@ -225,7 +254,7 @@ public class Q7NamedElementTest {
 				testcase.getNamedElement();
 			}
 		});
-		long stop = currentTimeMillis() + 10000;
+		long stop = currentTimeMillis() + Stress.millis(10000);
 		try {
 			int i = 0;
 			while (currentTimeMillis() < stop) {
@@ -263,7 +292,7 @@ public class Q7NamedElementTest {
 			throw new AssertionError(e);
 		}
 		IFile previousFile = TESTCASE_FILE;
-		for (int i = 0; i < 3_000; i++) {
+		for (int i = 0, n = Stress.iterations(3_000); i < n; i++) {
 			try {
 				IFile currentFile = PROJECT.getFile("t" + i + ".test");
 				previousFile.move(currentFile.getFullPath(), true, false, null);

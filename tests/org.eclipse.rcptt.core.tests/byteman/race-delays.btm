@@ -1,0 +1,49 @@
+# Random delays at race points of https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/176
+# Widens race windows so that rare CI-only failures become frequent.
+# Maximum delay (ms) is controlled by -Drcptt.byteman.maxDelayMs (default 20).
+# Loaded by Maven profile issue176-byteman, see ../README.md
+
+RULE issue176 delay between existence check and content read
+CLASS org.eclipse.rcptt.internal.core.model.Q7ResourceInfo
+METHOD load
+AT INVOKE openMetadata
+BIND max:int = java.lang.Integer.getInteger("rcptt.byteman.maxDelayMs", 20).intValue()
+IF max > 0
+DO delay(java.util.concurrent.ThreadLocalRandom.current().nextInt(max + 1))
+ENDRULE
+
+RULE issue176 delay in IFile.getContents
+CLASS org.eclipse.core.internal.resources.File
+METHOD getContents
+AT ENTRY
+BIND max:int = java.lang.Integer.getInteger("rcptt.byteman.maxDelayMs", 20).intValue()
+IF max > 0
+DO delay(java.util.concurrent.ThreadLocalRandom.current().nextInt(max + 1))
+ENDRULE
+
+RULE issue176 delay before ModelCache.removeInfo
+CLASS org.eclipse.rcptt.internal.core.model.cache.ModelCache
+METHOD removeInfo
+AT ENTRY
+BIND max:int = java.lang.Integer.getInteger("rcptt.byteman.maxDelayMs", 20).intValue()
+IF max > 0
+DO delay(java.util.concurrent.ThreadLocalRandom.current().nextInt(max + 1))
+ENDRULE
+
+RULE issue176 delay in DeltaProcessor.resourceChanged
+CLASS org.eclipse.rcptt.internal.core.model.deltas.DeltaProcessor
+METHOD resourceChanged
+AT ENTRY
+BIND max:int = java.lang.Integer.getInteger("rcptt.byteman.maxDelayMs", 20).intValue()
+IF max > 0
+DO delay(java.util.concurrent.ThreadLocalRandom.current().nextInt(max + 1))
+ENDRULE
+
+RULE issue176 delay in JobManager.discardJobs
+CLASS org.eclipse.rcptt.internal.core.jobs.JobManager
+METHOD discardJobs
+AT ENTRY
+BIND max:int = java.lang.Integer.getInteger("rcptt.byteman.maxDelayMs", 20).intValue()
+IF max > 0
+DO delay(java.util.concurrent.ThreadLocalRandom.current().nextInt(max + 1))
+ENDRULE

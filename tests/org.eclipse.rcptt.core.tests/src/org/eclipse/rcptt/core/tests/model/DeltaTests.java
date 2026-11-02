@@ -38,6 +38,7 @@ import org.eclipse.rcptt.core.tests.NoErrorsInLog;
 import org.eclipse.rcptt.core.tests.Util;
 import org.eclipse.rcptt.core.tests.Util.Comparer;
 import org.eclipse.rcptt.core.workspace.RcpttCore;
+import org.eclipse.rcptt.core.tests.HangWatchdog;
 import org.eclipse.rcptt.internal.core.model.ModelManager;
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +59,9 @@ public class DeltaTests {
 
 	@Rule
 	public final NoErrorsInLog NO_ERRORS = new NoErrorsInLog(RcpttCore.class);
+	
+	@Rule
+	public final HangWatchdog WATCHDOG = new HangWatchdog(60_000);
 	
 	@Before
 	@After
