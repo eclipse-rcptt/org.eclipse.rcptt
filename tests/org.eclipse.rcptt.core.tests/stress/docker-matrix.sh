@@ -67,8 +67,9 @@ for config in "${CONFIGS[@]}"; do
 			docker run -d --rm --name "$noise" "$IMAGE" bash -c 'for i in $(seq $(nproc)); do (while :; do :; done) & done; wait' > /dev/null || exit 1
 			;;
 		tmpfs)
-			opts=(--tmpfs /fast:exec,size=3g)
-			command="tar -C /work --exclude=.git --exclude=target -cf - . | tar -C /fast -xf - && cd /fast && OUT=/work/$PROJECT/target/stress/tmpfs $PROJECT/stress/stress-loop.sh"
+			opts=(--tmpfs "/fast:exec,size=3g")
+			# forceContextQualifier: there is no Git repository to compute qualifier from
+			command="tar -C /work --exclude=.git --exclude=target -cf - . | tar -C /fast -xf - && cd /fast && MVN_ARGS=\"\${MVN_ARGS--o} -DforceContextQualifier=stress\" OUT=/work/$PROJECT/target/stress/tmpfs $PROJECT/stress/stress-loop.sh"
 			;;
 		*) echo "Unknown configuration $config" >&2; exit 2 ;;
 	esac
