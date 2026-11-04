@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.rcptt.verifications.test
+Bundle-Name: Verification implementation tests
+Bundle-Version: 2.9.0.qualifier
+Automatic-Module-Name: org.eclipse.rcptt.verifications.test
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Bundle: org.junit,
+ org.eclipse.core.runtime,
+ org.eclipse.swt,
+ com.google.guava,
+ org.eclipse.rcptt.ecl.core;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.core.ecl.core;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.verifications;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.verifications.tree;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.verifications.tree.impl;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.tesla.swt.e4x;bundle-version="[2.9.0,3.0.0)"
