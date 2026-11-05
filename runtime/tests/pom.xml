@@ -20,6 +20,7 @@
 		<module>org.eclipse.rcptt.tesla.swt.test</module>
 		<module>org.eclipse.rcptt.watson.test</module>
 		<module>org.eclipse.rcptt.contexts.test</module>
+		<module>org.eclipse.rcptt.verifications.test</module>
 	</modules>
 
 	<build>
