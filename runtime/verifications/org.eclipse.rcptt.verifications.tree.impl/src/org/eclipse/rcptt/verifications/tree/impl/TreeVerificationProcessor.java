@@ -107,7 +107,7 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 					}
 				}
 				if (!mappedActualCols[j] && expectingColumns.get(i).getName().equals(actualColumns.get(j).getName())
-						&& isEqualStrings(expectingColumns.get(i).getTooltip(), actualColumns.get(i).getTooltip())) {
+						&& isEqualStrings(expectingColumns.get(i).getTooltip(), actualColumns.get(j).getTooltip())) {
 					mappedInds[i] = j;
 					mappedActualCols[j] = true;
 					mapped = true;
