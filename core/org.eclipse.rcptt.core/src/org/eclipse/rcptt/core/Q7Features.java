@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,7 @@ public class Q7Features extends AbstractFeatureManager {
 						"Transfer content with workspace context (the option is also used in workspace verification)")
 				.value("true").defaultValue("true")
 				.values(AbstractFeatureManager.BOOLEAN_VALUES).editable(true)
-				.showIn(TeslaFeatures.NONE);
+				.showIn(TeslaFeatures.ADV_OPTIONS);
 		// option(Q7_WORKSPACE_CLEAR_TIMEOUT)
 		// .category("Resources Context")
 		// .name("Clear workspace timeout")
