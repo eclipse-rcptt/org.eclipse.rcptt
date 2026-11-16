@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.rcptt.resources;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -114,7 +115,7 @@ public class WorkspaceDataMaker {
 
 				ByteArrayOutputStream bout = new ByteArrayOutputStream();
 				ZipOutputStream zout = new ZipOutputStream(bout);
-				zout.setLevel(9);
+				zout.setLevel(Deflater.BEST_SPEED);
 				zout.setMethod(ZipOutputStream.DEFLATED);
 				ZipEntry entry = new ZipEntry("content");
 				entry.setTime(1);
