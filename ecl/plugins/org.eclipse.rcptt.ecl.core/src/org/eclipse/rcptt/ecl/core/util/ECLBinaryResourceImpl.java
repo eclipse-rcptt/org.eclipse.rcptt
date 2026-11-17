@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,17 @@ package org.eclipse.rcptt.ecl.core.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +36,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -180,6 +187,10 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 			internalEObjectDataArrayBuffer[internalEObjectDataArrayBufferCount] = values;
 		}
 
+		protected static final HexFormat HEX_FORMAT = HexFormat.of().withUpperCase();
+
+		protected static final int HEX_BUFFER_SIZE = 64 * 1024;
+
 		protected FeatureMap.Entry.Internal[][] featureMapEntryDataArrayBuffer = new FeatureMap.Entry.Internal[50][];
 		protected int featureMapEntryDataArrayBufferCount = -1;
 
@@ -221,7 +232,14 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 
 			DATA, DATA_LIST,
 
-			FEATURE_MAP;
+			FEATURE_MAP,
+
+			/**
+			 * Ecore's EByteArray. Serialized exactly like {@link #DATA} (an
+			 * upper case hex string as written by writeString), but encoded and
+			 * decoded in bulk instead of through an intermediate String.
+			 */
+			HEX_BYTE_ARRAY;
 
 			public static FeatureKind get(EStructuralFeature eStructuralFeature) {
 				if (eStructuralFeature instanceof EReference) {
@@ -285,6 +303,8 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 						return LONG;
 					} else if (instanceClassName == "short") {
 						return SHORT;
+					} else if (eDataType == EcorePackage.Literals.EBYTE_ARRAY) {
+						return HEX_BYTE_ARRAY;
 					} else {
 						return DATA;
 					}
@@ -405,8 +425,7 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 							.isTransient()
 							|| eStructuralFeature.isContainer()
 							&& !eStructuralFeature.isResolveProxies();
-					eStructuralFeatureData.kind = FeatureKind
-							.get(eStructuralFeature);
+					eStructuralFeatureData.kind = FeatureKind.get(eStructuralFeature);
 					if (eStructuralFeature instanceof EAttribute) {
 						EAttribute eAttribute = (EAttribute) eStructuralFeature;
 						EDataType eDataType = eAttribute.getEAttributeType();
@@ -534,6 +553,10 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 			}
 			case STRING: {
 				writeString((String) value);
+				break;
+			}
+			case HEX_BYTE_ARRAY: {
+				writeHexByteArray((byte[]) value);
 				break;
 			}
 			case DATA:
@@ -701,6 +724,10 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 					saveFeatureMap(featureMap);
 					break;
 				}
+				case HEX_BYTE_ARRAY: {
+					writeHexByteArray((byte[]) value);
+					break;
+				}
 				case DATA: {
 					String literal = eStructuralFeatureData.eFactory
 							.convertToString(eStructuralFeatureData.eDataType,
@@ -731,6 +758,28 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 
 		public void writeByte(int value) throws IOException {
 			outputStream.write(value);
+		}
+
+		/**
+		 * Writes the same bytes as writeString(convertToString(EByteArray,
+		 * value)): the length of the hex string followed by one upper case hex
+		 * digit per character.
+		 */
+		public void writeHexByteArray(byte[] value) throws IOException {
+			if (value == null) {
+				writeCompressedInt(-1);
+				return;
+			}
+			writeCompressedInt(value.length * 2);
+			// Not closed: that would close the underlying stream
+			Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.US_ASCII),
+					HEX_BUFFER_SIZE);
+			try {
+				HEX_FORMAT.formatHex(writer, value);
+			} catch (UncheckedIOException e) {
+				throw e.getCause();
+			}
+			writer.flush();
 		}
 
 		public void writeBoolean(boolean value) throws IOException {
@@ -996,8 +1045,7 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 						.getEStructuralFeature(name);
 				eStructuralFeatureData.featureID = eClassData.eClass
 						.getFeatureID(eStructuralFeatureData.eStructuralFeature);
-				eStructuralFeatureData.kind = FeatureKind
-						.get(eStructuralFeatureData.eStructuralFeature);
+				eStructuralFeatureData.kind = FeatureKind.get(eStructuralFeatureData.eStructuralFeature);
 				if (eStructuralFeatureData.eStructuralFeature instanceof EAttribute) {
 					EAttribute eAttribute = (EAttribute) eStructuralFeatureData.eStructuralFeature;
 					eStructuralFeatureData.eDataType = eAttribute
@@ -1170,6 +1218,10 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 				value = readString();
 				break;
 			}
+			case HEX_BYTE_ARRAY: {
+				value = readHexByteArray();
+				break;
+			}
 			case DATA: {
 				String literal = readString();
 				value = eStructuralFeatureData.eFactory.createFromString(
@@ -1283,6 +1335,11 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 				loadFeatureMap(featureMap);
 				break;
 			}
+			case HEX_BYTE_ARRAY: {
+				internalEObject.eSet(eStructuralFeatureData.featureID,
+						readHexByteArray());
+				break;
+			}
 			case DATA: {
 				String literal = readString();
 				internalEObject.eSet(eStructuralFeatureData.featureID,
@@ -1352,6 +1409,37 @@ public class ECLBinaryResourceImpl extends ResourceImpl {
 						+ eStructuralFeatureData.kind);
 			}
 			}
+		}
+
+		/**
+		 * Reads a byte array written by {@link EObjectOutputStream#writeHexByteArray(byte[])}
+		 * or, equivalently, by writeString with an EByteArray hex literal.
+		 */
+		public byte[] readHexByteArray() throws IOException {
+			int length = readCompressedInt();
+			if (length == -1) {
+				return null;
+			}
+			if (length % 2 != 0) {
+				throw new IOException("Invalid hexadecimal byte array length " + length);
+			}
+			byte[] result = new byte[length / 2];
+			byte[] buffer = new byte[Math.min(length, HEX_BUFFER_SIZE)];
+			for (int position = 0; position < result.length;) {
+				int chunk = Math.min(buffer.length, (result.length - position) * 2);
+				if (inputStream.readNBytes(buffer, 0, chunk) != chunk) {
+					throw new IOException("Unexpected end of stream");
+				}
+				try {
+					for (int i = 0; i < chunk; i += 2) {
+						result[position++] = (byte) (HexFormat.fromHexDigit(buffer[i]) << 4
+								| HexFormat.fromHexDigit(buffer[i + 1]));
+					}
+				} catch (NumberFormatException e) {
+					throw new IOException("Invalid hexadecimal", e);
+				}
+			}
+			return result;
 		}
 
 		public byte readByte() throws IOException {
