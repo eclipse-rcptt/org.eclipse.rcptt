@@ -137,11 +137,11 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 			if (verifyIcons) {
 				for (int i = 0; i < expectingColumns.size(); i++) {
 					if (mappedInds[i] == -1) {
-						break;
+						continue;
 					}
 					String expImgName = TreeVerificationUtils.getDecoratedImagePath(expectingColumns.get(i).getImage());
 					String actImgName = TreeVerificationUtils
-							.getDecoratedImagePath(expectingColumns.get(mappedInds[i]).getImage());
+							.getDecoratedImagePath(actualColumns.get(mappedInds[i]).getImage());
 
 					if ((expImgName == null && actImgName != null)
 							|| (expImgName != null && !expImgName.equals(actImgName))) {
