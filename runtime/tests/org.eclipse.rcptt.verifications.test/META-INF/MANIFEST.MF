@@ -14,4 +14,5 @@ Require-Bundle: org.junit,
  org.eclipse.rcptt.verifications;bundle-version="[2.9.0,3.0.0)",
  org.eclipse.rcptt.verifications.tree;bundle-version="[2.9.0,3.0.0)",
  org.eclipse.rcptt.verifications.tree.impl;bundle-version="[2.9.0,3.0.0)",
+ org.eclipse.rcptt.tesla.core;bundle-version="[2.9.0,3.0.0)",
  org.eclipse.rcptt.tesla.swt.e4x;bundle-version="[2.9.0,3.0.0)"

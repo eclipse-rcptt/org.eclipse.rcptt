@@ -27,6 +27,8 @@ import org.eclipse.rcptt.core.ecl.core.model.Q7CoreFactory;
 import org.eclipse.rcptt.ecl.runtime.EclRuntime;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
 import org.eclipse.rcptt.ecl.runtime.ISession;
+import org.eclipse.rcptt.tesla.core.ui.Image;
+import org.eclipse.rcptt.tesla.core.ui.UiFactory;
 import org.eclipse.rcptt.verifications.runtime.VerificationStatus;
 import org.eclipse.rcptt.verifications.status.VerificationStatusData;
 import org.eclipse.rcptt.verifications.tree.Column;
@@ -92,6 +94,60 @@ public class TreeVerificationProcessorTest {
 	public void expectedColumnBeyondActualColumnCountIsMatchedByName() throws Exception {
 		showTreeWithColumns(shell, "B");
 		TreeVerification verification = verificationExpectingColumns("A", "B");
+
+		IStatus status = verify(verification);
+
+		List<VerificationStatusData> errors = verificationErrors(status);
+		assertEquals(1, errors.size());
+		assertTrue(errors.get(0).getMessage(), errors.get(0).getMessage().contains("\"A\""));
+	}
+	
+	/**
+	 * https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/353
+	 */
+	@Test
+	public void iconVerificationWithExtraColumnsDoesNotFail() throws Exception {
+		showTreeWithColumns(shell, "A", "B");
+		TreeVerification verification = verificationExpectingColumns("B");
+		verification.setAllowExtraColumns(true);
+		verification.setVerifyIcons(true);
+
+		IStatus status = verify(verification);
+
+		assertTrue(status.toString(), status.isOK());
+	}
+
+	/**
+	 * https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/353
+	 */
+	@Test
+	public void iconsOfColumnsAfterMissingColumnAreVerified() throws Exception {
+		showTreeWithColumns(shell, "B");
+		TreeVerification verification = verificationExpectingColumns("A", "B");
+		verification.setAllowMissingColumns(true);
+		verification.setVerifyIcons(true);
+		Image icon = UiFactory.eINSTANCE.createImage();
+		icon.setPath("b.png");
+		verification.getTree().getColumns().get(1).setImage(icon);
+
+		IStatus status = verify(verification);
+
+		List<VerificationStatusData> errors = verificationErrors(status);
+		assertEquals(1, errors.size());
+		assertTrue(errors.get(0).getMessage(), errors.get(0).getMessage().contains("\"B\""));
+	}
+	
+	/**
+	 * https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/353
+	 */
+	@Test
+	public void missingHeaderIconIsReported() throws Exception {
+		showTreeWithColumns(shell, "A");
+		TreeVerification verification = verificationExpectingColumns("A");
+		verification.setVerifyIcons(true);
+		Image icon = UiFactory.eINSTANCE.createImage();
+		icon.setPath("a.png");
+		verification.getTree().getColumns().get(0).setImage(icon);
 
 		IStatus status = verify(verification);
 
