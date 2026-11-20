@@ -120,7 +120,7 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 					correctMapping = false;
 					errors.add("Expected column \"%s\" %s was not found in actual columns list ",
 							expectingColumns.get(i).getName(), (expectingColumns.get(i).getTooltip() == null) ? ""
-									: String.format("with tooltip", expectingColumns.get(i)));
+									: String.format("with tooltip \"%s\"", expectingColumns.get(i).getTooltip()));
 				}
 			}
 		}
@@ -129,7 +129,7 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 				correctMapping = false;
 				errors.add("Column \"%s\" %s is undefined in expected columns list", actualColumns.get(i).getName(),
 						(actualColumns.get(i).getTooltip() == null) ? ""
-								: String.format("with tooltip", actualColumns.get(i)));
+								: String.format("with tooltip \"%s\"", actualColumns.get(i).getTooltip()));
 			}
 		}
 		if (correctMapping) {
