@@ -100,12 +100,45 @@ public class TreeVerificationProcessorTest {
 		assertTrue(errors.get(0).getMessage(), errors.get(0).getMessage().contains("\"A\""));
 	}
 
-	private static void showTreeWithColumns(Shell parent, String... columnNames) {
+	/**
+	 * https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/355
+	 */
+	@Test
+	public void tooltipOfMissingColumnIsReported() throws Exception {
+		showTreeWithColumns(shell, "A");
+		TreeVerification verification = verificationExpectingColumns("A", "B");
+		verification.getTree().getColumns().get(1).setTooltip("tooltip of B");
+
+		IStatus status = verify(verification);
+
+		List<VerificationStatusData> errors = verificationErrors(status);
+		assertEquals(1, errors.size());
+		assertTrue(errors.get(0).getMessage(), errors.get(0).getMessage().contains("with tooltip \"tooltip of B\""));
+	}
+	
+	/**
+	 * https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/355
+	 */
+	@Test
+	public void tooltipOfExtraColumnIsReported() throws Exception {
+		org.eclipse.swt.widgets.Tree tree = showTreeWithColumns(shell, "A", "B");
+		tree.getColumn(1).setToolTipText("tooltip of B");
+		TreeVerification verification = verificationExpectingColumns("A");
+
+		IStatus status = verify(verification);
+
+		List<VerificationStatusData> errors = verificationErrors(status);
+		assertEquals(1, errors.size());
+		assertTrue(errors.get(0).getMessage(), errors.get(0).getMessage().contains("with tooltip \"tooltip of B\""));
+	}
+	
+	private static org.eclipse.swt.widgets.Tree showTreeWithColumns(Shell parent, String... columnNames) {
 		var tree = new org.eclipse.swt.widgets.Tree(parent, SWT.NONE);
 		for (String name : columnNames) {
 			new TreeColumn(tree, SWT.NONE).setText(name);
 		}
 		parent.open();
+		return tree;
 	}
 
 	private static TreeVerification verificationExpectingColumns(String... names) {
