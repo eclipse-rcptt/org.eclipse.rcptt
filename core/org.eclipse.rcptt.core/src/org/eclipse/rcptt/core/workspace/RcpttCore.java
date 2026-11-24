@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -735,8 +736,19 @@ public class RcpttCore {
 		try {
 			return project.isAccessible() && project.isOpen() && RcpttNature.isRcpttProject(project);
 		} catch (CoreException e) {
-			RcpttPlugin.log(e);
+			logUnlessGone(e);
 			return false;
+		}
+	}
+
+	/**
+	 * A project can be closed or deleted between the accessibility check and
+	 * reading its natures. That is not an error.
+	 */
+	private static void logUnlessGone(CoreException e) {
+		int code = e.getStatus().getCode();
+		if (code != IResourceStatus.RESOURCE_NOT_FOUND && code != IResourceStatus.PROJECT_NOT_OPEN) {
+			RcpttPlugin.log(e);
 		}
 	}
 
@@ -761,7 +773,7 @@ public class RcpttCore {
 						result.add(iProject);
 					}
 				} catch (CoreException e) {
-					RcpttPlugin.log(e);
+					logUnlessGone(e);
 				}
 			}
 		}
