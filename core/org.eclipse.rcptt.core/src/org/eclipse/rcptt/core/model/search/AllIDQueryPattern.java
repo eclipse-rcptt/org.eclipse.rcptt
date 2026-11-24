@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class AllIDQueryPattern implements ISearchPattern {
 		for (QueryResult queryResult : query) {
 			Path fullPath = new Path(queryResult.path);
 			IResource resource = root.findMember(path.append(fullPath));
-			if (resource.exists()) {
+			if (resource != null && resource.exists()) {
 				IQ7Element q7Element = RcpttCore.create(resource);
 				requestor.acceptMatch(q7Element, IQ7IndexConstants.ID,
 						queryResult.value);
