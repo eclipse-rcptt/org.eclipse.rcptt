@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Xored Software Inc and others.
+ * Copyright (c) 2025, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -204,7 +204,38 @@ public class Q7NamedElementTest {
 		PROJECT.refreshLocal(IResource.DEPTH_INFINITE, null);
 		PROJECT.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
 	}
-	
+
+	/**
+	 * Listing projects must not log errors for a project that is closed or
+	 * deleted while the list is being built.
+	 */
+	@Test(timeout=60_000)
+	public void listProjectsWhileProjectIsDeleted() throws CoreException, InterruptedException, ExecutionException {
+		IProject other = WORKSPACE.getRoot().getProject("OTHER");
+		Q7Model model = ModelManager.getModelManager().getModel();
+		long stop = currentTimeMillis() + 10_000;
+		CompletableFuture<Void> lister = CompletableFuture.runAsync(() -> {
+			try {
+				while (currentTimeMillis() < stop) {
+					model.close();
+					model.getProjects();
+					RcpttCore.getQ7Projects();
+				}
+			} catch (ModelException | InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		while (!lister.isDone()) {
+			other.create(null);
+			other.open(null);
+			other.close(null);
+			other.open(null);
+			other.delete(true, true, null);
+		}
+		lister.get();
+		NO_ERRORS.assertNoErrors();
+	}
+
 	@Test(timeout=200_000)
 	public void noResourceleaksID() {
 		noResourceleaks(testcase -> Assert.assertEquals("_-dqP0BOHEeOQfY3L4mNcSA", testcase.getID()));
