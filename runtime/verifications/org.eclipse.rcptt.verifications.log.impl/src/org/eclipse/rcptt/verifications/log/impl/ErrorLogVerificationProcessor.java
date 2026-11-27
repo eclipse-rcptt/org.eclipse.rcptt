@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILogListener;
@@ -27,11 +28,9 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.rcptt.core.VerificationProcessor;
 import org.eclipse.rcptt.core.scenario.Verification;
 import org.eclipse.rcptt.ecl.runtime.IProcess;
-import org.eclipse.rcptt.reporting.ItemKind;
-import org.eclipse.rcptt.reporting.Q7Info;
-import org.eclipse.rcptt.reporting.core.IQ7ReportConstants;
 import org.eclipse.rcptt.reporting.core.ReportManager;
 import org.eclipse.rcptt.sherlock.core.INodeBuilder;
+import org.eclipse.rcptt.tesla.ecl.impl.UIRunnable;
 import org.eclipse.rcptt.verifications.log.ErrorLogVerification;
 import org.eclipse.rcptt.verifications.log.LogEntryPredicate;
 import org.eclipse.rcptt.verifications.log.LogFactory;
@@ -59,6 +58,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 	}
 
 	private final List<LogEntry> testLog = Collections.synchronizedList(new ArrayList<LogEntry>());
+	private final AtomicBoolean isContext = new AtomicBoolean(true);
 
 	public ErrorLogVerificationProcessor() {
 		Platform.addLogListener(this);
@@ -66,31 +66,62 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 	
 	@Override
 	synchronized public Object start(Verification verification, IProcess process) {
+		isContext.set(true);
 		testLog.clear();
 		return null;
 	}
 
 	@Override
-	synchronized public Object run(Verification verification, Object data, IProcess process) {
+	synchronized public Object run(Verification verification, Object data, IProcess process) throws CoreException {
+		isContext.set(false);
+		var logVerification = (ErrorLogVerification) verification;
+		if (!logVerification.isIncludeContexts()) {
+			ErrorList errors = new ErrorList();
+			exec(process, () -> 
+				findErrors(logVerification, copyLog(), errors)
+			);
+			errors.throwIfAny(String.format("Error log verification '%s' failed:", verification.getName()), this.getClass()
+					.getPackage().getName(), verification.getId());
+		}
 		return data;
 	}
 
 	@Override
 	public void finish(Verification verification, Object data, IProcess process) throws CoreException {
+		isContext.set(true);
+		ArrayList<LogEntry> copy = copyLog();
+		ErrorLogVerification logVerification = (ErrorLogVerification) verification;
+		ErrorList errors = new ErrorList();
+		exec(process, () -> { 
+			findErrors(logVerification, copy, errors);
+			checkRequired(logVerification, testLog, errors);
+		});
+		errors.throwIfAny(String.format("Error log verification '%s' failed:", verification.getName()), this.getClass()
+				.getPackage().getName(), verification.getId());
+	}
+	
+	private void exec(IProcess process, Runnable runnable) throws CoreException {
+		UIRunnable.<Void>exec(new UIRunnable<Void>() {
+			@Override
+			public Void run() throws CoreException {
+				runnable.run();
+				return null;
+			}
+		}, UIRunnable.getTimeout(), () -> !process.isAlive());
+	}
+
+	private ArrayList<LogEntry> copyLog() {
 		ArrayList<LogEntry> copy;
 		synchronized (testLog) {
 			copy = new ArrayList<>(testLog);
 		}
-		ErrorList errors = findErrors((ErrorLogVerification) verification, copy);
-		errors.throwIfAny(String.format("Error log verification '%s' failed:", verification.getName()), this.getClass()
-				.getPackage().getName(), verification.getId());
+		return copy;
 	}
 
-	private ErrorList findErrors(ErrorLogVerification logVerification, List<LogEntry> testLog) {
+	private void findErrors(ErrorLogVerification logVerification, List<LogEntry> testLog, ErrorList errors) {
 		List<LogEntryPredicate> whiteList = new ArrayList<>();
 		whiteList.addAll(logVerification.getAllowed());
 		whiteList.addAll(logVerification.getRequired());
-		ErrorList errors = new ErrorList();
 		for (LogEntry entry : testLog) {
 			boolean ignoreContext = !logVerification.isIncludeContexts() && entry.isContext;
 			if (ignoreContext || isWhiteListed(whiteList, entry.status)) {
@@ -104,7 +135,9 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 						describe(denied));
 			}
 		}
+	}
 
+	private ErrorList checkRequired(ErrorLogVerification logVerification, List<LogEntry> testLog, ErrorList errors) {
 		for (LogEntryPredicate predicate: logVerification.getRequired()) {
 			if (!contains(testLog, predicate)) {
 				errors.add("Required \n%s\nnot found", describe(predicate));
@@ -124,8 +157,7 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 
 	@Override
 	synchronized public void logging(IStatus status, String plugin) {
-		INodeBuilder node = ReportManager.getCurrentReportNode();
-		testLog.add(new LogEntry(status, isContext(node)));
+		testLog.add(new LogEntry(status, isContext()));
 	}
 	
 	private boolean isWhiteListed(Iterable<LogEntryPredicate> whiteList, IStatus status) {
@@ -156,15 +188,8 @@ public class ErrorLogVerificationProcessor extends VerificationProcessor impleme
 		return rv;
 	}
 
-	private static boolean isContext(INodeBuilder node) {
-		while (node != null) {
-			Q7Info info = (Q7Info) node.getProperty(IQ7ReportConstants.ROOT);
-			if (info != null && ItemKind.CONTEXT.equals(info.getType())) {
-				return true;
-			}
-			node = node.getParent();
-		}
-		return false;
+	private boolean isContext() {
+		return isContext.get();
 	}
 	
 }

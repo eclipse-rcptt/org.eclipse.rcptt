@@ -43,7 +43,6 @@ import org.eclipse.rcptt.verifications.tree.TreeFactory;
 import org.eclipse.rcptt.verifications.tree.TreeVerificationUtils;
 import org.eclipse.rcptt.verifications.tree.VerifyStyleType;
 import org.eclipse.rcptt.verifications.tree.VerifyTreeData;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Widget;
 
 public class TreeVerificationProcessor extends VerificationProcessor {
@@ -107,7 +106,7 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 					}
 				}
 				if (!mappedActualCols[j] && expectingColumns.get(i).getName().equals(actualColumns.get(j).getName())
-						&& isEqualStrings(expectingColumns.get(i).getTooltip(), actualColumns.get(i).getTooltip())) {
+						&& isEqualStrings(expectingColumns.get(i).getTooltip(), actualColumns.get(j).getTooltip())) {
 					mappedInds[i] = j;
 					mappedActualCols[j] = true;
 					mapped = true;
@@ -137,11 +136,11 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 			if (verifyIcons) {
 				for (int i = 0; i < expectingColumns.size(); i++) {
 					if (mappedInds[i] == -1) {
-						break;
+						continue;
 					}
 					String expImgName = TreeVerificationUtils.getDecoratedImagePath(expectingColumns.get(i).getImage());
 					String actImgName = TreeVerificationUtils
-							.getDecoratedImagePath(expectingColumns.get(mappedInds[i]).getImage());
+							.getDecoratedImagePath(actualColumns.get(mappedInds[i]).getImage());
 
 					if ((expImgName == null && actImgName != null)
 							|| (expImgName != null && !expImgName.equals(actImgName))) {
@@ -157,7 +156,7 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 				@Override
 				public List<TreeItemVerificationError> compare(Row row1, Row row2) {
 					List<TreeItemVerificationError> rv = new ArrayList<TreeItemVerificationError>();
-					boolean equal = compareRows(rv, row1, row2, widget.getDisplay(), verifyStyle, verifyIcons,
+					boolean equal = compareRows(rv, row1, row2, verifyStyle, verifyIcons,
 							expectingColumns, mappedInds);
 					Assert.isTrue(equal == rv.isEmpty());
 					return rv;
@@ -203,15 +202,17 @@ public class TreeVerificationProcessor extends VerificationProcessor {
 		return !((left == null && right != null) || (left != null && !left.equals(right)));
 	}
 
-	private boolean compareRows(List<TreeItemVerificationError> errors, Row expectedRow, Row actualRow, Display display,
+	private boolean compareRows(List<TreeItemVerificationError> errors, Row expectedRow, Row actualRow,
 			VerifyStyleType verifyStyle, boolean verifyIcons, List<Column> columns, int[] mappedInds) {
 		boolean equal = true;
 		if (expectedRow == actualRow)
 			return true;
+
 		if (expectedRow == null || actualRow == null) {
 			TreeItemVerificationError error = StatusFactory.eINSTANCE.createTreeItemVerificationError();
 			error.setMessage("Row undefined");
 			errors.add(error);
+			return false;
 		}
 
 		if (expectedRow.isChecked() != actualRow.isChecked()) {

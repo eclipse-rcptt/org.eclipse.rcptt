@@ -131,7 +131,7 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 	}
 
 	private class WaitForJobsStatus extends PreExecuteStatus {
-		final UIJobCollector collector = new UIJobCollector() {
+		final UIJobCollector collector = new UIJobCollector(Job.getJobManager()) {
 			@Override
 			protected JobStatus calcJobStatus(Job job) {
 				if (isMarkersJob(job)) {
@@ -156,8 +156,7 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 
 		@Override
 		public void clean() {
-			collector.disable();
-			Job.getJobManager().removeJobChangeListener(collector);
+			collector.close();
 		}
 
 		public WaitForJobsStatus(boolean canExecute) {
@@ -193,7 +192,7 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 				return s;
 			}
 			s.collector.disable();
-			Job.getJobManager().removeJobChangeListener(s.collector);
+			s.clean();
 		}
 		// Check for marker update job is present
 		Job[] find = Job.getJobManager().find(null);
@@ -203,7 +202,6 @@ public class ProblemViewSupportProcessor implements ITeslaCommandProcessor {
 			st.collector.disable();
 			return null;
 		}
-		Job.getJobManager().addJobChangeListener(st.collector);
 		Q7WaitUtils.updateInfo("problems.view", "wait", info);
 		return st;
 	}

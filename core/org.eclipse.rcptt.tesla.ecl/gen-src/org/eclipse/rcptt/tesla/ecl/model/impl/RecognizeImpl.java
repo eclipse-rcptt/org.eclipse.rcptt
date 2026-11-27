@@ -163,6 +163,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public byte[] getImage() {
 		return image;
 	}
@@ -172,6 +173,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setImage(byte[] newImage) {
 		byte[] oldImage = image;
 		image = newImage;
@@ -184,6 +186,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getX() {
 		return x;
 	}
@@ -193,6 +196,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(int newX) {
 		int oldX = x;
 		x = newX;
@@ -205,6 +209,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getY() {
 		return y;
 	}
@@ -214,6 +219,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(int newY) {
 		int oldY = y;
 		y = newY;
@@ -226,6 +232,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getWidth() {
 		return width;
 	}
@@ -235,6 +242,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setWidth(int newWidth) {
 		int oldWidth = width;
 		width = newWidth;
@@ -247,6 +255,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getHeight() {
 		return height;
 	}
@@ -256,6 +265,7 @@ public class RecognizeImpl extends CommandImpl implements Recognize {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setHeight(int newHeight) {
 		int oldHeight = height;
 		height = newHeight;

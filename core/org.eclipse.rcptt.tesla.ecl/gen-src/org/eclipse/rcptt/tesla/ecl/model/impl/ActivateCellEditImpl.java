@@ -114,6 +114,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getColumn() {
 		return column;
 	}
@@ -123,6 +124,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(int newColumn) {
 		int oldColumn = column;
 		column = newColumn;
@@ -135,6 +137,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ActivationEventType getType() {
 		return type;
 	}
@@ -144,6 +147,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(ActivationEventType newType) {
 		ActivationEventType oldType = type;
 		type = newType == null ? TYPE_EDEFAULT : newType;
@@ -156,6 +160,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getButton() {
 		return button;
 	}
@@ -165,6 +170,7 @@ public class ActivateCellEditImpl extends CellEditImpl implements ActivateCellEd
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setButton(int newButton) {
 		int oldButton = button;
 		button = newButton;

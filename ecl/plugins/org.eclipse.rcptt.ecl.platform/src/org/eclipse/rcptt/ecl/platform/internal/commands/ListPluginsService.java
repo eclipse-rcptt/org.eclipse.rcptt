@@ -35,12 +35,11 @@ import org.osgi.framework.Bundle;
 public class ListPluginsService implements ICommandService {
 
 	
+	@Override
 	public IStatus service(Command command, IProcess context)
 			throws InterruptedException, CoreException {
 		ListPlugins cmd = (ListPlugins) command;
 		boolean includeDeps = cmd.isIncludeDependencies();
-		State platformState = includeDeps ? Platform.getPlatformAdmin()
-				.getState() : null;
 
 		for (Bundle bundle : PlatformPlugin.getDefault().getBundles()) {
 			Plugin plugin = ObjectsFactory.eINSTANCE.createPlugin();
@@ -53,7 +52,7 @@ public class ListPluginsService implements ICommandService {
 			}
 
 			if (includeDeps) {
-				platformState = Platform.getPlatformAdmin().getState();
+				State platformState = Platform.getPlatformAdmin().getState();
 				BundleDescription bundleDesc = platformState.getBundle(bundle
 						.getBundleId());
 

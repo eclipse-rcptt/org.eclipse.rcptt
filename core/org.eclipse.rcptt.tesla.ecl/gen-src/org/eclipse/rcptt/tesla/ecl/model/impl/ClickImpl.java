@@ -155,6 +155,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -181,6 +182,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -193,6 +195,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isNowait() {
 		return nowait;
 	}
@@ -202,6 +205,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setNowait(boolean newNowait) {
 		boolean oldNowait = nowait;
 		nowait = newNowait;
@@ -214,6 +218,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isDefault() {
 		return default_;
 	}
@@ -223,6 +228,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDefault(boolean newDefault) {
 		boolean oldDefault = default_;
 		default_ = newDefault;
@@ -235,6 +241,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isArrow() {
 		return arrow;
 	}
@@ -244,6 +251,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setArrow(boolean newArrow) {
 		boolean oldArrow = arrow;
 		arrow = newArrow;
@@ -256,6 +264,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getMetaKeys() {
 		return metaKeys;
 	}
@@ -265,6 +274,7 @@ public class ClickImpl extends CommandImpl implements Click {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMetaKeys(String newMetaKeys) {
 		String oldMetaKeys = metaKeys;
 		metaKeys = newMetaKeys;

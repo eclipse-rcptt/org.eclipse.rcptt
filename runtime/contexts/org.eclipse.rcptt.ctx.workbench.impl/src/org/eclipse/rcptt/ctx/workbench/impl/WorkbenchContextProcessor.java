@@ -129,10 +129,8 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 	@Override
 	public void apply(final Context context, BooleanSupplier isCancelled) throws CoreException {
 		final WorkbenchContext ctx = (WorkbenchContext) context;
-		final UIJobCollector collector = new UIJobCollector();
 		long stop = currentTimeMillis() + TeslaLimits.getContextRunnableTimeout();
-		Job.getJobManager().addJobChangeListener(collector);
-		try {
+		try (final UIJobCollector collector = new UIJobCollector(Job.getJobManager())) {
 			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -207,8 +205,6 @@ public class WorkbenchContextProcessor implements IContextProcessor {
 					.createStatus("Failed to execute context: " + ctx.getName() + " Cause: " + e.getMessage(), e));
 			RcpttPlugin.log(e);
 			throw ee;
-		} finally {
-			Job.getJobManager().removeJobChangeListener(collector);
 		}
 	}
 

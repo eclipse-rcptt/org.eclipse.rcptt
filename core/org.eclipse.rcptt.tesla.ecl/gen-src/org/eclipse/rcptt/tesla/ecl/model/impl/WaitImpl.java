@@ -79,6 +79,7 @@ public class WaitImpl extends CommandImpl implements Wait {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getMs() {
 		return ms;
 	}
@@ -88,6 +89,7 @@ public class WaitImpl extends CommandImpl implements Wait {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMs(int newMs) {
 		int oldMs = ms;
 		ms = newMs;

@@ -119,7 +119,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Integer TIMES_EDEFAULT = new Integer(1);
+	protected static final Integer TIMES_EDEFAULT = Integer.valueOf(1);
 
 	/**
 	 * The cached value of the '{@link #getTimes() <em>Times</em>}' attribute.
@@ -155,6 +155,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -181,6 +182,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -193,6 +195,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getKey() {
 		return key;
 	}
@@ -202,6 +205,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKey(String newKey) {
 		String oldKey = key;
 		key = newKey;
@@ -214,6 +218,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getChar() {
 		return char_;
 	}
@@ -223,6 +228,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setChar(String newChar) {
 		String oldChar = char_;
 		char_ = newChar;
@@ -235,6 +241,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isDisplay() {
 		return display;
 	}
@@ -244,6 +251,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setDisplay(boolean newDisplay) {
 		boolean oldDisplay = display;
 		display = newDisplay;
@@ -256,6 +264,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getTimes() {
 		return times;
 	}
@@ -265,6 +274,7 @@ public class KeyTypeImpl extends CommandImpl implements KeyType {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTimes(Integer newTimes) {
 		Integer oldTimes = times;
 		times = newTimes;

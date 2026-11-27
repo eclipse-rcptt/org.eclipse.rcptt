@@ -155,6 +155,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -181,6 +182,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -193,6 +195,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getLine() {
 		return line;
 	}
@@ -202,6 +205,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setLine(int newLine) {
 		int oldLine = line;
 		line = newLine;
@@ -214,6 +218,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getColumn() {
 		return column;
 	}
@@ -223,6 +228,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(int newColumn) {
 		int oldColumn = column;
 		column = newColumn;
@@ -235,6 +241,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getEndLine() {
 		return endLine;
 	}
@@ -244,6 +251,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEndLine(int newEndLine) {
 		int oldEndLine = endLine;
 		endLine = newEndLine;
@@ -256,6 +264,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getEndColumn() {
 		return endColumn;
 	}
@@ -265,6 +274,7 @@ public class SelectRangeImpl extends CommandImpl implements SelectRange {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEndColumn(int newEndColumn) {
 		int oldEndColumn = endColumn;
 		endColumn = newEndColumn;

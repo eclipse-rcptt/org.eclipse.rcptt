@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.rcptt.ecl.core.BoxedValue;
 import org.eclipse.rcptt.ecl.core.Command;
 import org.eclipse.rcptt.ecl.platform.commands.SortBy;
 import org.eclipse.rcptt.ecl.runtime.CoreUtils;
@@ -28,6 +29,7 @@ import org.eclipse.rcptt.ecl.runtime.IProcess;
 public class SortByService implements ICommandService {
 
 	
+	@Override
 	public IStatus service(Command command, IProcess context)
 			throws InterruptedException, CoreException {
 		SortBy sb = (SortBy) command;
@@ -35,6 +37,7 @@ public class SortByService implements ICommandService {
 		List<Object> pipe = CoreUtils.readPipeContent(context.getInput());
 		Collections.sort(pipe, new Comparator<Object>() {
 
+			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			
 			public int compare(Object o1, Object o2) {
@@ -71,6 +74,9 @@ public class SortByService implements ICommandService {
 		return o.eGet(e);
 	}
 	private EAttribute findAttr(EObject o, String name) {
+		if (name == null && o instanceof BoxedValue ) {
+			name = "value";
+		}
 		for(EAttribute e : o.eClass().getEAllAttributes()) {
 			if(e.getName().equals(name)) {
 				return e;

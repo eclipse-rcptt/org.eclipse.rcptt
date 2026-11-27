@@ -2628,7 +2628,7 @@ public class SWTUIProcessor implements ITeslaCommandProcessor,
 		final SWTUIElement element = getMapper().get(command.getElement());
 		final GetTextResponse response = factory.createGetTextResponse();
 		if (element != null) {
-			response.setText(PlayerTextUtils.getText(element));
+			response.setText(element.getText());
 		}
 		else {
 			response.setStatus(ResponseStatus.FAILED);

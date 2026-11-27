@@ -229,6 +229,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -238,6 +239,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
@@ -250,6 +252,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getAfter() {
 		if (after != null && after.eIsProxy()) {
 			InternalEObject oldAfter = (InternalEObject)after;
@@ -276,6 +279,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAfter(ControlHandler newAfter) {
 		ControlHandler oldAfter = after;
 		after = newAfter;
@@ -288,6 +292,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Integer getIndex() {
 		return index;
 	}
@@ -297,6 +302,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setIndex(Integer newIndex) {
 		Integer oldIndex = index;
 		index = newIndex;
@@ -309,6 +315,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getParent() {
 		if (parent != null && parent.eIsProxy()) {
 			InternalEObject oldParent = (InternalEObject)parent;
@@ -335,6 +342,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setParent(ControlHandler newParent) {
 		ControlHandler oldParent = parent;
 		parent = newParent;
@@ -347,6 +355,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -356,6 +365,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -368,6 +378,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getRawImage() {
 		return rawImage;
 	}
@@ -377,6 +388,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRawImage(String newRawImage) {
 		String oldRawImage = rawImage;
 		rawImage = newRawImage;
@@ -389,6 +401,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getX() {
 		return x;
 	}
@@ -398,6 +411,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setX(int newX) {
 		int oldX = x;
 		x = newX;
@@ -410,6 +424,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getY() {
 		return y;
 	}
@@ -419,6 +434,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setY(int newY) {
 		int oldY = y;
 		y = newY;
@@ -431,6 +447,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getImageURI() {
 		return imageURI;
 	}
@@ -440,6 +457,7 @@ public class GetRegionImpl extends CommandImpl implements GetRegion {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setImageURI(String newImageURI) {
 		String oldImageURI = imageURI;
 		imageURI = newImageURI;

@@ -50,7 +50,7 @@ public class PDEHelper {
 		return P2Utils.safeLoadRepository(uri, monitor, P2Utils.getProvisioningAgent());
 	}
 
-	public static IArtifactRepository safeLoadArtifactRepository(URI uri, IProgressMonitor monitor) {
+	public static IArtifactRepository safeLoadArtifactRepository(URI uri, IProgressMonitor monitor) throws CoreException {
 		return P2Utils.safeLoadArtifactRepository(uri, monitor, P2Utils.getProvisioningAgent());
 	}
 }

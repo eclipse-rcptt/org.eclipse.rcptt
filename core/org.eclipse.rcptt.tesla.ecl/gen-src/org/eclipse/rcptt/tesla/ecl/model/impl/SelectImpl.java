@@ -130,6 +130,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ControlHandler getControl() {
 		if (control != null && control.eIsProxy()) {
 			InternalEObject oldControl = (InternalEObject)control;
@@ -156,6 +157,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setControl(ControlHandler newControl) {
 		ControlHandler oldControl = control;
 		control = newControl;
@@ -168,6 +170,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<Object> getItems() {
 		if (items == null) {
 			items = new EDataTypeUniqueEList<Object>(Object.class, this, TeslaPackage.SELECT__ITEMS);
@@ -180,6 +183,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isAll() {
 		return all;
 	}
@@ -189,6 +193,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setAll(boolean newAll) {
 		boolean oldAll = all;
 		all = newAll;
@@ -201,6 +206,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getColumn() {
 		return column;
 	}
@@ -210,6 +216,7 @@ public class SelectImpl extends CommandImpl implements Select {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setColumn(String newColumn) {
 		String oldColumn = column;
 		column = newColumn;

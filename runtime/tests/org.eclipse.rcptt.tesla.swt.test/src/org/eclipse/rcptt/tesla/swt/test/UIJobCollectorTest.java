@@ -124,9 +124,7 @@ public class UIJobCollectorTest {
 		Display display = Display.getCurrent();
 		while (display != null && display.readAndDispatch()) {
 		}
-		UIJobCollector subject = new UIJobCollector();
-		MANAGER.addJobChangeListener(subject);
-		try {
+		try (UIJobCollector subject = new UIJobCollector(MANAGER);) {
 			subject.enable();
 			boolean found = true;
 			while (found) {
@@ -134,8 +132,6 @@ public class UIJobCollectorTest {
 				found = MANAGER.find(org.eclipse.ui.internal.decorators.DecoratorManager.FAMILY_DECORATE).length > 0
 						|| !isEmpty(subject);
 			}
-		} finally {
-			MANAGER.removeJobChangeListener(subject);
 		}
 	}
 
@@ -158,8 +154,8 @@ public class UIJobCollectorTest {
 
 	@Test
 	public void emptyWhenNoJobs() {
-		UIJobCollector subject = new UIJobCollector();
-		addListener(subject);
+		UIJobCollector subject = new UIJobCollector(MANAGER);
+		closer.register(subject);
 		subject.enable();
 		assertEmpty("No relevant jobs are expected on start", subject);
 	}
@@ -167,7 +163,7 @@ public class UIJobCollectorTest {
 	@Test
 	public void stepMode() throws InterruptedException {
 		Parameters parameters = new Parameters();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		long start = System.currentTimeMillis();
 		sleepingJob.schedule();
@@ -184,7 +180,7 @@ public class UIJobCollectorTest {
 	public void waitSecondRunAfterStopAndReschedule() throws InterruptedException {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		Job job = busyLoop;
 		for (int i = 0; i < 100; i++) {
@@ -233,7 +229,7 @@ public class UIJobCollectorTest {
 	@Test
 	public void waitSecondRunAfterCancelReschedule() throws InterruptedException {
 		Parameters parameters = new Parameters();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		Job job = busyLoop;
 		long stop = currentTimeMillis() + 10000;
@@ -257,7 +253,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		assertEmpty("No jobs on start", subject);
 		rescheduling.schedule(0);
@@ -273,7 +269,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		subject.disable();
 		addListener(rescheduling, new JobChangeAdapter() {
@@ -293,7 +289,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		subject.disable();
 		addListener(rescheduling, new JobChangeAdapter() {
@@ -313,7 +309,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		busyLoop.schedule(parameters.timeout);
 		busyLoop.cancel();
@@ -326,7 +322,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
 		parameters.stepModeTimeout = 120000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		CountDownLatch start = new CountDownLatch(1);
 		CountDownLatch stop = new CountDownLatch(1);
@@ -358,11 +354,10 @@ public class UIJobCollectorTest {
 	private boolean shutdown(Job job, int timeoutInSeconds) throws InterruptedException {
 		long stop = System.currentTimeMillis() + timeoutInSeconds * 1000;
 		job.cancel();
-		while (job.getState() != Job.NONE && System.currentTimeMillis() < stop) {
-			job.cancel();
-			job.join(1, null);
-		}
-		return job.getState() == Job.NONE;
+		// Job should always be joined twice to skip cancellation event
+		// https://github.com/eclipse-platform/eclipse.platform/issues/2210#issuecomment-3448780992
+		job.join(stop - currentTimeMillis(), null);
+		return job.join(stop - currentTimeMillis(), null);
 	}
 	
 	
@@ -370,7 +365,7 @@ public class UIJobCollectorTest {
 	public void waitForCancelledJobs() throws InterruptedException {
 		Parameters parameters = new Parameters();
 		parameters.timeout = 60000;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		CountDownLatch startedOnce = new CountDownLatch(1);
 		IJobChangeListener jobListener = new JobChangeAdapter() {
@@ -402,7 +397,7 @@ public class UIJobCollectorTest {
 	
 
 	private void prepare(UIJobCollector subject) {
-		addListener(subject);
+		closer.register(subject);
 		subject.enable();
 		idle(); // Waiting for irrelevant jobs to start
 		join(subject, 10000); // Waiting for irrelevant jobs to complete
@@ -411,7 +406,7 @@ public class UIJobCollectorTest {
 	@Test
 	public void stepAfterDelay() throws InterruptedException {
 		Parameters parameters = new Parameters();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		sleepingJob.schedule();
 		idle();
@@ -423,7 +418,7 @@ public class UIJobCollectorTest {
 	public void stepRepeatedly() {
 		Parameters parameters = new Parameters();
 		parameters.stepModeStartDelay = 1;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		sleepingJob.schedule();
 		idle();
@@ -444,7 +439,7 @@ public class UIJobCollectorTest {
 	public void abortStepMode() throws InterruptedException {
 		Parameters parameters = new Parameters();
 		parameters.stepModeStartDelay = parameters.stepInterval();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		long sleepTime = parameters.stepModeStartDelay() + parameters.stepInterval() * 2;
 		Job job = Job.create("runaway", (ICoreRunnable)monitor -> {
@@ -470,8 +465,8 @@ public class UIJobCollectorTest {
 	public void doNotWaitForPreviouslyScheduledJob() throws InterruptedException {
 		Parameters parameters = new Parameters();
 		busyLoop.schedule(parameters.timeout);
-		UIJobCollector subject = new UIJobCollector(parameters);
-		addListener(subject);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
+		closer.register(subject);
 		subject.enable();
 		assertEmpty("Ignore old jobs, schduled before collector starts", subject);
 	}
@@ -479,7 +474,7 @@ public class UIJobCollectorTest {
 	@Test
 	public void doNotStepTwice() throws InterruptedException {
 		Parameters parameters = new Parameters();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		sleepingJob.schedule();
 		join(subject, parameters.stepModeStartDelay);
@@ -492,7 +487,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.delayToWaitFor = 0;
 		parameters.stepModeTimeout = parameters.timeout + schedulingTolerance;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		sleepingJob.schedule();
 		long stop = System.currentTimeMillis() + parameters.stepModeTimeout;
@@ -516,8 +511,8 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.stepModeStartDelay = schedulingTolerance * 3;
 		parameters.stepModeStepInterval = schedulingTolerance;
-		UIJobCollector subject = new UIJobCollector(parameters);
-		addListener(subject);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
+		closer.register(subject);
 		MessageDialog dialog = new MessageDialog(null, "hello", null, "press X", 0, 0, new String[] { "X" });
 		Job closeDialog = Job.create("close dialog", monitor -> {
 			while (!monitor.isCanceled() && dialog.getShell() == null) {
@@ -552,7 +547,7 @@ public class UIJobCollectorTest {
 		Display display = Display.getCurrent();
 		Assume.assumeNotNull(display);
 		Parameters parameters = new Parameters();
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 			IJobManager jobManager = Job.getJobManager();
 			IWorkspaceRoot rule = ResourcesPlugin.getWorkspace().getRoot();
@@ -586,7 +581,7 @@ public class UIJobCollectorTest {
 		Parameters parameters = new Parameters();
 		parameters.delayToWaitFor = 0;
 		parameters.stepModeTimeout = parameters.timeout + schedulingTolerance;
-		UIJobCollector subject = new UIJobCollector(parameters);
+		UIJobCollector subject = new UIJobCollector(parameters, MANAGER);
 		prepare(subject);
 		
 		for (int i = 0; i < 100; i++) {
@@ -641,12 +636,6 @@ public class UIJobCollectorTest {
 		}
 	}
 
-	
-	@SuppressWarnings("resource")
-	private void addListener(IJobChangeListener listener) {
-		MANAGER.addJobChangeListener(listener);
-		closer.register(() -> MANAGER.removeJobChangeListener(listener));
-	}
 	
 	@SuppressWarnings("resource")
 	private void addListener(Job job, IJobChangeListener listener) {
