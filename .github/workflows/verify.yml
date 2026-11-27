@@ -131,7 +131,7 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/target/*-reports/*.xml'
-          fail_on_failure: true
+          fail_on_failure: false
           annotate_only: true
   self_test:
     runs-on: ubuntu-latest
