@@ -37,13 +37,13 @@ proc replace_all [val input -input] [val pattern] [val replacement] {
 	    with [get-editbox -after [get-button "Toggle input for replace.*"]] {
 	         set-text $pattern
 	     }
-	    try -command {
-	       get-button "Replace all.*"
-	    } -catch {
+	    // The overlay hides "Replace all" when the editor is narrow, so do not rely on it.
+	    // Without the replace input, the second edit box is the script viewer itself.
+	    if [get-editbox -index 1 | get-property "getClass().getName()" -raw | eq "org.eclipse.swt.custom.StyledText"] {
 	       get-button "Toggle input for replace.*" | click
 	    }
 	    get-editbox -index 1 | set-text $replacement
-	    get-button "Replace all.*" | click
+	    get-editbox -index 1 | key-type "M1+Enter"
 	    get-editbox -index 1 |key-type ESC
     }
 }
