@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -85,7 +86,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			EList<EObject> contents = resource.getContents();
 			resource.setModified(false);
 			if (contents.size() == 0 ) {
-				if (file != null && !file.exists()) {
+				if (file != null && isGone(file)) {
 					throw newNotExistsException(file);
 				}
 				throw new ModelException(new Q7Status(0, "Empty resource " + uri + ". Empty metadata is " + (allowEmptyMetadataContent ? "" : "not ") + "allowed. File: " + (file == null ? null : file.getFullPath())));
@@ -100,7 +101,7 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			}
 		} catch (IOException | CoreException e) {
 			try {
-				if (file != null && !file.exists()) {
+				if (file != null && isGone(file)) {
 					throw newNotExistsException(file);
 				}
 				ModelException modelException = new ModelException(e, Q7Status.ERROR);
@@ -129,6 +130,19 @@ public class Q7ResourceInfo extends OpenableElementInfo implements ILRUCacheable
 			unload();
 			throw e;
 		}
+	}
+
+	/**
+	 * A file being moved or deleted by another thread may already be gone from
+	 * disk while the workspace tree still has it, so {@link IFile#exists()} alone
+	 * is not enough to tell a vanished file from a broken one.
+	 */
+	private static boolean isGone(IFile file) {
+		if (!file.exists()) {
+			return true;
+		}
+		IPath location = file.getLocation();
+		return location != null && !location.toFile().exists();
 	}
 
 	private ModelException newNotExistsException(IFile file) {

@@ -180,6 +180,23 @@ public class Q7NamedElementTest {
 	}
 	
 	/**
+	 * While another thread moves or deletes a file, it may already be gone from
+	 * disk but still be present in the workspace tree. Such a file has to be
+	 * reported as missing, not as an empty (broken) resource.
+	 */
+	@Test(timeout=100_000)
+	public void notExistsIfDeletedOnlyOnDisk() throws CoreException, IOException, InterruptedException {
+		try (InputStream is = getClass().getResourceAsStream("testcase.test")) {
+			TESTCASE_FILE.create(is, IFile.REPLACE|IFile.FORCE, null);
+		}
+		ITestCase testcase = (ITestCase) RcpttCore.create(TESTCASE_FILE);
+		Files.delete(Path.of(TESTCASE_FILE.getRawLocation().toOSString()));
+		testcase.close();
+		assertTrue(TESTCASE_FILE.exists());
+		assertFalse(testcase.exists());
+	}
+
+	/**
 	 * @see https://github.com/eclipse-rcptt/org.eclipse.rcptt/issues/229
 	 */
 	@Test(timeout=100_000)
