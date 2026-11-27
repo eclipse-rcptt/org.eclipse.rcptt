@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2019 Xored Software Inc and others.
+ * Copyright (c) 2009, 2026 Xored Software Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -29,8 +28,7 @@ import org.eclipse.rcptt.core.model.IQ7Element;
 import org.eclipse.rcptt.core.model.IQ7Model;
 import org.eclipse.rcptt.core.model.IQ7Project;
 import org.eclipse.rcptt.core.model.ModelException;
-import org.eclipse.rcptt.core.nature.RcpttNature;
-import org.eclipse.rcptt.internal.core.RcpttPlugin;
+import org.eclipse.rcptt.core.workspace.RcpttCore;
 
 public class Q7Model extends Openable implements IQ7Model {
 
@@ -78,14 +76,8 @@ public class Q7Model extends Openable implements IQ7Model {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
 		for (IProject iProject : projects) {
-			if (iProject.isAccessible() && iProject.isOpen()) {
-				try {
-					if (RcpttNature.isRcpttProject(iProject)) {
-						result.add(getProject(iProject.getName()));
-					}
-				} catch (CoreException e) {
-					RcpttPlugin.log(e);
-				}
+			if (RcpttCore.hasRcpttNature(iProject)) {
+				result.add(getProject(iProject.getName()));
 			}
 		}
 		info.setChildren(result);
