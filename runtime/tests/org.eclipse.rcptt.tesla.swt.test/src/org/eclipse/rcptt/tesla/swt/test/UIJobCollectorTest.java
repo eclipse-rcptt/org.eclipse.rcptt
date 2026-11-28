@@ -351,8 +351,8 @@ public class UIJobCollectorTest {
 		join(subject, 100_000);
 	}	
 	
-	private boolean shutdown(Job job, int timeoutInSeconds) throws InterruptedException {
-		long stop = System.currentTimeMillis() + timeoutInSeconds * 1000;
+	private boolean shutdown(Job job, int timeoutMs) throws InterruptedException {
+		long stop = System.currentTimeMillis() + timeoutMs;
 		job.cancel();
 		// Job should always be joined twice to skip cancellation event
 		// https://github.com/eclipse-platform/eclipse.platform/issues/2210#issuecomment-3448780992
@@ -605,14 +605,14 @@ public class UIJobCollectorTest {
 		closer.close();
 	}
 
-	private void join(UIJobCollector subject, long timeout) {
-		long stop = System.currentTimeMillis() + timeout + schedulingTolerance;
+	private void join(UIJobCollector subject, long timeoutMs) {
+		long stop = System.currentTimeMillis() + timeoutMs + schedulingTolerance;
 		while (System.currentTimeMillis() < stop) {
 			idle();
 			if (isEmpty(subject))
 				return;
 		}
-		throw new AssertionError("timeout after " + timeout);
+		throw new AssertionError("timeout after " + timeoutMs);
 	}
 
 	private void sleepUntil(long moment) {
